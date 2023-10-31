@@ -1,4 +1,4 @@
 package br.demo.backend.model;
 
-public class UsuarioModel {
+public class GroupModel {
 }
