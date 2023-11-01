@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserGroupId {
-    private Long userId;
-    private Long groupId;
+
+public class TaskPropertiesId{
+    private Long taskId;
+
 
 }
