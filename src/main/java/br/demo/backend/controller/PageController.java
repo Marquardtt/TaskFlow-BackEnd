@@ -22,7 +22,7 @@ public class PageController {
         pageService.save(page);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public PageModel findOne(@RequestParam Long id) {
         return pageService.findOne(id);
     }

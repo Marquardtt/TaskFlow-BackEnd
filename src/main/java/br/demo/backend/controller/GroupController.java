@@ -21,7 +21,7 @@ public class GroupController {
         groupService.save(group);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public GroupModel findOne(@RequestParam Long id) {
         return groupService.findOne(id);
     }

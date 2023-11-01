@@ -22,7 +22,7 @@ public class TaskController {
         taskService.save(task);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public TaskModel findOne(@RequestParam Long id){
         return taskService.findOne(id);
     }

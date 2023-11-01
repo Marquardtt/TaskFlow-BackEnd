@@ -23,7 +23,7 @@ public class TaskPropertiesController {
         taskPropertiesService.save(task);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public TaskPropertiesModel findOne(@RequestParam Long id){
         return taskPropertiesService.findOne(id);
     }

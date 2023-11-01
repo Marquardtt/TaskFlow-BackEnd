@@ -22,7 +22,7 @@ public class UserController {
         userService.save(user);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public UserModel findOne(@RequestParam Long id){
         return userService.findOne(id);
     }

@@ -22,7 +22,7 @@ public class CanvasController {
         canvasService.save(canvas);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public CanvasModel findOne(@RequestParam Long id){
         return canvasService.findOne(id);
     }

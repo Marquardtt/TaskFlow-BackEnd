@@ -22,7 +22,7 @@ public class PropertyController {
         propertyService.save(property);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public PropertyModel findOne(@RequestParam Long id){
         return propertyService.findOne(id);
     }

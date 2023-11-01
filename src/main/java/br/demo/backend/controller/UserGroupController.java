@@ -23,7 +23,7 @@ public class UserGroupController {
         userGroupService.save(user);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public UserGroupModel findOne(@RequestParam Long id){
         return userGroupService.findOne(id);
     }

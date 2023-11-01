@@ -22,7 +22,7 @@ public class ProjectController {
         projectService.save(project);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ProjectModel findOne(@RequestParam Long id) {
         return projectService.findOne(id);
     }

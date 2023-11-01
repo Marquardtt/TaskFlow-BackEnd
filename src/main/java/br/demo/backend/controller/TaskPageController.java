@@ -23,7 +23,7 @@ public class TaskPageController {
         taskPageService.save(task);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public TaskPageModel findOne(@RequestParam Long id){
         return taskPageService.findOne(id);
     }
