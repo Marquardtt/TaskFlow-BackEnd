@@ -23,7 +23,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ProjectModel findOne(@RequestParam Long id) {
+    public ProjectModel findOne(@PathVariable Long id) {
         return projectService.findOne(id);
     }
 
@@ -32,8 +32,8 @@ public class ProjectController {
         return projectService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id) {
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
         projectService.delete(id);
     }
 }

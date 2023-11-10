@@ -23,7 +23,7 @@ public class CanvasController {
     }
 
     @GetMapping("/{id}")
-    public CanvasModel findOne(@RequestParam Long id){
+    public CanvasModel findOne(@PathVariable Long id){
         return canvasService.findOne(id);
     }
 
@@ -32,8 +32,8 @@ public class CanvasController {
         return canvasService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
         canvasService.delete(id);
     }
 

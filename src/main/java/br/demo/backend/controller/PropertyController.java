@@ -23,7 +23,7 @@ public class PropertyController {
     }
 
     @GetMapping("/{id}")
-    public PropertyModel findOne(@RequestParam Long id){
+    public PropertyModel findOne(@PathVariable Long id){
         return propertyService.findOne(id);
     }
 
@@ -32,8 +32,8 @@ public class PropertyController {
         return propertyService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
         propertyService.delete(id);
     }
 }

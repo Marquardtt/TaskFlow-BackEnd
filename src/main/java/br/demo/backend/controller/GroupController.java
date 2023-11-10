@@ -22,7 +22,7 @@ public class GroupController {
     }
 
     @GetMapping("/{id}")
-    public GroupModel findOne(@RequestParam Long id) {
+    public GroupModel findOne(@PathVariable Long id) {
         return groupService.findOne(id);
     }
 
@@ -31,8 +31,8 @@ public class GroupController {
         return groupService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id) {
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
         groupService.delete(id);
     }
 

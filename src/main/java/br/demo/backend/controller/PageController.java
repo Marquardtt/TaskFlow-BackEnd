@@ -23,7 +23,7 @@ public class PageController {
     }
 
     @GetMapping("/{id}")
-    public PageModel findOne(@RequestParam Long id) {
+    public PageModel findOne(@PathVariable Long id) {
         return pageService.findOne(id);
     }
 
@@ -32,8 +32,8 @@ public class PageController {
         return pageService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id) {
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
         pageService.delete(id);
     }
 }

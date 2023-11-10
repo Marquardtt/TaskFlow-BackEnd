@@ -24,7 +24,7 @@ public class TaskPropertiesController {
     }
 
     @GetMapping("/{id}")
-    public TaskPropertiesModel findOne(@RequestParam Long id){
+    public TaskPropertiesModel findOne(@PathVariable Long id){
         return taskPropertiesService.findOne(id);
     }
 
@@ -33,8 +33,8 @@ public class TaskPropertiesController {
         return taskPropertiesService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
         taskPropertiesService.delete(id);
     }
 

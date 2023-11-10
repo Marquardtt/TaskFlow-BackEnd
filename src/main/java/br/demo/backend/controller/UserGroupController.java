@@ -24,7 +24,7 @@ public class UserGroupController {
     }
 
     @GetMapping("/{id}")
-    public UserGroupModel findOne(@RequestParam Long id){
+    public UserGroupModel findOne(@PathVariable Long id){
         return userGroupService.findOne(id);
     }
 
@@ -33,8 +33,8 @@ public class UserGroupController {
         return userGroupService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
         userGroupService.delete(id);
     }
 

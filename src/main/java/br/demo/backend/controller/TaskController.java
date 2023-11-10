@@ -23,7 +23,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public TaskModel findOne(@RequestParam Long id){
+    public TaskModel findOne(@PathVariable Long id){
         return taskService.findOne(id);
     }
 
@@ -32,8 +32,8 @@ public class TaskController {
         return taskService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
         taskService.delete(id);
     }
 }

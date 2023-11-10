@@ -24,7 +24,7 @@ public class TaskPageController {
     }
 
     @GetMapping("/{id}")
-    public TaskPageModel findOne(@RequestParam Long id){
+    public TaskPageModel findOne(@PathVariable Long id){
         return taskPageService.findOne(id);
     }
 
@@ -33,8 +33,8 @@ public class TaskPageController {
         return taskPageService.findAll();
     }
 
-    @DeleteMapping
-    public void delete(@RequestParam Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
         taskPageService.delete(id);
     }
 }
