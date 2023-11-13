@@ -26,7 +26,6 @@ public class UserGroupModel {
     @JoinColumn(name = "groupId")
     private GroupModel group;
 
-    @ManyToMany
     @Enumerated(value = EnumType.STRING)
     private Collection<Permission> permissions;
 }
