@@ -9,7 +9,9 @@ import lombok.*;
 @Entity
 @Table(name = "tb_task_property")
 public class TaskPropertiesModel {
-    //Dar uma revisada depois
+    //Dar uma revisada
+
+
     private String value;
 }
 
