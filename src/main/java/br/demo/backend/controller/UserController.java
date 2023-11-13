@@ -1,9 +1,11 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.UserModel;
+import br.demo.backend.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserModel> findAll(){
+    public Collection<UserModel> findAll(){
         return userService.findAll();
     }
 

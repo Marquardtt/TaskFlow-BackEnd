@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "tb_task_model")
+@Table(name = "tb_task_page")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

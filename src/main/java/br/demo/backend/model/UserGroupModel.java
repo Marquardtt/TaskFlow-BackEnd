@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.text.CollationElementIterator;
+import java.util.Collection;
+
 @Entity
 @Table(name = "tb_user_group")
 @Data
@@ -17,12 +20,13 @@ public class UserGroupModel {
     private Long groupId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private UserModel user;
     @ManyToOne
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "groupId")
     private GroupModel group;
 
-    private Enum permissions;
-
+    @ManyToMany
+    @Enumerated(value = EnumType.STRING)
+    private Collection<Permission> permissions;
 }

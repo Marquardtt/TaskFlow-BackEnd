@@ -2,6 +2,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.UserGroupModel;
+import br.demo.backend.repository.UserGroupRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

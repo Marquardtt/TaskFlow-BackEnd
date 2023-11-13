@@ -3,6 +3,8 @@ package br.demo.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Collection;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,4 +17,7 @@ public class GroupModel {
     private String name;
     private String picture;
     private String description;
+
+    @OneToMany(mappedBy = "group")
+    private Collection<UserGroupModel> users;
 }

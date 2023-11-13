@@ -2,6 +2,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.TaskPageModel;
+import br.demo.backend.repository.TaskPageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

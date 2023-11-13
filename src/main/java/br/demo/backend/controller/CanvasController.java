@@ -2,9 +2,11 @@ package br.demo.backend.controller;
 
 
 import br.demo.backend.model.CanvasModel;
+import br.demo.backend.service.CanvasService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,7 @@ public class CanvasController {
     }
 
     @GetMapping
-    public List<CanvasModel> findAll(){
+    public Collection<CanvasModel> findAll(){
         return canvasService.findAll();
     }
 

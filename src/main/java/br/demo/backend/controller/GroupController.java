@@ -1,9 +1,11 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.GroupModel;
+import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -27,7 +29,7 @@ public class GroupController {
     }
 
     @GetMapping
-    public List<GroupModel> findAll() {
+    public Collection<GroupModel> findAll() {
         return groupService.findAll();
     }
 

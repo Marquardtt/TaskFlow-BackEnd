@@ -1,9 +1,11 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.PropertyModel;
+import br.demo.backend.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,7 @@ public class PropertyController {
     }
 
     @GetMapping
-    public List<PropertyModel> findAll(){
+    public Collection<PropertyModel> findAll(){
         return propertyService.findAll();
     }
 

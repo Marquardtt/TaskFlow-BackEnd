@@ -2,6 +2,8 @@ package br.demo.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Collection;
 import java.util.Date;
 
 @Data
@@ -17,4 +19,9 @@ public class ProjectModel {
     private String description;
     private Date date;
     private String picture;
+
+    @OneToMany
+    private Collection<GroupModel> groups;
+    @OneToMany
+    private Collection<PageModel> pages;
 }

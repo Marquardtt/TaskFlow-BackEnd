@@ -2,6 +2,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.ProjectModel;
+import br.demo.backend.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

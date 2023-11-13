@@ -1,9 +1,11 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.TaskModel;
+import br.demo.backend.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,7 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskModel> findAll(){
+    public Collection<TaskModel> findAll(){
         return taskService.findAll();
     }
 

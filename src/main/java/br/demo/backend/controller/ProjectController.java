@@ -2,9 +2,11 @@ package br.demo.backend.controller;
 
 
 import br.demo.backend.model.ProjectModel;
+import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,7 @@ public class ProjectController {
     }
 
     @GetMapping
-    public List<ProjectModel> findAll() {
+    public Collection<ProjectModel> findAll() {
         return projectService.findAll();
     }
 

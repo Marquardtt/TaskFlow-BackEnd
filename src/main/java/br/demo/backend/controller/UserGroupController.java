@@ -2,9 +2,11 @@ package br.demo.backend.controller;
 
 
 import br.demo.backend.model.UserGroupModel;
+import br.demo.backend.service.UserGroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -29,7 +31,7 @@ public class UserGroupController {
     }
 
     @GetMapping
-    public List<UserGroupModel> findAll(){
+    public Collection<UserGroupModel> findAll(){
         return userGroupService.findAll();
     }
 
