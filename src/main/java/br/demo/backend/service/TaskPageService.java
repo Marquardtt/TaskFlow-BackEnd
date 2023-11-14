@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.TaskPageId;
 import br.demo.backend.model.TaskPageModel;
 import br.demo.backend.repository.TaskPageRepository;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class TaskPageService {
         return taskPageRepository.findAll();
     }
 
-    public TaskPageModel findOne(Long id) {
+    public TaskPageModel findOne(TaskPageId id) {
         return taskPageRepository.findById(id).get();
     }
 
@@ -26,7 +27,7 @@ public class TaskPageService {
         taskPageRepository.save(taskPageModel);
     }
 
-    public void delete(Long id) {
+    public void delete(TaskPageId id) {
         taskPageRepository.deleteById(id);
     }
 }

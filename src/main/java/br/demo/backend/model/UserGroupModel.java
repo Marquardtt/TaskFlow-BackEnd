@@ -19,13 +19,13 @@ public class UserGroupModel {
     @Id
     private Long groupId;
 
+
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", insertable = false, updatable = false)
     private UserModel user;
     @ManyToOne
-    @JoinColumn(name = "groupId")
+    @JoinColumn(name = "groupId", insertable = false, updatable = false)
     private GroupModel group;
-
     @Enumerated(value = EnumType.STRING)
     private Collection<Permission> permissions;
 }

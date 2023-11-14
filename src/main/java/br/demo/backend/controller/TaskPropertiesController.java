@@ -1,6 +1,7 @@
 package br.demo.backend.controller;
 
 
+import br.demo.backend.model.TaskPropertiesId;
 import br.demo.backend.model.TaskPropertiesModel;
 import br.demo.backend.service.TaskPropertiesService;
 import lombok.AllArgsConstructor;
@@ -25,9 +26,9 @@ public class TaskPropertiesController {
         taskPropertiesService.save(task);
     }
 
-    @GetMapping("/{id}")
-    public TaskPropertiesModel findOne(@PathVariable Long id){
-        return taskPropertiesService.findOne(id);
+    @GetMapping("/{id}/{id2}")
+    public TaskPropertiesModel findOne(@PathVariable Long id,@PathVariable Long id2){
+        return taskPropertiesService.findOne(new TaskPropertiesId(id, id2));
     }
 
     @GetMapping
@@ -35,9 +36,9 @@ public class TaskPropertiesController {
         return taskPropertiesService.findAll();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        taskPropertiesService.delete(id);
+    @DeleteMapping("/{id}/{id2}")
+    public void delete(@PathVariable Long id,@PathVariable Long id2){
+        taskPropertiesService.delete(new TaskPropertiesId(id, id2));
     }
 
 }

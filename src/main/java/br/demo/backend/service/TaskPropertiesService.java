@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.TaskPropertiesId;
 import br.demo.backend.model.TaskPropertiesModel;
 import br.demo.backend.repository.TaskPropertiesRepository;
 import br.demo.backend.repository.TaskRepository;
@@ -20,7 +21,7 @@ public class TaskPropertiesService {
         return taskPropertiesRepository.findAll();
     }
 
-    public TaskPropertiesModel findOne(Long id) {
+    public TaskPropertiesModel findOne(TaskPropertiesId id) {
         return taskPropertiesRepository.findById(id).get();
     }
 
@@ -28,7 +29,7 @@ public class TaskPropertiesService {
         taskPropertiesRepository.save(taskPropertiesModel);
     }
 
-    public void delete(Long id) {
+    public void delete(TaskPropertiesId id) {
         taskPropertiesRepository.deleteById(id);
     }
 }

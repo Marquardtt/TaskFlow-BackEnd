@@ -1,6 +1,7 @@
 package br.demo.backend.controller;
 
 
+import br.demo.backend.model.UserGroupId;
 import br.demo.backend.model.UserGroupModel;
 import br.demo.backend.service.UserGroupService;
 import lombok.AllArgsConstructor;
@@ -25,9 +26,9 @@ public class UserGroupController {
         userGroupService.save(user);
     }
 
-    @GetMapping("/{id}")
-    public UserGroupModel findOne(@PathVariable Long id){
-        return userGroupService.findOne(id);
+    @GetMapping("/{id}/{id2}")
+    public UserGroupModel findOne(@PathVariable Long id, @PathVariable Long id2){
+        return userGroupService.findOne(new UserGroupId(id, id2));
     }
 
     @GetMapping
@@ -35,9 +36,9 @@ public class UserGroupController {
         return userGroupService.findAll();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        userGroupService.delete(id);
+    @DeleteMapping("/{id}/{id2}")
+    public void delete(@PathVariable Long id,@PathVariable Long id2){
+        userGroupService.delete(new UserGroupId(id, id2));
     }
 
 }

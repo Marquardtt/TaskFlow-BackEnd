@@ -13,5 +13,6 @@ public class PropertyModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
+    private String tipo;
     //private Enum type;  Procurar saber como fazer Enum corretamente
 }

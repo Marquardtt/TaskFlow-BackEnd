@@ -1,5 +1,6 @@
 package br.demo.backend.controller;
 
+import br.demo.backend.model.TaskPageId;
 import br.demo.backend.model.TaskPageModel;
 import br.demo.backend.service.TaskPageService;
 import lombok.AllArgsConstructor;
@@ -25,9 +26,9 @@ public class TaskPageController {
         taskPageService.save(task);
     }
 
-    @GetMapping("/{id}")
-    public TaskPageModel findOne(@PathVariable Long id){
-        return taskPageService.findOne(id);
+    @GetMapping("/{id}/{id2}")
+    public TaskPageModel findOne(@PathVariable Long id,@PathVariable Long id2 ){
+        return taskPageService.findOne(new TaskPageId(id, id2));
     }
 
     @GetMapping
@@ -35,8 +36,8 @@ public class TaskPageController {
         return taskPageService.findAll();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        taskPageService.delete(id);
+    @DeleteMapping("/{id}/{id2}")
+    public void delete(@PathVariable Long id,@PathVariable Long id2 ){
+        taskPageService.delete(new TaskPageId(id, id2));
     }
 }

@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.UserGroupId;
 import br.demo.backend.model.UserGroupModel;
 import br.demo.backend.repository.UserGroupRepository;
 import lombok.AllArgsConstructor;
@@ -18,15 +19,15 @@ public class UserGroupService {
         return userGroupRepository.findAll();
     }
 
-    public UserGroupModel findOne(Long id) {
+    public UserGroupModel findOne(UserGroupId id) {
         return userGroupRepository.findById(id).get();
     }
 
     public void save(UserGroupModel userGroupModel) {
-        userGroupRepository.save(userGroupModel);
+       userGroupRepository.save(userGroupModel);
     }
 
-    public void delete(Long id) {
+    public void delete(UserGroupId id) {
         userGroupRepository.deleteById(id);
     }
 }

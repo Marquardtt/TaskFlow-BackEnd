@@ -21,10 +21,10 @@ public class TaskPropertiesModel {
     private String value;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "taskId")
+    @JoinColumn(name = "taskId", insertable = false, updatable = false)
     private TaskModel task;
     @ManyToOne
-    @JoinColumn(name = "propertyId")
+    @JoinColumn(name = "propertyId", insertable = false, updatable = false)
     private GroupModel group;
 }
 

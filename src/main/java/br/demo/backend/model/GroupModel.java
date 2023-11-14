@@ -2,6 +2,7 @@ package br.demo.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import java.util.Collection;
 
@@ -18,6 +19,4 @@ public class GroupModel {
     private String picture;
     private String description;
 
-    @OneToMany(mappedBy = "group")
-    private Collection<UserGroupModel> users;
 }
