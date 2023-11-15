@@ -20,11 +20,12 @@ public class TaskPropertiesModel {
     private Long propertyId;
     private String value;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "taskId", insertable = false, updatable = false)
     private TaskModel task;
     @ManyToOne
     @JoinColumn(name = "propertyId", insertable = false, updatable = false)
-    private GroupModel group;
+    private PropertyModel property;
 }
 
