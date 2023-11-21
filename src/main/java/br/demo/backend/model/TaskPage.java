@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @IdClass(TaskPageId.class)
-public class TaskPageModel {
+public class TaskPage {
 
     @Id
     private Long taskId;
@@ -20,10 +20,10 @@ public class TaskPageModel {
 
     @ManyToOne
     @JoinColumn(name = "taskId", insertable = false, updatable = false)
-    private TaskModel task;
+    private Task task;
     @ManyToOne
     @JoinColumn(name = "pageId", insertable = false, updatable = false)
-    private PageModel page;
+    private Page page;
     private Double x;
     private Double y;
 }

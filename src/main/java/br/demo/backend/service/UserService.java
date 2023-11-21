@@ -1,7 +1,7 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.UserModel;
+import br.demo.backend.model.User;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,16 +14,16 @@ public class UserService {
 
     UserRepository userRepository;
 
-    public Collection<UserModel> findAll() {
+    public Collection<User> findAll() {
         return userRepository.findAll();
     }
 
-    public UserModel findOne(Long id) {
+    public User findOne(Long id) {
         return userRepository.findById(id).get();
     }
 
-    public void save(UserModel userModel) {
-        userRepository.save(userModel);
+    public void save(User user) {
+        userRepository.save(user);
     }
 
     public void delete(Long id) {

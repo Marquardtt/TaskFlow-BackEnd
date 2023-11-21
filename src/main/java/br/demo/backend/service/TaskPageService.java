@@ -2,7 +2,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.TaskPageId;
-import br.demo.backend.model.TaskPageModel;
+import br.demo.backend.model.TaskPage;
 import br.demo.backend.repository.TaskPageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,16 +15,16 @@ public class TaskPageService {
 
     TaskPageRepository taskPageRepository;
 
-    public Collection<TaskPageModel> findAll() {
+    public Collection<TaskPage> findAll() {
         return taskPageRepository.findAll();
     }
 
-    public TaskPageModel findOne(TaskPageId id) {
+    public TaskPage findOne(TaskPageId id) {
         return taskPageRepository.findById(id).get();
     }
 
-    public void save(TaskPageModel taskPageModel) {
-        taskPageRepository.save(taskPageModel);
+    public void save(TaskPage taskPage) {
+        taskPageRepository.save(taskPage);
     }
 
     public void delete(TaskPageId id) {

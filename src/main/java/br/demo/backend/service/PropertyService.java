@@ -1,7 +1,7 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.PropertyModel;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.repository.PropertyRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,16 +14,16 @@ public class PropertyService {
 
     PropertyRepository propertyRepository;
 
-    public Collection<PropertyModel> findAll() {
+    public Collection<Property> findAll() {
         return propertyRepository.findAll();
     }
 
-    public PropertyModel findOne(Long id) {
+    public Property findOne(Long id) {
         return propertyRepository.findById(id).get();
     }
 
-    public void save(PropertyModel propertyModel) {
-        propertyRepository.save(propertyModel);
+    public void save(Property property) {
+        propertyRepository.save(property);
     }
 
     public void delete(Long id) {

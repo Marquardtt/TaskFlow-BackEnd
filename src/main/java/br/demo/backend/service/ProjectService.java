@@ -1,7 +1,7 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.ProjectModel;
+import br.demo.backend.model.Project;
 import br.demo.backend.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,16 +14,16 @@ public class ProjectService {
 
     ProjectRepository projectRepository;
 
-    public Collection<ProjectModel> findAll() {
+    public Collection<Project> findAll() {
         return projectRepository.findAll();
     }
 
-    public ProjectModel findOne(Long id) {
+    public Project findOne(Long id) {
         return projectRepository.findById(id).get();
     }
 
-    public void save(ProjectModel projectModel) {
-        projectRepository.save(projectModel);
+    public void save(Project project) {
+        projectRepository.save(project);
     }
 
     public void delete(Long id) {

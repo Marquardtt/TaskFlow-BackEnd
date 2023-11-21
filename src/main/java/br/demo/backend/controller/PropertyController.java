@@ -1,12 +1,11 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.PropertyModel;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -15,22 +14,22 @@ public class PropertyController {
     private PropertyService propertyService;
 
     @PostMapping
-    public void insert(@RequestBody PropertyModel property){
+    public void insert(@RequestBody Property property){
         propertyService.save(property);
     }
 
     @PutMapping
-    public void upDate(@RequestBody PropertyModel property){
+    public void upDate(@RequestBody Property property){
         propertyService.save(property);
     }
 
     @GetMapping("/{id}")
-    public PropertyModel findOne(@PathVariable Long id){
+    public Property findOne(@PathVariable Long id){
         return propertyService.findOne(id);
     }
 
     @GetMapping
-    public Collection<PropertyModel> findAll(){
+    public Collection<Property> findAll(){
         return propertyService.findAll();
     }
 

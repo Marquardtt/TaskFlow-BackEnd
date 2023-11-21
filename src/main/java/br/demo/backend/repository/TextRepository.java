@@ -1,10 +1,9 @@
 package br.demo.backend.repository;
 
-import br.demo.backend.model.TaskPageId;
-import br.demo.backend.model.TaskPage;
+import br.demo.backend.model.properties.Text;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TaskPageRepository extends JpaRepository<TaskPage, TaskPageId>{
+public interface TextRepository extends JpaRepository<Text, Long> {
 }

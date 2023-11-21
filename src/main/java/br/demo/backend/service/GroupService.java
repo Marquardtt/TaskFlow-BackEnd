@@ -1,7 +1,7 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.GroupModel;
+import br.demo.backend.model.Group;
 import br.demo.backend.repository.GroupRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,16 +14,16 @@ public class GroupService {
 
     GroupRepository groupRepository;
 
-    public Collection<GroupModel> findAll() {
+    public Collection<Group> findAll() {
         return groupRepository.findAll();
     }
 
-    public GroupModel findOne(Long id) {
+    public Group findOne(Long id) {
         return groupRepository.findById(id).get();
     }
 
-    public void save(GroupModel groupModel) {
-        groupRepository.save(groupModel);
+    public void save(Group group) {
+        groupRepository.save(group);
     }
 
     public void delete(Long id) {

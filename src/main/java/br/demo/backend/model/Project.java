@@ -11,7 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_project")
-public class ProjectModel {
+public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +21,7 @@ public class ProjectModel {
     private String picture;
 
     @OneToMany
-    private Collection<GroupModel> groups;
+    private Collection<Group> groups;
     @OneToMany
-    private Collection<PageModel> pages;
+    private Collection<Page> pages;
 }

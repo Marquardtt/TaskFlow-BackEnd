@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_user")
-public class UserModel {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,4 +21,6 @@ public class UserModel {
     private String phone;
     private String description;
     private Integer points;
+    @OneToOne
+    private Configuration configuration;
 }

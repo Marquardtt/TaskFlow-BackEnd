@@ -1,6 +1,7 @@
 package br.demo.backend.model;
 
 
+import br.demo.backend.model.properties.Property;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -15,16 +16,16 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "db_page")
+@Table(name = "tb_page")
 
-public class PageModel {
+public class Page {
     @Id
     private Long id;
     private String name;
     private String type ;
 
     @ManyToMany
-    private Collection<TaskModel> tasks;
+    private Collection<Task> tasks;
     @ManyToMany
-    private Collection<PropertyModel> properties;
+    private Collection<Property> properties;
 }

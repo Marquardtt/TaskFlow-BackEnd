@@ -1,10 +1,8 @@
 package br.demo.backend.model.enums;
 
-
-public enum Permission {
-    READ,
+public enum Action {
+    CREATE,
     UPDATE,
     DELETE,
-    CREATE
-
+    REDO
 }

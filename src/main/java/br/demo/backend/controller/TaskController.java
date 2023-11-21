@@ -1,12 +1,11 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.TaskModel;
+import br.demo.backend.model.Task;
 import br.demo.backend.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -15,22 +14,22 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping
-    public void insert(@RequestBody TaskModel task){
+    public void insert(@RequestBody Task task){
         taskService.save(task);
     }
 
     @PutMapping
-    public void upDate(@RequestBody TaskModel task){
+    public void upDate(@RequestBody Task task){
         taskService.save(task);
     }
 
     @GetMapping("/{id}")
-    public TaskModel findOne(@PathVariable Long id){
+    public Task findOne(@PathVariable Long id){
         return taskService.findOne(id);
     }
 
     @GetMapping
-    public Collection<TaskModel> findAll(){
+    public Collection<Task> findAll(){
         return taskService.findAll();
     }
 

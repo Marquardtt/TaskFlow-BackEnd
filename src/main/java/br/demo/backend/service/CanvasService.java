@@ -1,7 +1,7 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.pages.CanvasModel;
+import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.repository.CanvasRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,15 +14,15 @@ public class CanvasService {
 
     CanvasRepository canvasRepository;
 
-    public Collection<CanvasModel> findAll() {
+    public Collection<Canvas> findAll() {
         return canvasRepository.findAll();
     }
 
-    public CanvasModel findOne(Long id) {
+    public Canvas findOne(Long id) {
         return canvasRepository.findById(id).get();
     }
 
-    public void save(CanvasModel canvasModel) {
+    public void save(Canvas canvasModel) {
         canvasRepository.save(canvasModel);
     }
 

@@ -1,12 +1,11 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.PageModel;
+import br.demo.backend.model.Page;
 import br.demo.backend.service.PageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -15,22 +14,22 @@ public class PageController {
 
     private PageService pageService;
     @PostMapping
-    public void insert(@RequestBody PageModel page) {
+    public void insert(@RequestBody Page page) {
         pageService.save(page);
     }
 
     @PutMapping
-    public void upDate(@RequestBody PageModel page) {
+    public void upDate(@RequestBody Page page) {
         pageService.save(page);
     }
 
     @GetMapping("/{id}")
-    public PageModel findOne(@PathVariable Long id) {
+    public Page findOne(@PathVariable Long id) {
         return pageService.findOne(id);
     }
 
     @GetMapping
-    public Collection<PageModel> findAll() {
+    public Collection<Page> findAll() {
         return pageService.findAll();
     }
 

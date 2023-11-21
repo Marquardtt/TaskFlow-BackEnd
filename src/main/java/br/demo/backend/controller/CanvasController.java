@@ -1,7 +1,7 @@
 package br.demo.backend.controller;
 
 
-import br.demo.backend.model.pages.CanvasModel;
+import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.service.CanvasService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,22 +14,22 @@ import java.util.Collection;
 public class CanvasController {
     private CanvasService canvasService;
     @PostMapping
-    public void insert(@RequestBody CanvasModel canvas){
+    public void insert(@RequestBody Canvas canvas){
         canvasService.save(canvas);
     }
 
     @PutMapping
-    public void upDate(@RequestBody CanvasModel canvas){
+    public void upDate(@RequestBody Canvas canvas){
         canvasService.save(canvas);
     }
 
     @GetMapping("/{id}")
-    public CanvasModel findOne(@PathVariable Long id){
+    public Canvas findOne(@PathVariable Long id){
         return canvasService.findOne(id);
     }
 
     @GetMapping
-    public Collection<CanvasModel> findAll(){
+    public Collection<Canvas> findAll(){
         return canvasService.findAll();
     }
 

@@ -1,10 +1,8 @@
 package br.demo.backend.model.properties;
 
-import br.demo.backend.model.OptionModel;
-import br.demo.backend.model.PropertyModel;
+import br.demo.backend.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,10 +14,9 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_tag")
-public class TagModel extends PropertyModel {
+@Table(name = "tb_property_user")
+public class PropertyUser extends Property {
+    private Integer maximum;
     @ManyToMany
-    private Collection<OptionModel> options;
-    @ManyToMany
-    private Collection<OptionModel> values;
+    private Collection<User> value;
 }

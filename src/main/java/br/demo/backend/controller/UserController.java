@@ -1,12 +1,11 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.UserModel;
+import br.demo.backend.model.User;
 import br.demo.backend.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -15,22 +14,22 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public void insert(@RequestBody UserModel user){
+    public void insert(@RequestBody User user){
         userService.save(user);
     }
 
     @PutMapping
-    public void upDate(@RequestBody UserModel user){
+    public void upDate(@RequestBody User user){
         userService.save(user);
     }
 
     @GetMapping("/{id}")
-    public UserModel findOne(@PathVariable Long id){
+    public User findOne(@PathVariable Long id){
         return userService.findOne(id);
     }
 
     @GetMapping
-    public Collection<UserModel> findAll(){
+    public Collection<User> findAll(){
         return userService.findAll();
     }
 

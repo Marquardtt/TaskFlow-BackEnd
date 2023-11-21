@@ -1,8 +1,6 @@
 package br.demo.backend.model.enums;
 
 
-import br.demo.backend.model.properties.SelectModel;
-
 public enum Type {
 
     RADIO,
@@ -13,6 +11,7 @@ public enum Type {
     TEMPO,
     USER,
     PROGRESS,
-    ARCHIVE
+    ARCHIVE,
+    CHECKBOX
 
 }

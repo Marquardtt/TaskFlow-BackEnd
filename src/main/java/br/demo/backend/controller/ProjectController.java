@@ -1,13 +1,12 @@
 package br.demo.backend.controller;
 
 
-import br.demo.backend.model.ProjectModel;
+import br.demo.backend.model.Project;
 import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -15,22 +14,22 @@ import java.util.List;
 public class ProjectController {
     private ProjectService projectService;
     @PostMapping
-    public void insert(@RequestBody ProjectModel project) {
+    public void insert(@RequestBody Project project) {
         projectService.save(project);
     }
 
     @PutMapping
-    public void upDate(@RequestBody ProjectModel project) {
+    public void upDate(@RequestBody Project project) {
         projectService.save(project);
     }
 
     @GetMapping("/{id}")
-    public ProjectModel findOne(@PathVariable Long id) {
+    public Project findOne(@PathVariable Long id) {
         return projectService.findOne(id);
     }
 
     @GetMapping
-    public Collection<ProjectModel> findAll() {
+    public Collection<Project> findAll() {
         return projectService.findAll();
     }
 
