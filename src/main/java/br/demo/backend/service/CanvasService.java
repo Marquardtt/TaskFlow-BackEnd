@@ -1,9 +1,8 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.CanvasModel;
+import br.demo.backend.model.pages.CanvasModel;
 import br.demo.backend.repository.CanvasRepository;
-import br.demo.backend.repository.PageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

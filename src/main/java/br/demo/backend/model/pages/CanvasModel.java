@@ -1,8 +1,9 @@
-package br.demo.backend.model;
+package br.demo.backend.model.pages;
 
 
+import br.demo.backend.model.PageModel;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "db_canvas")
 public class CanvasModel extends PageModel {
 
     private String draw;

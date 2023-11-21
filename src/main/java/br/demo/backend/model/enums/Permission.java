@@ -1,4 +1,4 @@
-package br.demo.backend.model;
+package br.demo.backend.model.enums;
 
 
 import jakarta.persistence.Entity;

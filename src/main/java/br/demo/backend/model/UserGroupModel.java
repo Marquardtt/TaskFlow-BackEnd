@@ -1,10 +1,10 @@
 package br.demo.backend.model;
+import br.demo.backend.model.enums.Permission;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.text.CollationElementIterator;
 import java.util.Collection;
 
 @Entity
@@ -26,6 +26,7 @@ public class UserGroupModel {
     @ManyToOne
     @JoinColumn(name = "groupId", insertable = false, updatable = false)
     private GroupModel group;
-    @Enumerated(value = EnumType.STRING)
-    private Collection<Permission> permissions;
+    @ManyToOne
+    private PermissionModel permission;
+
 }

@@ -1,6 +1,6 @@
 package br.demo.backend.model;
 
-
+import br.demo.backend.model.enums.Permission;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,18 +11,13 @@ import java.util.Collection;
 @Entity
 @Data
 @AllArgsConstructor
-@Table(name = "db_task")
 @NoArgsConstructor
-
-public class TaskModel {
-
+@Table(name = "db_permission")
+public class PermissionModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue
     private Long id;
-
     private String name;
-
-    @OneToMany(mappedBy = "task")
-    private Collection<PropertyModel> properties;
-
+    @Enumerated(value = EnumType.STRING)
+    private Collection<Permission> permissions;
 }

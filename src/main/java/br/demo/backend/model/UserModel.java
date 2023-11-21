@@ -13,9 +13,12 @@ public class UserModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String surname;
+    private String userName;
     private String address;
     private String picture;
-    private String email;
+    private String mail;
     private String phone;
     private String description;
+    private Integer points;
 }

@@ -1,6 +1,6 @@
 package br.demo.backend.repository;
 
-import br.demo.backend.model.CanvasModel;
+import br.demo.backend.model.pages.CanvasModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

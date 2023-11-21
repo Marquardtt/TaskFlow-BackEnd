@@ -1,13 +1,12 @@
 package br.demo.backend.controller;
 
 
-import br.demo.backend.model.CanvasModel;
+import br.demo.backend.model.pages.CanvasModel;
 import br.demo.backend.service.CanvasService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
