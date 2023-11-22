@@ -21,6 +21,6 @@ public class User {
     private String phone;
     private String description;
     private Integer points;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     private Configuration configuration;
 }

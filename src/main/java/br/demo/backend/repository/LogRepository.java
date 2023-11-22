@@ -1,9 +1,10 @@
 package br.demo.backend.repository;
 
-import br.demo.backend.model.properties.Data;
+import br.demo.backend.model.Log;
+import br.demo.backend.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DataRepository extends JpaRepository<Data, Long> {
+public interface LogRepository extends JpaRepository<Log, Long> {
 }

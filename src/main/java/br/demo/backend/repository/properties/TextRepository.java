@@ -1,4 +1,4 @@
-package br.demo.backend.repository;
+package br.demo.backend.repository.properties;
 
 import br.demo.backend.model.properties.Text;
 import org.springframework.data.jpa.repository.JpaRepository;

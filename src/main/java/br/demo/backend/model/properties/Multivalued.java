@@ -20,8 +20,8 @@ public class Multivalued extends Property {
     private Collection<Option> options;
 
     @ElementCollection(targetClass = String.class)
-    @CollectionTable(name = "tb_valores")
-    private List<String> valores = new ArrayList<>();
+    @CollectionTable(name = "tb_value")
+    private List<String> value = new ArrayList<>();
     //    @ManyToMany
 //    private Collection<Option> values;
 }
