@@ -1,4 +1,4 @@
-package br.demo.backend.model.properties;
+package br.demo.backend.model;
 
 import br.demo.backend.model.enums.Type;
 import jakarta.persistence.*;

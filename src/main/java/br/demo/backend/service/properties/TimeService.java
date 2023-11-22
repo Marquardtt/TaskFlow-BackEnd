@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.Time;
-import br.demo.backend.repository.TimeRepository;
+import br.demo.backend.repository.properties.TimeRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

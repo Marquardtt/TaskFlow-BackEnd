@@ -1,6 +1,7 @@
 package br.demo.backend.model.properties;
 
 import br.demo.backend.model.Option;
+import br.demo.backend.model.Property;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;

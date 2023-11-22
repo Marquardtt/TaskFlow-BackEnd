@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.Progress;
-import br.demo.backend.repository.ProgressRepository;
+import br.demo.backend.repository.properties.ProgressRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

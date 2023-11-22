@@ -1,6 +1,6 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.Property;
 import br.demo.backend.service.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;

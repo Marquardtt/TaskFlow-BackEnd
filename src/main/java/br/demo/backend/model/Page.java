@@ -1,7 +1,6 @@
 package br.demo.backend.model;
 
 
-import br.demo.backend.model.properties.Property;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;

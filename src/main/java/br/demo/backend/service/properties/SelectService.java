@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.Select;
-import br.demo.backend.repository.SelectRepository;
+import br.demo.backend.repository.properties.SelectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

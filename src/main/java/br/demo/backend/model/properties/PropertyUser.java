@@ -1,5 +1,6 @@
 package br.demo.backend.model.properties;
 
+import br.demo.backend.model.Property;
 import br.demo.backend.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;

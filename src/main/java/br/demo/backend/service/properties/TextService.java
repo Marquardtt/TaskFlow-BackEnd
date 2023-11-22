@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.Text;
-import br.demo.backend.repository.TextRepository;
+import br.demo.backend.repository.properties.TextRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

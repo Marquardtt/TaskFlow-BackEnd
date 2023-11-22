@@ -2,7 +2,7 @@ package br.demo.backend.service.properties;
 
 
 import br.demo.backend.model.properties.Archive;
-import br.demo.backend.repository.ArchiveRepository;
+import br.demo.backend.repository.properties.ArchiveRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

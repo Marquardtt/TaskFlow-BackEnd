@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.PropertyUser;
-import br.demo.backend.repository.PropertyUserRepository;
+import br.demo.backend.repository.properties.PropertyUserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

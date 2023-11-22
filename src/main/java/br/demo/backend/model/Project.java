@@ -1,6 +1,5 @@
 package br.demo.backend.model;
 
-import br.demo.backend.model.properties.Property;
 import jakarta.persistence.*;
 import lombok.*;
 

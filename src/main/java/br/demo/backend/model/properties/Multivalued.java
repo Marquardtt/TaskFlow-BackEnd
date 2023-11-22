@@ -1,6 +1,7 @@
 package br.demo.backend.model.properties;
 
 import br.demo.backend.model.Option;
+import br.demo.backend.model.Property;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

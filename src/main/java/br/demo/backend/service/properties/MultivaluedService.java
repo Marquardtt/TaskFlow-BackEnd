@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.Multivalued;
-import br.demo.backend.repository.MultivaluedRepository;
+import br.demo.backend.repository.properties.MultivaluedRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
