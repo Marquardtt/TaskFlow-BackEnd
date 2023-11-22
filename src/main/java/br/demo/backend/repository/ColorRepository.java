@@ -1,4 +1,4 @@
-package br.demo.backend.repository.properties;
+package br.demo.backend.repository;
 
 import br.demo.backend.model.properties.Color;
 import org.springframework.data.jpa.repository.JpaRepository;
