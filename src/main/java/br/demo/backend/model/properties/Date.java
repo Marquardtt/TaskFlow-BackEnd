@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_data")
-public class Data extends Property {
+public class Date extends Property {
 
     private Boolean canBePass;
     private Boolean includesHours;
