@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+import br.demo.backend.model.properties.Property;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +25,6 @@ public class Project {
     private Collection<Group> groups;
     @OneToMany
     private Collection<Page> pages;
+    @OneToMany
+    private Collection<Property> properties;
 }
