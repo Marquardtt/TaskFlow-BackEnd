@@ -25,11 +25,11 @@ public class Task {
 
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
     private Collection<Multivalued> multiProperties;
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
     private Collection<Univalued> uniProperties;
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
     private Collection<UserValue> userProperties;
 
     private Boolean deleted;

@@ -20,7 +20,7 @@ public class TaskController {
 
     @PutMapping
     public void upDate(@RequestBody Task task){
-        taskService.save(task);
+        taskService.update(task);
     }
 
     @GetMapping("/{id}")
