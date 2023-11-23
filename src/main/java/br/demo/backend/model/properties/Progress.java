@@ -1,6 +1,5 @@
 package br.demo.backend.model.properties;
 
-import br.demo.backend.model.Property;
 import br.demo.backend.model.enums.TypeOfProgress;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,10 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_progress")
-public class Progress extends Property {
-    private Integer maximum;
+public class Progress extends Limited {
     @Enumerated(value = EnumType.STRING)
     private TypeOfProgress typeOfProgress;
-    private Integer value;
-
 }

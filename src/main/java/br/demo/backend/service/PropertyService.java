@@ -24,6 +24,7 @@ public class PropertyService {
 
     public void save(Property property) {
         propertyRepository.save(property);
+
     }
 
     public void delete(Long id) {

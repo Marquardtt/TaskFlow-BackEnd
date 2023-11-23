@@ -25,9 +25,9 @@ public class TaskPageController {
         taskPageService.save(task);
     }
 
-    @GetMapping("/{id}/{id2}")
-    public TaskPage findOne(@PathVariable Long id, @PathVariable Long id2 ){
-        return taskPageService.findOne(new TaskPageId(id, id2));
+    @GetMapping("/{taskId}/{propertyId}")
+    public TaskPage findOne(@PathVariable Long taskId, @PathVariable Long propertyId ){
+        return taskPageService.findOne(new TaskPageId(taskId, propertyId));
     }
 
     @GetMapping
@@ -35,8 +35,8 @@ public class TaskPageController {
         return taskPageService.findAll();
     }
 
-    @DeleteMapping("/{id}/{id2}")
-    public void delete(@PathVariable Long id,@PathVariable Long id2 ){
-        taskPageService.delete(new TaskPageId(id, id2));
+    @DeleteMapping("/{taskId}/{propertyId}")
+    public void delete(@PathVariable Long taskId,@PathVariable Long propertyId ){
+        taskPageService.delete(new TaskPageId(taskId, propertyId));
     }
 }

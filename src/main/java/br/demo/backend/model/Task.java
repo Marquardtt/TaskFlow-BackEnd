@@ -1,6 +1,9 @@
 package br.demo.backend.model;
 
 
+import br.demo.backend.model.properties.relations.Multivalued;
+import br.demo.backend.model.properties.relations.Univalued;
+import br.demo.backend.model.properties.relations.UserValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,13 +25,19 @@ public class Task {
 
     private String name;
 
-    @OneToMany
-    private Collection<Property> properties;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private Collection<Multivalued> multiProperties;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private Collection<Univalued> uniProperties;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private Collection<UserValue> userProperties;
 
     private Boolean deleted;
     @OneToMany
     Collection<Log> logs;
     @OneToMany
     Collection<Message> comments;
+
+
 
 }

@@ -1,7 +1,7 @@
 package br.demo.backend.controller.properties;
 
 
-import br.demo.backend.model.properties.Multivalued;
+import br.demo.backend.model.properties.relations.Multivalued;
 import br.demo.backend.service.properties.MultivaluedService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +19,13 @@ public class MultivaluedController {
     }
 
     @PutMapping
-    public void upDate(@RequestBody Multivalued multivalued){
+    public void upMultivalued(@RequestBody Multivalued multivalued){
         multivaluedService.save(multivalued);
     }
 
-    @GetMapping("/{id}")
-    public Multivalued findOne(@PathVariable Long id){
-        return multivaluedService.findOne(id);
+    @GetMapping("/{taskId}/{propertyId}")
+    public Multivalued findOne(@PathVariable Long taskId, @PathVariable Long propertyId){
+        return multivaluedService.findOne(taskId, propertyId);
     }
 
     @GetMapping
@@ -33,9 +33,9 @@ public class MultivaluedController {
         return multivaluedService.findAll();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        multivaluedService.delete(id);
+    @DeleteMapping("/{taskId}/{propertyId}")
+    public void delete(@PathVariable Long taskId, @PathVariable Long propertyId){
+        multivaluedService.delete(taskId, propertyId);
     }
 
 }

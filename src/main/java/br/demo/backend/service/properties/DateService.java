@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 import br.demo.backend.model.properties.Date;
-import br.demo.backend.repository.properties.DataRepository;
+import br.demo.backend.repository.properties.DateRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class DateService {
 
-    DataRepository dateRepository;
+    DateRepository dateRepository;
 
     public Collection<Date> findAll() {
         return dateRepository.findAll();

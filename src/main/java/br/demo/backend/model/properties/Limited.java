@@ -1,8 +1,9 @@
 package br.demo.backend.model.properties;
 
-
 import br.demo.backend.model.Property;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,8 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_color")
-public class Color extends Property {
-
-    private String color;
+@Table(name = "tb_limited")
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Limited extends Property {
+    private Integer maximum;
 }

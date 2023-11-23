@@ -25,9 +25,9 @@ public class UserGroupController {
         userGroupService.save(user);
     }
 
-    @GetMapping("/{id}/{id2}")
-    public UserGroup findOne(@PathVariable Long id, @PathVariable Long id2){
-        return userGroupService.findOne(new UserGroupId(id, id2));
+    @GetMapping("/{taskId}/{propertyId}")
+    public UserGroup findOne(@PathVariable Long taskId, @PathVariable Long propertyId){
+        return userGroupService.findOne(new UserGroupId(taskId, propertyId));
     }
 
     @GetMapping
@@ -35,9 +35,9 @@ public class UserGroupController {
         return userGroupService.findAll();
     }
 
-    @DeleteMapping("/{id}/{id2}")
-    public void delete(@PathVariable Long id,@PathVariable Long id2){
-        userGroupService.delete(new UserGroupId(id, id2));
+    @DeleteMapping("/{taskId}/{propertyId}")
+    public void delete(@PathVariable Long taskId,@PathVariable Long propertyId){
+        userGroupService.delete(new UserGroupId(taskId, propertyId));
     }
 
 }
