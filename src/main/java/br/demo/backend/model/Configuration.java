@@ -12,17 +12,18 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_configuration")
 public class Configuration {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
- // Falta usar o cérebro
+    private Long taskId;
+    // Falta usar o cérebro
     private Boolean notifications;
-   private String primaryColor;
-   private String secondaryColor;
-   @Enumerated(value = EnumType.STRING)
-   private Theme theme;
-   private Integer fontSize;
-   private Boolean libras;
-   private Boolean textToSound;
+    private String primaryColor;
+    private String secondaryColor;
+    @Enumerated(value = EnumType.STRING)
+    private Theme theme;
+    private Integer fontSize;
+    @JoinColumn(name = "taskId", insertable = false, updatable = false)
+    @OneToOne
+    private User user;
+    private Boolean libras;
+    private Boolean textToSound;
 }

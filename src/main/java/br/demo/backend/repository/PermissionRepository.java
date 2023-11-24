@@ -1,5 +1,4 @@
 package br.demo.backend.repository;
-import br.demo.backend.model.Chat;
 import br.demo.backend.model.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,7 +1,6 @@
 package br.demo.backend.model.pages;
 
 
-import br.demo.backend.model.Page;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;

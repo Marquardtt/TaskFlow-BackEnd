@@ -1,7 +1,7 @@
 package br.demo.backend.model.properties.relations;
 
-import br.demo.backend.model.Property;
-import br.demo.backend.model.Task;
+import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.User;
 import br.demo.backend.model.properties.relations.ids.ValueId;
 import com.fasterxml.jackson.annotation.JsonIgnore;

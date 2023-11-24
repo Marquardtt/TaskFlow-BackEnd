@@ -1,7 +1,8 @@
 package br.demo.backend.model.properties.relations;
 
-import br.demo.backend.model.*;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.relations.ids.ValueId;
+import br.demo.backend.model.tasks.Task;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
