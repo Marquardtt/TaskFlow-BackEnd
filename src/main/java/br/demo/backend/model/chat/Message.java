@@ -20,8 +20,11 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String message;
+    private String value;
+    @ManyToOne
+    private Chat chat;
     @OneToOne
     private User user;
-    private LocalDateTime value;
+    private LocalDateTime dateTime;
+    private Boolean visualized;
 }

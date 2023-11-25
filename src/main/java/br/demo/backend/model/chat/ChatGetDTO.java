@@ -11,15 +11,10 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "tb_chat")
-public class Chat {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ChatGetDTO {
     private Long id;
-    @ManyToMany
-    private Collection<User> users;
-    @OneToMany(cascade = CascadeType.ALL)
-    private Collection<Message> messages;
-
+    private String picture;
+    private Integer quantitityUnvisualized;
+    private Message lastMessage;
+    private String name;
 }
