@@ -7,6 +7,7 @@ import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.relations.Multivalued;
 import br.demo.backend.model.properties.relations.Univalued;
@@ -14,8 +15,10 @@ import br.demo.backend.model.properties.relations.UserValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.tasks.TaskPostDTO;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,6 +30,7 @@ import java.util.*;
 public class TaskService {
 
     TaskRepository taskRepository;
+    UserRepository userRepository;
 
     public Collection<Task> findAll() {
         return taskRepository.findAll();
@@ -36,14 +40,13 @@ public class TaskService {
         return taskRepository.findById(id).get();
     }
 
-    public Task save(TaskPostDTO taskPostDTO, User user) {
+    public Task save(Page page, User user) {
         Task taskEmpty = taskRepository.save(new Task());
 
-        Page page = taskPostDTO.getPage();
         Collection<Property> propertiesPage = page.getProperties();
 
         Project project = page.getProject();
-        Collection<Property> propertiesProject = page.getProperties();
+        Collection<Property> propertiesProject = project.getProperties();
 
 
         setTaskProperties(propertiesPage, taskEmpty);
@@ -88,5 +91,22 @@ public class TaskService {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, user, LocalDateTime.now()));
+    }
+
+    public Collection<Task> getTasksToday(Long id) {
+        User user = userRepository.findById(id).get();
+        Collection<Task> tasks = taskRepository.findTasksByUserPropertiesContaining(user);
+        Collection<Task> tasksToday = new ArrayList<>();
+        for(Task t : tasks){
+            for(Univalued u : t.getUniProperties()){
+                Property p = u.getProperty();
+                if(p.getType() == TypeOfProperty.DATE &&((Date)p).getScheduling()){
+                    if(LocalDate.parse(u.getValue()).equals(LocalDate.now())){
+                        tasksToday.add(t);
+                    }
+                }
+            }
+        }
+        return tasksToday;
     }
 }

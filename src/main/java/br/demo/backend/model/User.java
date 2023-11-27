@@ -3,6 +3,8 @@ package br.demo.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Collection;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +16,8 @@ public class User {
     private Long id;
     private String name;
     private String surname;
-    private String userName;
+    private String username;
+    private String password;
     private String address;
     private String picture;
     private String mail;
@@ -23,7 +26,10 @@ public class User {
     private Integer points;
     @OneToOne(cascade = CascadeType.PERSIST)
     private Configuration configuration;
-
+    @ManyToMany
+    private Collection<Group> groups;
+    @OneToMany
+    private Collection<Project> project;
     public User (Long id){
         this.id = id;
     }

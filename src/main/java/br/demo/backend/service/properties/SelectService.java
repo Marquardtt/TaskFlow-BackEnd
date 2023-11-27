@@ -26,6 +26,15 @@ public class SelectService {
     }
 
     public void delete(Long id) {
-        selectRepository.deleteById(id);
+        Select select = selectRepository.findById(id).get();
+        Integer count  = select.getPage() == null ?
+                selectRepository.countByProject(select.getProject()):
+                selectRepository.countByPage(select.getPage());
+        if(count > 1){
+            selectRepository.deleteById(id);
+        }else{
+            return;
+//            Erro de apagar select
+        }
     }
 }

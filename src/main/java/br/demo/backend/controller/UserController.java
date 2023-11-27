@@ -28,6 +28,16 @@ public class UserController {
         return userService.findOne(id);
     }
 
+    @GetMapping("/username/{username}/{password}")
+    public User findByUsernameAndPassword(@PathVariable String username, @PathVariable String password){
+        return userService.findByUsernameAndPassword(username, password);
+    }
+    @GetMapping("/email/{email}/{password}")
+
+    public User findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
+        return userService.findByEmailAndPassword(email, password);
+    }
+
     @GetMapping
     public Collection<User> findAll(){
         return userService.findAll();

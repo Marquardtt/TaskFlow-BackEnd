@@ -2,6 +2,7 @@ package br.demo.backend.controller.tasks;
 
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.tasks.TaskPostDTO;
 import br.demo.backend.service.tasks.TaskService;
@@ -17,8 +18,8 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping
-    public void insert(@RequestBody TaskPostDTO taskPostDTO, @RequestBody User user){
-        taskService.save(taskPostDTO, user);
+    public void insert(@RequestBody Page page, @RequestBody User user){
+        taskService.save(page, user);
     }
 
     @PutMapping
@@ -39,6 +40,11 @@ public class TaskController {
     @GetMapping
     public Collection<Task> findAll(){
         return taskService.findAll();
+    }
+
+    @GetMapping("/today/{id}")
+    public Collection<Task> findTodaysTasks(@PathVariable Long id){
+        return taskService.getTasksToday(id);
     }
 
     @DeleteMapping("/{id}")
