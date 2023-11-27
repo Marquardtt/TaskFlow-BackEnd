@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 
 import java.util.Collection;
 
@@ -33,9 +34,9 @@ public class Task {
     private Collection<UserValue> userProperties;
 
     private Boolean deleted;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     Collection<Log> logs;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     Collection<Message> comments;
 
 

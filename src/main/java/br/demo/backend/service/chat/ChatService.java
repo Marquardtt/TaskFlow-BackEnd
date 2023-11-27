@@ -18,8 +18,6 @@ import java.util.Collection;
 public class ChatService {
 
     private ChatRepository chatRepository;
-    private MessageRepository messageRepository;
-    private GroupRepository groupRepository;
 
     public Collection<Chat> findAllPrivate(Long id) {
         return chatRepository.findChatsByUsersContains_IdAndTypeOrderByMessagesDateTimeDesc(id, TypeOfChat.PRIVATE);

@@ -2,23 +2,25 @@ package br.demo.backend.service.tasks;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
+import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.relations.Multivalued;
 import br.demo.backend.model.properties.relations.Univalued;
 import br.demo.backend.model.properties.relations.UserValue;
+import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.tasks.TaskPostDTO;
 import br.demo.backend.repository.tasks.TaskRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -34,7 +36,7 @@ public class TaskService {
         return taskRepository.findById(id).get();
     }
 
-    public Task save(TaskPostDTO taskPostDTO) {
+    public Task save(TaskPostDTO taskPostDTO, User user) {
         Task taskEmpty = taskRepository.save(new Task());
 
         Page page = taskPostDTO.getPage();
@@ -46,6 +48,8 @@ public class TaskService {
 
         setTaskProperties(propertiesPage, taskEmpty);
         setTaskProperties(propertiesProject, taskEmpty);
+
+        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
 
         return taskRepository.save(taskEmpty);
     }
@@ -74,8 +78,15 @@ public class TaskService {
         taskRepository.save(task);
     }
 
+    public void delete(Long id, User user) {
 
-    public void delete(Long id) {
-        taskRepository.deleteById(id);
+        Task task = taskRepository.findById(id).get();
+        task.setDeleted(true);
+        task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
+    }
+    public void redo(Long id, User user) {
+        Task task = taskRepository.findById(id).get();
+        task.setDeleted(false);
+        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, user, LocalDateTime.now()));
     }
 }

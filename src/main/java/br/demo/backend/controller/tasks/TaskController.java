@@ -1,5 +1,6 @@
 package br.demo.backend.controller.tasks;
 
+import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.tasks.TaskPostDTO;
@@ -16,8 +17,8 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping
-    public void insert(@RequestBody TaskPostDTO taskPostDTO){
-        taskService.save(taskPostDTO);
+    public void insert(@RequestBody TaskPostDTO taskPostDTO, @RequestBody User user){
+        taskService.save(taskPostDTO, user);
     }
 
     @PutMapping
@@ -41,7 +42,12 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        taskService.delete(id);
+    public void delete(@PathVariable Long id , @RequestBody User user){
+        taskService.delete(id, user);
+    }
+
+    @PutMapping()
+    public void redo(@PathVariable Long id , @RequestBody User user){
+        taskService.redo(id, user);
     }
 }
