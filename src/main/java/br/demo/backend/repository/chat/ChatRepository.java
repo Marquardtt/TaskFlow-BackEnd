@@ -10,7 +10,7 @@ import java.util.Collection;
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
-    public Collection<Chat> findChatsByUsersContains_IdAndTypeOrderByMessagesDateTimeDesc(Long id, TypeOfChat type);
+    public Collection<Chat> findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(User user, TypeOfChat type);
     public Collection<Chat> findChatsByNameContains(String name);
 
 }

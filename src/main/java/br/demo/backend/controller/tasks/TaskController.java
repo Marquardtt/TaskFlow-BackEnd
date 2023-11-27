@@ -46,7 +46,7 @@ public class TaskController {
         taskService.delete(id, user);
     }
 
-    @PutMapping()
+    @PutMapping("/redo")
     public void redo(@PathVariable Long id , @RequestBody User user){
         taskService.redo(id, user);
     }

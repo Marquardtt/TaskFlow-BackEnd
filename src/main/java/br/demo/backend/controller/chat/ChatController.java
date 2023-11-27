@@ -23,7 +23,7 @@ public class ChatController {
     public void upDate(@RequestBody Chat chat){
         chatService.update(chat);
     }
-    @PutMapping
+    @PutMapping("/visualized")
     public void upDateToVisualized(@RequestBody Chat chat){
         chatService.updateMessagesToVisualized(chat);
     }

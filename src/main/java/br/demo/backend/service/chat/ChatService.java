@@ -1,6 +1,7 @@
 package br.demo.backend.service.chat;
 
 
+import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.ChatGetDTO;
 import br.demo.backend.model.chat.Message;
@@ -20,12 +21,12 @@ public class ChatService {
     private ChatRepository chatRepository;
 
     public Collection<Chat> findAllPrivate(Long id) {
-        return chatRepository.findChatsByUsersContains_IdAndTypeOrderByMessagesDateTimeDesc(id, TypeOfChat.PRIVATE);
+        return chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(id), TypeOfChat.PRIVATE);
 
     }
 
     public Collection<Chat> findAllGroup(Long id) {
-        return chatRepository.findChatsByUsersContains_IdAndTypeOrderByMessagesDateTimeDesc(id, TypeOfChat.GROUP);
+        return chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(id), TypeOfChat.GROUP);
     }
 
 

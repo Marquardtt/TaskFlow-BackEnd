@@ -30,12 +30,5 @@ public class Chat {
     @OneToOne
     private Message lastMessage;
 
-    public User getOtherUser(User user){
-        for(User u : users){
-            if(!u.equals(user)){
-                return u;
-            }
-        }
-        return null;
-    }
+
 }

@@ -23,4 +23,8 @@ public class User {
     private Integer points;
     @OneToOne(cascade = CascadeType.PERSIST)
     private Configuration configuration;
+
+    public User (Long id){
+        this.id = id;
+    }
 }

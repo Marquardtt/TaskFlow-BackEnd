@@ -10,5 +10,4 @@ import java.util.Collection;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
-    public Group findGroupByUsers(Collection<User> users);
 }
