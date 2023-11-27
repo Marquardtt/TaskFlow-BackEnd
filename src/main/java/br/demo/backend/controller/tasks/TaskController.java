@@ -1,6 +1,8 @@
 package br.demo.backend.controller.tasks;
 
+import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.model.tasks.TaskPostDTO;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +16,8 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping
-    public void insert(@RequestBody Task task){
-        taskService.save(task);
+    public void insert(@RequestBody TaskPostDTO taskPostDTO){
+        taskService.save(taskPostDTO);
     }
 
     @PutMapping
@@ -26,6 +28,11 @@ public class TaskController {
     @GetMapping("/{id}")
     public Task findOne(@PathVariable Long id){
         return taskService.findOne(id);
+    }
+
+    @GetMapping("/name/{name}")
+    public Collection<Task> findByName(@PathVariable String name){
+        return taskService.findByName(name);
     }
 
     @GetMapping

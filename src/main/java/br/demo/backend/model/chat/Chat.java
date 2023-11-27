@@ -1,6 +1,7 @@
 package br.demo.backend.model.chat;
 
 import br.demo.backend.model.User;
+import br.demo.backend.model.enums.TypeOfChat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,5 +22,20 @@ public class Chat {
     private Collection<User> users;
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Message> messages;
+    @Enumerated(EnumType.STRING)
+    private TypeOfChat type;
+    private String name;
+    private String picture;
+    private Integer quantitityUnvisualized;
+    @OneToOne
+    private Message lastMessage;
 
+    public User getOtherUser(User user){
+        for(User u : users){
+            if(!u.equals(user)){
+                return u;
+            }
+        }
+        return null;
+    }
 }

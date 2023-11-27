@@ -32,6 +32,10 @@ public class MessageController {
     public Collection<Message> findAll(){
         return messageService.findAll();
     }
+    @GetMapping("/chat/{id}")
+    public Collection<Message> findAllbyChat(@PathVariable Long id){
+        return messageService.findAllByChat(id);
+    }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){

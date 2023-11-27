@@ -1,7 +1,7 @@
 package br.demo.backend.model.enums;
 
 
-public enum Type {
+public enum TypeOfProperty {
 
 //  Select
     RADIO,
