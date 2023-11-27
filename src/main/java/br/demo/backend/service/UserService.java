@@ -29,4 +29,15 @@ public class UserService {
     public void delete(Long id) {
         userRepository.deleteById(id);
     }
+
+    public User findByUsernameAndPassword(String username, String password) {
+        return userRepository.findByUsernameAndPassword(username, password);
+    }
+    public User findByEmailAndPassword(String mail, String password) {
+        return userRepository.findByMailAndPassword(mail, password);
+    }
+
+    public User findByName(String name) {
+        return userRepository.findByNameContains(name);
+    }
 }

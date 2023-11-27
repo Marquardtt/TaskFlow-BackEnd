@@ -5,6 +5,7 @@ import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.properties.relations.Multivalued;
 import br.demo.backend.model.properties.relations.Univalued;
 import br.demo.backend.model.properties.relations.UserValue;
+import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,9 @@ public class Task {
     private Collection<Univalued> uniProperties;
     @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
     private Collection<UserValue> userProperties;
+
+    @OneToMany
+    private Collection<TaskPage> pages;
 
     private Boolean deleted;
     @OneToMany(cascade = CascadeType.ALL)

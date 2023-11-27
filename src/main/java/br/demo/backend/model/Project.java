@@ -24,6 +24,8 @@ public class Project {
 
     @OneToMany
     private Collection<Group> groups;
+    @ManyToOne
+    private User owner;
     @OneToMany
     private Collection<Page> pages;
     @OneToMany

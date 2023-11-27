@@ -3,6 +3,7 @@ package br.demo.backend.model.pages;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.enums.TypeOfPage;
 import jakarta.persistence.*;
@@ -26,8 +27,8 @@ public class Page {
     private TypeOfPage type ;
     @ManyToOne
     private Project project;
-    @ManyToMany
-    private Collection<Task> tasks;
+    @OneToMany
+    private Collection<TaskPage> tasks;
     @ManyToMany
     private Collection<Property> properties;
 }
