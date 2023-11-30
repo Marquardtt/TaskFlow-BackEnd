@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull private Long id;
+    private Long id;
     private String name;
     private Boolean visible;
     private Boolean obligatory;
