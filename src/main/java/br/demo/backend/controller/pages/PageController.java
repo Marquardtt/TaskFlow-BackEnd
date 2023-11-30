@@ -1,6 +1,7 @@
 package br.demo.backend.controller.pages;
 
 import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.pages.PagePostDTO;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +15,13 @@ public class PageController {
 
     private PageService pageService;
     @PostMapping
-    public void insert(@RequestBody Page page) {
+    public void insert(@RequestBody PagePostDTO page) {
         pageService.save(page);
     }
 
     @PutMapping
     public void upDate(@RequestBody Page page) {
-        pageService.save(page);
+        pageService.update(page);
     }
 
     @GetMapping("/{id}")
