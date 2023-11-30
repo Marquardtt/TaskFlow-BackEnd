@@ -4,6 +4,7 @@ import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +29,6 @@ public class Project {
     private User owner;
     @OneToMany
     private Collection<Page> pages;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Property> properties;
 }
