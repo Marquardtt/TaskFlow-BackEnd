@@ -21,6 +21,7 @@ import java.util.Collection;
 
 public class Page {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     @Enumerated(value = EnumType.STRING)
