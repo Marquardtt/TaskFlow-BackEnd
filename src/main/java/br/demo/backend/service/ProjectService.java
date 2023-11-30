@@ -35,7 +35,9 @@ public class ProjectService {
         options.add(new Option(null, "To-do", "#FF7A00"));
         options.add(new Option(null, "Doing", "#F7624B"));
         options.add(new Option(null, "Done", "#F04A94"));
-        project.getProperties().add(new Select(null, "Stats", true, false, options));
+        HashSet<Property> properties = new HashSet<>();
+        properties.add(new Select(null, "Stats", true, false, options));
+        project.setProperties(properties);
         projectRepository.save(project);
     }
 
