@@ -1,6 +1,7 @@
 package br.demo.backend.model;
 
 import br.demo.backend.model.enums.Theme;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_configuration")
 public class Configuration {
     @Id
-    private Long taskId;
+    private Long id;
     // Falta usar o cérebro
     private Boolean notifications;
     private String primaryColor;

@@ -18,8 +18,8 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping
-    public void insert(@RequestBody Page page, @RequestBody User user){
-        taskService.save(page, user);
+    public void insert(@RequestBody Page page, @RequestParam Long id){
+        taskService.save(page, id);
     }
 
     @PutMapping

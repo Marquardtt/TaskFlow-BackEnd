@@ -2,6 +2,7 @@ package br.demo.backend.model;
 
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
@@ -26,8 +27,10 @@ public class Project {
     @OneToMany
     private Collection<Group> groups;
     @ManyToOne
+    @JsonIgnore
     private User owner;
     @OneToMany
+    @JsonIgnore
     private Collection<Page> pages;
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Property> properties;

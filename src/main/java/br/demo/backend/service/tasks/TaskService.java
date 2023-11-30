@@ -12,10 +12,12 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.relations.Multivalued;
 import br.demo.backend.model.properties.relations.Univalued;
 import br.demo.backend.model.properties.relations.UserValue;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.tasks.TaskPostDTO;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
@@ -31,6 +33,7 @@ public class TaskService {
 
     TaskRepository taskRepository;
     UserRepository userRepository;
+    PageRepository pageRepository;
 
     public Collection<Task> findAll() {
         return taskRepository.findAll();
@@ -40,7 +43,7 @@ public class TaskService {
         return taskRepository.findById(id).get();
     }
 
-    public Task save(Page page, User user) {
+    public Task save(Page page, Long id) {
         Task taskEmpty = taskRepository.save(new Task());
 
         Collection<Property> propertiesPage = page.getProperties();
@@ -49,10 +52,17 @@ public class TaskService {
         Collection<Property> propertiesProject = project.getProperties();
 
 
+        taskEmpty.setUniProperties(new ArrayList<>());
+        taskEmpty.setMultiProperties(new ArrayList<>());
+        taskEmpty.setUserProperties(new ArrayList<>());
+        taskEmpty.setLogs(new ArrayList<>());
+        taskEmpty.setComments(new ArrayList<>());
+
         setTaskProperties(propertiesPage, taskEmpty);
         setTaskProperties(propertiesProject, taskEmpty);
-
-        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
+        taskEmpty.setPages(new ArrayList<>());
+        taskEmpty.getPages().add(new TaskPage(taskEmpty.getId(), page.getId(), taskEmpty, page, null, null));
+        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, userRepository.findById(id).get(), LocalDateTime.now()));
 
         return taskRepository.save(taskEmpty);
     }

@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,8 +28,10 @@ public class User {
     @OneToOne(cascade = CascadeType.PERSIST)
     private Configuration configuration;
     @ManyToMany
+    @JsonIgnore
     private Collection<Group> groups;
     @OneToMany
+    @JsonIgnore // vai ocorrer problemas futuramente
     private Collection<Project> project;
     public User (Long id){
         this.id = id;

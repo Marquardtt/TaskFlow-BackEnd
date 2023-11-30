@@ -3,6 +3,7 @@ package br.demo.backend.model.relations;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.relations.ids.TaskPageId;
 import br.demo.backend.model.pages.Page;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

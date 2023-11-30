@@ -6,6 +6,7 @@ import br.demo.backend.model.properties.relations.Multivalued;
 import br.demo.backend.model.properties.relations.Univalued;
 import br.demo.backend.model.properties.relations.UserValue;
 import br.demo.backend.model.relations.TaskPage;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,7 +35,8 @@ public class Task {
     @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
     private Collection<UserValue> userProperties;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @JsonIgnore
     private Collection<TaskPage> pages;
 
     private Boolean deleted;
