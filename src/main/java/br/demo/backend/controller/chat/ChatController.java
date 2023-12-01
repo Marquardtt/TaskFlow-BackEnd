@@ -3,7 +3,6 @@ package br.demo.backend.controller.chat;
 
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
-import br.demo.backend.model.chat.ChatGetDTO;
 import br.demo.backend.service.chat.ChatService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;

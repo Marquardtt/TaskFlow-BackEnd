@@ -3,12 +3,9 @@ package br.demo.backend.service.chat;
 
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
-import br.demo.backend.model.chat.ChatGetDTO;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfChat;
-import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.chat.ChatRepository;
-import br.demo.backend.repository.chat.MessageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +19,6 @@ public class ChatService {
 
     public Collection<Chat> findAllPrivate(Long id) {
         return chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(id), TypeOfChat.PRIVATE);
-
     }
 
     public Collection<Chat> findAllGroup(Long id) {

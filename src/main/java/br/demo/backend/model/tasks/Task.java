@@ -2,10 +2,9 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.properties.relations.Multivalued;
-import br.demo.backend.model.properties.relations.Univalued;
-import br.demo.backend.model.properties.relations.UserValue;
 import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.values.Value;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,24 +24,21 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
+
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
-    private Collection<Multivalued> multiProperties;
-    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
-    private Collection<Univalued> uniProperties;
-    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
-    private Collection<UserValue> userProperties;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private Collection<TaskValue> properties;
 
     @OneToMany
     private Collection<TaskPage> pages;
 
     private Boolean deleted;
+
     @OneToMany(cascade = CascadeType.ALL)
     Collection<Log> logs;
+
     @OneToMany(cascade = CascadeType.ALL)
     Collection<Message> comments;
-
-
 
 }

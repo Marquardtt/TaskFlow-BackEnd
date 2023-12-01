@@ -3,7 +3,6 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
@@ -14,11 +13,9 @@ import br.demo.backend.model.properties.relations.Univalued;
 import br.demo.backend.model.properties.relations.UserValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.tasks.TaskPostDTO;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

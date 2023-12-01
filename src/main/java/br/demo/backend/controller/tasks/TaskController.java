@@ -1,10 +1,8 @@
 package br.demo.backend.controller.tasks;
 
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.tasks.TaskPostDTO;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
