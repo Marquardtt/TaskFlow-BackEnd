@@ -36,48 +36,56 @@ public class DeserializerValue extends StdDeserializer<Value> {
             System.out.println(e.getMessage());
         }
 
-        if (isPresent("text")) {
-            String valorJson = jsonNode.get("text").asText();
-            return new TextValued(id, valorJson);
-        } else if (isPresent("data")) {
-            String valorJson = jsonNode.get("data").asText();
-            LocalDateTime date = LocalDateTime.parse(valorJson);
-            return new DateValued(id, date);
-        } else if (isPresent("number")) {
-            Integer valorJson = jsonNode.get("number").asInt();
-            return new NumberValued(id, valorJson);
-        } else if (isPresent("tempo")) {
-            String valorJson = jsonNode.get("tempo").asText();
-            LocalTime time = LocalTime.parse(valorJson);
+        if (isPresent(jsonNode, "text")) {
+            String jsonValue = jsonNode.get("text").asText();
+            return new TextValued(id, jsonValue);
+        } else if (isPresent(jsonNode, "dateTime")) {
+            String jsonValue = jsonNode.get("dateTime").asText();
+            LocalDateTime dateTime = null;
+            dateTime = LocalDateTime.parse(jsonValue);
+            return new DateValued(id, dateTime);
+
+        } else if (isPresent(jsonNode, "number")) {
+            Integer jsonValue = jsonNode.get("number").asInt();
+            return new NumberValued(id, jsonValue);
+        } else if (isPresent(jsonNode, "time")) {
+            String jsonValue = jsonNode.get("time").asText();
+            LocalTime time = LocalTime.parse(jsonValue);
             return new TimeValued(id, time);
-        } else if (isPresent("archive")) {
-            String valorJson = jsonNode.get("archive").asText();
-            return new ArchiveValued(id, valorJson);
-        } else if (isPresent("users")) {
+        } else if (isPresent(jsonNode, "archive")) {
+            String jsonValue = jsonNode.get("archive").asText();
+            return new ArchiveValued(id, jsonValue);
+        } else if (isPresent(jsonNode, "users")) {
             List<JsonNode> usersJSON = jsonNode.findValues("users");
             List<User> users = new ArrayList<>();
             for (JsonNode user : usersJSON) {
-                Long idUser = user.get("id").asLong();
-                users.add(new User(idUser));
+                if (isPresent(user, "id")) {
+                    Long idUser = user.get("id").asLong();
+                    users.add(new User(idUser));
+                }
             }
             return new UserValued(id, users);
-        } else if (isPresent("uniOption")) {
-            JsonNode valorJson = jsonNode.findValue("uniOption");
-            Option option = new Option(valorJson.get("id").asLong());
+        } else if (isPresent(jsonNode, "uniOption")) {
+            JsonNode jsonValue = jsonNode.findValue("uniOption");
+            Option option = null;
+            if (isPresent(jsonValue, "id")) {
+                option = new Option(jsonValue.get("id").asLong());
+            }
             return new UniOptionValued(id, option);
         }
         List<JsonNode> multiJSON = jsonNode.findValues("multiOptions");
         List<Option> options = new ArrayList<>();
         for (JsonNode option : multiJSON) {
-            options.add(new Option(option.get("id").asLong()));
+            if (isPresent(option, "id")) {
+                options.add(new Option(option.get("id").asLong()));
+            }
         }
         return new MultiOptionValued(id, options);
     }
 
-    private boolean isPresent(String text) {
+    private boolean isPresent(JsonNode jsonNode, String text) {
         try {
             if (jsonNode.findParent(text) != null) {
-                System.out.println(jsonNode.findParent(text));
                 return true;
             } else {
                 throw new NullPointerException();

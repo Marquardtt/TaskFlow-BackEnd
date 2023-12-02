@@ -57,7 +57,6 @@ public class DeserializerProperty extends StdDeserializer<Property> {
                     page = new Page(pageJson.get("id").asLong());
                 }
             }
-
             if(type.equals(TypeOfProperty.DATE)){
                 Boolean canBePass = null;
                 Boolean includesHours = null;
@@ -77,7 +76,10 @@ public class DeserializerProperty extends StdDeserializer<Property> {
                 }
                 return new Date(id, name, visible, obligatory, page, canBePass, includesHours, term, scheduling);
             }
-            else if (type.equals(TypeOfProperty.SELECT)) {
+            else if (type.equals(TypeOfProperty.SELECT) ||
+                    type.equals(TypeOfProperty.RADIO) ||
+                    type.equals(TypeOfProperty.TAG) ||
+                    type.equals(TypeOfProperty.CHECKBOX)) {
                 List<Option> options = new ArrayList<>();
                 if(isPresent(jsonNode, "options")){
                     List<JsonNode> optionsJson = jsonNode.findValues("options");
@@ -86,6 +88,7 @@ public class DeserializerProperty extends StdDeserializer<Property> {
                             options.add(new Option(optionJson.get("id").asLong()));
                         }
                     }
+                    System.out.println(options);
                 }
                 return new Select(id, name, visible, obligatory, page, options);
             }else{
@@ -102,7 +105,6 @@ public class DeserializerProperty extends StdDeserializer<Property> {
     private boolean isPresent(JsonNode jsonNode, String text) {
         try {
             if (jsonNode.findParent(text) != null) {
-                System.out.println(jsonNode.findParent(text));
                 return true;
             } else {
                 throw new NullPointerException();

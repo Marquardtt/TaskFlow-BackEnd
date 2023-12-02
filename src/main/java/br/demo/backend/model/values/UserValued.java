@@ -27,7 +27,9 @@ public class UserValued extends Value{
         super(id);
         this.users = users;
     }
-
+    public UserValued(Long id){
+        super(id);
+    }
     @Override
     public Object getValue(){
         return this.users;

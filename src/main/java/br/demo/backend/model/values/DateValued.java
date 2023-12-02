@@ -15,13 +15,13 @@ import java.time.LocalDateTime;
 @Table(name = "tb_date_valued")
 public class DateValued extends Value{
 
-    private LocalDateTime data;
-    public DateValued(Long id, LocalDateTime data){
+    private LocalDateTime dateTime;
+    public DateValued(Long id, LocalDateTime dateTime){
         super(id);
-        this.data = data;
+        this.dateTime = dateTime;
     }
     @Override
     public Object getValue(){
-        return this.data;
+        return this.dateTime;
     }
 }

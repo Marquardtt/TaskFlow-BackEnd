@@ -14,15 +14,15 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "tb_time_valued")
 public class TimeValued extends Value {
-    private LocalTime tempo;
+    private LocalTime time;
 
-    public TimeValued(Long id, LocalTime tempo) {
+    public TimeValued(Long id, LocalTime time) {
         super(id);
-        this.tempo = tempo;
+        this.time = time;
     }
 
     @Override
     public Object getValue() {
-        return this.tempo;
+        return this.time;
     }
 }

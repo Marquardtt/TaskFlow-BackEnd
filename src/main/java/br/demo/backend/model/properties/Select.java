@@ -17,7 +17,7 @@ import java.util.Collection;
 @Entity
 @Table(name = "tb_select")
 public class Select extends Property {
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Option> options;
 
 
