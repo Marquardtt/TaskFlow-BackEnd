@@ -36,67 +36,70 @@ public class DeserializerProperty extends StdDeserializer<Property> {
             System.out.println(e.getMessage());
         }
 
-        if (isPresent("type")) {
+        if (isPresent(jsonNode, "type")) {
             TypeOfProperty type = TypeOfProperty.valueOf(jsonNode.get("type").asText());
             Page page = null;
             String name = null;
             Boolean visible = null;
             Boolean obligatory = null;
-
-            if (isPresent("name")) {
+            if (isPresent(jsonNode, "name")) {
                 name = jsonNode.get("name").asText();
             }
-            if (isPresent("visible")) {
+            if (isPresent(jsonNode, "visible")) {
                 visible = jsonNode.get("visible").asBoolean();
             }
-            if (isPresent("obligatory")) {
+            if (isPresent(jsonNode, "obligatory")) {
                 obligatory = jsonNode.get("obligatory").asBoolean();
             }
-            if (isPresent("page")) {
+            if (isPresent(jsonNode, "page")) {
                 JsonNode pageJson = jsonNode.get("page");
-                page = new Page(pageJson.get("id").asLong());
+                if(isPresent(pageJson, "id")){
+                    page = new Page(pageJson.get("id").asLong());
+                }
             }
+
             if(type.equals(TypeOfProperty.DATE)){
                 Boolean canBePass = null;
                 Boolean includesHours = null;
                 Boolean term = null;
                 Boolean scheduling = null;
-                if (isPresent("canBePass")) {
+                if (isPresent(jsonNode, "canBePass")) {
                     canBePass = jsonNode.get("canBePass").asBoolean();
                 }
-                if (isPresent("includesHours")) {
+                if (isPresent(jsonNode, "includesHours")) {
                     includesHours = jsonNode.get("includesHours").asBoolean();
                 }
-                if (isPresent("term")) {
+                if (isPresent(jsonNode, "term")) {
                     term = jsonNode.get("term").asBoolean();
                 }
-                if (isPresent("scheduling")) {
+                if (isPresent(jsonNode, "scheduling")) {
                     scheduling = jsonNode.get("scheduling").asBoolean();
                 }
                 return new Date(id, name, visible, obligatory, page, canBePass, includesHours, term, scheduling);
             }
             else if (type.equals(TypeOfProperty.SELECT)) {
-                if(isPresent("options")){
+                List<Option> options = new ArrayList<>();
+                if(isPresent(jsonNode, "options")){
                     List<JsonNode> optionsJson = jsonNode.findValues("options");
-                    List<Option> options = new ArrayList<>();
                     for(JsonNode optionJson : optionsJson){
-                        options.add(new Option(optionJson.get("id").asLong()));
+                        if(isPresent(optionJson, "id")){
+                            options.add(new Option(optionJson.get("id").asLong()));
+                        }
                     }
-                    return new Select(id, name, visible, obligatory, page, options);
                 }
+                return new Select(id, name, visible, obligatory, page, options);
             }else{
-                if(isPresent("maximum")){
-                    Integer maxSize = jsonNode.get("maximum").asInt();
-                    return new Limited(id, name, visible, obligatory, page, maxSize);
+                Integer maxSize = null;
+                if(isPresent(jsonNode, "maximum")){
+                    maxSize = jsonNode.get("maximum").asInt();
                 }
+                return new Limited(id, name, visible, obligatory, page, maxSize);
             }
-
         }
         throw new IllegalArgumentException("Invalid type of property");
-
     }
 
-    private boolean isPresent(String text) {
+    private boolean isPresent(JsonNode jsonNode, String text) {
         try {
             if (jsonNode.findParent(text) != null) {
                 System.out.println(jsonNode.findParent(text));
