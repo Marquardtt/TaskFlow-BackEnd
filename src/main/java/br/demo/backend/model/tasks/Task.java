@@ -5,6 +5,7 @@ import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.values.Value;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,16 +25,15 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
-
     private String name;
+    private Boolean deleted;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<TaskValue> properties;
 
     @OneToMany
     private Collection<TaskPage> pages;
 
-    private Boolean deleted;
 
     @OneToMany(cascade = CascadeType.ALL)
     Collection<Log> logs;

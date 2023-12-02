@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,16 @@ import java.util.Collection;
 @Entity
 @Table(name = "tb_multi_option_valued")
 public class MultiOptionValued extends Value{
+
     @ManyToMany
-    private Collection<Option> value;
+    private List<Option> multiOptions;
+
+    public MultiOptionValued(Long id, List<Option> archive){
+        super(id);
+        this.multiOptions = archive;
+    }
+    @Override
+    public Object getValue(){
+        return this.multiOptions;
+    }
 }

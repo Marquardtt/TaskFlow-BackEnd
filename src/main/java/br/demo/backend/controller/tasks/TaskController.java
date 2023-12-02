@@ -15,9 +15,9 @@ import java.util.Collection;
 public class TaskController {
     private TaskService taskService;
 
-    @PostMapping
-    public void insert(@RequestBody Page page, @RequestBody User user){
-        taskService.save(page, user);
+    @PostMapping("/{userId}")
+    public void insert(@RequestBody Page page, @PathVariable Long userId){
+        taskService.save(page, userId);
     }
 
     @PutMapping

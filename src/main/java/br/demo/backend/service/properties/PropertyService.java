@@ -2,8 +2,11 @@ package br.demo.backend.service.properties;
 
 
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.properties.PropertyPostDTO;
+import br.demo.backend.model.properties.PropertyPutDTO;
 import br.demo.backend.repository.properties.PropertyRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -22,11 +25,17 @@ public class PropertyService {
         return propertyRepository.findById(id).get();
     }
 
-    public void save(Property property) {
+    public void save(PropertyPostDTO propertyPostDTO) {
+        Property property = new Property();
+        BeanUtils.copyProperties(propertyPostDTO, property);
         propertyRepository.save(property);
-
     }
 
+    public void save(PropertyPutDTO propertyPostDTO) {
+        Property property = new Property();
+        BeanUtils.copyProperties(propertyPostDTO, property);
+        propertyRepository.save(property);
+    }
     public void delete(Long id) {
         propertyRepository.deleteById(id);
     }

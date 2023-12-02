@@ -1,5 +1,7 @@
 package br.demo.backend.model;
 
+import br.demo.backend.model.relations.UserGroup;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,10 +26,10 @@ public class User {
     private String phone;
     private String description;
     private Integer points;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
     @ManyToMany
-    private Collection<Group> groups;
+    private Collection<UserGroup> groups;
     @OneToMany
     private Collection<Project> project;
     public User (Long id){

@@ -3,27 +3,19 @@ package br.demo.backend.model.properties;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.SuperBuilder;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "tb_property")
-@Inheritance(strategy = InheritanceType.JOINED)
-public class Property {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class PropertyPutDTO {
     private Long id;
     private String name;
     private Boolean visible;
     private Boolean obligatory;
-    @Enumerated(value = EnumType.STRING)
     private TypeOfProperty type;
-    @ManyToOne
     private Page page;
+    private Project project;
 }

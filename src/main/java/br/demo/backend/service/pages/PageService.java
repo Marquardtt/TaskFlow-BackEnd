@@ -1,6 +1,7 @@
 package br.demo.backend.service.pages;
 
 
+import br.demo.backend.model.Project;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.pages.PagePostDTO;
 import br.demo.backend.model.properties.Property;
@@ -31,7 +32,8 @@ public class PageService {
     }
 
     public void save(PagePostDTO pagePostDTO) {
-        ArrayList<Property> properties = new ArrayList<>(pagePostDTO.getProject().getProperties());
+        Project project = projectRepository.findById(pagePostDTO.getProject().getId()).get();
+        ArrayList<Property> properties = new ArrayList<>(project.getProperties());
         Page page = new Page();
         BeanUtils.copyProperties(pagePostDTO, page);
         page.setPropertyOrdering(properties.get(0));

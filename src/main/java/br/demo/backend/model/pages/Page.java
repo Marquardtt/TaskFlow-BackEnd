@@ -6,6 +6,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.enums.TypeOfPage;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,8 +27,6 @@ public class Page {
     private String name;
     @Enumerated(value = EnumType.STRING)
     private TypeOfPage type ;
-    @ManyToOne
-    private Project project;
     @OneToMany
     private Collection<TaskPage> tasks;
     @ManyToMany

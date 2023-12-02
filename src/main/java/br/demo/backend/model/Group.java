@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+import br.demo.backend.model.relations.UserGroup;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,6 @@ public class Group {
     private String description;
 
     @ManyToMany
-    private Collection<User> users;
+    private Collection<UserGroup> users;
 
 }

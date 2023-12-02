@@ -1,9 +1,10 @@
-package br.demo.backend.repository;
+package br.demo.backend.repository.values;
 
 import br.demo.backend.model.Configuration;
+import br.demo.backend.model.values.TextValued;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ConfigurationRepository extends JpaRepository<Configuration, Long> {
+public interface TextValuedRepository extends JpaRepository<TextValued, Long> {
 }

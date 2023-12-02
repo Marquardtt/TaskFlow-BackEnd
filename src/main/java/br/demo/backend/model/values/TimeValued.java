@@ -13,6 +13,16 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_time_valued")
-public class TimeValued extends Value{
-    private LocalTime value;
+public class TimeValued extends Value {
+    private LocalTime tempo;
+
+    public TimeValued(Long id, LocalTime tempo) {
+        super(id);
+        this.tempo = tempo;
+    }
+
+    @Override
+    public Object getValue() {
+        return this.tempo;
+    }
 }

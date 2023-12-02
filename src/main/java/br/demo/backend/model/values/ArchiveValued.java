@@ -12,5 +12,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_archive_valued")
 public class ArchiveValued extends Value{
-    String value;
+    private String archive;
+
+    public ArchiveValued(Long id, String archive){
+        super(id);
+        this.archive = archive;
+    }
+
+    @Override
+    public Object getValue(){
+        return this.archive;
+    }
 }

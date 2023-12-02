@@ -21,7 +21,7 @@ public class Select extends Property {
 
 
     public Select(Long id, String name, Boolean visible, Boolean obligatory, Collection<Option> options) {
-        super(id, name, visible, obligatory, TypeOfProperty.SELECT, null, null);
+        super(id, name, visible, obligatory, TypeOfProperty.SELECT, null);
         this.options = options;
     }
 

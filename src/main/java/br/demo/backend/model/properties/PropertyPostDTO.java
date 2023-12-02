@@ -12,18 +12,11 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "tb_property")
-@Inheritance(strategy = InheritanceType.JOINED)
-public class Property {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class PropertyPostDTO {
     private String name;
     private Boolean visible;
     private Boolean obligatory;
-    @Enumerated(value = EnumType.STRING)
     private TypeOfProperty type;
-    @ManyToOne
     private Page page;
+    private Project project;
 }

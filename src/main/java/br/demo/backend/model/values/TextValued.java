@@ -12,5 +12,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_text_valued")
 public class TextValued extends Value {
-    private String value;
+    private String text;
+
+    public TextValued(Long id, String text){
+        super(id);
+        this.text = text;
+    }
+    @Override
+    public Object getValue(){
+        return this.text;
+    }
+
 }

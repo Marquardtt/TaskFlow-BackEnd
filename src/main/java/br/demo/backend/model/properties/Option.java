@@ -16,4 +16,8 @@ public class Option {
     private Long id;
     private String name;
     private String color;
+
+    public Option(Long id){
+        this.id = id;
+    }
 }

@@ -11,23 +11,12 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "tb_project")
-public class Project {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ProjectDTO {
+
     private String name;
     private String description;
     private Date date;
     private String picture;
-
-    @OneToMany
-    private Collection<Group> groups;
-    @ManyToOne
     private User owner;
-    @OneToMany(cascade = CascadeType.ALL)
-    private Collection<Page> pages;
-    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Property> properties;
 }

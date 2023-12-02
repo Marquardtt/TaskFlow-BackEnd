@@ -8,13 +8,16 @@ import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.properties.relations.Multivalued;
-import br.demo.backend.model.properties.relations.Univalued;
-import br.demo.backend.model.properties.relations.UserValue;
+import br.demo.backend.model.properties.Select;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.model.values.*;
+import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
+import br.demo.backend.repository.tasks.TaskValueRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,9 @@ public class TaskService {
 
     TaskRepository taskRepository;
     UserRepository userRepository;
+    TaskValueRepository taskValueRepository;
+    PageRepository pageRepositorry;
+    ProjectRepository projectRepository;
 
     public Collection<Task> findAll() {
         return taskRepository.findAll();
@@ -37,36 +43,49 @@ public class TaskService {
         return taskRepository.findById(id).get();
     }
 
-    public Task save(Page page, User user) {
+    public Task save(Page pagePost, Long userId) {
+        Page page = pageRepositorry.findById(pagePost.getId()).get();
+        User user = new User(userId);
         Task taskEmpty = taskRepository.save(new Task());
-
         Collection<Property> propertiesPage = page.getProperties();
-
-        Project project = page.getProject();
+        Project project = projectRepository.findByPagesContaining(page);
         Collection<Property> propertiesProject = project.getProperties();
 
-
+        taskEmpty.setProperties(new HashSet<>());
         setTaskProperties(propertiesPage, taskEmpty);
         setTaskProperties(propertiesProject, taskEmpty);
 
+        taskEmpty.setLogs(new HashSet<>());
         taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
 
+        System.out.println(taskEmpty);
         return taskRepository.save(taskEmpty);
     }
 
     private void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
         for (Property p : properties) {
-            if (p.getType().equals(TypeOfProperty.USER)) {
-                UserValue userValue = new UserValue(taskEmpty.getId(), p.getId(), new HashSet<>(), taskEmpty, p);
-                taskEmpty.getUserProperties().add(userValue);
-            } else if (p.getType().equals(TypeOfProperty.CHECKBOX) ||
-            p.getType().equals(TypeOfProperty.TAG)) {
-                Multivalued multivalued = new Multivalued(taskEmpty.getId(), p.getId(), new ArrayList<>(), taskEmpty, p);
-                taskEmpty.getMultiProperties().add(multivalued);
-            } else {
-                Univalued univalued = new Univalued(taskEmpty.getId(), p.getId(), "", taskEmpty, p);
-                taskEmpty.getUniProperties().add(univalued);
+            Value value = null;
+            if(p.getType() == TypeOfProperty.SELECT){
+//                value = new UniOptionValued((new ArrayList<>(((Select) p).getOptions())).get(0));
+                value = new UniOptionValued();
+            }else if(p.getType() == TypeOfProperty.RADIO || p.getType() == TypeOfProperty.CHECKBOX || p.getType() == TypeOfProperty.TAG){
+                value = new MultiOptionValued();
+            }else if(p.getType() == TypeOfProperty.TEXT){
+                value = new TextValued();
+            } else if (p.getType() == TypeOfProperty.DATE) {
+                value = new DateValued();
+            } else if (p.getType() == TypeOfProperty.NUMBER || p.getType() == TypeOfProperty.PROGRESS) {
+                value = new NumberValued();
+            } else if (p.getType() == TypeOfProperty.TIME) {
+                value = new TimeValued();
+            } else if (p.getType() == TypeOfProperty.ARCHIVE) {
+                value = new ArchiveValued();
             }
+            else if (p.getType() == TypeOfProperty.USER) {
+                value = new UserValued();
+            }
+            TaskValue taskValue = new TaskValue(null, p, value);
+            taskEmpty.getProperties().add(taskValue);
         }
     }
 
@@ -92,13 +111,14 @@ public class TaskService {
 
     public Collection<Task> getTasksToday(Long id) {
         User user = userRepository.findById(id).get();
-        Collection<Task> tasks = taskRepository.findTasksByUserPropertiesContaining(user);
+        TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
+        Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
         Collection<Task> tasksToday = new ArrayList<>();
         for(Task t : tasks){
-            for(Univalued u : t.getUniProperties()){
-                Property p = u.getProperty();
+            for(TaskValue tp : t.getProperties()){
+                Property p = tp.getProperty();
                 if(p.getType() == TypeOfProperty.DATE &&((Date)p).getScheduling()){
-                    if(LocalDate.parse(u.getValue()).equals(LocalDate.now())){
+                    if(tp.getValue().getValue().equals(LocalDate.now())){
                         tasksToday.add(t);
                     }
                 }

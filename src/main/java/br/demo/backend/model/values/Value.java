@@ -1,7 +1,6 @@
 package br.demo.backend.model.values;
 
-import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.tasks.Task;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +12,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_value")
 @Inheritance(strategy = InheritanceType.JOINED)
+@JsonDeserialize(using = DeserializerValue.class)
 public abstract class Value {
     @Id
     @GeneratedValue
     private Long id;
+
+    public abstract Object getValue();
 }

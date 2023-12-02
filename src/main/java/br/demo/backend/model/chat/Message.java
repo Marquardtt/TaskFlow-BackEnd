@@ -1,6 +1,7 @@
 package br.demo.backend.model.chat;
 
 import br.demo.backend.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

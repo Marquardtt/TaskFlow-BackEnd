@@ -3,6 +3,7 @@ import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
 import br.demo.backend.model.relations.ids.UserGroupId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

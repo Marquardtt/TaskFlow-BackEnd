@@ -12,5 +12,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_number_valued")
 public class NumberValued extends Value{
-    private Integer value;
+    private Integer number;
+
+    public NumberValued(Long id, Integer number){
+        super(id);
+        this.number = number;
+    }
+    @Override
+    public Object getValue(){
+        return this.number;
+    }
 }

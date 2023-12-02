@@ -10,5 +10,4 @@ import org.springframework.stereotype.Repository;
 public interface SelectRepository extends JpaRepository<Select, Long> {
 
     public Integer countByPage(Page page);
-    public Integer countByProject(Project project);
 }
