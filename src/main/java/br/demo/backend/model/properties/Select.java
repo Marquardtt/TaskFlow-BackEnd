@@ -1,6 +1,7 @@
 package br.demo.backend.model.properties;
 
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Page;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -22,6 +23,10 @@ public class Select extends Property {
 
     public Select(Long id, String name, Boolean visible, Boolean obligatory, Collection<Option> options) {
         super(id, name, visible, obligatory, TypeOfProperty.SELECT, null);
+        this.options = options;
+    }
+    public Select(Long id, String name, Boolean visible, Boolean obligatory,Page page, Collection<Option> options) {
+        super(id, name, visible, obligatory, TypeOfProperty.SELECT, page);
         this.options = options;
     }
 

@@ -1,7 +1,8 @@
 package br.demo.backend.model.properties;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Page;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -16,4 +17,13 @@ public class Date extends Property {
     private Boolean includesHours;
     private Boolean term;
     private Boolean scheduling;
+
+    public Date(Long id, String name, Boolean visible, Boolean obligatory, Page page, Boolean canBePass,
+                Boolean includesHours, Boolean term, Boolean scheduling){
+        super(id, name, visible, obligatory, TypeOfProperty.DATE, page);
+        this.canBePass = canBePass;
+        this.includesHours = includesHours;
+        this.term = term;
+        this.scheduling = scheduling;
+    }
 }

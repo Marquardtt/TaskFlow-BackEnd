@@ -3,7 +3,9 @@ package br.demo.backend.model.properties;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.values.DeserializerValue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.Data;
@@ -15,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "tb_property")
 @Inheritance(strategy = InheritanceType.JOINED)
+@JsonDeserialize(using = DeserializerProperty.class)
 public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

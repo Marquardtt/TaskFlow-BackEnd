@@ -33,4 +33,8 @@ public class Page {
     private Collection<Property> properties;
     @ManyToOne
     private Property propertyOrdering;
+
+    public Page(Long id){
+        this.id = id;
+    }
 }
