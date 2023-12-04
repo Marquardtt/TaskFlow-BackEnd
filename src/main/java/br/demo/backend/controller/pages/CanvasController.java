@@ -20,7 +20,7 @@ public class CanvasController {
 
     @PutMapping
     public void upDate(@RequestBody Canvas canvas){
-        canvasService.save(canvas);
+        canvasService.update(canvas);
     }
 
     @GetMapping("/{id}")

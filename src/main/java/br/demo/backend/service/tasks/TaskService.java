@@ -52,10 +52,8 @@ public class TaskService {
         User user = new User(userId);
         Task taskEmpty = taskRepository.save(new Task());
 
-        //Talvez tenha que assegurar que page tem properties
         Collection<Property> propertiesPage = page.getProperties();
         Project project = projectRepository.findByPagesContaining(page);
-        //Talvez tenha que assegurar que project tem properties
         Collection<Property> propertiesProject = project.getProperties();
 
         taskEmpty.setProperties(new HashSet<>());

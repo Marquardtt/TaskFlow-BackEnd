@@ -20,7 +20,7 @@ public class CommonPageController {
 
     @PutMapping
     public void upDate(@RequestBody CommonPage page) {
-        commonPageService.save(page);
+        commonPageService.update(page);
     }
 
     @GetMapping("/{id}")

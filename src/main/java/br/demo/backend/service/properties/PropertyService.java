@@ -4,13 +4,20 @@ package br.demo.backend.service.properties;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Canvas;
+import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
+import br.demo.backend.repository.tasks.TaskRepository;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +31,7 @@ public class PropertyService {
     private PropertyRepository propertyRepository;
     private ProjectRepository projectRepository;
     private PageRepository pageRepository;
+    private TaskRepository taskRepository;
 
     public void update(Property property) {
         propertyRepository.save(property);
@@ -76,4 +84,26 @@ public class PropertyService {
         }
         return false;
     }
+
+    public void setRelationsBetweenPropAndTasks(Project project, Property property){
+        for(Page page : project.getPages()){
+            setRelationsBetweenPropAndTasks(page, property);
+        }
+    }
+
+    public void setRelationsBetweenPropAndTasks(Page page, Property property){
+        if(page.getType().equals(TypeOfPage.CANVAS)){
+            for(TaskCanvas taskCanvas : ((Canvas)page).getTasks()){
+                Task task = taskCanvas.getTask();
+                task.getProperties().add(new TaskValue(null, property, null));
+                taskRepository.save(task);
+            }
+        }else{
+            for(Task task : ((CommonPage)page).getTasks()){
+                task.getProperties().add(new TaskValue(null, property, null));
+                taskRepository.save(task);
+            }
+        }
+    }
+
 }

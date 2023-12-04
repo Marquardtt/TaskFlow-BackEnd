@@ -4,8 +4,10 @@ package br.demo.backend.service;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.ProjectRepository;
+import br.demo.backend.service.properties.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.HashSet;
 public class ProjectService {
 
     private ProjectRepository projectRepository;
+    private PropertyService propertyService;
 
     public Collection<Project> findAll() {
         return projectRepository.findAll();
@@ -29,7 +32,24 @@ public class ProjectService {
     }
 
     public void update(Project project) {
+        Project oldProject = projectRepository.findById(project.getId()).get();
+
+        for(Property propNew : project.getProperties()){
+            if(!testIfAlredyExistsProperty(propNew, oldProject)) {
+                propertyService.setRelationsBetweenPropAndTasks(project, propNew);
+            }
+        }
+
         projectRepository.save(project);
+    }
+
+    private Boolean testIfAlredyExistsProperty(Property property, Project project){
+        for(Property prop : project.getProperties()){
+            if(prop.getId().equals(property.getId())){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void save(Project project) {
