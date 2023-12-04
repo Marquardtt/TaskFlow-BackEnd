@@ -10,7 +10,5 @@ import java.util.Collection;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    public Integer countAllByChatAndVisualized(Chat c, Boolean v);
-    public Collection<Message> findAllByChat_Id(Long id);
 
 }

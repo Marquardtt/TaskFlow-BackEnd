@@ -2,6 +2,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.ProjectRepository;
@@ -37,7 +38,7 @@ public class ProjectService {
         options.add(new Option(null, "Doing", "#F7624B"));
         options.add(new Option(null, "Done", "#F04A94"));
         project.setProperties(new HashSet<>());
-        Select select = new Select(null, "Stats", true, false, options);
+        Select select = new Select(null, "Stats", true, false, options, TypeOfProperty.SELECT);
         project.getProperties().add(select);
         projectRepository.save(project);
     }

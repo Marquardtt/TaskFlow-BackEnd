@@ -30,6 +30,7 @@ public class DeserializerProperty extends StdDeserializer<Property> {
 
         Long id = null;
         jsonNode = deserializationContext.readTree(jsonParser);
+        System.out.println(jsonNode);
         try {
             id = jsonNode.get("id").asLong();
         } catch (Exception e) {
@@ -37,6 +38,7 @@ public class DeserializerProperty extends StdDeserializer<Property> {
         }
 
         if (isPresent(jsonNode, "type")) {
+            System.out.println("AAAAAAAAAAAAAAAA");
             TypeOfProperty type = TypeOfProperty.valueOf(jsonNode.get("type").asText());
             String name = null;
             Boolean visible = null;
@@ -75,22 +77,21 @@ public class DeserializerProperty extends StdDeserializer<Property> {
                     type.equals(TypeOfProperty.CHECKBOX)) {
                 List<Option> options = new ArrayList<>();
                 if(isPresent(jsonNode, "options")){
-                    List<JsonNode> optionsJson = jsonNode.findValues("options");
+                    JsonNode optionsJson =jsonNode.get("options");
                     for(JsonNode optionJson : optionsJson){
                         if(isPresent(optionJson, "id")){
                             options.add(new Option(optionJson.get("id").asLong()));
                         }
                     }
-                    System.out.println(options);
                 }
-                return new Select(id, name, visible, obligatory, options);
-            }else{
+                return new Select(id, name, visible, obligatory, options, type);
+            }
                 Integer maxSize = null;
                 if(isPresent(jsonNode, "maximum")){
                     maxSize = jsonNode.get("maximum").asInt();
                 }
-                return new Limited(id, name, visible, obligatory, maxSize);
-            }
+                return new Limited(id, name, visible, obligatory, maxSize, type);
+
         }
         throw new IllegalArgumentException("Invalid type of property");
     }

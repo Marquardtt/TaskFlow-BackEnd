@@ -48,11 +48,10 @@ public class DeserializePage extends StdDeserializer<Page> {
                 name = jsonNode.get("name").asText();
             }
             if (isPresent(jsonNode, "properties")) {
-                List<JsonNode> propsJsN = new ArrayList<>();
-                jsonNode.findValues("properties", propsJsN);
+                JsonNode propsJsN = jsonNode.get("properties");
                 for (JsonNode jsN : propsJsN) {
                     DeserializerProperty dsP = new DeserializerProperty();
-                    properties.add(dsP.deserialize(jsonParser, deserializationContext));
+                    properties.add(dsP.deserialize(jsN.traverse(), deserializationContext));
                 }
             }
             if (type.equals(TypeOfPage.CANVAS)) {
@@ -78,8 +77,7 @@ public class DeserializePage extends StdDeserializer<Page> {
             Property propertyOrdering = null;
 
             if (isPresent(jsonNode, "tasks")) {
-                List<JsonNode> tasksJsN = new ArrayList<>();
-                jsonNode.findValues("tasks", tasksJsN);
+                JsonNode tasksJsN = jsonNode.get("tasks");
                 for (JsonNode jsN : tasksJsN) {
                     Task task = new Task(jsN.get("id").asLong());
                     tasks.add(task);
@@ -87,8 +85,13 @@ public class DeserializePage extends StdDeserializer<Page> {
             }
             if (isPresent(jsonNode, "propertyOrdering")) {
                 JsonNode propOrderingJsN = jsonNode.get("propertyOrdering");
-                DeserializerProperty dsP = new DeserializerProperty();
-                propertyOrdering = dsP.deserialize(jsonParser, deserializationContext);
+                //Esse try catch deverá ser mais específico
+                try{
+                    DeserializerProperty dsP = new DeserializerProperty();
+                    propertyOrdering = dsP.deserialize(propOrderingJsN.traverse(), deserializationContext);
+                }catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
             }
             return new CommonPage(id, name, type, properties, tasks, propertyOrdering);
         }

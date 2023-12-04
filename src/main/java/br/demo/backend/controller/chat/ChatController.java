@@ -34,13 +34,13 @@ public class ChatController {
     public Collection<Chat> findByName(@PathVariable String name){
         return chatService.findByName(name);
     }
-    @GetMapping("/private/{id}")
-    public Collection<Chat> findAllPrivate( @PathVariable Long id){
-        return chatService.findAllPrivate(id);
+    @GetMapping("/private/{userId}")
+    public Collection<Chat> findAllPrivate( @PathVariable Long userId){
+        return chatService.findAllPrivate(userId);
     }
-    @GetMapping("/group/{id}")
-    public Collection<Chat> findAllGroup( @PathVariable Long id){
-        return chatService.findAllGroup(id);
+    @GetMapping("/group/{userId}")
+    public Collection<Chat> findAllGroup( @PathVariable Long userId){
+        return chatService.findAllGroup(userId);
     }
 
     @DeleteMapping("/{id}")

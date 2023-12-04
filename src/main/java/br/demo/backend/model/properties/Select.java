@@ -19,8 +19,8 @@ public class Select extends Property {
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Option> options;
 
-    public Select(Long id, String name, Boolean visible, Boolean obligatory, Collection<Option> options) {
-        super(id, name, visible, obligatory, TypeOfProperty.SELECT);
+    public Select(Long id, String name, Boolean visible, Boolean obligatory, Collection<Option> options, TypeOfProperty type) {
+        super(id, name, visible, obligatory, type);
         this.options = options;
     }
 

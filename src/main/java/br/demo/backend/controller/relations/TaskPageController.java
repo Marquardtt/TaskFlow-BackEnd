@@ -34,7 +34,7 @@ public class TaskPageController {
         return taskPageService.findAll();
     }
 
-    @DeleteMapping("/id}")
+    @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id ){
         taskPageService.delete(id);
     }

@@ -18,7 +18,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonDeserialize(using = DeserializerProperty.class)
+@JsonDeserialize(using = DeserializePage.class)
 public abstract class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

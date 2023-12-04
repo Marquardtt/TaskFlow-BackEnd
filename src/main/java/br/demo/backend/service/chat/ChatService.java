@@ -7,11 +7,11 @@ import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfChat;
 import br.demo.backend.repository.GroupRepository;
-import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -20,7 +20,6 @@ import java.util.HashSet;
 public class ChatService {
 
     private ChatRepository chatRepository;
-    private GroupRepository groupRepository;
 
     public Collection<Chat> findAllPrivate(Long userId) {
         Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.PRIVATE);
@@ -64,19 +63,7 @@ public class ChatService {
         return chatRepository.findById(id).get();
     }
 
-    public void save(Chat chat, Long userId) {
-        if(chat.getType().equals(TypeOfChat.GROUP)) {
-            Group group = groupRepository.findGroupByUsers(chat.getUsers());
-            chat.setName(group.getName());
-            chat.setPicture(group.getPicture());
-        }else{
-            for(User user : chat.getUsers()){
-                if(!user.getId().equals(userId)){
-                    chat.setName(user.getName());
-                    chat.setPicture(user.getPicture());
-                }
-            }
-        }
+    public void save(Chat chat) {
         chatRepository.save(chat);
     }
 
