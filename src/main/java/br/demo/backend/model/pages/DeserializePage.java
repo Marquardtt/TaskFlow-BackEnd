@@ -84,11 +84,9 @@ public class DeserializePage extends StdDeserializer<Page> {
             }
             if (isPresent(jsonNode, "propertyOrdering")) {
                 JsonNode propOrderingJsN = jsonNode.get("propertyOrdering");
-                try{
+                if(!propOrderingJsN.isNull()){
                     DeserializerProperty dsP = new DeserializerProperty();
                     propertyOrdering = dsP.deserialize(propOrderingJsN.traverse(), deserializationContext);
-                }catch (Exception e){
-                    System.out.println(e.getMessage());
                 }
             }
             return new CommonPage(id, name, type, properties, tasks, propertyOrdering);
