@@ -19,7 +19,7 @@ import java.util.Collection;
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonDeserialize(using = DeserializePage.class)
-public abstract class Page {
+public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -58,8 +58,7 @@ public class DeserializePage extends StdDeserializer<Page> {
                 Collection<TaskCanvas> tasks = new HashSet<>();
                 String draw = null;
                 if (isPresent(jsonNode, "tasks")) {
-                    List<JsonNode> tasksJsN = new ArrayList<>();
-                    jsonNode.findValues("tasks", tasksJsN);
+                    JsonNode tasksJsN = jsonNode.get("tasks");
                     for (JsonNode jsN : tasksJsN) {
                         Double x = jsN.get("x").asDouble();
                         Double y = jsN.get("y").asDouble();
@@ -85,7 +84,6 @@ public class DeserializePage extends StdDeserializer<Page> {
             }
             if (isPresent(jsonNode, "propertyOrdering")) {
                 JsonNode propOrderingJsN = jsonNode.get("propertyOrdering");
-                //Esse try catch deverá ser mais específico
                 try{
                     DeserializerProperty dsP = new DeserializerProperty();
                     propertyOrdering = dsP.deserialize(propOrderingJsN.traverse(), deserializationContext);

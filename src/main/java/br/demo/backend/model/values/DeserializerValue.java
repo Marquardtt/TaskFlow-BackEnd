@@ -56,7 +56,7 @@ public class DeserializerValue extends StdDeserializer<Value> {
             String jsonValue = jsonNode.get("archive").asText();
             return new ArchiveValued(id, jsonValue);
         } else if (isPresent(jsonNode, "users")) {
-            List<JsonNode> usersJSON = jsonNode.findValues("users");
+            JsonNode usersJSON = jsonNode.get("users");
             List<User> users = new ArrayList<>();
             for (JsonNode user : usersJSON) {
                 if (isPresent(user, "id")) {
@@ -66,14 +66,14 @@ public class DeserializerValue extends StdDeserializer<Value> {
             }
             return new UserValued(id, users);
         } else if (isPresent(jsonNode, "uniOption")) {
-            JsonNode jsonValue = jsonNode.findValue("uniOption");
+            JsonNode jsonValue = jsonNode.get("uniOption");
             Option option = null;
             if (isPresent(jsonValue, "id")) {
                 option = new Option(jsonValue.get("id").asLong());
             }
             return new UniOptionValued(id, option);
         }
-        List<JsonNode> multiJSON = jsonNode.findValues("multiOptions");
+        JsonNode multiJSON = jsonNode.get("multiOptions");
         List<Option> options = new ArrayList<>();
         for (JsonNode option : multiJSON) {
             if (isPresent(option, "id")) {

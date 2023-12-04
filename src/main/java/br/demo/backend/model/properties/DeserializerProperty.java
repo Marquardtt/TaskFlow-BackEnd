@@ -30,7 +30,6 @@ public class DeserializerProperty extends StdDeserializer<Property> {
 
         Long id = null;
         jsonNode = deserializationContext.readTree(jsonParser);
-        System.out.println(jsonNode);
         try {
             id = jsonNode.get("id").asLong();
         } catch (Exception e) {
@@ -38,7 +37,6 @@ public class DeserializerProperty extends StdDeserializer<Property> {
         }
 
         if (isPresent(jsonNode, "type")) {
-            System.out.println("AAAAAAAAAAAAAAAA");
             TypeOfProperty type = TypeOfProperty.valueOf(jsonNode.get("type").asText());
             String name = null;
             Boolean visible = null;

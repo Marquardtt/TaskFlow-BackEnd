@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "tb_property")
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonDeserialize(using = DeserializerProperty.class)
-public abstract class Property {
+public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
