@@ -2,7 +2,6 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.Project;
-import br.demo.backend.model.pages.PagePostDTO;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.ProjectRepository;
@@ -10,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -17,7 +17,7 @@ import java.util.HashSet;
 @AllArgsConstructor
 public class ProjectService {
 
-    ProjectRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     public Collection<Project> findAll() {
         return projectRepository.findAll();
@@ -28,12 +28,10 @@ public class ProjectService {
     }
 
     public void update(Project project) {
-        System.out.println(project);
         projectRepository.save(project);
     }
-    public void save(PagePostDTO projectPostDTO) {
-        Project project = new Project();
-        BeanUtils.copyProperties(projectPostDTO, project);
+
+    public void save(Project project) {
         HashSet<Option> options = new HashSet<>();
         options.add(new Option(null, "To-do", "#FF7A00"));
         options.add(new Option(null, "Doing", "#F7624B"));
@@ -41,6 +39,11 @@ public class ProjectService {
         project.setProperties(new HashSet<>());
         Select select = new Select(null, "Stats", true, false, options);
         project.getProperties().add(select);
+        projectRepository.save(project);
+    }
+
+    public void setVisualizedNow(Project project) {
+        project.setVisualizedAt(LocalDateTime.now());
         projectRepository.save(project);
     }
 

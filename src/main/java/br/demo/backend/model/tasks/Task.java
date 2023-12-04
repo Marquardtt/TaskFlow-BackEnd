@@ -2,15 +2,11 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
-import br.demo.backend.model.values.Value;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
 
 import java.util.Collection;
 
@@ -31,14 +27,13 @@ public class Task {
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<TaskValue> properties;
 
-    @OneToMany
-    private Collection<TaskPage> pages;
-
-
     @OneToMany(cascade = CascadeType.ALL)
     Collection<Log> logs;
 
     @OneToMany(cascade = CascadeType.ALL)
     Collection<Message> comments;
+    public Task(Long id){
+        this.id= id;
+    }
 
 }

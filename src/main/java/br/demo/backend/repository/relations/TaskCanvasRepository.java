@@ -1,9 +1,8 @@
 package br.demo.backend.repository.relations;
-
-import br.demo.backend.model.relations.PermissionProject;
+import br.demo.backend.model.relations.TaskCanvas;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserGroupRepository extends JpaRepository<PermissionProject, Long> {
+public interface TaskCanvasRepository extends JpaRepository<TaskCanvas, Long>{
 }

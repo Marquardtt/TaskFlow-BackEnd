@@ -1,8 +1,7 @@
 package br.demo.backend.controller.relations;
 
-import br.demo.backend.model.relations.ids.TaskPageId;
-import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.service.relations.TaskPageService;
+import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.service.relations.TaskCanvasService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,30 +12,30 @@ import java.util.Collection;
 @AllArgsConstructor
 @RequestMapping("/task-page")
 public class TaskPageController {
-    private TaskPageService taskPageService;
+    private TaskCanvasService taskPageService;
 
     @PostMapping
-    public void insert(@RequestBody TaskPage task){
+    public void insert(@RequestBody TaskCanvas task){
         taskPageService.save(task);
     }
 
     @PutMapping
-    public void upDate(@RequestBody TaskPage task){
+    public void upDate(@RequestBody TaskCanvas task){
         taskPageService.save(task);
     }
 
-    @GetMapping("/{taskId}/{propertyId}")
-    public TaskPage findOne(@PathVariable Long taskId, @PathVariable Long propertyId ){
-        return taskPageService.findOne(new TaskPageId(taskId, propertyId));
+    @GetMapping("/{id}")
+    public TaskCanvas findOne(@PathVariable Long id){
+        return taskPageService.findOne(id);
     }
 
     @GetMapping
-    public Collection<TaskPage> findAll(){
+    public Collection<TaskCanvas> findAll(){
         return taskPageService.findAll();
     }
 
-    @DeleteMapping("/{taskId}/{propertyId}")
-    public void delete(@PathVariable Long taskId,@PathVariable Long propertyId ){
-        taskPageService.delete(new TaskPageId(taskId, propertyId));
+    @DeleteMapping("/id}")
+    public void delete(@PathVariable Long id ){
+        taskPageService.delete(id);
     }
 }

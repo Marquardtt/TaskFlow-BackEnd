@@ -12,7 +12,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class PermissionService {
 
-    PermissionRepository permissionRepository;
+    private PermissionRepository permissionRepository;
 
     public Collection<Permission> findAll() {
         return permissionRepository.findAll();

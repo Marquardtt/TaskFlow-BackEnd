@@ -22,8 +22,6 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String value;
-    @ManyToOne
-    private Chat chat;
     @OneToOne
     private User user;
     private LocalDateTime dateTime;

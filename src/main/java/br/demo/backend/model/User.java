@@ -1,7 +1,6 @@
 package br.demo.backend.model;
 
-import br.demo.backend.model.relations.UserGroup;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.demo.backend.model.relations.PermissionProject;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,10 +27,8 @@ public class User {
     private Integer points;
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
-    @ManyToMany
-    private Collection<UserGroup> groups;
     @OneToMany
-    private Collection<Project> project;
+    private Collection<PermissionProject> projects;
     public User (Long id){
         this.id = id;
     }

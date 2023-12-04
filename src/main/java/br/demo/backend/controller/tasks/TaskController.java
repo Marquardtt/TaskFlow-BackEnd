@@ -15,9 +15,9 @@ import java.util.Collection;
 public class TaskController {
     private TaskService taskService;
 
-    @PostMapping("/{userId}")
-    public void insert(@RequestBody Page page, @PathVariable Long userId){
-        taskService.save(page, userId);
+    @PostMapping("/{pageId}/{userId}")
+    public void insert(@PathVariable Long pageId, @PathVariable Long userId){
+        taskService.save(pageId, userId);
     }
 
     @PutMapping
@@ -45,13 +45,21 @@ public class TaskController {
         return taskService.getTasksToday(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id , @RequestBody User user){
-        taskService.delete(id, user);
+    @DeleteMapping("/{id}/{userId}")
+    public void delete(@PathVariable Long id , @PathVariable Long userId){
+        taskService.delete(id, userId);
     }
 
-    @PutMapping("/redo")
-    public void redo(@PathVariable Long id , @RequestBody User user){
-        taskService.redo(id, user);
+    @PutMapping("/redo/{userId}")
+    public void redo(@PathVariable Long id , @PathVariable Long userId){
+        taskService.redo(id, userId);
     }
+
+    @GetMapping("/month/{month}/{pageId}/{propertyId}")
+    public Collection<Task> getTasksOfMonth(@PathVariable Integer month,
+                                            @PathVariable Long pageId,
+                                            @PathVariable Long propertyId){
+        return taskService.getTasksOfMonth(month, pageId, propertyId);
+    }
+
 }

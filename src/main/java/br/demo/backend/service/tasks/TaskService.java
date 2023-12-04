@@ -5,19 +5,22 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.repository.pages.CommonPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
+import br.demo.backend.repository.properties.DateRepository;
+import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
-import br.demo.backend.repository.tasks.TaskValueRepository;
+import br.demo.backend.repository.relations.TaskValueRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +32,12 @@ import java.util.*;
 @AllArgsConstructor
 public class TaskService {
 
-    TaskRepository taskRepository;
-    UserRepository userRepository;
-    TaskValueRepository taskValueRepository;
-    PageRepository pageRepositorry;
-    ProjectRepository projectRepository;
+    private TaskRepository taskRepository;
+    private UserRepository userRepository;
+    private TaskValueRepository taskValueRepository;
+    private PageRepository pageRepositorry;
+    private CommonPageRepository commonPageRepository;
+    private ProjectRepository projectRepository;
 
     public Collection<Task> findAll() {
         return taskRepository.findAll();
@@ -43,12 +47,15 @@ public class TaskService {
         return taskRepository.findById(id).get();
     }
 
-    public Task save(Page pagePost, Long userId) {
-        Page page = pageRepositorry.findById(pagePost.getId()).get();
+    public Task save(Long idpage, Long userId) {
+        Page page = pageRepositorry.findById(idpage).get();
         User user = new User(userId);
         Task taskEmpty = taskRepository.save(new Task());
+
+        //Talvez tenha que assegurar que page tem properties
         Collection<Property> propertiesPage = page.getProperties();
         Project project = projectRepository.findByPagesContaining(page);
+        //Talvez tenha que assegurar que project tem properties
         Collection<Property> propertiesProject = project.getProperties();
 
         taskEmpty.setProperties(new HashSet<>());
@@ -58,7 +65,6 @@ public class TaskService {
         taskEmpty.setLogs(new HashSet<>());
         taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
 
-        System.out.println(taskEmpty);
         return taskRepository.save(taskEmpty);
     }
 
@@ -66,8 +72,7 @@ public class TaskService {
         for (Property p : properties) {
             Value value = null;
             if(p.getType() == TypeOfProperty.SELECT){
-//                value = new UniOptionValued((new ArrayList<>(((Select) p).getOptions())).get(0));
-                value = new UniOptionValued();
+               value = new UniOptionValued();
             }else if(p.getType() == TypeOfProperty.RADIO || p.getType() == TypeOfProperty.CHECKBOX || p.getType() == TypeOfProperty.TAG){
                 value = new MultiOptionValued();
             }else if(p.getType() == TypeOfProperty.TEXT){
@@ -97,14 +102,15 @@ public class TaskService {
         taskRepository.save(task);
     }
 
-    public void delete(Long id, User user) {
-
+    public void delete(Long id, Long userId) {
+        User user = userRepository.findById(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
     }
-    public void redo(Long id, User user) {
+    public void redo(Long id, Long userId) {
         Task task = taskRepository.findById(id).get();
+        User user = userRepository.findById(userId).get();
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, user, LocalDateTime.now()));
     }
@@ -125,5 +131,21 @@ public class TaskService {
             }
         }
         return tasksToday;
+    }
+
+    public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId){
+        CommonPage page = commonPageRepository.findById(pageId).get();
+        Collection<Task> tasks = new ArrayList<>();
+        for(Task task : page.getTasks()){
+            for(TaskValue taskValue : task.getProperties()){
+                if(taskValue.getProperty().getId().equals(propertyId)){
+                    if(((LocalDateTime)taskValue.getValue()
+                            .getValue()).getMonthValue() == month){
+                        tasks.add(task);
+                    }
+                }
+            }
+        }
+        return tasks;
     }
 }

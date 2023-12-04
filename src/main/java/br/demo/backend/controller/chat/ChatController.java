@@ -22,9 +22,9 @@ public class ChatController {
     public void upDate(@RequestBody Chat chat){
         chatService.update(chat);
     }
-    @PutMapping("/visualized")
-    public void upDateToVisualized(@RequestBody Chat chat){
-        chatService.updateMessagesToVisualized(chat);
+    @PutMapping("/visualized/{userId}")
+    public void upDateToVisualized(@RequestBody Chat chat, @PathVariable Long userId){
+        chatService.updateMessagesToVisualized(chat, userId);
     }
     @GetMapping("/{id}")
     public Chat findOne(@PathVariable Long id){

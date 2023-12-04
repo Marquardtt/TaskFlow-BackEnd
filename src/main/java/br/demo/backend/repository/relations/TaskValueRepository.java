@@ -1,4 +1,4 @@
-package br.demo.backend.repository.tasks;
+package br.demo.backend.repository.relations;
 
 import br.demo.backend.model.Configuration;
 import br.demo.backend.model.enums.TypeOfProperty;

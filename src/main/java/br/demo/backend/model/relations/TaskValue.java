@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 public class TaskValue {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Property property;
 
     @ManyToOne(cascade = CascadeType.ALL)

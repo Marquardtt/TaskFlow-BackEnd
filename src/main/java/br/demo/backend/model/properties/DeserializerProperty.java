@@ -21,7 +21,7 @@ import java.util.List;
 public class DeserializerProperty extends StdDeserializer<Property> {
     JsonNode jsonNode;
 
-    protected DeserializerProperty() {
+    public DeserializerProperty() {
         super(Property.class);
     }
 
@@ -38,7 +38,6 @@ public class DeserializerProperty extends StdDeserializer<Property> {
 
         if (isPresent(jsonNode, "type")) {
             TypeOfProperty type = TypeOfProperty.valueOf(jsonNode.get("type").asText());
-            Page page = null;
             String name = null;
             Boolean visible = null;
             Boolean obligatory = null;
@@ -50,12 +49,6 @@ public class DeserializerProperty extends StdDeserializer<Property> {
             }
             if (isPresent(jsonNode, "obligatory")) {
                 obligatory = jsonNode.get("obligatory").asBoolean();
-            }
-            if (isPresent(jsonNode, "page")) {
-                JsonNode pageJson = jsonNode.get("page");
-                if(isPresent(pageJson, "id")){
-                    page = new Page(pageJson.get("id").asLong());
-                }
             }
             if(type.equals(TypeOfProperty.DATE)){
                 Boolean canBePass = null;
@@ -74,7 +67,7 @@ public class DeserializerProperty extends StdDeserializer<Property> {
                 if (isPresent(jsonNode, "scheduling")) {
                     scheduling = jsonNode.get("scheduling").asBoolean();
                 }
-                return new Date(id, name, visible, obligatory, page, canBePass, includesHours, term, scheduling);
+                return new Date(id, name, visible, obligatory, canBePass, includesHours, term, scheduling);
             }
             else if (type.equals(TypeOfProperty.SELECT) ||
                     type.equals(TypeOfProperty.RADIO) ||
@@ -90,13 +83,13 @@ public class DeserializerProperty extends StdDeserializer<Property> {
                     }
                     System.out.println(options);
                 }
-                return new Select(id, name, visible, obligatory, page, options);
+                return new Select(id, name, visible, obligatory, options);
             }else{
                 Integer maxSize = null;
                 if(isPresent(jsonNode, "maximum")){
                     maxSize = jsonNode.get("maximum").asInt();
                 }
-                return new Limited(id, name, visible, obligatory, page, maxSize);
+                return new Limited(id, name, visible, obligatory, maxSize);
             }
         }
         throw new IllegalArgumentException("Invalid type of property");

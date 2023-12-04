@@ -1,8 +1,7 @@
 package br.demo.backend.service.relations;
 
 
-import br.demo.backend.model.relations.ids.UserGroupId;
-import br.demo.backend.model.relations.UserGroup;
+import br.demo.backend.model.relations.PermissionProject;
 import br.demo.backend.repository.relations.UserGroupRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,23 +10,23 @@ import java.util.Collection;
 
 @Service
 @AllArgsConstructor
-public class UserGroupService {
+public class UserProjectService {
 
-    UserGroupRepository userGroupRepository;
+    private UserGroupRepository userGroupRepository;
 
-    public Collection<UserGroup> findAll() {
+    public Collection<PermissionProject> findAll() {
         return userGroupRepository.findAll();
     }
 
-    public UserGroup findOne(UserGroupId id) {
+    public PermissionProject findOne(Long id) {
         return userGroupRepository.findById(id).get();
     }
 
-    public void save(UserGroup userGroup) {
+    public void save(PermissionProject userGroup) {
        userGroupRepository.save(userGroup);
     }
 
-    public void delete(UserGroupId id) {
+    public void delete(Long id) {
         userGroupRepository.deleteById(id);
     }
 }

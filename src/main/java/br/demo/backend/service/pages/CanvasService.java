@@ -12,7 +12,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class CanvasService {
 
-    CanvasRepository canvasRepository;
+    private CanvasRepository canvasRepository;
 
     public Collection<Canvas> findAll() {
         return canvasRepository.findAll();
