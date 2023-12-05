@@ -46,6 +46,15 @@ public class GroupService {
         return groups;
     }
 
+    public Permission getPermissionOfAGroupInAProject(Long groupId, Long projectId){
+        Group group = groupRepository.findById(groupId).get();
+        Permission permission = group.getProjects().stream().filter(
+                p -> p.getProject().getId().equals(projectId)
+        ).findFirst().get().getPermission();
+        return permission;
+    }
+
+
     public Collection<Group> findGroupsOfAProject(Long projectId) {
         Collection<Group> groups =  groupRepository.findGroupsByProjects_Project(new Project(projectId));
         for(Group group : groups){

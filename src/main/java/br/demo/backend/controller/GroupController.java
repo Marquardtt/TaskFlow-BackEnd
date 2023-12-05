@@ -1,6 +1,7 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.Group;
+import br.demo.backend.model.Permission;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,11 @@ public class GroupController {
     @GetMapping("/project/{projectId}")
     public Collection<Group> findGroupsOfAProject(@PathVariable Long projectId) {
         return groupService.findGroupsOfAProject(projectId);
+    }
+
+    @GetMapping("/{goupId}/{projectId}")
+    public Permission insert(@PathVariable Long goupId, @PathVariable Long projectId){
+        return groupService.getPermissionOfAGroupInAProject(goupId, projectId);
     }
 
     @PutMapping("/permission/{projectId}/{permissionId}")
