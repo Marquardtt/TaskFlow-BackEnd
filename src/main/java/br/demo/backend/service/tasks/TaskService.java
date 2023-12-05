@@ -23,6 +23,7 @@ import br.demo.backend.repository.pages.CommonPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
+import br.demo.backend.service.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,33 +43,18 @@ public class TaskService {
     private ProjectRepository projectRepository;
     private CanvasRepository canvasRepository;
 
-    public void resolveStackOverflow(Task task) {
-        for (TaskValue taskValue : task.getProperties()) {
-            taskValue.getProperty().setProject(null);
-            taskValue.getProperty().setPages(null);
-        }
-        for (Log log : task.getLogs()) {
-            log.getUser().setProjects(null);
-        }
-        try {
-            for (Message message : task.getComments()) {
-                message.getUser().setProjects(null);
-            }
-        } catch (NullPointerException ignored) {
-        }
-    }
 
     public Collection<Task> findAll() {
         Collection<Task> tasks = taskRepository.findAll();
         for (Task task : tasks) {
-            resolveStackOverflow(task);
+            ResolveStackOverflow.resolveStackOverflow(task);
         }
         return tasks;
     }
 
     public Task findOne(Long id) {
         Task task = taskRepository.findById(id).get();
-        resolveStackOverflow(task);
+        ResolveStackOverflow.resolveStackOverflow(task);
         return task;
     }
 
@@ -92,7 +78,7 @@ public class TaskService {
 
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page);
-        resolveStackOverflow(task);
+        ResolveStackOverflow.resolveStackOverflow(task);
         return task;
     }
 
@@ -140,7 +126,7 @@ public class TaskService {
     public Collection<Task> findByName(String name) {
         Collection<Task> tasks = taskRepository.findTasksByNameContains(name);
         for (Task task : tasks) {
-            resolveStackOverflow(task);
+            ResolveStackOverflow.resolveStackOverflow(task);
         }
         return tasks;
     }
@@ -164,17 +150,11 @@ public class TaskService {
 
     public Collection<Task> getTasksToday(Long id) {
         User user = userRepository.findById(id).get();
-        user.setProjects(null);
-
         TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
-        value.getProperty().setPages(null);
-        value.getProperty().setProject(null);
-
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
         Collection<Task> tasksToday = new ArrayList<>();
-
         for (Task t : tasks) {
-            resolveStackOverflow(t);
+            ResolveStackOverflow.resolveStackOverflow(t);
             for (TaskValue tp : t.getProperties()) {
                 Property p = tp.getProperty();
                 if (p.getType() == TypeOfProperty.DATE && ((Date) p).getScheduling()) {
@@ -189,12 +169,9 @@ public class TaskService {
 
     public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
         CommonPage page = commonPageRepository.findById(pageId).get();
-        page.setProperties(null);
-        page.setProject(null);
-
         Collection<Task> tasks = new ArrayList<>();
         for (Task task : page.getTasks()) {
-            resolveStackOverflow(task);
+            ResolveStackOverflow.resolveStackOverflow(task);
             for (TaskValue taskValue : task.getProperties()) {
                 if (taskValue.getProperty().getId().equals(propertyId)) {
                     if (((LocalDateTime) taskValue.getValue()

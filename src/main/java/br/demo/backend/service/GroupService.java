@@ -23,22 +23,14 @@ public class GroupService {
     public Collection<Group> findAll() {
         Collection<Group> groups = groupRepository.findAll();
         for(Group group : groups){
-            for(User user : group.getUsers()){
-                for(PermissionProject permissionProject : user.getProjects()){
-                    projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-                }
-            }
+            ResolveStackOverflow.resolveStackOverflow(group);
         }
         return groups;
     }
 
     public Group findOne(Long id) {
         Group group = groupRepository.findById(id).get();
-        for(User user : group.getUsers()){
-            for(PermissionProject permissionProject : user.getProjects()){
-                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-            }
-        }
+        ResolveStackOverflow.resolveStackOverflow(group);
         return group;
     }
 
@@ -49,11 +41,7 @@ public class GroupService {
     public Collection<Group> findGroupsByUser(Long userId) {
         Collection<Group> groups =  groupRepository.findGroupsByUsersContaining(new User(userId));
         for(Group group : groups){
-            for(User user : group.getUsers()){
-                for(PermissionProject permissionProject : user.getProjects()){
-                    projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-                }
-            }
+            ResolveStackOverflow.resolveStackOverflow(group);
         }
         return groups;
     }
@@ -61,11 +49,7 @@ public class GroupService {
     public Collection<Group> findGroupsOfAProject(Long projectId) {
         Collection<Group> groups =  groupRepository.findGroupsByProjects_Project(new Project(projectId));
         for(Group group : groups){
-            for(User user : group.getUsers()){
-                for(PermissionProject permissionProject : user.getProjects()){
-                    projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-                }
-            }
+            ResolveStackOverflow.resolveStackOverflow(group);
         }
         return groups;
     }

@@ -18,6 +18,7 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
+import br.demo.backend.service.ResolveStackOverflow;
 import br.demo.backend.service.tasks.TaskService;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import lombok.AllArgsConstructor;
@@ -36,15 +37,13 @@ public class PropertyService {
 
     public Property findOne(Long id) {
         Property property = propertyRepository.findById(id).get();
-        property.setProject(null);
-        property.setPages(null);
+        ResolveStackOverflow.resolveStackOverflow(property);
         return property;
     }
     public Collection<Property> findAll() {
         Collection<Property> properties = propertyRepository.findAll();
         for(Property property : properties) {
-            property.setProject(null);
-            property.setPages(null);
+            ResolveStackOverflow.resolveStackOverflow(property);
         }
         return properties;
     }
@@ -55,7 +54,8 @@ public class PropertyService {
         if(property.getPages() != null){
             setRelationAtPage(property, property.getPages());
         }else{
-            setRelationAtPage(property, property.getProject().getPages());
+            Project project = projectRepository.findById(property.getProject().getId()).get();
+            setRelationAtPage(property, project.getPages());
         }
         propertyRepository.save(property);
     }
@@ -63,8 +63,7 @@ public class PropertyService {
     private void setRelationAtPage(Property property, Collection<Page> pages){
         for(Page pageJustId : pages) {
             Page page = pageRepository.findById(pageJustId.getId()).get();
-            if(page.getType().equals(TypeOfPage.CANVAS)){
-                Canvas canvas = (Canvas) page;
+            if(page instanceof Canvas canvas){
                 for(TaskCanvas taskCanvas : canvas.getTasks()) {
                     taskService.setTaskProperty(property, taskCanvas.getTask());
                 }
@@ -85,7 +84,7 @@ public class PropertyService {
         throw new RuntimeException("Property can't be deleted");
     }
 
-    private boolean validateCanBeDeleted(Property property) {
+    private Boolean validateCanBeDeleted(Property property) {
         if (testIfIsSelectable(property)) {
             Project project = projectRepository.findByPropertiesContaining(property);
             for(Property prop : project.getProperties()) {
@@ -111,14 +110,14 @@ public class PropertyService {
         return false;
     }
 
-    private boolean testIfIsSelectable(Property property) {
+    private Boolean testIfIsSelectable(Property property) {
         return property.getType().equals(TypeOfProperty.SELECT) ||
                 property.getType().equals(TypeOfProperty.RADIO) ||
                 property.getType().equals(TypeOfProperty.CHECKBOX) ||
                 property.getType().equals(TypeOfProperty.TAG);
     }
 
-    private boolean testIfPageHasOtherProperty(Page page, Property property) {
+    private Boolean testIfPageHasOtherProperty(Page page, Property property) {
         for (Property prop  : page.getProperties()) {
             if (!prop.getId().equals(property.getId()) &&
                     testIfIsSelectable(prop)) {

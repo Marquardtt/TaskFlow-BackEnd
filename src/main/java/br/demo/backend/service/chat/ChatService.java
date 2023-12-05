@@ -11,6 +11,7 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.service.ProjectService;
+import br.demo.backend.service.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,24 +26,11 @@ public class ChatService {
     private ChatRepository chatRepository;
     private ProjectService projectService;
 
-    private void resolveStackOverFlow(Chat chat) {
-        for (User user : chat.getUsers()) {
-            for (PermissionProject permissionProject : user.getProjects()) {
-                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-            }
-        }
-        for (Message message : chat.getMessages()) {
-            for (PermissionProject permissionProject : message.getUser().getProjects()) {
-                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-            }
-        }
-        chat.getLastMessage().getUser().setProjects(null);
-    }
 
     public Collection<Chat> findAllPrivate(Long userId) {
         Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.PRIVATE);
         for(Chat chat : chats){
-            resolveStackOverFlow(chat);
+            ResolveStackOverflow.resolveStackOverflow(chat);
         }
         setQuantityUnvisualized(chats, userId);
         return chats;
@@ -63,7 +51,7 @@ public class ChatService {
     public Collection<Chat> findAllGroup(Long userId) {
         Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.GROUP);
         for(Chat chat : chats){
-            resolveStackOverFlow(chat);
+            ResolveStackOverflow.resolveStackOverflow(chat);
         }
         setQuantityUnvisualized(chats, userId);
         return chats;
@@ -82,14 +70,14 @@ public class ChatService {
     public Collection<Chat> findByName(String name) {
         Collection<Chat> chats = chatRepository.findChatsByNameContains(name);
         for(Chat chat : chats){
-            resolveStackOverFlow(chat);
+            ResolveStackOverflow.resolveStackOverflow(chat);
         }
         return chats;
     }
 
     public Chat findOne(Long id) {
         Chat chat = chatRepository.findById(id).get();
-        resolveStackOverFlow(chat);
+        ResolveStackOverflow.resolveStackOverflow(chat);
         return chat;
     }
 

@@ -33,35 +33,18 @@ public class ProjectService {
     private CanvasService canvasService;
     private CommonPageService commonPageService;
 
-    public void setProjectInPropertyOfProjectNull(Project project) {
-        for (Property p : project.getProperties()) {
-            p.setProject(null);
-            p.setPages(null);
-        }
-        for (Page page : project.getPages()) {
-            if (page.getType().equals(TypeOfPage.CANVAS)) {
-                canvasService.resolveStackOverflow((Canvas) page);
-            } else {
-                commonPageService.resolveStackOverflow((CommonPage) page);
-            }
-        }
-        try {
-            project.getOwner().setProjects(null);
-        } catch (NullPointerException ignored) {
-        }
-    }
 
     public Collection<Project> findAll() {
         Collection<Project> projects = projectRepository.findAll();
         for (Project project : projects) {
-            setProjectInPropertyOfProjectNull(project);
+            ResolveStackOverflow.resolveStackOverflow(project);
         }
         return projects;
     }
 
     public Project findOne(Long id) {
         Project project = projectRepository.findById(id).get();
-        setProjectInPropertyOfProjectNull(project);
+        ResolveStackOverflow.resolveStackOverflow(project);
         return project;
     }
 

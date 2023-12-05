@@ -21,25 +21,18 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private UserRepository userRepository;
-    private GroupRepository groupRepository;
-    private PermissionRepository permissionRepository;
-    private ProjectService projectService;
 
     public Collection<User> findAll() {
         Collection<User> users = userRepository.findAll();
         for(User user : users){
-            for(PermissionProject permissionProject : user.getProjects()){
-                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-            }
+            ResolveStackOverflow.resolveStackOverflow(user);
         }
         return users;
     }
 
     public User findOne(Long id) {
         User user = userRepository.findById(id).get();
-        for(PermissionProject permissionProject : user.getProjects()){
-            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-        }
+        ResolveStackOverflow.resolveStackOverflow(user);
         user.setProjects(
                 user.getProjects().stream().sorted(
                         (p1, p2) -> p2.getProject().getVisualizedAt().compareTo(
@@ -58,25 +51,19 @@ public class UserService {
 
     public User findByUsernameAndPassword(String username, String password) {
         User user = userRepository.findByUsernameAndPassword(username, password);
-        for(PermissionProject permissionProject : user.getProjects()){
-            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-        }
+        ResolveStackOverflow.resolveStackOverflow(user);
         return user;
     }
 
     public User findByEmailAndPassword(String mail, String password) {
         User user = userRepository.findByMailAndPassword(mail, password);
-        for(PermissionProject permissionProject : user.getProjects()){
-            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-        }
+        ResolveStackOverflow.resolveStackOverflow(user);
         return user;
     }
 
     public User findByUserNameOrName(String name) {
         User user = userRepository.findUserByUsernameOrName(name, name);
-        for(PermissionProject permissionProject : user.getProjects()){
-            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
-        }
+        ResolveStackOverflow.resolveStackOverflow(user);
         return user;
     }
 }
