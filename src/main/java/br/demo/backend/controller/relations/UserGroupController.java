@@ -20,7 +20,7 @@ public class UserGroupController {
         userGroupService.save(user);
     }
 
-    @PostMapping("/{userId}/{projectId}")
+    @GetMapping("/{userId}/{projectId}")
     public Permission insert(@PathVariable Long userId, @PathVariable Long projectId){
         return userGroupService.getPermissionOfAUserInAProject(userId, projectId);
     }
