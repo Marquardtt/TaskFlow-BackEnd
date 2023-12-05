@@ -1,5 +1,6 @@
 package br.demo.backend.controller;
 
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
 import br.demo.backend.service.UserService;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,12 @@ public class UserController {
     @PostMapping
     public void insert(@RequestBody User user){
         userService.save(user);
+    }
+
+
+    @GetMapping("/{userId}/{projectId}")
+    public Permission insert(@PathVariable Long userId, @PathVariable Long projectId){
+        return userService.getPermissionOfAUserInAProject(userId, projectId);
     }
 
     @PutMapping

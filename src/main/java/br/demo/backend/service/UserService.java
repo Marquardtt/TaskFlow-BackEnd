@@ -55,6 +55,14 @@ public class UserService {
         return user;
     }
 
+    public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
+        User user = userRepository.findById(userId).get();
+        Permission permission = user.getProjects().stream().filter(
+                p -> p.getProject().getId().equals(projectId)
+        ).findFirst().get().getPermission();
+        return permission;
+    }
+
     public User findByEmailAndPassword(String mail, String password) {
         User user = userRepository.findByMailAndPassword(mail, password);
         ResolveStackOverflow.resolveStackOverflow(user);

@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserGroupRepository extends JpaRepository<PermissionProject, Long> {
 
-    public PermissionProject findPermissionByUserIdAndProjectId(Long userId, Long projectId);
 }

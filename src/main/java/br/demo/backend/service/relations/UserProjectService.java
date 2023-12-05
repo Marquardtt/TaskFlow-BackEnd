@@ -15,10 +15,6 @@ public class UserProjectService {
 
     private UserGroupRepository userGroupRepository;
 
-    public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
-        return userGroupRepository.findPermissionByUserIdAndProjectId(userId, projectId).getPermission();
-    }
-
     public void save(PermissionProject userGroup) {
        userGroupRepository.save(userGroup);
     }
