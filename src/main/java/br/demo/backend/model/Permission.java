@@ -18,8 +18,7 @@ public class Permission {
     @GeneratedValue
     private Long id;
     private String name;
-    @Enumerated(value = EnumType.STRING)
-    private Collection<TypePermission> permissions;
+    private TypePermission permission;
 
     public Permission(Long id){
         this.id = id;
