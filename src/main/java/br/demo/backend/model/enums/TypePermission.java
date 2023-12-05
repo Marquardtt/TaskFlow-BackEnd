@@ -1,7 +1,7 @@
 package br.demo.backend.model.enums;
 
 
-public enum Permission {
+public enum TypePermission {
     READ,
     UPDATE,
     DELETE,

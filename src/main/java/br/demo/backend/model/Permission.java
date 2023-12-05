@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+import br.demo.backend.model.enums.TypePermission;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class Permission {
     private Long id;
     private String name;
     @Enumerated(value = EnumType.STRING)
-    private Collection<br.demo.backend.model.enums.Permission> permissions;
+    private Collection<TypePermission> permissions;
 
     public Permission(Long id){
         this.id = id;
