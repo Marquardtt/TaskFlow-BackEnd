@@ -6,6 +6,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfPage;
+import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
@@ -15,6 +16,9 @@ import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.model.values.UserValued;
+
+import java.util.Collection;
 
 public class ResolveStackOverflow {
 
@@ -67,6 +71,11 @@ public class ResolveStackOverflow {
     public static void resolveStackOverflow(Task task) {
         try {
             for (TaskValue taskValue : task.getProperties()) {
+                if(taskValue.getProperty().getType().equals(TypeOfProperty.USER)){
+                    for(User user : (Collection<User>)taskValue.getValue()){
+                        resolveStackOverflow(user);
+                    }
+                }
                 resolveStackOverflow(taskValue.getProperty());
             }
             for (Message message : task.getComments()) {

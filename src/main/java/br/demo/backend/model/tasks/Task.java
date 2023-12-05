@@ -22,7 +22,9 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
     private String name;
+
     private Boolean deleted;
+    private Boolean completed;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<TaskValue> properties;

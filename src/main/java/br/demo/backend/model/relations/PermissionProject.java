@@ -20,4 +20,5 @@ public class PermissionProject {
     @ManyToOne
     private Permission permission;
 
+
 }

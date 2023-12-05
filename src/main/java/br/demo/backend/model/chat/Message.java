@@ -22,8 +22,8 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String value;
-    @OneToOne
+    @ManyToOne
     private User user;
     private LocalDateTime dateTime;
-    private Boolean visualized;
+    private Boolean visualized = false;
 }
