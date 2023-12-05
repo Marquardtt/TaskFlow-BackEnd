@@ -6,8 +6,11 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfChat;
+import br.demo.backend.model.relations.PermissionProject;
 import br.demo.backend.repository.GroupRepository;
+import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.chat.ChatRepository;
+import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +23,36 @@ import java.util.HashSet;
 public class ChatService {
 
     private ChatRepository chatRepository;
+    private ProjectService projectService;
+
+    private void resolveStackOverFlow(Chat chat) {
+        for (User user : chat.getUsers()) {
+            for (PermissionProject permissionProject : user.getProjects()) {
+                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+            }
+        }
+        for (Message message : chat.getMessages()) {
+            for (PermissionProject permissionProject : message.getUser().getProjects()) {
+                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+            }
+        }
+        chat.getLastMessage().getUser().setProjects(null);
+    }
 
     public Collection<Chat> findAllPrivate(Long userId) {
         Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.PRIVATE);
+        for(Chat chat : chats){
+            resolveStackOverFlow(chat);
+        }
         setQuantityUnvisualized(chats, userId);
         return chats;
     }
 
-    private void setQuantityUnvisualized(Collection<Chat> chats, Long userId){
+    private void setQuantityUnvisualized(Collection<Chat> chats, Long userId) {
         for (Chat c : chats) {
             Integer qttyUnvisualized = 0;
-            for(Message m : c.getMessages()){
-                if(!m.getVisualized() && !m.getUser().getId().equals(userId)){
+            for (Message m : c.getMessages()) {
+                if (!m.getVisualized() && !m.getUser().getId().equals(userId)) {
                     qttyUnvisualized++;
                 }
             }
@@ -41,6 +62,9 @@ public class ChatService {
 
     public Collection<Chat> findAllGroup(Long userId) {
         Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.GROUP);
+        for(Chat chat : chats){
+            resolveStackOverFlow(chat);
+        }
         setQuantityUnvisualized(chats, userId);
         return chats;
     }
@@ -48,7 +72,7 @@ public class ChatService {
 
     public void updateMessagesToVisualized(Chat chat, Long userId) {
         for (Message m : chat.getMessages()) {
-            if(!m.getUser().getId().equals(userId)){
+            if (!m.getUser().getId().equals(userId)) {
                 m.setVisualized(true);
             }
         }
@@ -56,11 +80,17 @@ public class ChatService {
     }
 
     public Collection<Chat> findByName(String name) {
-        return chatRepository.findChatsByNameContains(name);
+        Collection<Chat> chats = chatRepository.findChatsByNameContains(name);
+        for(Chat chat : chats){
+            resolveStackOverFlow(chat);
+        }
+        return chats;
     }
 
     public Chat findOne(Long id) {
-        return chatRepository.findById(id).get();
+        Chat chat = chatRepository.findById(id).get();
+        resolveStackOverFlow(chat);
+        return chat;
     }
 
     public void save(Chat chat) {

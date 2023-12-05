@@ -18,28 +18,56 @@ import java.util.Collection;
 public class GroupService {
 
     private GroupRepository groupRepository;
-    private UserRepository userRepository;
+    private ProjectService projectService;
 
     public Collection<Group> findAll() {
-        return groupRepository.findAll();
+        Collection<Group> groups = groupRepository.findAll();
+        for(Group group : groups){
+            for(User user : group.getUsers()){
+                for(PermissionProject permissionProject : user.getProjects()){
+                    projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+                }
+            }
+        }
+        return groups;
     }
 
     public Group findOne(Long id) {
-        return groupRepository.findById(id).get();
+        Group group = groupRepository.findById(id).get();
+        for(User user : group.getUsers()){
+            for(PermissionProject permissionProject : user.getProjects()){
+                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+            }
+        }
+        return group;
     }
 
-    public void save(Group group, Long userId) {
-        User user = userRepository.findById(userId).get();
-        group.setOwner(user);
+    public void save(Group group) {
         groupRepository.save(group);
     }
 
     public Collection<Group> findGroupsByUser(Long userId) {
-        return groupRepository.findGroupsByUsersContaining(new User(userId));
+        Collection<Group> groups =  groupRepository.findGroupsByUsersContaining(new User(userId));
+        for(Group group : groups){
+            for(User user : group.getUsers()){
+                for(PermissionProject permissionProject : user.getProjects()){
+                    projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+                }
+            }
+        }
+        return groups;
     }
 
     public Collection<Group> findGroupsOfAProject(Long projectId) {
-        return groupRepository.findGroupsByProjects_Project(new Project(projectId));
+        Collection<Group> groups =  groupRepository.findGroupsByProjects_Project(new Project(projectId));
+        for(Group group : groups){
+            for(User user : group.getUsers()){
+                for(PermissionProject permissionProject : user.getProjects()){
+                    projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+                }
+            }
+        }
+        return groups;
     }
 
     public void update(Group group) {

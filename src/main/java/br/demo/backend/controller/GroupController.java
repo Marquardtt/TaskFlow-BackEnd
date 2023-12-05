@@ -12,9 +12,9 @@ import java.util.Collection;
 @RequestMapping("/group")
 public class GroupController {
     private GroupService groupService;
-    @PostMapping("/{userId}")
-    public void insert(@RequestBody Group group, @PathVariable Long userId) {
-        groupService.save(group, userId);
+    @PostMapping
+    public void insert(@RequestBody Group group) {
+        groupService.save(group);
     }
 
     @PutMapping

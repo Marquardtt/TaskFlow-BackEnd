@@ -15,15 +15,7 @@ public class Date extends Property {
 
     private Boolean canBePass;
     private Boolean includesHours;
-    private Boolean term;
+    private Boolean deadline;
     private Boolean scheduling;
 
-    public Date(Long id, String name, Boolean visible, Boolean obligatory, Boolean canBePass,
-                Boolean includesHours, Boolean term, Boolean scheduling){
-        super(id, name, visible, obligatory, TypeOfProperty.DATE);
-        this.canBePass = canBePass;
-        this.includesHours = includesHours;
-        this.term = term;
-        this.scheduling = scheduling;
-    }
 }

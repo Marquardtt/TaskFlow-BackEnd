@@ -24,16 +24,6 @@ public class UserGroupController {
         userGroupService.save(user);
     }
 
-    @GetMapping("/{id}")
-    public PermissionProject findOne(@PathVariable Long id){
-        return userGroupService.findOne(id);
-    }
-
-    @GetMapping
-    public Collection<PermissionProject> findAll(){
-        return userGroupService.findAll();
-    }
-
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
         userGroupService.delete(id);

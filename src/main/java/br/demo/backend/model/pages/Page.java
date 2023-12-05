@@ -1,7 +1,7 @@
 package br.demo.backend.model.pages;
 
 
-import br.demo.backend.model.properties.DeserializerProperty;
+import br.demo.backend.model.Project;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -18,7 +18,6 @@ import java.util.Collection;
 @NoArgsConstructor
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonDeserialize(using = DeserializePage.class)
 public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +27,11 @@ public class Page {
     @Enumerated(value = EnumType.STRING)
     private TypeOfPage type;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "pages")
     private Collection<Property> properties;
+
+    @ManyToOne
+    private Project project;
 
     public Page(Long id){
         this.id = id;

@@ -5,6 +5,7 @@ import br.demo.backend.model.properties.Property;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -20,14 +21,14 @@ public class Project {
     private String name;
     private String description;
     private String picture;
-
-    LocalDateTime visualizedAt;
+    private LocalDate deadline;
+    private LocalDateTime visualizedAt;
     @ManyToOne
     private User owner;
     private Boolean gamification;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project")
     private Collection<Page> pages;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project")
     private Collection<Property> properties;
 
     public Project(Long id){

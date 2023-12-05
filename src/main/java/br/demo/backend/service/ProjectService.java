@@ -2,11 +2,19 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Canvas;
+import br.demo.backend.model.pages.CommonPage;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.ProjectRepository;
+import br.demo.backend.repository.properties.PropertyRepository;
+import br.demo.backend.repository.properties.SelectRepository;
+import br.demo.backend.service.pages.CanvasService;
+import br.demo.backend.service.pages.CommonPageService;
 import br.demo.backend.service.properties.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -21,46 +29,58 @@ import java.util.HashSet;
 public class ProjectService {
 
     private ProjectRepository projectRepository;
-    private PropertyService propertyService;
+    private SelectRepository selectRepository;
+    private CanvasService canvasService;
+    private CommonPageService commonPageService;
+
+    public void setProjectInPropertyOfProjectNull(Project project) {
+        for (Property p : project.getProperties()) {
+            p.setProject(null);
+            p.setPages(null);
+        }
+        for (Page page : project.getPages()) {
+            if (page.getType().equals(TypeOfPage.CANVAS)) {
+                canvasService.resolveStackOverflow((Canvas) page);
+            } else {
+                commonPageService.resolveStackOverflow((CommonPage) page);
+            }
+        }
+        try {
+            project.getOwner().setProjects(null);
+        } catch (NullPointerException ignored) {
+        }
+    }
 
     public Collection<Project> findAll() {
-        return projectRepository.findAll();
+        Collection<Project> projects = projectRepository.findAll();
+        for (Project project : projects) {
+            setProjectInPropertyOfProjectNull(project);
+        }
+        return projects;
     }
 
     public Project findOne(Long id) {
-        return projectRepository.findById(id).get();
+        Project project = projectRepository.findById(id).get();
+        setProjectInPropertyOfProjectNull(project);
+        return project;
     }
 
     public void update(Project project) {
-        Project oldProject = projectRepository.findById(project.getId()).get();
-
-        for(Property propNew : project.getProperties()){
-            if(!testIfAlredyExistsProperty(propNew, oldProject)) {
-                propertyService.setRelationsBetweenPropAndTasks(project, propNew);
-            }
-        }
-
         projectRepository.save(project);
     }
 
-    private Boolean testIfAlredyExistsProperty(Property property, Project project){
-        for(Property prop : project.getProperties()){
-            if(prop.getId().equals(property.getId())){
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void save(Project project) {
+        Project emptyProject = projectRepository.save(project);
         HashSet<Option> options = new HashSet<>();
         options.add(new Option(null, "To-do", "#FF7A00"));
         options.add(new Option(null, "Doing", "#F7624B"));
         options.add(new Option(null, "Done", "#F04A94"));
-        project.setProperties(new HashSet<>());
-        Select select = new Select(null, "Stats", true, false, options, TypeOfProperty.SELECT);
-        project.getProperties().add(select);
-        projectRepository.save(project);
+        emptyProject.setProperties(new HashSet<>());
+        Select select = new Select(null, "Stats", true, false,
+                options, TypeOfProperty.SELECT, null, emptyProject);
+        Select selectCreated = selectRepository.save(select);
+        emptyProject.getProperties().add(selectCreated);
+        projectRepository.save(emptyProject);
     }
 
     public void setVisualizedNow(Project project) {

@@ -18,6 +18,7 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
+import br.demo.backend.service.tasks.TaskService;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,10 +32,49 @@ public class PropertyService {
     private PropertyRepository propertyRepository;
     private ProjectRepository projectRepository;
     private PageRepository pageRepository;
-    private TaskRepository taskRepository;
+    private TaskService taskService;
 
+    public Property findOne(Long id) {
+        Property property = propertyRepository.findById(id).get();
+        property.setProject(null);
+        property.setPages(null);
+        return property;
+    }
+    public Collection<Property> findAll() {
+        Collection<Property> properties = propertyRepository.findAll();
+        for(Property property : properties) {
+            property.setProject(null);
+            property.setPages(null);
+        }
+        return properties;
+    }
     public void update(Property property) {
         propertyRepository.save(property);
+    }
+    public void save(Property property) {
+        if(property.getPages() != null){
+            setRelationAtPage(property, property.getPages());
+        }else{
+            setRelationAtPage(property, property.getProject().getPages());
+        }
+        propertyRepository.save(property);
+    }
+
+    private void setRelationAtPage(Property property, Collection<Page> pages){
+        for(Page pageJustId : pages) {
+            Page page = pageRepository.findById(pageJustId.getId()).get();
+            if(page.getType().equals(TypeOfPage.CANVAS)){
+                Canvas canvas = (Canvas) page;
+                for(TaskCanvas taskCanvas : canvas.getTasks()) {
+                    taskService.setTaskProperty(property, taskCanvas.getTask());
+                }
+            }else{
+                CommonPage commonPage = (CommonPage) page;
+                for(Task task : commonPage.getTasks()) {
+                    taskService.setTaskProperty(property, task);
+                }
+            }
+        }
     }
 
     public void delete(Long id) {
@@ -48,6 +88,9 @@ public class PropertyService {
     private boolean validateCanBeDeleted(Property property) {
         if (testIfIsSelectable(property)) {
             Project project = projectRepository.findByPropertiesContaining(property);
+            for(Property prop : project.getProperties()) {
+                prop.setProject(null);
+            }
             if(project != null) {
                 for (Property prop  : project.getProperties()) {
                     if (!prop.getId().equals(property.getId()) &&
@@ -83,27 +126,6 @@ public class PropertyService {
             }
         }
         return false;
-    }
-
-    public void setRelationsBetweenPropAndTasks(Project project, Property property){
-        for(Page page : project.getPages()){
-            setRelationsBetweenPropAndTasks(page, property);
-        }
-    }
-
-    public void setRelationsBetweenPropAndTasks(Page page, Property property){
-        if(page.getType().equals(TypeOfPage.CANVAS)){
-            for(TaskCanvas taskCanvas : ((Canvas)page).getTasks()){
-                Task task = taskCanvas.getTask();
-                task.getProperties().add(new TaskValue(null, property, null));
-                taskRepository.save(task);
-            }
-        }else{
-            for(Task task : ((CommonPage)page).getTasks()){
-                task.getProperties().add(new TaskValue(null, property, null));
-                taskRepository.save(task);
-            }
-        }
     }
 
 }

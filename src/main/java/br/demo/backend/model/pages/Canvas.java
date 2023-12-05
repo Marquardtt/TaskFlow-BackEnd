@@ -24,10 +24,5 @@ public class Canvas extends Page {
     private Collection<TaskCanvas> tasks;
     private String draw;
 
-    public Canvas(Long id, String name, Collection<Property> props, String draw, Collection<TaskCanvas> tasks){
-        super(id, name, TypeOfPage.CANVAS, props);
-        this.draw = draw;
-        this.tasks = tasks;
-    }
 
 }

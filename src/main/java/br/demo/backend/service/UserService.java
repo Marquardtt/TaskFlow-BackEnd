@@ -3,7 +3,9 @@ package br.demo.backend.service;
 
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
+import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.PermissionProject;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.PermissionRepository;
@@ -21,14 +23,23 @@ public class UserService {
     private UserRepository userRepository;
     private GroupRepository groupRepository;
     private PermissionRepository permissionRepository;
+    private ProjectService projectService;
 
     public Collection<User> findAll() {
-        return userRepository.findAll();
+        Collection<User> users = userRepository.findAll();
+        for(User user : users){
+            for(PermissionProject permissionProject : user.getProjects()){
+                projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+            }
+        }
+        return users;
     }
 
     public User findOne(Long id) {
         User user = userRepository.findById(id).get();
-        //Sorting by project date
+        for(PermissionProject permissionProject : user.getProjects()){
+            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+        }
         user.setProjects(
                 user.getProjects().stream().sorted(
                         (p1, p2) -> p2.getProject().getVisualizedAt().compareTo(
@@ -46,14 +57,26 @@ public class UserService {
     }
 
     public User findByUsernameAndPassword(String username, String password) {
-        return userRepository.findByUsernameAndPassword(username, password);
+        User user = userRepository.findByUsernameAndPassword(username, password);
+        for(PermissionProject permissionProject : user.getProjects()){
+            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+        }
+        return user;
     }
 
     public User findByEmailAndPassword(String mail, String password) {
-        return userRepository.findByMailAndPassword(mail, password);
+        User user = userRepository.findByMailAndPassword(mail, password);
+        for(PermissionProject permissionProject : user.getProjects()){
+            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+        }
+        return user;
     }
 
     public User findByUserNameOrName(String name) {
-        return userRepository.findUserByUsernameOrName(name, name);
+        User user = userRepository.findUserByUsernameOrName(name, name);
+        for(PermissionProject permissionProject : user.getProjects()){
+            projectService.setProjectInPropertyOfProjectNull(permissionProject.getProject());
+        }
+        return user;
     }
 }

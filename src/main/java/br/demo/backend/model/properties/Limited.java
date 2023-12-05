@@ -18,8 +18,4 @@ import lombok.NoArgsConstructor;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Limited extends Property {
     private Integer maximum;
-    public Limited(Long id, String name, Boolean visible, Boolean obligatory, Integer maximum, TypeOfProperty type){
-        super(id, name, visible, obligatory, type);
-        this.maximum = maximum;
-    }
 }

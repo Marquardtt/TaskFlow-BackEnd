@@ -18,7 +18,7 @@ public class TaskValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Property property;
 
     @ManyToOne(cascade = CascadeType.ALL)

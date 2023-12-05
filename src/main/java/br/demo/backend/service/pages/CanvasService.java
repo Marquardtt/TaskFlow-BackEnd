@@ -3,10 +3,14 @@ package br.demo.backend.service.pages;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.pages.Canvas;
+import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.repository.pages.CanvasRepository;
 import br.demo.backend.service.properties.PropertyService;
+import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +21,34 @@ import java.util.Collection;
 public class CanvasService {
 
     private CanvasRepository canvasRepository;
-    private PropertyService propertyService;
+    private TaskService taskService;
+
+    public void resolveStackOverflow(Canvas canvas) {
+        for (Property property : canvas.getProperties()) {
+            property.setPages(null);
+            property.setProject(null);
+        }
+        Project project = canvas.getProject();
+        for(Page page : project.getPages()) {
+            page.setProject(null);
+        }
+        for(TaskCanvas taskCanvas : canvas.getTasks()) {
+            taskService.resolveStackOverflow(taskCanvas.getTask());
+        }
+    }
 
     public Collection<Canvas> findAll() {
-        return canvasRepository.findAll();
+        Collection<Canvas> canvas = canvasRepository.findAll();
+        for(Canvas canvasModel : canvas) {
+            resolveStackOverflow(canvasModel);
+        }
+        return canvas;
     }
 
     public Canvas findOne(Long id) {
-        return canvasRepository.findById(id).get();
+        Canvas canvas = canvasRepository.findById(id).get();
+        resolveStackOverflow(canvas);
+        return canvas;
     }
 
     public void save(Canvas canvasModel) {
@@ -32,26 +56,8 @@ public class CanvasService {
     }
 
     public void update(Canvas canvas) {
-        Canvas oldCanvas = canvasRepository.findById(canvas.getId()).get();
-
-        for(Property propNew : canvas.getProperties()){
-            if(!testIfAlredyExistsProperty(propNew, oldCanvas)) {
-                propertyService.setRelationsBetweenPropAndTasks(canvas, propNew);
-            }
-        }
-
         canvasRepository.save(canvas);
     }
-
-    private Boolean testIfAlredyExistsProperty(Property property, Canvas canvas){
-        for(Property prop : canvas.getProperties()){
-            if(prop.getId().equals(property.getId())){
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     public void delete(Long id) {
         canvasRepository.deleteById(id);

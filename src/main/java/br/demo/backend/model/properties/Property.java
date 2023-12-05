@@ -11,13 +11,14 @@ import lombok.*;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Collection;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_property")
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonDeserialize(using = DeserializerProperty.class)
 public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +28,10 @@ public class Property {
     private Boolean obligatory;
     @Enumerated(value = EnumType.STRING)
     private TypeOfProperty type;
+
+    @ManyToMany
+    private Collection<Page> pages;
+
+    @ManyToOne
+    private Project project;
 }

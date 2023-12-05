@@ -14,14 +14,6 @@ public class UserProjectService {
 
     private UserGroupRepository userGroupRepository;
 
-    public Collection<PermissionProject> findAll() {
-        return userGroupRepository.findAll();
-    }
-
-    public PermissionProject findOne(Long id) {
-        return userGroupRepository.findById(id).get();
-    }
-
     public void save(PermissionProject userGroup) {
        userGroupRepository.save(userGroup);
     }
