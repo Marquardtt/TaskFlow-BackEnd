@@ -1,6 +1,7 @@
 package br.demo.backend.service.relations;
 
 
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.relations.PermissionProject;
 import br.demo.backend.repository.relations.UserGroupRepository;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,10 @@ import java.util.Collection;
 public class UserProjectService {
 
     private UserGroupRepository userGroupRepository;
+
+    public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
+        return userGroupRepository.findPermissionByUserIdAndProjectId(userId, projectId).getPermission();
+    }
 
     public void save(PermissionProject userGroup) {
        userGroupRepository.save(userGroup);
