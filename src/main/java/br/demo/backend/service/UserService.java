@@ -27,8 +27,8 @@ public class UserService {
     public User findOne(Long id) {
         User user = userRepository.findById(id).get();
         ResolveStackOverflow.resolveStackOverflow(user);
-        user.setProjects(
-                user.getProjects().stream().sorted(
+        user.setPermission(
+                user.getPermission().stream().sorted(
                         (p1, p2) -> p2.getProject().getVisualizedAt().compareTo(
                                 p1.getProject().getVisualizedAt()
                         )).collect(Collectors.toList()));

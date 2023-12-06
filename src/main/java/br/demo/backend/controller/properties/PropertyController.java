@@ -1,6 +1,7 @@
 package br.demo.backend.controller.properties;
 
 import br.demo.backend.model.pages.Canvas;
+import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
@@ -14,11 +15,19 @@ import java.util.Collection;
 @AllArgsConstructor
 @RequestMapping("/property")
 public class PropertyController {
+
     private PropertyService propertyService;
 
-
-    @PostMapping()
+    @PostMapping("/limited")
     public void save(@RequestBody Limited property){
+        propertyService.save(property);
+    }
+    @PostMapping("/select")
+    public void save(@RequestBody Select property){
+        propertyService.save(property);
+    }
+    @PostMapping("/date")
+    public void save(@RequestBody Date property){
         propertyService.save(property);
     }
 

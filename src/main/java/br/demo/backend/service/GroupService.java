@@ -54,7 +54,7 @@ public class GroupService {
 
 
     public Collection<Group> findGroupsOfAProject(Long projectId) {
-        Collection<Group> groups = groupRepository.findGroupsByProjects_Project(new Project(projectId));
+        Collection<Group> groups = groupRepository.findGroupsByPermission_Project(new Project(projectId));
         for (Group group : groups) {
             ResolveStackOverflow.resolveStackOverflow(group);
         }

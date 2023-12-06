@@ -15,7 +15,7 @@ public enum TypeOfProperty {
     DATE,
 //  Limited
     TIME,
-//  User
+//  Limited
     USER,
 //  Limited
     PROGRESS,

@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
@@ -86,11 +87,11 @@ public class PropertyService {
 
     private Boolean validateCanBeDeleted(Property property) {
         if (testIfIsSelectable(property)) {
-            Project project = projectRepository.findByPropertiesContaining(property);
-            for(Property prop : project.getProperties()) {
-                prop.setProject(null);
-            }
-            if(project != null) {
+            try{
+                Project project = projectRepository.findById(property.getProject().getId()).get();
+                for(Property prop : project.getProperties()) {
+                    prop.setProject(null);
+                }
                 for (Property prop  : project.getProperties()) {
                     if (!prop.getId().equals(property.getId()) &&
                             testIfIsSelectable(prop)) {
@@ -103,11 +104,12 @@ public class PropertyService {
                     }
                 }
                 return true;
+            } catch (NoSuchElementException e) {
+                Page page = pageRepository.findByPropertiesContaining(property);
+                return testIfPageHasOtherProperty(page, property);
             }
-            Page page = pageRepository.findByPropertiesContaining(property);
-            return testIfPageHasOtherProperty(page, property);
         }
-        return false;
+        return true;
     }
 
     private Boolean testIfIsSelectable(Property property) {
