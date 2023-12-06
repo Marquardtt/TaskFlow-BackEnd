@@ -1,14 +1,8 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
-import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.PermissionProject;
-import br.demo.backend.repository.GroupRepository;
-import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,9 +51,9 @@ public class UserService {
 
     public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
         User user = userRepository.findById(userId).get();
-        Permission permission = user.getProjects().stream().filter(
+        Permission permission = user.getPermission().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
-        ).findFirst().get().getPermission();
+        ).findFirst().get();
         return permission;
     }
 

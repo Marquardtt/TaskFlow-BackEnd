@@ -1,12 +1,8 @@
 package br.demo.backend.repository;
 
-import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
-import br.demo.backend.model.relations.PermissionProject;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Collection;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {

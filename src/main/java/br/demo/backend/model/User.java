@@ -1,6 +1,5 @@
 package br.demo.backend.model;
 
-import br.demo.backend.model.relations.PermissionProject;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,7 +27,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
     @OneToMany
-    private Collection<PermissionProject> projects;
+    private Collection<Permission> permission;
     public User (Long id){
         this.id = id;
     }

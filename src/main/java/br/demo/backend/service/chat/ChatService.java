@@ -1,21 +1,16 @@
 package br.demo.backend.service.chat;
 
 
-import br.demo.backend.model.Group;
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfChat;
-import br.demo.backend.model.relations.PermissionProject;
-import br.demo.backend.repository.GroupRepository;
-import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.service.ProjectService;
 import br.demo.backend.service.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 

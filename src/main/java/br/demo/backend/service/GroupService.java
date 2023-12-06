@@ -5,9 +5,7 @@ import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.relations.PermissionProject;
 import br.demo.backend.repository.GroupRepository;
-import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +20,7 @@ public class GroupService {
 
     public Collection<Group> findAll() {
         Collection<Group> groups = groupRepository.findAll();
-        for(Group group : groups){
+        for (Group group : groups) {
             ResolveStackOverflow.resolveStackOverflow(group);
         }
         return groups;
@@ -39,45 +37,54 @@ public class GroupService {
     }
 
     public Collection<Group> findGroupsByUser(Long userId) {
-        Collection<Group> groups =  groupRepository.findGroupsByUsersContaining(new User(userId));
-        for(Group group : groups){
+        Collection<Group> groups = groupRepository.findGroupsByUsersContaining(new User(userId));
+        for (Group group : groups) {
             ResolveStackOverflow.resolveStackOverflow(group);
         }
         return groups;
     }
 
-    public Permission getPermissionOfAGroupInAProject(Long groupId, Long projectId){
+    public Permission getPermissionOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
-        Permission permission = group.getProjects().stream().filter(
+        Permission permission = group.getPermission().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
-        ).findFirst().get().getPermission();
+        ).findFirst().get();
         return permission;
     }
 
 
     public Collection<Group> findGroupsOfAProject(Long projectId) {
-        Collection<Group> groups =  groupRepository.findGroupsByProjects_Project(new Project(projectId));
-        for(Group group : groups){
+        Collection<Group> groups = groupRepository.findGroupsByProjects_Project(new Project(projectId));
+        for (Group group : groups) {
             ResolveStackOverflow.resolveStackOverflow(group);
         }
         return groups;
     }
 
     public void update(Group group) {
-        groupRepository.save(group);
-    }
-    public void updatePermission(Group group, Long projectId, Long permissionId) {
-        for(PermissionProject permissionProject : group.getProjects()){
-            if(permissionProject.getProject().getId().equals(projectId)){
-                permissionProject.setPermission(new Permission(permissionId));
-            }
-        }
-        for(User user : group.getUsers()){
-            for(PermissionProject permissionProject : user.getProjects()){
-                if(permissionProject.getProject().getId().equals(projectId)){
-                    permissionProject.setPermission(new Permission(permissionId));
+        Group groupOld = groupRepository.findById(group.getId()).get();
+        for (Permission permissionOld : groupOld.getPermission()) {
+            for (Permission permission : group.getPermission()) {
+                if (permissionOld.getProject().getId().equals(permission.getProject().getId()) &&
+                        !permissionOld.getPermission().equals(permission.getPermission())) {
+                    updatePermission(group, permission.getProject().getId(), permission);
+                    break;
                 }
             }
+        }
+        groupRepository.save(group);
+    }
+
+
+    private void updatePermission(Group group, Long projectId, Permission permission) {
+        for (User user : group.getUsers()) {
+            for (Permission permissionFor : user.getPermission()) {
+                if (permissionFor.getProject().getId().equals(projectId)) {
+                    user.getPermission().remove(permissionFor);
+                    break;
+                }
+            }
+            user.getPermission().add(permission);
         }
         groupRepository.save(group);
     }

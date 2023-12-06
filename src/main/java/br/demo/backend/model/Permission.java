@@ -19,7 +19,8 @@ public class Permission {
     private Long id;
     private String name;
     private TypePermission permission;
-
+    @ManyToOne
+    private Project project;
     public Permission(Long id){
         this.id = id;
     }

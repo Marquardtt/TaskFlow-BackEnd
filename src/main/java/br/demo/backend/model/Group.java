@@ -1,6 +1,5 @@
 package br.demo.backend.model;
 
-import br.demo.backend.model.relations.PermissionProject;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +19,7 @@ public class Group {
     private String description;
 
     @OneToMany
-    private Collection<PermissionProject> projects;
+    private Collection<Permission> permission;
     @ManyToOne
     private User owner;
     @ManyToMany

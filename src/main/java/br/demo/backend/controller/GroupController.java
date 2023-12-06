@@ -47,11 +47,6 @@ public class GroupController {
         return groupService.getPermissionOfAGroupInAProject(goupId, projectId);
     }
 
-    @PutMapping("/permission/{projectId}/{permissionId}")
-    public void updatePermission(@RequestBody Group group, @PathVariable Long projectId, @PathVariable Long permissionId) {
-        groupService.updatePermission(group, projectId, permissionId);
-    }
-
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         groupService.delete(id);

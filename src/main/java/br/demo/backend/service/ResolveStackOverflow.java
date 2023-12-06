@@ -1,22 +1,20 @@
 package br.demo.backend.service;
 
 import br.demo.backend.model.Group;
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.PermissionProject;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.values.UserValued;
 
 import java.util.Collection;
 
@@ -79,10 +77,10 @@ public class ResolveStackOverflow {
                 resolveStackOverflow(taskValue.getProperty());
             }
             for (Message message : task.getComments()) {
-                message.getUser().setProjects(null);
+                message.getUser().setPermission(null);
             }
             for (Log log : task.getLogs()) {
-                log.getUser().setProjects(null);
+                log.getUser().setPermission(null);
             }
         } catch (NullPointerException ignored) {
         }
@@ -90,8 +88,8 @@ public class ResolveStackOverflow {
 
     public static void resolveStackOverflow(User user) {
         try {
-            for (PermissionProject permissionProject : user.getProjects()) {
-                resolveStackOverflow(permissionProject.getProject());
+            for (Permission permission : user.getPermission()) {
+                resolveStackOverflow(permission.getProject());
             }
         } catch (NullPointerException ignored) {
         }
