@@ -43,6 +43,10 @@ public class GroupService {
         }
         return groups;
     }
+    public Collection<User> findUsersByGroup(Long groupId) {
+        Group group = groupRepository.findById(groupId).get();
+        return group.getUsers();
+    }
 
     public Permission getPermissionOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
@@ -89,6 +93,11 @@ public class GroupService {
         groupRepository.save(group);
     }
 
+    public void updateUsers(User user, Long groupId) {
+        Group group = groupRepository.findById(groupId).get();
+        group.getUsers().add(user);
+        groupRepository.save(group);
+    }
 
     public void delete(Long id) {
         groupRepository.deleteById(id);

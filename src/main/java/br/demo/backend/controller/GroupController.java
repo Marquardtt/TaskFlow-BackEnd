@@ -23,6 +23,11 @@ public class GroupController {
         groupService.update(group);
     }
 
+    @PutMapping("/users/{groupId}")
+    public void updateUser(@RequestBody User user, @PathVariable Long groupId) {
+        groupService.updateUsers(user, groupId);
+    }
+
     @GetMapping("/{id}")
     public Group findOne(@PathVariable Long id) {
         return groupService.findOne(id);
@@ -47,9 +52,17 @@ public class GroupController {
         return groupService.getPermissionOfAGroupInAProject(goupId, projectId);
     }
 
+    @GetMapping("/users/{groupId}")
+    public Collection<User> findUsersByGroup(@PathVariable Long groupId) {
+        return groupService.findUsersByGroup(groupId);
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         groupService.delete(id);
     }
+
+
+
 
 }
