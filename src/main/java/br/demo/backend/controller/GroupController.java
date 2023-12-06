@@ -1,6 +1,7 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.Group;
+import br.demo.backend.model.User;
 import br.demo.backend.model.Permission;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
