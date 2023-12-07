@@ -19,4 +19,5 @@ public abstract class Value {
     private Long id;
 
     public abstract Object getValue();
+    public abstract void setValue(Object value);
 }

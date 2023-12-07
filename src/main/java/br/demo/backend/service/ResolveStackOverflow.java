@@ -39,6 +39,9 @@ public class ResolveStackOverflow {
                 resolveStackOverflow(property);
             }
             page.setProject(null);
+            if(page instanceof CommonPage){
+                resolveStackOverflow(((CommonPage)page).getPropertyOrdering());
+            }
             if (page instanceof Canvas) {
                 for (TaskCanvas taskCanvas : ((Canvas) page).getTasks()) {
                     resolveStackOverflow(taskCanvas.getTask());
@@ -67,23 +70,46 @@ public class ResolveStackOverflow {
     }
 
     public static void resolveStackOverflow(Task task) {
+
         try {
             for (TaskValue taskValue : task.getProperties()) {
                 if(taskValue.getProperty().getType().equals(TypeOfProperty.USER)){
-                    for(User user : (Collection<User>)taskValue.getValue()){
-                        resolveStackOverflow(user);
+
+                    try {
+                        for(User user : (Collection<User>)taskValue.getValue()){
+                            resolveStackOverflow(user);
+                        }
+                    } catch (NullPointerException ignored){
+
                     }
+
                 }
                 resolveStackOverflow(taskValue.getProperty());
             }
-            for (Message message : task.getComments()) {
-                message.getUser().setPermission(null);
-            }
-            for (Log log : task.getLogs()) {
-                log.getUser().setPermission(null);
-            }
-        } catch (NullPointerException ignored) {
+        } catch (NullPointerException ignored){
+
         }
+
+
+
+
+            try {
+                for (Message message : task.getComments()) {
+                    message.getUser().setPermission(null);
+                }
+            } catch (NullPointerException ignored){
+
+            }
+
+
+            try {
+                for (Log log : task.getLogs()) {
+                    log.getUser().setPermission(null);
+                }
+            } catch (NullPointerException ignored){
+
+            }
+
     }
 
     public static void resolveStackOverflow(User user) {

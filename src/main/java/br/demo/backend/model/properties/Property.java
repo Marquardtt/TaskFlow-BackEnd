@@ -28,7 +28,7 @@ public class Property {
     private Boolean obligatory;
     @Enumerated(value = EnumType.STRING)
     private TypeOfProperty type;
-
+ 
     @ManyToMany
     private Collection<Page> pages;
 

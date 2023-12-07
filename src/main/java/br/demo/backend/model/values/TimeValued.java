@@ -21,6 +21,8 @@ public class TimeValued extends Value {
     }
 
     @Override
+    public void setValue(Object value){this.time = (LocalTime) value;}
+    @Override
     public Object getValue() {
         return this.time;
     }

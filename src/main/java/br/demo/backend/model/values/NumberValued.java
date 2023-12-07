@@ -17,6 +17,9 @@ public class NumberValued extends Value{
         super(id);
         this.number = number;
     }
+
+    @Override
+    public void setValue(Object value){this.number = (Integer)value;}
     @Override
     public Object getValue(){
         return this.number;
