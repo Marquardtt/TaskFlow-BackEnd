@@ -20,15 +20,15 @@ public class PropertyController {
 
     @PostMapping("/limited")
     public void save(@RequestBody Limited property){
-        propertyService.save(property);
+        propertyService.saveLimited(property);
     }
     @PostMapping("/select")
     public void save(@RequestBody Select property){
-        propertyService.save(property);
+        propertyService.saveSelect(property);
     }
     @PostMapping("/date")
     public void save(@RequestBody Date property){
-        propertyService.save(property);
+        propertyService.saveDate(property);
     }
 
     @PutMapping

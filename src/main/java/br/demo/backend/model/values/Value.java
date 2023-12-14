@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(using = DeserializerValue.class)
 public abstract class Value {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     public abstract Object getValue();
