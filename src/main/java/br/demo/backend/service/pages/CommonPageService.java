@@ -2,6 +2,7 @@ package br.demo.backend.service.pages;
 
 
 import br.demo.backend.model.pages.CommonPage;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.repository.pages.CommonPageRepository;
 import br.demo.backend.service.ResolveStackOverflow;
 import br.demo.backend.service.tasks.TaskService;
@@ -29,6 +30,17 @@ public class CommonPageService {
         CommonPage commonPage = commonPageRepository.findById(id).get();
         ResolveStackOverflow.resolveStackOverflow(commonPage);
         return commonPage;
+    }
+
+    public void updateIndexes(CommonPage page, Long taskId, Integer index) {
+        for(TaskPage task : page.getTasks()) {
+            if(task.getTask().getId().equals(taskId)) {
+                task.setIndex(index);
+            } else if (task.getIndex() >= index) {
+                task.setIndex(task.getIndex() + 1);
+            }
+        }
+        commonPageRepository.save(page);
     }
     public void update(CommonPage commonPage) {
         commonPageRepository.save(commonPage);
