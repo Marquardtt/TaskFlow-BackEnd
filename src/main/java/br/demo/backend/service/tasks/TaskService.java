@@ -85,11 +85,11 @@ public class TaskService {
     private void addTaskToPage(Task task, Page page) {
         if (page instanceof CommonPage) {
             CommonPage commonPage = (CommonPage) page;
-            commonPage.getTasks().add(task);
+            commonPage.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
             commonPageRepository.save(commonPage);
         }else{
             Canvas canvas = (Canvas) page;
-            canvas.getTasks().add(new TaskPage(null, task, 0.0, 0.0));
+            canvas.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
             canvasRepository.save(canvas);
         }
     }
@@ -170,13 +170,13 @@ public class TaskService {
     public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
         CommonPage page = commonPageRepository.findById(pageId).get();
         Collection<Task> tasks = new ArrayList<>();
-        for (Task task : page.getTasks()) {
-            ResolveStackOverflow.resolveStackOverflow(task);
-            for (TaskValue taskValue : task.getProperties()) {
+        for (TaskPage task : page.getTasks()) {
+            ResolveStackOverflow.resolveStackOverflow(task.getTask());
+            for (TaskValue taskValue : task.getTask().getProperties()) {
                 if (taskValue.getProperty().getId().equals(propertyId)) {
                     if (((LocalDateTime) taskValue.getValue()
                             .getValue()).getMonthValue() == month) {
-                        tasks.add(task);
+                        tasks.add(task.getTask());
                     }
                 }
             }

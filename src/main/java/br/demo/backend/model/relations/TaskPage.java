@@ -20,5 +20,5 @@ public class TaskPage {
     private Task task;
     private Double x;
     private Double y;
-    private Integer index;
+    private Integer indexAtColumn;
 }

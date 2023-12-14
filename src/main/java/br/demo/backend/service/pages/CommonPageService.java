@@ -35,9 +35,9 @@ public class CommonPageService {
     public void updateIndexes(CommonPage page, Long taskId, Integer index) {
         for(TaskPage task : page.getTasks()) {
             if(task.getTask().getId().equals(taskId)) {
-                task.setIndex(index);
-            } else if (task.getIndex() >= index) {
-                task.setIndex(task.getIndex() + 1);
+                task.setIndexAtColumn(index);
+            } else if (task.getIndexAtColumn() >= index) {
+                task.setIndexAtColumn(task.getIndexAtColumn() + 1);
             }
         }
         commonPageRepository.save(page);

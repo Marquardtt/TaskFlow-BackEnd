@@ -18,8 +18,8 @@ public class CommonPageController {
         commonPageService.save(page);
     }
 
-    @PutMapping
-    public void updateIndexes(@RequestBody CommonPage page, @RequestParam Long taskId, @RequestParam Integer index) {
+    @PutMapping("/{taskId}/{index}")
+    public void updateIndexes(@RequestBody CommonPage page, @PathVariable Long taskId, @PathVariable Integer index) {
         commonPageService.updateIndexes(page, taskId, index);
     }
 
