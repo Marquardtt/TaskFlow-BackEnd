@@ -1,16 +1,9 @@
 package br.demo.backend.service.pages;
 
 
-import br.demo.backend.model.Project;
 import br.demo.backend.model.pages.CommonPage;
-import br.demo.backend.model.pages.CommonPage;
-import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskCanvas;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.pages.CommonPageRepository;
 import br.demo.backend.service.ResolveStackOverflow;
-import br.demo.backend.service.properties.PropertyService;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

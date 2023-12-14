@@ -17,8 +17,6 @@ import java.util.Collection;
 @AllArgsConstructor
 @Table(name = "db_common_page")
 public class CommonPage extends Page {
-    @ManyToMany
-    private Collection<Task> tasks;
     @ManyToOne
     private Property propertyOrdering;
 }

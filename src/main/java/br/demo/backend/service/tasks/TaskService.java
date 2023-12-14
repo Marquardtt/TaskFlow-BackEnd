@@ -3,7 +3,6 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Canvas;
@@ -11,7 +10,7 @@ import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -90,7 +89,7 @@ public class TaskService {
             commonPageRepository.save(commonPage);
         }else{
             Canvas canvas = (Canvas) page;
-            canvas.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
+            canvas.getTasks().add(new TaskPage(null, task, 0.0, 0.0));
             canvasRepository.save(canvas);
         }
     }

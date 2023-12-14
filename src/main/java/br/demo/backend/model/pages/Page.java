@@ -4,7 +4,7 @@ package br.demo.backend.model.pages;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +26,9 @@ public class Page {
 
     @Enumerated(value = EnumType.STRING)
     private TypeOfPage type;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Collection<TaskPage> tasks;
 
     @ManyToMany(mappedBy = "pages")
     private Collection<Property> properties;

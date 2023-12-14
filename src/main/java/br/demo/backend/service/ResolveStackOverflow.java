@@ -11,7 +11,7 @@ import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -42,15 +42,11 @@ public class ResolveStackOverflow {
             if(page instanceof CommonPage){
                 resolveStackOverflow(((CommonPage)page).getPropertyOrdering());
             }
-            if (page instanceof Canvas) {
-                for (TaskCanvas taskCanvas : ((Canvas) page).getTasks()) {
-                    resolveStackOverflow(taskCanvas.getTask());
-                }
-            } else {
-                for (Task task : ((CommonPage) page).getTasks()) {
-                    resolveStackOverflow(task);
-                }
+
+            for (TaskPage taskCanvas : page.getTasks()) {
+                resolveStackOverflow(taskCanvas.getTask());
             }
+
         } catch (NullPointerException ignored) {
         }
     }
