@@ -1,11 +1,13 @@
 package br.demo.backend.controller.pages;
 
 import br.demo.backend.model.pages.CommonPage;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.CommonPageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -19,8 +21,8 @@ public class CommonPageController {
     }
 
     @PutMapping("/{taskId}/{index}")
-    public void updateIndexes(@RequestBody CommonPage page, @PathVariable Long taskId, @PathVariable Integer index) {
-        commonPageService.updateIndexes(page, taskId, index);
+    public CommonPage updateIndexes(@RequestBody CommonPage page, @PathVariable Long taskId, @PathVariable Integer index) {
+        return commonPageService.updateIndexes(page, taskId, index);
     }
 
     @PutMapping

@@ -42,11 +42,9 @@ public class ResolveStackOverflow {
             if(page instanceof CommonPage){
                 resolveStackOverflow(((CommonPage)page).getPropertyOrdering());
             }
-
             for (TaskPage taskCanvas : page.getTasks()) {
                 resolveStackOverflow(taskCanvas.getTask());
             }
-
         } catch (NullPointerException ignored) {
         }
     }
