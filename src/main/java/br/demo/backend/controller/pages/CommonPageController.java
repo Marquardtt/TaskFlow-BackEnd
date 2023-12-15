@@ -20,9 +20,9 @@ public class CommonPageController {
         commonPageService.save(page);
     }
 
-    @PutMapping("/{taskId}/{index}")
-    public CommonPage updateIndexes(@RequestBody CommonPage page, @PathVariable Long taskId, @PathVariable Integer index) {
-        return commonPageService.updateIndexes(page, taskId, index);
+    @PutMapping("/{taskId}/{index}/{columnChanged}")
+    public CommonPage updateIndexes(@RequestBody CommonPage page, @PathVariable Long taskId, @PathVariable Integer index, @PathVariable Integer columnChanged) {
+        return commonPageService.updateIndexes(page, taskId, index,columnChanged);
     }
 
     @PutMapping

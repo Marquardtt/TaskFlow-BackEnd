@@ -35,28 +35,35 @@ public class CommonPageService {
         return commonPage;
     }
 
-    public CommonPage updateIndexes(CommonPage page, Long taskId, Integer index) {
+    public CommonPage updateIndexes(CommonPage page, Long taskId, Integer index, Integer columnChaged) {
         Integer oldIndex = 0;
         Option columnOption = null;
+        TaskPage taskOld = null;
         for (TaskPage task : page.getTasks()) {
             if (task.getTask().getId().equals(taskId)) {
+                taskOld = task;
                 oldIndex = task.getIndexAtColumn();
                 for (TaskValue taskVl : task.getTask().getProperties()) {
                     if (taskVl.getProperty().getId().equals(page.getPropertyOrdering().getId())) {
                         columnOption = (Option) taskVl.getValue().getValue();
                     }
                 }
-                task.setIndexAtColumn(index);
             }
         }
         for (TaskPage task : page.getTasks()) {
             for (TaskValue taskVl : task.getTask().getProperties()) {
                 if (taskVl.getProperty().getId().equals(page.getPropertyOrdering().getId())) {
-                    if (((Option)taskVl.getValue().getValue()).getId().equals(columnOption.getId())) {
-                         if (oldIndex < index && task.getIndexAtColumn() <= index && task.getIndexAtColumn() > oldIndex &&  !task.getTask().getId().equals(taskId)) {
-                            task.setIndexAtColumn(index - 1);
-                        } else if (oldIndex > index && task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
-                            task.setIndexAtColumn(index + 1);
+                    if (((Option) taskVl.getValue().getValue()).getId().equals(columnOption.getId())) {
+                        if (oldIndex > index || columnChaged == 1) {
+                            if (task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
+                                task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                            }
+                            taskOld.setIndexAtColumn(index);
+                        } else {
+                            if (task.getIndexAtColumn() > index && !task.getTask().getId().equals(taskId)) {
+                                task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                            }
+                            taskOld.setIndexAtColumn(index+1);
                         }
                     }
                 }
