@@ -1,7 +1,9 @@
 package br.demo.backend.model.values;
 
+import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.properties.Option;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.values.*;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -20,6 +22,8 @@ import java.util.List;
 
 public class DeserializerValue extends StdDeserializer<Value> {
     JsonNode jsonNode;
+    private Project project;
+    private Project ;
 
     protected DeserializerValue() {
         super(Value.class);
@@ -93,5 +97,8 @@ public class DeserializerValue extends StdDeserializer<Value> {
         } catch (NullPointerException e) {
             return false;
         }
+
     }
+
+
 }

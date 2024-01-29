@@ -53,19 +53,22 @@ public class CommonPageService {
         for (TaskPage task : page.getTasks()) {
             for (TaskValue taskVl : task.getTask().getProperties()) {
                 if (taskVl.getProperty().getId().equals(page.getPropertyOrdering().getId())) {
-                    if (((Option) taskVl.getValue().getValue()).getId().equals(columnOption.getId())) {
-                        if (oldIndex > index || columnChaged == 1) {
-                            if (task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
-                                task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                    try{
+                        if (taskVl.getValue().getValue() == null && columnOption == null ||
+                                ((Option) taskVl.getValue().getValue()).getId().equals(columnOption.getId())) {
+                            if (oldIndex > index || columnChaged == 1) {
+                                if (task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
+                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                                }
+                                taskOld.setIndexAtColumn(index);
+                            } else {
+                                if (task.getIndexAtColumn() > index && !task.getTask().getId().equals(taskId)) {
+                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                                }
+                                taskOld.setIndexAtColumn(index+1);
                             }
-                            taskOld.setIndexAtColumn(index);
-                        } else {
-                            if (task.getIndexAtColumn() > index && !task.getTask().getId().equals(taskId)) {
-                                task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                            }
-                            taskOld.setIndexAtColumn(index+1);
                         }
-                    }
+                    } catch (NullPointerException ignore){}
                 }
             }
         }
