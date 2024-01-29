@@ -19,6 +19,9 @@ public class ArchiveValued extends Value{
     }
 
     @Override
+    public void setValue(Object value){this.archive = (String)value;}
+
+    @Override
     public Object getValue(){
         return this.archive;
     }

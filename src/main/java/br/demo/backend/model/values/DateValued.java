@@ -19,6 +19,9 @@ public class DateValued extends Value{
         super(id);
         this.dateTime = dateTime;
     }
+
+    @Override
+    public void setValue(Object value){this.dateTime = (LocalDateTime) value;}
     @Override
     public Object getValue(){
         return this.dateTime;

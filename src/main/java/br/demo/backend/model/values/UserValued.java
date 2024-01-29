@@ -33,4 +33,7 @@ public class UserValued extends Value{
     public Object getValue(){
         return this.users;
     }
+
+    @Override
+    public void setValue(Object value){this.users = (List<User>)value;}
 }

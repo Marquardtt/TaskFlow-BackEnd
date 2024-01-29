@@ -29,4 +29,12 @@ public class Configuration {
     private Language language;
     private Boolean libras;
     private Boolean textToSound;
+    private Boolean notificTasks;
+    private Boolean notificAtAddMeInAGroup;
+    private Boolean notificWhenChangeMyPermission;
+    private Boolean notificMyPointsChange;
+    private Boolean notificSchedules;
+    private Boolean notificMylateProject;
+    private Boolean notificChats;
+    private Boolean notificComments;
 }

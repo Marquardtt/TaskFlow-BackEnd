@@ -20,15 +20,15 @@ import java.util.Collection;
 @Table(name = "tb_property")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Property {
-    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id
+    private Long id = null;
     private String name;
     private Boolean visible;
     private Boolean obligatory;
     @Enumerated(value = EnumType.STRING)
     private TypeOfProperty type;
-
+ 
     @ManyToMany
     private Collection<Page> pages;
 

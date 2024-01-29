@@ -22,4 +22,8 @@ public class TextValued extends Value {
         return this.text;
     }
 
+
+    @Override
+    public void setValue(Object value){this.text = (String)value;}
+
 }

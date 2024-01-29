@@ -24,6 +24,9 @@ public class UniOptionValued extends Value{
 ;    }
 
     @Override
+    public void setValue(Object value){this.uniOption = (Option) value;}
+
+    @Override
     public Object getValue(){
         return this.uniOption;
     }

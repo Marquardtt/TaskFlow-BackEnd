@@ -3,7 +3,6 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Canvas;
@@ -11,7 +10,7 @@ import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -76,6 +75,7 @@ public class TaskService {
         taskEmpty.setLogs(new HashSet<>());
         taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
 
+        System.out.println(taskEmpty);
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page);
         ResolveStackOverflow.resolveStackOverflow(task);
@@ -85,11 +85,11 @@ public class TaskService {
     private void addTaskToPage(Task task, Page page) {
         if (page instanceof CommonPage) {
             CommonPage commonPage = (CommonPage) page;
-            commonPage.getTasks().add(task);
+            commonPage.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
             commonPageRepository.save(commonPage);
         }else{
             Canvas canvas = (Canvas) page;
-            canvas.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
+            canvas.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
             canvasRepository.save(canvas);
         }
     }
@@ -170,13 +170,13 @@ public class TaskService {
     public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
         CommonPage page = commonPageRepository.findById(pageId).get();
         Collection<Task> tasks = new ArrayList<>();
-        for (Task task : page.getTasks()) {
-            ResolveStackOverflow.resolveStackOverflow(task);
-            for (TaskValue taskValue : task.getProperties()) {
+        for (TaskPage task : page.getTasks()) {
+            ResolveStackOverflow.resolveStackOverflow(task.getTask());
+            for (TaskValue taskValue : task.getTask().getProperties()) {
                 if (taskValue.getProperty().getId().equals(propertyId)) {
                     if (((LocalDateTime) taskValue.getValue()
                             .getValue()).getMonthValue() == month) {
-                        tasks.add(task);
+                        tasks.add(task.getTask());
                     }
                 }
             }

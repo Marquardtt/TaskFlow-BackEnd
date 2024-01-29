@@ -25,7 +25,6 @@ public class Project {
     private LocalDateTime visualizedAt;
     @ManyToOne
     private User owner;
-    private Boolean gamification;
     @OneToMany(mappedBy = "project")
     private Collection<Page> pages;
     @OneToMany(mappedBy = "project")

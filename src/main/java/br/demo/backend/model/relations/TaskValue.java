@@ -21,6 +21,6 @@ public class TaskValue {
     @ManyToOne
     private Property property;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private Value value;
 }

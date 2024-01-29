@@ -25,6 +25,8 @@ public class MultiOptionValued extends Value{
         this.multiOptions = archive;
     }
     @Override
+    public void setValue(Object value){this.multiOptions = (List<Option>) value;}
+    @Override
     public Object getValue(){
         return this.multiOptions;
     }
