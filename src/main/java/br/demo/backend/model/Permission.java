@@ -18,10 +18,12 @@ public class Permission {
     @GeneratedValue
     private Long id;
     private String name;
+    @Enumerated(EnumType.STRING)
     private TypePermission permission;
     @ManyToOne
     private Project project;
-    public Permission(Long id){
+
+    public Permission(Long id) {
         this.id = id;
     }
 }
