@@ -2,6 +2,7 @@ package br.demo.backend.service.properties;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
@@ -21,6 +22,7 @@ import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.service.ResolveStackOverflow;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -53,7 +55,24 @@ public class PropertyService {
     }
 
     public void update(Property property) {
-        propertyRepository.save(property);
+        System.out.println(property);
+        if(property.getType().equals(TypeOfProperty.DATE)){
+            Date date = new Date();
+            BeanUtils.copyProperties( property, date);
+            dateRepository.save(date);
+        } else if(property.getType().equals(TypeOfProperty.SELECT) ||
+                property.getType().equals(TypeOfProperty.TAG) ||
+                property.getType().equals(TypeOfProperty.RADIO) ||
+                property.getType().equals(TypeOfProperty.CHECKBOX)
+        ){
+            Select select = new Select();
+            BeanUtils.copyProperties( property, select);
+            selectRepository.save(select);
+        }else{
+            Limited limited = new Limited();
+            BeanUtils.copyProperties( property, limited);
+            limitedRepository.save(limited);
+        }
     }
 
     private void setInTheTasksThatAlreadyExists(Property property) {
@@ -95,8 +114,9 @@ public class PropertyService {
         Property property = propertyRepository.findById(id).get();
         if (validateCanBeDeleted(property)) {
             propertyRepository.delete(property);
-        }
+        }else{
         throw new RuntimeException("Property can't be deleted");
+        }
     }
 
     private Boolean validateCanBeDeleted(Property property) {

@@ -15,8 +15,11 @@ import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.model.values.UserValued;
+import org.springframework.beans.BeanUtils;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ResolveStackOverflow {
 
@@ -38,15 +41,18 @@ public class ResolveStackOverflow {
             for (Property property : page.getProperties()) {
                 resolveStackOverflow(property);
             }
-            page.setProject(null);
-            if(page instanceof CommonPage){
-                resolveStackOverflow(((CommonPage)page).getPropertyOrdering());
+        } catch (NullPointerException ignore) {}
+        page.setProject(null);
+        try {
+            if (page instanceof CommonPage) {
+                resolveStackOverflow(((CommonPage) page).getPropertyOrdering());
             }
+        } catch (NullPointerException ignore) {}
+        try {
             for (TaskPage taskCanvas : page.getTasks()) {
                 resolveStackOverflow(taskCanvas.getTask());
             }
-        } catch (NullPointerException ignored) {
-        }
+        } catch (NullPointerException ignore) {}
     }
 
     public static void resolveStackOverflow(Property property) {
@@ -67,42 +73,34 @@ public class ResolveStackOverflow {
 
         try {
             for (TaskValue taskValue : task.getProperties()) {
-                if(taskValue.getProperty().getType().equals(TypeOfProperty.USER)){
-
+                if (taskValue.getProperty().getType().equals(TypeOfProperty.USER)) {
                     try {
-                        for(User user : (Collection<User>)taskValue.getValue()){
+                        for(User user : (Collection<User>)taskValue.getValue().getValue()){
                             resolveStackOverflow(user);
                         }
-                    } catch (NullPointerException ignored){
-
-                    }
+                    } catch (NullPointerException ignored) {}
 
                 }
                 resolveStackOverflow(taskValue.getProperty());
             }
-        } catch (NullPointerException ignored){
+        } catch (NullPointerException ignored) { }
+
+         try {
+            for (Message message : task.getComments()) {
+                message.getUser().setPermission(null);
+            }
+        } catch (NullPointerException ignored) {
 
         }
 
-
-
-
-            try {
-                for (Message message : task.getComments()) {
-                    message.getUser().setPermission(null);
-                }
-            } catch (NullPointerException ignored){
-
+        try {
+            for (Log log : task.getLogs()) {
+                log.getUser().setPermission(null);
             }
+        } catch (NullPointerException ignored) {
 
+        }
 
-            try {
-                for (Log log : task.getLogs()) {
-                    log.getUser().setPermission(null);
-                }
-            } catch (NullPointerException ignored){
-
-            }
 
     }
 

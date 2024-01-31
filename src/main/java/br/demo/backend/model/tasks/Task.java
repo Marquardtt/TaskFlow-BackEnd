@@ -2,6 +2,7 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.TaskValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,10 +33,10 @@ public class Task {
     private Collection<TaskValue> properties;
 
     @OneToMany(cascade = CascadeType.ALL)
-    Collection<Log> logs;
+    private Collection<Log> logs;
 
     @OneToMany(cascade = CascadeType.ALL)
-    Collection<Message> comments;
+    private Collection<Message> comments;
     public Task(Long id){
         this.id= id;
     }

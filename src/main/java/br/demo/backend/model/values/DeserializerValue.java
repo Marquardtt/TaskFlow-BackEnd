@@ -22,8 +22,7 @@ import java.util.List;
 
 public class DeserializerValue extends StdDeserializer<Value> {
     JsonNode jsonNode;
-    private Project project;
-    private Project ;
+
 
     protected DeserializerValue() {
         super(Value.class);

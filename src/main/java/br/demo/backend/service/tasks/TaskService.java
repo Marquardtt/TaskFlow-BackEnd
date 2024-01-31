@@ -77,12 +77,13 @@ public class TaskService {
 
         System.out.println(taskEmpty);
         Task task = taskRepository.save(taskEmpty);
-        addTaskToPage(task, page);
+        addTaskToPage(task, page.getId());
         ResolveStackOverflow.resolveStackOverflow(task);
         return task;
     }
 
-    private void addTaskToPage(Task task, Page page) {
+    private void addTaskToPage(Task task, Long pageId) {
+        Page page = pageRepositorry.findById(pageId).get();
         if (page instanceof CommonPage) {
             CommonPage commonPage = (CommonPage) page;
             commonPage.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
