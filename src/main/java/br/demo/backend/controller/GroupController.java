@@ -1,10 +1,12 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.Group;
+import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.Permission;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -14,6 +16,7 @@ import java.util.Collection;
 @RequestMapping("/group")
 public class GroupController {
     private GroupService groupService;
+
     @PostMapping
     public void insert(@RequestBody Group group) {
         groupService.save(group);
@@ -24,9 +27,14 @@ public class GroupController {
         groupService.update(group);
     }
 
-    @PutMapping("/users/{groupId}")
+    @PutMapping("/user/{groupId}")
     public void updateUser(@RequestBody User user, @PathVariable Long groupId) {
         groupService.updateUsers(user, groupId);
+    }
+
+    @PutMapping("{projectId}{groupId}/{permission}")
+    public void updatePermission(@PathVariable Long projectId, @RequestBody Group group, @RequestBody Permission permission) {
+        groupService.updatePermission(group, projectId, permission);
     }
 
     @GetMapping("/{id}")
@@ -43,14 +51,21 @@ public class GroupController {
     public Collection<Group> findGroupsByAUser(@PathVariable Long userId) {
         return groupService.findGroupsByUser(userId);
     }
+
     @GetMapping("/project/{projectId}")
     public Collection<Group> findGroupsOfAProject(@PathVariable Long projectId) {
         return groupService.findGroupsOfAProject(projectId);
     }
 
-    @GetMapping("/{goupId}/{projectId}")
-    public Permission insert(@PathVariable Long goupId, @PathVariable Long projectId){
-        return groupService.getPermissionOfAGroupInAProject(goupId, projectId);
+    @GetMapping("/{groupId}/{projectId}")
+    public Permission findPermissionOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
+        return groupService.findPermissionOfAGroupInAProject(groupId, projectId);
+    }
+
+    @GetMapping("/{groupId}/permissions/{projectId}")
+    public ResponseEntity<Collection<Permission>> findAllPermissionsOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
+        Collection<Permission> permissions = groupService.findAllPermissionsOfAGroupInAProject(groupId, projectId);
+        return ResponseEntity.ok(permissions);
     }
 
     @GetMapping("/users/{groupId}")
@@ -62,8 +77,4 @@ public class GroupController {
     public void delete(@PathVariable Long id) {
         groupService.delete(id);
     }
-
-
-
-
 }
