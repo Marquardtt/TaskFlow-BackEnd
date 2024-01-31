@@ -74,7 +74,7 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                                 Long idOpt = value.get("id").asLong();
                                 return new TaskValue(id, property, new UniOptionValued(idTaskVl, new Option(idOpt)));
                             }
-                            return null;
+                            return new TaskValue(id, property, new UniOptionValued(idTaskVl, null));
                         }
                         else if(type.equals("CHECKBOX") || type.equals("TAG")){
                             ArrayList<Option> options = new ArrayList<>();
