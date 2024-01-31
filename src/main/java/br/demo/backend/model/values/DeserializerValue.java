@@ -2,8 +2,10 @@ package br.demo.backend.model.values;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.values.*;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -20,16 +22,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class DeserializerValue extends StdDeserializer<Value> {
+public class DeserializerValue extends StdDeserializer<TaskValue> {
     JsonNode jsonNode;
 
 
     protected DeserializerValue() {
-        super(Value.class);
+        super(TaskValue.class);
     }
 
     @Override
-    public Value deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public TaskValue deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
 
         Long id = null;
         jsonNode = deserializationContext.readTree(jsonParser);
@@ -39,53 +41,71 @@ public class DeserializerValue extends StdDeserializer<Value> {
             System.out.println(e.getMessage());
         }
 
-        System.out.println(jsonNode);
 
-        if (isPresent(jsonNode, "text")) {
-            String jsonValue = jsonNode.get("text").asText();
-            return new TextValued(id, jsonValue);
-        } else if (isPresent(jsonNode, "dateTime")) {
-            String jsonValue = jsonNode.get("dateTime").asText();
-            LocalDateTime dateTime = null;
-            dateTime = LocalDateTime.parse(jsonValue);
-            return new DateValued(id, dateTime);
 
-        } else if (isPresent(jsonNode, "number")) {
-            Integer jsonValue = jsonNode.get("number").asInt();
-            return new NumberValued(id, jsonValue);
-        } else if (isPresent(jsonNode, "time")) {
-            String jsonValue = jsonNode.get("time").asText();
-            LocalTime time = LocalTime.parse(jsonValue);
-            return new TimeValued(id, time);
-        } else if (isPresent(jsonNode, "archive")) {
-            String jsonValue = jsonNode.get("archive").asText();
-            return new ArchiveValued(id, jsonValue);
-        } else if (isPresent(jsonNode, "users")) {
-            JsonNode usersJSON = jsonNode.get("users");
-            List<User> users = new ArrayList<>();
-            for (JsonNode user : usersJSON) {
-                if (isPresent(user, "id")) {
-                    Long idUser = user.get("id").asLong();
-                    users.add(new User(idUser));
+        if (isPresent(jsonNode, "property")) {
+            JsonNode jsonProp = jsonNode.get("property");
+            if (isPresent(jsonProp, "type") &&
+                    isPresent(jsonProp, "id")) {
+                String type = jsonProp.get("type").asText();
+                Long idProp = jsonProp.get("id").asLong();
+
+                if (isPresent(jsonNode, "value")) {
+                    JsonNode jsonValue = jsonNode.get("value");
+                    if (isPresent(jsonValue, "value") &&
+                            isPresent(jsonValue, "id")) {
+                        JsonNode value = jsonValue.get("value");
+                        Long idTaskVl = jsonValue.get("id").asLong();
+                        Property property = new Property(idProp);
+
+                        if (type.equals("TEXT")) {
+                            return new TaskValue(id, property, new TextValued(idTaskVl, value.asText()));
+                        }else if(type.equals("ARCHIVE")){
+                            return new TaskValue(id, property, new ArchiveValued(idTaskVl, value.asText()));
+                        }
+                        else if(type.equals("DATE")){
+                            return new TaskValue(id, property, new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
+                        }
+                        else if(type.equals("NUMBER") || type.equals("PROGRESS")){
+                            return new TaskValue(id, property, new NumberValued(idTaskVl, value.asInt()));
+                        }
+                        else if(type.equals("RADIO") || type.equals("SELECT")){
+                            if(isPresent(value, "id")){
+                                Long idOpt = value.get("id").asLong();
+                                return new TaskValue(id, property, new UniOptionValued(idTaskVl, new Option(idOpt)));
+                            }
+                            return null;
+                        }
+                        else if(type.equals("CHECKBOX") || type.equals("TAG")){
+                            ArrayList<Option> options = new ArrayList<>();
+                            for(JsonNode valueF : value){
+                                if(isPresent(valueF, "id")){
+                                    options.add(new Option(valueF.get("id").asLong()));
+                                }
+                            }
+                            return new TaskValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
+                        }
+                        else if(type.equals("TIME")){
+                            return new TaskValue(id, property, new TimeValued(idTaskVl, LocalTime.parse(value.asText())));
+                        }
+                        else if(type.equals("USER")){
+                            ArrayList<User> users = new ArrayList<>();
+                            for(JsonNode valueF : value){
+                                if(isPresent(valueF, "id")){
+                                    users.add(new User(valueF.get("id").asLong()));
+                                }
+                            }
+                            return new TaskValue(id, new Property(idProp), new UserValued(idTaskVl, users));
+                        }
+                        throw new RuntimeException("Property have a unknown type");
+                    }
+                    throw new RuntimeException("Value object dont have a value or Id!");
                 }
+                throw new RuntimeException("TaskValue don't have a value");
             }
-            return new UserValued(id, users);
-        } else if (isPresent(jsonNode, "uniOption")) {
-            JsonNode jsonValue = jsonNode.get("uniOption");
-            Option option = null;
-            if (isPresent(jsonValue, "id")) {
-                option = new Option(jsonValue.get("id").asLong());
-            }
-            return new UniOptionValued(id, option);
+                throw new RuntimeException("Property don't have type attribute or id");
         }
-        JsonNode multiJSON = jsonNode.get("multiOptions");
-        List<Option> options = new ArrayList<>();
-        for (JsonNode option : multiJSON) {
-            if (isPresent(option, "id")) {
-                options.add(new Option(option.get("id").asLong()));
-            }
-        }
-        return new MultiOptionValued(id, options);
+            throw new RuntimeException("TaskValue don't have a property");
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {
@@ -100,6 +120,4 @@ public class DeserializerValue extends StdDeserializer<Value> {
         }
 
     }
-
-
 }

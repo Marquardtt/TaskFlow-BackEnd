@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_value")
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonDeserialize(using = DeserializerValue.class)
 public abstract class Value {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

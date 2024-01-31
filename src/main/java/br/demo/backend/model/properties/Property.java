@@ -34,4 +34,8 @@ public class Property {
 
     @ManyToOne
     private Project project;
+
+    public Property(Long id){
+        this.id = id;
+    }
 }
