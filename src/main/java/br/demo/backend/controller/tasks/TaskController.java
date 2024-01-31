@@ -5,6 +5,7 @@ import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;

@@ -20,8 +20,10 @@ public class Project {
     private Long id;
     private String name;
     private String description;
+    //Patch
     private String picture;
     private LocalDate deadline;
+    //Patch
     private LocalDateTime visualizedAt;
     @ManyToOne
     private User owner;

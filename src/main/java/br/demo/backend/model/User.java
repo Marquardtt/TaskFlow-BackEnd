@@ -19,11 +19,16 @@ public class User {
     private String username;
     private String password;
     private String address;
+    //Patch
     private String picture;
     private String mail;
     private String phone;
     private String description;
+
+    //Patch
     private Integer points;
+
+    //Patch
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
     @OneToMany

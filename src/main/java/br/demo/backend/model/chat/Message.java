@@ -25,5 +25,6 @@ public class Message {
     @ManyToOne
     private User user;
     private LocalDateTime dateTime;
+    //Patch
     private Boolean visualized = false;
 }

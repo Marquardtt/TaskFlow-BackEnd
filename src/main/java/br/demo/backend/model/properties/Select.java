@@ -19,6 +19,7 @@ import java.util.Collection;
 @Table(name = "tb_select")
 public class Select extends Property {
     @OneToMany(cascade = CascadeType.ALL)
+    //Patch
     private Collection<Option> options;
 
     public Select(Long id, String name, Boolean visible, Boolean obligatory,

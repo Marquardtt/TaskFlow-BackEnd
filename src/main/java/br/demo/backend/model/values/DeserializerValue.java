@@ -39,6 +39,8 @@ public class DeserializerValue extends StdDeserializer<Value> {
             System.out.println(e.getMessage());
         }
 
+        System.out.println(jsonNode);
+
         if (isPresent(jsonNode, "text")) {
             String jsonValue = jsonNode.get("text").asText();
             return new TextValued(id, jsonValue);

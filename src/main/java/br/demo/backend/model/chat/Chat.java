@@ -20,6 +20,7 @@ public class Chat {
     private Long id;
     @ManyToMany
     private Collection<User> users;
+    //Patch
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Message> messages;
     @Enumerated(EnumType.STRING)
@@ -28,6 +29,7 @@ public class Chat {
     private String picture;
     private Integer quantitityUnvisualized;
     @OneToOne
+    //Patch
     private Message lastMessage;
 
 

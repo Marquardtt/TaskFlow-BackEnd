@@ -13,5 +13,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "db_canvas")
 public class Canvas extends Page {
 
+    //Patch
     private String draw;
 }

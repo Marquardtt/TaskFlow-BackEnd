@@ -15,6 +15,7 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    //Patch
     private String picture;
     private String description;
 

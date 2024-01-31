@@ -27,6 +27,7 @@ public class Page {
     @Enumerated(value = EnumType.STRING)
     private TypeOfPage type;
 
+    //Cuidado para nao deletar as tasks sem querer
     @ManyToMany(cascade = CascadeType.ALL)
     private Collection<TaskPage> tasks;
 

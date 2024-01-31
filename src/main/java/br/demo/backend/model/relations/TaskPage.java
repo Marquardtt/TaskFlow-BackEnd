@@ -22,7 +22,10 @@ public class TaskPage {
     @ManyToOne
     private Task task;
 
+    //Patch
     private Double x;
+    //Patch
     private Double y;
+    //Patch
     private Integer indexAtColumn;
 }
