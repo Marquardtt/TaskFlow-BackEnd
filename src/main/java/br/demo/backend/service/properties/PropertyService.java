@@ -54,8 +54,9 @@ public class PropertyService {
         return properties;
     }
 
-    public void update(Property property) {
-        System.out.println(property);
+    public void update(Property propertyTarget) {
+        System.out.println(propertyTarget);
+        Property property = propertyRepository.findById(propertyTarget.getId()).get();
         if(property.getType().equals(TypeOfProperty.DATE)){
             Date date = new Date();
             BeanUtils.copyProperties( property, date);
