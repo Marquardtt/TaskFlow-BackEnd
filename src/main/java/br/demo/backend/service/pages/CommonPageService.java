@@ -78,6 +78,36 @@ public class CommonPageService {
         return updatedPage;
     }
 
+    public CommonPage updateIndexes(CommonPage page, Long taskId, Integer index) {
+        Integer oldIndex = 0;
+        TaskPage taskOld = null;
+        for (TaskPage task : page.getTasks()) {
+            if (task.getTask().getId().equals(taskId)) {
+                taskOld = task;
+                oldIndex = task.getIndexAtColumn();
+            }
+        }
+        for (TaskPage task : page.getTasks()) {
+                    try{
+                            if (oldIndex > index) {
+                                if (task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
+                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                                }
+                                taskOld.setIndexAtColumn(index);
+                            } else {
+                                if (task.getIndexAtColumn() > index && !task.getTask().getId().equals(taskId)) {
+                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                                }
+                                taskOld.setIndexAtColumn(index+1);
+                            }
+                    } catch (NullPointerException ignore){}
+        }
+        CommonPage updatedPage = commonPageRepository.save(page);
+        ResolveStackOverflow.resolveStackOverflow(updatedPage);
+        return updatedPage;
+    }
+
+
     public void update(CommonPage commonPage) {
         commonPageRepository.save(commonPage);
     }
