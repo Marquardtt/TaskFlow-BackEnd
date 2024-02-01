@@ -31,6 +31,19 @@ public class PropertyController {
         propertyService.saveDate(property);
     }
 
+    @PutMapping("/limited")
+    public void update(@RequestBody Limited property){
+        propertyService.updateLimited(property);
+    }
+    @PutMapping("/select")
+    public void update(@RequestBody Select property){
+        propertyService.updateSelect(property);
+    }
+    @PutMapping("/date")
+    public void update(@RequestBody Date property){
+        propertyService.updateDate(property);
+    }
+
     @PutMapping
     public void upDate(@RequestBody Property property){
         propertyService.update(property);

@@ -54,26 +54,8 @@ public class PropertyService {
         return properties;
     }
 
-    public void update(Property propertyTarget) {
-        System.out.println(propertyTarget);
-        Property property = propertyRepository.findById(propertyTarget.getId()).get();
-        if(property.getType().equals(TypeOfProperty.DATE)){
-            Date date = new Date();
-            BeanUtils.copyProperties( property, date);
-            dateRepository.save(date);
-        } else if(property.getType().equals(TypeOfProperty.SELECT) ||
-                property.getType().equals(TypeOfProperty.TAG) ||
-                property.getType().equals(TypeOfProperty.RADIO) ||
-                property.getType().equals(TypeOfProperty.CHECKBOX)
-        ){
-            Select select = new Select();
-            BeanUtils.copyProperties( property, select);
-            selectRepository.save(select);
-        }else{
-            Limited limited = new Limited();
-            BeanUtils.copyProperties( property, limited);
-            limitedRepository.save(limited);
-        }
+    public void update(Property property) {
+        propertyRepository.save(property);
     }
 
     private void setInTheTasksThatAlreadyExists(Property property) {
@@ -99,6 +81,18 @@ public class PropertyService {
         setInTheTasksThatAlreadyExists(property);
         selectRepository.save(property);
     }
+    public void updateLimited(Limited property) {
+        limitedRepository.save(property);
+    }
+
+    public void updateDate(Date property) {
+        dateRepository.save(property);
+    }
+
+    public void updateSelect(Select property) {
+        selectRepository.save(property);
+    }
+
 
     private void setRelationAtPage(Property property, Collection<Page> pages) {
         for (Page pageJustId : pages) {
