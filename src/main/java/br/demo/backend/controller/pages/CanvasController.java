@@ -2,6 +2,8 @@ package br.demo.backend.controller.pages;
 
 
 import br.demo.backend.model.pages.Canvas;
+import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.service.pages.CanvasService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,18 @@ public class CanvasController {
     public void upDate(@RequestBody Canvas canvas){
         canvasService.update(canvas);
     }
+
+    @PutMapping("/{idCanvas}")
+    public void upDate(@RequestBody TaskPage taskPage, @PathVariable Long idCanvas){
+        canvasService.updateXAndY(idCanvas, taskPage);
+    }
+
+
+    @PutMapping("/draw")
+    public void upDateDraw(@RequestBody Canvas canvas){
+        canvasService.updateDraw(canvas);
+    }
+
 
     @GetMapping("/{id}")
     public Canvas findOne(@PathVariable Long id){

@@ -82,26 +82,28 @@ public class CommonPageService {
         Integer oldIndex = 0;
         TaskPage taskOld = null;
         for (TaskPage task : page.getTasks()) {
-            if (task.getTask().getId().equals(taskId)) {
+            if (task.getId().equals(taskId)) {
                 taskOld = task;
                 oldIndex = task.getIndexAtColumn();
             }
         }
-        for (TaskPage task : page.getTasks()) {
-                    try{
-                            if (oldIndex > index) {
-                                if (task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
-                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                                }
-                                taskOld.setIndexAtColumn(index);
-                            } else {
-                                if (task.getIndexAtColumn() > index && !task.getTask().getId().equals(taskId)) {
-                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                                }
-                                taskOld.setIndexAtColumn(index+1);
-                            }
-                    } catch (NullPointerException ignore){}
-        }
+
+           if (oldIndex > index) {
+               for (TaskPage task : page.getTasks()) {
+                   if (task.getIndexAtColumn() >= index && !task.getId().equals(taskId)) {
+                       task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                   }
+               }
+               taskOld.setIndexAtColumn(index);
+           } else {
+               for (TaskPage task : page.getTasks()) {
+                   if (task.getIndexAtColumn() > index && !task.getId().equals(taskId)) {
+                       task.setIndexAtColumn(task.getIndexAtColumn() + 1);
+                   }
+               }
+               taskOld.setIndexAtColumn(index+1);
+           }
+
         CommonPage updatedPage = commonPageRepository.save(page);
         ResolveStackOverflow.resolveStackOverflow(updatedPage);
         return updatedPage;
