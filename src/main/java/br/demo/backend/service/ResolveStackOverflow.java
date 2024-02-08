@@ -52,12 +52,13 @@ public class ResolveStackOverflow {
 
     public static Property resolveStackOverflow(Property property) {
         property.setPages(property.getPages().stream().map(p -> {
-            try {
                 p.setTasks(null);
                 p.setProperties(null);
                 p.setProject(null);
-            } catch (NullPointerException ignore) {
-            }
+                if(p instanceof CommonPage){
+                    ((CommonPage) p).setPropertyOrdering(null);
+                    return p;
+                }
             return p;
         }).toList());
         try {
