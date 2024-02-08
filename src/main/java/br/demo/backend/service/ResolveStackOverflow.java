@@ -1,4 +1,5 @@
 package br.demo.backend.service;
+
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -29,9 +30,12 @@ public class ResolveStackOverflow {
             page.setProperties(page.getProperties().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
         } catch (NullPointerException ignore) {
         }
-        page.getProject().setPages(null);
-        page.getProject().setProperties(null);
-        page.getProject().setOwner(null);
+        try {
+            page.getProject().setPages(null);
+            page.getProject().setProperties(null);
+            page.getProject().setOwner(null);
+        } catch (NullPointerException ignore) {
+        }
         try {
             ((CommonPage) page).setPropertyOrdering(resolveStackOverflow(((CommonPage) page).getPropertyOrdering()));
         } catch (NullPointerException | ClassCastException ignore) {
@@ -45,13 +49,19 @@ public class ResolveStackOverflow {
 
     public static Property resolveStackOverflow(Property property) {
         property.setPages(property.getPages().stream().peek(p -> {
-            p.setTasks(null);
-            p.setProperties(null);
-            p.setProject(null);
+            try {
+                p.setTasks(null);
+                p.setProperties(null);
+                p.setProject(null);
+            } catch (NullPointerException ignore) {
+            }
         }).toList());
-        property.getProject().setOwner(null);
-        property.getProject().setProperties(null);
-        property.getProject().setPages(null);
+        try {
+            property.getProject().setOwner(null);
+            property.getProject().setProperties(null);
+            property.getProject().setPages(null);
+        } catch (NullPointerException ignore) {
+        }
         return property;
     }
 
