@@ -41,20 +41,24 @@ public class ResolveStackOverflow {
         } catch (NullPointerException | ClassCastException ignore) {
         }
         try {
-            page.setTasks(page.getTasks().stream().peek(t -> t.setTask(resolveStackOverflow(t.getTask()))).toList());
+            page.setTasks(page.getTasks().stream().map(t -> {
+                t.setTask(resolveStackOverflow(t.getTask()));
+                return t;
+            }).toList());
         } catch (NullPointerException ignore) {
         }
         return page;
     }
 
     public static Property resolveStackOverflow(Property property) {
-        property.setPages(property.getPages().stream().peek(p -> {
+        property.setPages(property.getPages().stream().map(p -> {
             try {
                 p.setTasks(null);
                 p.setProperties(null);
                 p.setProject(null);
             } catch (NullPointerException ignore) {
             }
+            return p;
         }).toList());
         try {
             property.getProject().setOwner(null);
@@ -71,7 +75,10 @@ public class ResolveStackOverflow {
         } catch (NullPointerException ignored) {
         }
         try {
-            group.setPermission(group.getPermission().stream().peek(p -> p.setProject(resolveStackOverflow(p.getProject()))).toList());
+            group.setPermission(group.getPermission().stream().map(p -> {
+                p.setProject(resolveStackOverflow(p.getProject()));
+                return p;
+            }).toList());
         } catch (NullPointerException ignored) {
         }
         try {
@@ -84,23 +91,30 @@ public class ResolveStackOverflow {
     public static Task resolveStackOverflow(Task task) {
         try {
             task.setProperties(
-                    task.getProperties().stream().peek(t -> {
+                    task.getProperties().stream().map(t -> {
                         if (t.getProperty().getType().equals(TypeOfProperty.USER)) {
                             t.getValue().setValue(resolveStackOverflow((User) t.getValue().getValue()));
                         }
                         t.setProperty(resolveStackOverflow(t.getProperty()));
+                        return t;
                     }).toList()
             );
         } catch (NullPointerException ignored) {
         }
 
         try {
-            task.setComments(task.getComments().stream().peek(m -> m.getUser().setPermission(null)).toList());
+            task.setComments(task.getComments().stream().map(m -> {
+                m.getUser().setPermission(null);
+                return m;
+            }).toList());
         } catch (NullPointerException ignored) {
 
         }
         try {
-            task.setLogs(task.getLogs().stream().peek(l -> l.getUser().setPermission(null)).toList());
+            task.setLogs(task.getLogs().stream().map(l -> {
+                l.getUser().setPermission(null);
+                return l;
+            }).toList());
         } catch (NullPointerException ignored) {
         }
         return task;
@@ -109,7 +123,10 @@ public class ResolveStackOverflow {
 
     public static User resolveStackOverflow(User user) {
         try {
-            user.setPermission(user.getPermission().stream().peek(p -> p.setProject(resolveStackOverflow(p.getProject()))).toList());
+            user.setPermission(user.getPermission().stream().map(p -> {
+                p.setProject(resolveStackOverflow(p.getProject()));
+                return p;
+            }).toList());
         } catch (NullPointerException ignored) {
         }
         return user;
@@ -121,7 +138,10 @@ public class ResolveStackOverflow {
         } catch (NullPointerException ignored) {
         }
         try {
-            chat.setMessages(chat.getMessages().stream().peek(m -> m.setUser(resolveStackOverflow(m.getUser()))).toList());
+            chat.setMessages(chat.getMessages().stream().map(m -> {
+                m.setUser(resolveStackOverflow(m.getUser()));
+                return m;
+            }).toList());
         } catch (NullPointerException ignored) {
         }
         try {
