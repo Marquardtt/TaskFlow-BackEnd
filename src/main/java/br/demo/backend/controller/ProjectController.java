@@ -38,6 +38,11 @@ public class ProjectController {
         return projectService.findAll();
     }
 
+    @GetMapping("/user/{userId}")
+    public Collection<Project> findAllOfAUser(@PathVariable Long userId) {
+        return projectService.finAllOfAUser(userId);
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         projectService.delete(id);

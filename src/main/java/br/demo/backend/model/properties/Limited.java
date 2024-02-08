@@ -8,12 +8,14 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_limited")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Limited extends Property {

@@ -1,26 +1,21 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.Group;
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
-import br.demo.backend.model.enums.TypeOfPage;
+import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.pages.Canvas;
-import br.demo.backend.model.pages.CommonPage;
-import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Option;
-import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
+import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
-import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
-import br.demo.backend.service.pages.CanvasService;
-import br.demo.backend.service.pages.CommonPageService;
-import br.demo.backend.service.properties.PropertyService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -30,22 +25,23 @@ public class ProjectService {
 
     private ProjectRepository projectRepository;
     private SelectRepository selectRepository;
-    private CanvasService canvasService;
-    private CommonPageService commonPageService;
+    private GroupRepository groupRepository;
 
 
     public Collection<Project> findAll() {
         Collection<Project> projects = projectRepository.findAll();
-        for (Project project : projects) {
-            ResolveStackOverflow.resolveStackOverflow(project);
-        }
-        return projects;
+        return projects.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
+    public Collection<Project> finAllOfAUser(Long id) {
+        Collection<Project> projects = projectRepository.findProjectsByOwner_Id(id);
+        Collection<Group> groups = groupRepository.findGroupsByUsersContaining(new User(id));
+        projects.addAll(groups.stream().flatMap(g -> g.getPermission().stream().map(Permission::getProject)).toList());
+        return projects.stream().distinct().map(ResolveStackOverflow::resolveStackOverflow).toList();
+    }
     public Project findOne(Long id) {
         Project project = projectRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(project);
-        return project;
+        return ResolveStackOverflow.resolveStackOverflow(project);
     }
 
     public void update(Project project) {

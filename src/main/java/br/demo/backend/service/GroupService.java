@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -24,16 +26,12 @@ public class GroupService {
 
     public Collection<Group> findAll() {
         Collection<Group> groups = groupRepository.findAll();
-        for (Group group : groups) {
-            ResolveStackOverflow.resolveStackOverflow(group);
-        }
-        return groups;
+        return groups.stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
     }
 
     public Group findOne(Long id) {
         Group group = groupRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(group);
-        return group;
+        return ResolveStackOverflow.resolveStackOverflow(group);
     }
 
     public void save(Group group) {
@@ -42,66 +40,56 @@ public class GroupService {
 
     public Collection<Group> findGroupsByUser(Long userId) {
         Collection<Group> groups = groupRepository.findGroupsByUsersContaining(new User(userId));
-        for (Group group : groups) {
-            ResolveStackOverflow.resolveStackOverflow(group);
-        }
-        return groups;
+        return groups.stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
     }
+
     public Collection<User> findUsersByGroup(Long groupId) {
         Group group = groupRepository.findById(groupId).get();
-        return group.getUsers();
+        return group.getUsers().stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
     }
 
     public Permission findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
-        Permission permission = group.getPermission().stream().filter(
+        return group.getPermission().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
         ).findFirst().get();
-        return permission;
     }
 
     public Collection<Group> findGroupsOfAProject(Long projectId) {
         Collection<Group> groups = groupRepository.findGroupsByPermission_Project(new Project(projectId));
-        for (Group group : groups) {
-            ResolveStackOverflow.resolveStackOverflow(group);
-        }
-        return groups;
+        return groups.stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
     }
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
 
         return group.getPermission().stream()
-                .filter(permission -> permission.getProject().getId().equals(projectId))
-                .collect(Collectors.toList());
+                .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
     }
 
     public void update(Group group) {
         Group groupOld = groupRepository.findById(group.getId()).get();
-        for (Permission permissionOld : groupOld.getPermission()) {
-            for (Permission permission : group.getPermission()) {
-                if (permissionOld.getProject().getId().equals(permission.getProject().getId()) &&
-                        !permissionOld.getPermission().equals(permission.getPermission())) {
-                    updatePermission(group, permission.getProject().getId(), permission);
-                    break;
-                }
-            }
+        Collection<Permission> permissions = groupOld.getPermission().stream().filter(p ->
+                group.getPermission().stream().anyMatch(p1 ->
+                        p1.getId().equals(p.getId()) && !p1.getPermission().equals(p.getPermission()))
+        ).toList();
+        for(Permission permission : permissions) {
+            updatePermission(group, permission);
         }
         groupRepository.save(group);
     }
 
 
-    public void updatePermission(Group group, Long projectId, Permission permission) {
-        for (User user : group.getUsers()) {
-            for (Permission permissionFor : user.getPermission()) {
-                if (permissionFor.getProject().getId().equals(projectId)) {
-                    user.getPermission().remove(permissionFor);
-                    break;
-                }
-            }
-            user.getPermission().add(permission);
-        }
-        groupRepository.save(group);
+    public void updatePermission(Group group, Permission permission) {
+        Collection <User> users = group.getUsers().stream().map( user -> {
+            Collection<Permission> permissions = user.getPermission();
+            permissions.removeAll(user.getPermission().stream().filter(p ->
+                    p.getProject().getId().equals(permission.getId())).toList());
+            permissions.add(permission);
+            user.setPermission(permissions);
+            return user;
+        }).toList();
+        group.setUsers(users);
     }
 
     public void updateUsers(User user, Long groupId) {
@@ -117,4 +105,6 @@ public class GroupService {
 
     public void updateUserPermission(Long projectId, Long groupId, Long userId, Long permissionId) {
     }
+
+
 }

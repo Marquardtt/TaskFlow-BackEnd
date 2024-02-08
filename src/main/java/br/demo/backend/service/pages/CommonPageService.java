@@ -1,6 +1,7 @@
 package br.demo.backend.service.pages;
 
 
+import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.relations.TaskPage;
@@ -9,10 +10,13 @@ import br.demo.backend.repository.pages.CommonPageRepository;
 import br.demo.backend.service.ResolveStackOverflow;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -23,90 +27,56 @@ public class CommonPageService {
 
     public Collection<CommonPage> findAll() {
         Collection<CommonPage> commonPages = commonPageRepository.findAll();
-        for (CommonPage commonPage : commonPages) {
-            ResolveStackOverflow.resolveStackOverflow(commonPage);
-        }
-        return commonPages;
+        return commonPages.stream().map(c -> (CommonPage) ResolveStackOverflow.resolveStackOverflow(c)).toList();
+
     }
 
     public CommonPage findOne(Long id) {
         CommonPage commonPage = commonPageRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(commonPage);
-        return commonPage;
+        return (CommonPage) ResolveStackOverflow.resolveStackOverflow(commonPage);
     }
 
     public CommonPage updateIndexes(CommonPage page, Long taskId, Integer index, Integer columnChaged) {
-        Integer oldIndex = 0;
-        Option columnOption = null;
-        TaskPage taskOld = null;
-        for (TaskPage task : page.getTasks()) {
-            if (task.getTask().getId().equals(taskId)) {
-                taskOld = task;
-                oldIndex = task.getIndexAtColumn();
-                for (TaskValue taskVl : task.getTask().getProperties()) {
-                    if (taskVl.getProperty().getId().equals(page.getPropertyOrdering().getId())) {
-                        columnOption = (Option) taskVl.getValue().getValue();
-                    }
-                }
-            }
-        }
-        for (TaskPage task : page.getTasks()) {
-            for (TaskValue taskVl : task.getTask().getProperties()) {
-                if (taskVl.getProperty().getId().equals(page.getPropertyOrdering().getId())) {
-                    try{
-                        if (taskVl.getValue().getValue() == null && columnOption == null ||
-                                ((Option) taskVl.getValue().getValue()).getId().equals(columnOption.getId())) {
-                            if (oldIndex > index || columnChaged == 1) {
-                                if (task.getIndexAtColumn() >= index && !task.getTask().getId().equals(taskId)) {
-                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                                }
-                                taskOld.setIndexAtColumn(index);
-                            } else {
-                                if (task.getIndexAtColumn() > index && !task.getTask().getId().equals(taskId)) {
-                                    task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                                }
-                                taskOld.setIndexAtColumn(index+1);
-                            }
-                        }
-                    } catch (NullPointerException ignore){}
-                }
-            }
-        }
-        CommonPage updatedPage = commonPageRepository.save(page);
+        TaskPage taskOld = page.getTasks().stream().filter(task ->
+                task.getTask().getId().equals(taskId)).findFirst().get();
+        Option columnOption = (Option) taskOld.getTask().getProperties().stream().filter(p ->
+                p.getProperty().equals(page.getPropertyOrdering())).findFirst().get().getValue().getValue();
 
-        ResolveStackOverflow.resolveStackOverflow(updatedPage);
-        return updatedPage;
+        page.setTasks(page.getTasks().stream().map(t -> {
+            TaskValue prop = t.getTask().getProperties().stream().filter(p ->
+                    p.getProperty().equals(page.getPropertyOrdering()) &&
+                            (p.getValue().getValue() == null && columnOption == null ||
+                                    ((Option) p.getValue().getValue()).getId().equals(columnOption.getId()))
+            ).findFirst().orElse(null);
+            if (prop == null) return t;
+            boolean verification = taskOld.getIndexAtColumn() > index || columnChaged == 1;
+            if (t.equals(taskOld)) {
+                t.setIndexAtColumn(index + (verification ? 0 : 1));
+            } else {
+                if ((t.getIndexAtColumn() >= index && verification) || t.getIndexAtColumn() > index) {
+                    t.setIndexAtColumn(t.getIndexAtColumn() + 1);
+                }
+            }
+            return t;
+        }).toList());
+       return (CommonPage)ResolveStackOverflow.resolveStackOverflow(commonPageRepository.save(page));
     }
 
     public CommonPage updateIndexes(CommonPage page, Long taskId, Integer index) {
-        Integer oldIndex = 0;
-        TaskPage taskOld = null;
-        for (TaskPage task : page.getTasks()) {
-            if (task.getId().equals(taskId)) {
-                taskOld = task;
-                oldIndex = task.getIndexAtColumn();
+        TaskPage taskOld = page.getTasks().stream().filter(task ->
+                task.getTask().getId().equals(taskId)).findFirst().get();
+        page.setTasks(page.getTasks().stream().map(t -> {
+            boolean verification = taskOld.getIndexAtColumn() > index;
+            if (t.equals(taskOld)) {
+                t.setIndexAtColumn(index + (verification ? 0 : 1));
+            } else {
+                if ((t.getIndexAtColumn() >= index && verification) || t.getIndexAtColumn() > index) {
+                    t.setIndexAtColumn(t.getIndexAtColumn() + 1);
+                }
             }
-        }
-
-           if (oldIndex > index) {
-               for (TaskPage task : page.getTasks()) {
-                   if (task.getIndexAtColumn() >= index && !task.getId().equals(taskId)) {
-                       task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                   }
-               }
-               taskOld.setIndexAtColumn(index);
-           } else {
-               for (TaskPage task : page.getTasks()) {
-                   if (task.getIndexAtColumn() > index && !task.getId().equals(taskId)) {
-                       task.setIndexAtColumn(task.getIndexAtColumn() + 1);
-                   }
-               }
-               taskOld.setIndexAtColumn(index+1);
-           }
-
-        CommonPage updatedPage = commonPageRepository.save(page);
-        ResolveStackOverflow.resolveStackOverflow(updatedPage);
-        return updatedPage;
+            return t;
+        }).toList());
+        return (CommonPage) ResolveStackOverflow.resolveStackOverflow(commonPageRepository.save(page));
     }
 
 

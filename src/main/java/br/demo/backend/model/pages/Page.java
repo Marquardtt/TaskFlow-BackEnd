@@ -8,6 +8,7 @@ import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
@@ -15,12 +16,14 @@ import java.util.Collection;
 @Entity
 @Data
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     private String name;
 

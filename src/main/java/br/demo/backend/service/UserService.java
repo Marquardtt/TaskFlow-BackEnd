@@ -18,21 +18,17 @@ public class UserService {
 
     public Collection<User> findAll() {
         Collection<User> users = userRepository.findAll();
-        for(User user : users){
-            ResolveStackOverflow.resolveStackOverflow(user);
-        }
-        return users;
+        return users.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
     public User findOne(Long id) {
         User user = userRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(user);
         user.setPermission(
                 user.getPermission().stream().sorted(
                         (p1, p2) -> p2.getProject().getVisualizedAt().compareTo(
                                 p1.getProject().getVisualizedAt()
-                        )).collect(Collectors.toList()));
-        return user;
+                        )).toList());
+        return ResolveStackOverflow.resolveStackOverflow(user);
     }
 
     public void save(User user) {
@@ -45,27 +41,23 @@ public class UserService {
 
     public User findByUsernameAndPassword(String username, String password) {
         User user = userRepository.findByUsernameAndPassword(username, password);
-        ResolveStackOverflow.resolveStackOverflow(user);
-        return user;
+        return ResolveStackOverflow.resolveStackOverflow(user);
     }
 
     public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
         User user = userRepository.findById(userId).get();
-        Permission permission = user.getPermission().stream().filter(
+        return user.getPermission().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
         ).findFirst().get();
-        return permission;
     }
 
     public User findByEmailAndPassword(String mail, String password) {
         User user = userRepository.findByMailAndPassword(mail, password);
-        ResolveStackOverflow.resolveStackOverflow(user);
-        return user;
+        return ResolveStackOverflow.resolveStackOverflow(user);
     }
 
     public User findByUserNameOrName(String name) {
         User user = userRepository.findUserByUsernameOrName(name, name);
-        ResolveStackOverflow.resolveStackOverflow(user);
-        return user;
+        return ResolveStackOverflow.resolveStackOverflow(user);
     }
 }

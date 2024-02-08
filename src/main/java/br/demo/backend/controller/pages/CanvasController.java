@@ -25,9 +25,9 @@ public class CanvasController {
         canvasService.update(canvas);
     }
 
-    @PutMapping("/{idCanvas}")
-    public void upDate(@RequestBody TaskPage taskPage, @PathVariable Long idCanvas){
-        canvasService.updateXAndY(idCanvas, taskPage);
+    @PutMapping("/XandY")
+    public void upDate(@RequestBody TaskPage taskPage){
+        canvasService.updateXAndY( taskPage);
     }
 
 

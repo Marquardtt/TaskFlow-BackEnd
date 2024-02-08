@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 
 @Service
@@ -23,57 +24,48 @@ public class ChatService {
 
 
     public Collection<Chat> findAllPrivate(Long userId) {
-        Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.PRIVATE);
-        for(Chat chat : chats){
-            ResolveStackOverflow.resolveStackOverflow(chat);
-        }
+        Collection<Chat> chats = chatRepository
+                .findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.PRIVATE);
         setQuantityUnvisualized(chats, userId);
-        return chats;
+        return chats.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
+
     }
 
     private void setQuantityUnvisualized(Collection<Chat> chats, Long userId) {
-        for (Chat c : chats) {
-            Integer qttyUnvisualized = 0;
-            for (Message m : c.getMessages()) {
-                if (!m.getVisualized() && !m.getUser().getId().equals(userId)) {
-                    qttyUnvisualized++;
-                }
-            }
-            c.setQuantitityUnvisualized(qttyUnvisualized);
-        }
+        chats.forEach(
+                chat ->
+                        chat.setQuantitityUnvisualized(
+                                chat.getMessages().stream().filter(
+                                                message -> !message.getVisualized() && !message.getUser().getId().equals(userId))
+                                        .count()));
     }
 
     public Collection<Chat> findAllGroup(Long userId) {
-        Collection<Chat> chats = chatRepository.findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.GROUP);
-        for(Chat chat : chats){
-            ResolveStackOverflow.resolveStackOverflow(chat);
-        }
+        Collection<Chat> chats = chatRepository
+                .findChatsByUsersContainingAndTypeOrderByMessagesDateTimeDesc(new User(userId), TypeOfChat.GROUP);
+        chats.forEach(ResolveStackOverflow::resolveStackOverflow);
         setQuantityUnvisualized(chats, userId);
         return chats;
     }
 
 
     public void updateMessagesToVisualized(Chat chat, Long userId) {
-        for (Message m : chat.getMessages()) {
-            if (!m.getUser().getId().equals(userId)) {
-                m.setVisualized(true);
-            }
-        }
+        Collection<Message> messages = chat.getMessages().stream().map(m -> {
+            if (!m.getUser().getId().equals(userId)) m.setVisualized(true);
+            return m;
+        }).toList();
+        chat.setMessages(messages);
         chatRepository.save(chat);
     }
 
     public Collection<Chat> findByName(String name) {
         Collection<Chat> chats = chatRepository.findChatsByNameContains(name);
-        for(Chat chat : chats){
-            ResolveStackOverflow.resolveStackOverflow(chat);
-        }
-        return chats;
+        return chats.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
     public Chat findOne(Long id) {
         Chat chat = chatRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(chat);
-        return chat;
+        return ResolveStackOverflow.resolveStackOverflow(chat);
     }
 
     public void save(Chat chat) {
@@ -82,7 +74,7 @@ public class ChatService {
 
     public void update(Chat chat) {
         HashSet<Message> messages = new HashSet<>(chat.getMessages());
-        chat.setLastMessage(messages.stream().max((m1, m2) -> m1.getDateTime().compareTo(m2.getDateTime())).get());
+        chat.setLastMessage(messages.stream().max(Comparator.comparing(Message::getDateTime)).get());
         chatRepository.save(chat);
     }
 

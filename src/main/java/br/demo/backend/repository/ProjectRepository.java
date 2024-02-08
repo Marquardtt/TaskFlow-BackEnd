@@ -12,4 +12,6 @@ import java.util.Collection;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     Project findByPropertiesContaining(Property p);
     Project findByPagesContaining(Page p);
+
+    Collection<Project> findProjectsByOwner_Id(Long id);
 }

@@ -9,10 +9,12 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     private String name;
     private String surname;
@@ -31,7 +33,7 @@ public class User {
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
-    @OneToMany
+    @ManyToMany
     private Collection<Permission> permission;
     public User (Long id){
         this.id = id;

@@ -32,9 +32,9 @@ public class GroupController {
         groupService.updateUsers(user, groupId);
     }
 
-    @PutMapping("{projectId}{groupId}/{permission}")
-    public void updatePermission(@PathVariable Long projectId, @RequestBody Group group, @RequestBody Permission permission) {
-        groupService.updatePermission(group, projectId, permission);
+    @PutMapping("/{groupId}/{permission}")
+    public void updatePermission( @RequestBody Group group, @RequestBody Permission permission) {
+        groupService.updatePermission(group, permission);
     }
 
     @GetMapping("/{id}")

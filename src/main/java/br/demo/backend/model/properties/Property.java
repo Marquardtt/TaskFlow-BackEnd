@@ -17,11 +17,13 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_property")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Property {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @EqualsAndHashCode.Include
     private Long id = null;
     private String name;
     private Boolean visible;

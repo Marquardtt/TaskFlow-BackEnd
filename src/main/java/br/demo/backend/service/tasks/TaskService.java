@@ -45,16 +45,12 @@ public class TaskService {
 
     public Collection<Task> findAll() {
         Collection<Task> tasks = taskRepository.findAll();
-        for (Task task : tasks) {
-            ResolveStackOverflow.resolveStackOverflow(task);
-        }
-        return tasks;
+        return tasks.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
     public Task findOne(Long id) {
         Task task = taskRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(task);
-        return task;
+        return ResolveStackOverflow.resolveStackOverflow(task);
     }
 
     public Task save(Long idpage, Long userId) {
@@ -78,8 +74,7 @@ public class TaskService {
         System.out.println(taskEmpty);
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page.getId());
-        ResolveStackOverflow.resolveStackOverflow(task);
-        return task;
+        return ResolveStackOverflow.resolveStackOverflow(task);
     }
 
     private void addTaskToPage(Task task, Long pageId) {
@@ -88,7 +83,7 @@ public class TaskService {
             CommonPage commonPage = (CommonPage) page;
             commonPage.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
             commonPageRepository.save(commonPage);
-        }else{
+        } else {
             Canvas canvas = (Canvas) page;
             canvas.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
             canvasRepository.save(canvas);
@@ -96,12 +91,10 @@ public class TaskService {
     }
 
     public void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
-        for (Property p : properties) {
-           setTaskProperty(p, taskEmpty);
-        }
+        taskEmpty.getProperties().addAll(properties.stream().map(p -> setTaskProperty(p)).toList());
     }
 
-    public void setTaskProperty(Property p, Task taskEmpty){
+    public TaskValue setTaskProperty(Property p) {
         Value value = null;
         if (p.getType() == TypeOfProperty.SELECT) {
             value = new UniOptionValued();
@@ -120,16 +113,12 @@ public class TaskService {
         } else if (p.getType() == TypeOfProperty.USER) {
             value = new UserValued();
         }
-        TaskValue taskValue = new TaskValue(null, p, value);
-        taskEmpty.getProperties().add(taskValue);
+        return new TaskValue(null, p, value);
     }
 
     public Collection<Task> findByName(String name) {
         Collection<Task> tasks = taskRepository.findTasksByNameContains(name);
-        for (Task task : tasks) {
-            ResolveStackOverflow.resolveStackOverflow(task);
-        }
-        return tasks;
+        return tasks.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
     public void update(Task task) {
@@ -153,35 +142,25 @@ public class TaskService {
         User user = userRepository.findById(id).get();
         TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
-        Collection<Task> tasksToday = new ArrayList<>();
-        for (Task t : tasks) {
-            ResolveStackOverflow.resolveStackOverflow(t);
-            for (TaskValue tp : t.getProperties()) {
-                Property p = tp.getProperty();
-                if (p.getType() == TypeOfProperty.DATE && ((Date) p).getScheduling()) {
-                    if (tp.getValue().getValue().equals(LocalDate.now())) {
-                        tasksToday.add(t);
-                    }
-                }
-            }
-        }
-        return tasksToday;
+
+        return tasks.stream().filter(t ->
+                t.getProperties().stream().anyMatch(p ->
+                                p.getProperty().getType().equals(TypeOfProperty.DATE) &&
+                                        ((Date) p.getProperty()).getScheduling() &&
+                                        p.getValue().getValue().equals(LocalDate.now())))
+                .map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
     public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
         CommonPage page = commonPageRepository.findById(pageId).get();
-        Collection<Task> tasks = new ArrayList<>();
-        for (TaskPage task : page.getTasks()) {
-            ResolveStackOverflow.resolveStackOverflow(task.getTask());
-            for (TaskValue taskValue : task.getTask().getProperties()) {
-                if (taskValue.getProperty().getId().equals(propertyId)) {
-                    if (((LocalDateTime) taskValue.getValue()
-                            .getValue()).getMonthValue() == month) {
-                        tasks.add(task.getTask());
-                    }
-                }
-            }
-        }
-        return tasks;
+
+        return page.getTasks().stream().filter(t ->
+                        t.getTask().getProperties().stream().anyMatch(p ->
+                                p.getProperty().getId().equals(propertyId) &&
+                                        ((LocalDateTime) p.getValue()
+                                                .getValue()).getMonthValue() == month))
+                .map(t -> ResolveStackOverflow.resolveStackOverflow(t.getTask())).toList();
+
     }
+
 }

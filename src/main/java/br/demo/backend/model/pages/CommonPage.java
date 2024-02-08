@@ -7,6 +7,7 @@ import br.demo.backend.model.tasks.Task;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
@@ -14,6 +15,8 @@ import java.util.Collection;
 @Entity
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+
 @AllArgsConstructor
 @Table(name = "db_common_page")
 public class CommonPage extends Page {

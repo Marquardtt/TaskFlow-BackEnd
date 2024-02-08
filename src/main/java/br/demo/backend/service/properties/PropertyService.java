@@ -42,44 +42,38 @@ public class PropertyService {
 
     public Property findOne(Long id) {
         Property property = propertyRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(property);
-        return property;
+        return ResolveStackOverflow.resolveStackOverflow(property);
     }
 
     public Collection<Property> findAll() {
         Collection<Property> properties = propertyRepository.findAll();
-        for (Property property : properties) {
-            ResolveStackOverflow.resolveStackOverflow(property);
-        }
-        return properties;
+        return properties.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
     public void update(Property property) {
         propertyRepository.save(property);
     }
 
-    private void setInTheTasksThatAlreadyExists(Property property) {
+    private Property setInTheTasksThatAlreadyExists(Property property) {
         if (property.getPages() != null) {
-            setRelationAtPage(property, property.getPages());
+            return setRelationAtPage(property, property.getPages());
         } else {
             Project project = projectRepository.findById(property.getProject().getId()).get();
-            setRelationAtPage(property, project.getPages());
+            return setRelationAtPage(property, project.getPages());
         }
     }
 
     public void saveLimited(Limited property) {
-        setInTheTasksThatAlreadyExists(property);
-        limitedRepository.save(property);
+        limitedRepository.save((Limited)setInTheTasksThatAlreadyExists(property));
     }
 
     public void saveDate(Date property) {
-        setInTheTasksThatAlreadyExists(property);
-        dateRepository.save(property);
+        dateRepository.save((Date)setInTheTasksThatAlreadyExists(property));
+
     }
 
     public void saveSelect(Select property) {
-        setInTheTasksThatAlreadyExists(property);
-        selectRepository.save(property);
+        selectRepository.save((Select) setInTheTasksThatAlreadyExists(property));
     }
     public void updateLimited(Limited property) {
         limitedRepository.save(property);
@@ -94,15 +88,17 @@ public class PropertyService {
     }
 
 
-    private void setRelationAtPage(Property property, Collection<Page> pages) {
-        for (Page pageJustId : pages) {
-            Page page = pageRepository.findById(pageJustId.getId()).get();
-
-            for (TaskPage taskCanvas : page.getTasks()) {
-                taskService.setTaskProperty(property, taskCanvas.getTask());
-            }
-
-        }
+    private Property setRelationAtPage(Property property, Collection<Page> pages) {
+        pages.stream().map(p -> {
+            Page page = pageRepository.findById(p.getId()).get();
+            page.setTasks(page.getTasks().stream().map(tP -> {
+                tP.getTask().getProperties().add(taskService.setTaskProperty(property));
+                taskService.update(tP.getTask());
+                return tP;
+            }).toList());
+            return page;
+        });
+        return property;
     }
 
     public void delete(Long id) {
@@ -118,21 +114,9 @@ public class PropertyService {
         if (testIfIsSelectable(property)) {
             try {
                 Project project = projectRepository.findById(property.getProject().getId()).get();
-                for (Property prop : project.getProperties()) {
-                    prop.setProject(null);
-                }
-                for (Property prop : project.getProperties()) {
-                    if (!prop.getId().equals(property.getId()) &&
-                            testIfIsSelectable(prop)) {
-                        return true;
-                    }
-                }
-                for (Page page : project.getPages()) {
-                    if (!testIfPageHasOtherProperty(page, property)) {
-                        return false;
-                    }
-                }
-                return true;
+                if (project.getProperties().stream().anyMatch(p -> !p.getId().equals(property.getId()) &&
+                        testIfIsSelectable(p))) return true;
+                return project.getPages().stream().anyMatch(p -> testIfPageHasOtherProperty(p, property));
             } catch (NoSuchElementException e) {
                 Page page = pageRepository.findByPropertiesContaining(property);
                 return testIfPageHasOtherProperty(page, property);
@@ -149,13 +133,8 @@ public class PropertyService {
     }
 
     private Boolean testIfPageHasOtherProperty(Page page, Property property) {
-        for (Property prop : page.getProperties()) {
-            if (!prop.getId().equals(property.getId()) &&
-                    testIfIsSelectable(prop)) {
-                return true;
-            }
-        }
-        return false;
+        return page.getProperties().stream().anyMatch(p -> !p.getId().equals(property.getId()) &&
+                testIfIsSelectable(p));
     }
 
 }

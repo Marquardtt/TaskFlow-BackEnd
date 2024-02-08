@@ -4,9 +4,11 @@ package br.demo.backend.service.pages;
 import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.repository.pages.CanvasRepository;
+import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.service.ResolveStackOverflow;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -16,30 +18,23 @@ import java.util.Collection;
 public class CanvasService {
 
     private CanvasRepository canvasRepository;
-    private TaskService taskService;
+    private TaskPageRepository taskPageRepository;
+    private ModelMapper modelMapper;
     public Collection<Canvas> findAll() {
         Collection<Canvas> canvas = canvasRepository.findAll();
-        for(Canvas canvasModel : canvas) {
-            ResolveStackOverflow.resolveStackOverflow(canvasModel);
-        }
-        return canvas;
+        return canvas.stream().map(c -> (Canvas)ResolveStackOverflow.resolveStackOverflow(c)).toList();
     }
 
     public Canvas findOne(Long id) {
         Canvas canvas = canvasRepository.findById(id).get();
-        ResolveStackOverflow.resolveStackOverflow(canvas);
-        return canvas;
+        return (Canvas)ResolveStackOverflow.resolveStackOverflow(canvas);
     }
 
-    public void updateXAndY(Long idCanvas, TaskPage taskPage) {
-        Canvas canvas  = canvasRepository.findById(idCanvas).get();
-        for(TaskPage taskPageFor : canvas.getTasks()){
-            if(taskPageFor.getId().equals(taskPage.getId())){
-                taskPageFor.setX(taskPage.getX());
-                taskPageFor.setY(taskPage.getY());
-            }
-        }
-        canvasRepository.save(canvas);
+    public void updateXAndY(TaskPage taskPage) {
+        TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
+        taskPageRepository.save(taskPage);
+        modelMapper.map(taskPage, oldTaskPage);
+        taskPageRepository.save(oldTaskPage);
     }
 
     public void updateDraw(Canvas canvas) {
