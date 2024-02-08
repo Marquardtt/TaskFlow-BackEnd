@@ -1,83 +1,67 @@
 package br.demo.backend.service;
-
 import br.demo.backend.model.Group;
-import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
-import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.TaskValue;
-import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.values.UserValued;
-import org.springframework.beans.BeanUtils;
-
-import java.util.Collection;
-import java.util.List;
 
 public class ResolveStackOverflow {
 
     public static Project resolveStackOverflow(Project project) {
         try {
-            for (Page page : project.getPages()) {
-                resolveStackOverflow(page);
-            }
-            for (Property property : project.getProperties()) {
-                resolveStackOverflow(property);
-            }
-            resolveStackOverflow(project.getOwner());
+            project.setPages(project.getPages().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
         } catch (NullPointerException ignored) {
         }
+        try {
+            project.setProperties(project.getProperties().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
+        } catch (NullPointerException ignored) {
+        }
+        project.setOwner(resolveStackOverflow(project.getOwner()));
         return project;
     }
 
     public static Page resolveStackOverflow(Page page) {
         try {
-            for (Property property : page.getProperties()) {
-                resolveStackOverflow(property);
-            }
+            page.setProperties(page.getProperties().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
         } catch (NullPointerException ignore) {
         }
-        page.setProject(null);
+        page.getProject().setPages(null);
+        page.getProject().setProperties(null);
+        page.getProject().setOwner(null);
         try {
-            if (page instanceof CommonPage) {
-                resolveStackOverflow(((CommonPage) page).getPropertyOrdering());
-            }
-        } catch (NullPointerException ignore) {
+            ((CommonPage) page).setPropertyOrdering(resolveStackOverflow(((CommonPage) page).getPropertyOrdering()));
+        } catch (NullPointerException | ClassCastException ignore) {
         }
         try {
-            for (TaskPage taskCanvas : page.getTasks()) {
-                resolveStackOverflow(taskCanvas.getTask());
-            }
+            page.setTasks(page.getTasks().stream().peek(t -> t.setTask(resolveStackOverflow(t.getTask()))).toList());
         } catch (NullPointerException ignore) {
         }
         return page;
     }
 
     public static Property resolveStackOverflow(Property property) {
-        property.setPages(null);
-        property.setProject(null);
+        property.setPages(property.getPages().stream().peek(p -> {
+            p.setTasks(null);
+            p.setProperties(null);
+            p.setProject(null);
+        }).toList());
+        property.getProject().setOwner(null);
+        property.getProject().setProperties(null);
+        property.getProject().setPages(null);
         return property;
     }
 
     public static Group resolveStackOverflow(Group group) {
         try {
-            for (User user : group.getUsers()) {
-                resolveStackOverflow(user);
-            }
+            group.setUsers(group.getUsers().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
         } catch (NullPointerException ignored) {
         }
         try {
-
-            for (Permission permission : group.getPermission()) {
-                resolveStackOverflow(permission.getProject());
-            }
+            group.setPermission(group.getPermission().stream().peek(p -> p.setProject(resolveStackOverflow(p.getProject()))).toList());
         } catch (NullPointerException ignored) {
         }
         try {
@@ -88,36 +72,26 @@ public class ResolveStackOverflow {
     }
 
     public static Task resolveStackOverflow(Task task) {
-
         try {
-            for (TaskValue taskValue : task.getProperties()) {
-                if (taskValue.getProperty().getType().equals(TypeOfProperty.USER)) {
-                    try {
-                        for (User user : (Collection<User>) taskValue.getValue().getValue()) {
-                            resolveStackOverflow(user);
+            task.setProperties(
+                    task.getProperties().stream().peek(t -> {
+                        if (t.getProperty().getType().equals(TypeOfProperty.USER)) {
+                            t.getValue().setValue(resolveStackOverflow((User) t.getValue().getValue()));
                         }
-                    } catch (NullPointerException ignored) {
-                    }
-
-                }
-                resolveStackOverflow(taskValue.getProperty());
-            }
+                        t.setProperty(resolveStackOverflow(t.getProperty()));
+                    }).toList()
+            );
         } catch (NullPointerException ignored) {
         }
 
         try {
-            for (Message message : task.getComments()) {
-                message.getUser().setPermission(null);
-            }
+            task.setComments(task.getComments().stream().peek(m -> m.getUser().setPermission(null)).toList());
         } catch (NullPointerException ignored) {
 
         }
         try {
-            for (Log log : task.getLogs()) {
-                log.getUser().setPermission(null);
-            }
+            task.setLogs(task.getLogs().stream().peek(l -> l.getUser().setPermission(null)).toList());
         } catch (NullPointerException ignored) {
-
         }
         return task;
 
@@ -125,9 +99,7 @@ public class ResolveStackOverflow {
 
     public static User resolveStackOverflow(User user) {
         try {
-            for (Permission permission : user.getPermission()) {
-                resolveStackOverflow(permission.getProject());
-            }
+            user.setPermission(user.getPermission().stream().peek(p -> p.setProject(resolveStackOverflow(p.getProject()))).toList());
         } catch (NullPointerException ignored) {
         }
         return user;
@@ -135,12 +107,14 @@ public class ResolveStackOverflow {
 
     public static Chat resolveStackOverflow(Chat chat) {
         try {
-            for (User user : chat.getUsers()) {
-                resolveStackOverflow(user);
-            }
-            for (Message message : chat.getMessages()) {
-                resolveStackOverflow(message.getUser());
-            }
+            chat.setUsers(chat.getUsers().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
+        } catch (NullPointerException ignored) {
+        }
+        try {
+            chat.setMessages(chat.getMessages().stream().peek(m -> m.setUser(resolveStackOverflow(m.getUser()))).toList());
+        } catch (NullPointerException ignored) {
+        }
+        try {
             resolveStackOverflow(chat.getLastMessage().getUser());
         } catch (NullPointerException ignored) {
         }
