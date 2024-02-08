@@ -10,6 +10,9 @@ import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class ResolveStackOverflow {
 
     public static Project resolveStackOverflow(Project project) {
@@ -51,22 +54,8 @@ public class ResolveStackOverflow {
     }
 
     public static Property resolveStackOverflow(Property property) {
-        property.setPages(property.getPages().stream().map(p -> {
-                p.setTasks(null);
-                p.setProperties(null);
-                p.setProject(null);
-                if(p instanceof CommonPage){
-                    ((CommonPage) p).setPropertyOrdering(null);
-                    return p;
-                }
-            return p;
-        }).toList());
-        try {
-            property.getProject().setOwner(null);
-            property.getProject().setProperties(null);
-            property.getProject().setPages(null);
-        } catch (NullPointerException ignore) {
-        }
+        property.setPages(null);
+        property.setProject(null);
         return property;
     }
 

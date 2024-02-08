@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "db_canvas")
