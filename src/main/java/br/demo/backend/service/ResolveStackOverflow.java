@@ -1,5 +1,4 @@
 package br.demo.backend.service;
-
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -9,9 +8,6 @@ import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class ResolveStackOverflow {
 
