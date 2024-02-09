@@ -27,7 +27,11 @@ public class UserController {
 
     @PutMapping
     public void upDate(@RequestBody User user){
-        userService.save(user);
+        userService.update(user, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody User user){
+        userService.update(user, true);
     }
 
     @GetMapping("/{id}")

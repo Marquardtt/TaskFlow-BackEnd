@@ -20,8 +20,14 @@ public class ChatController {
     }
     @PutMapping
     public void upDate(@RequestBody Chat chat){
-        chatService.update(chat);
+        chatService.update(chat, false);
     }
+
+    @PatchMapping
+    public void patch(@RequestBody Chat chat){
+        chatService.update(chat, true);
+    }
+
     @PutMapping("/visualized/{userId}")
     public void upDateToVisualized(@RequestBody Chat chat, @PathVariable Long userId){
         chatService.updateMessagesToVisualized(chat, userId);

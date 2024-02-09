@@ -24,7 +24,11 @@ public class GroupController {
 
     @PutMapping
     public void upDate(@RequestBody Group group) {
-        groupService.update(group);
+        groupService.update(group, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody Group group) {
+        groupService.update(group, true);
     }
 
     @PutMapping("/user/{groupId}")

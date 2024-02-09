@@ -1,4 +1,4 @@
-package br.demo.backend.service;
+package br.demo.backend.globalfunctions;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -31,7 +31,6 @@ public class ResolveStackOverflow {
         }
         try {
             page.setProject(null);
-
         } catch (NullPointerException ignore) {
         }
         try {

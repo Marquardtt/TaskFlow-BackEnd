@@ -5,8 +5,8 @@ import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.repository.pages.CanvasRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
-import br.demo.backend.service.ResolveStackOverflow;
-import br.demo.backend.service.tasks.TaskService;
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -18,8 +18,11 @@ import java.util.Collection;
 public class CanvasService {
 
     private CanvasRepository canvasRepository;
+
     private TaskPageRepository taskPageRepository;
+    private AutoMapper<Canvas> autoMapper;
     private ModelMapper modelMapper;
+
     public Collection<Canvas> findAll() {
         Collection<Canvas> canvas = canvasRepository.findAll();
         return canvas.stream().map(c -> (Canvas)ResolveStackOverflow.resolveStackOverflow(c)).toList();
@@ -47,7 +50,9 @@ public class CanvasService {
         canvasRepository.save(canvasModel);
     }
 
-    public void update(Canvas canvas) {
+    public void update(Canvas canvasDto , Boolean patching) {
+        Canvas canvas = patching ? canvasRepository.findById(canvasDto.getId()).get() : new Canvas();
+        autoMapper.map(canvasDto, canvas, patching);
         canvasRepository.save(canvas);
     }
 

@@ -1,29 +1,24 @@
 package br.demo.backend.service.pages;
 
 
-import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.repository.pages.CommonPageRepository;
-import br.demo.backend.service.ResolveStackOverflow;
-import br.demo.backend.service.tasks.TaskService;
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class CommonPageService {
 
     private CommonPageRepository commonPageRepository;
-    private TaskService taskService;
+    private AutoMapper<CommonPage> autoMapper;
 
     public Collection<CommonPage> findAll() {
         Collection<CommonPage> commonPages = commonPageRepository.findAll();
@@ -80,7 +75,9 @@ public class CommonPageService {
     }
 
 
-    public void update(CommonPage commonPage) {
+    public void update(CommonPage commonPageDto, Boolean patching) {
+        CommonPage commonPage = patching ? commonPageRepository.findById(commonPageDto.getId()).get() : new CommonPage();
+        autoMapper.map(commonPageDto, commonPage, patching);
         commonPageRepository.save(commonPage);
     }
 

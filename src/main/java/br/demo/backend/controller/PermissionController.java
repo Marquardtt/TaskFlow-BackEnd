@@ -20,7 +20,11 @@ public class PermissionController {
 
     @PutMapping
     public void upDate(@RequestBody Permission permission){
-        permissionService.save(permission);
+        permissionService.update(permission, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody Permission permission){
+        permissionService.update(permission, true);
     }
 
     @GetMapping("/{id}")

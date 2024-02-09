@@ -22,7 +22,8 @@ import br.demo.backend.repository.pages.CommonPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
-import br.demo.backend.service.ResolveStackOverflow;
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,8 @@ public class TaskService {
     private CommonPageRepository commonPageRepository;
     private ProjectRepository projectRepository;
     private CanvasRepository canvasRepository;
+    private AutoMapper<Task> autoMapper;
+
 
 
     public Collection<Task> findAll() {
@@ -121,7 +124,9 @@ public class TaskService {
         return tasks.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
-    public void update(Task task) {
+    public void update(Task taskDTO, Boolean patching) {
+        Task task = patching ? taskRepository.findById(taskDTO.getId()).get() : new Task();
+        autoMapper.map(taskDTO, task, patching);
         taskRepository.save(task);
     }
 

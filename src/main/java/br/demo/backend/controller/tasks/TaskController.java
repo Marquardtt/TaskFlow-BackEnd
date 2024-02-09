@@ -23,7 +23,11 @@ public class TaskController {
 
     @PutMapping
     public void upDate(@RequestBody Task task){
-        taskService.update(task);
+        taskService.update(task, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody Task task){
+        taskService.update(task, true);
     }
 
     @GetMapping("/{id}")

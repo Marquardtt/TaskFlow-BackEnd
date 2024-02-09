@@ -33,20 +33,29 @@ public class PropertyController {
 
     @PutMapping("/limited")
     public void update(@RequestBody Limited property){
-        propertyService.updateLimited(property);
+        propertyService.updateLimited(property, false);
     }
     @PutMapping("/select")
     public void update(@RequestBody Select property){
-        propertyService.updateSelect(property);
+        propertyService.updateSelect(property, false);
     }
     @PutMapping("/date")
     public void update(@RequestBody Date property){
-        propertyService.updateDate(property);
+        propertyService.updateDate(property, false);
     }
+    @PatchMapping("/limited")
+    public void patch(@RequestBody Limited property){
+        propertyService.updateLimited(property, true);
+    }
+    @PatchMapping("/select")
 
-    @PutMapping
-    public void upDate(@RequestBody Property property){
-        propertyService.update(property);
+    public void patch(@RequestBody Select property){
+        propertyService.updateSelect(property, true);
+    }
+    @PatchMapping("/date")
+
+    public void patch(@RequestBody Date property){
+        propertyService.updateDate(property, true);
     }
 
     @GetMapping("/{id}")

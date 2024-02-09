@@ -32,7 +32,11 @@ public class CommonPageController {
 
     @PutMapping
     public void upDate(@RequestBody CommonPage page) {
-        commonPageService.update(page);
+        commonPageService.update(page, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody CommonPage page) {
+        commonPageService.update(page, true);
     }
 
     @GetMapping("/{id}")

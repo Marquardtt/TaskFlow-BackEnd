@@ -1,10 +1,13 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;
@@ -15,7 +18,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -26,6 +28,8 @@ public class ProjectService {
     private ProjectRepository projectRepository;
     private SelectRepository selectRepository;
     private GroupRepository groupRepository;
+    private AutoMapper<Project> autoMapper;
+
 
 
     public Collection<Project> findAll() {
@@ -44,7 +48,9 @@ public class ProjectService {
         return ResolveStackOverflow.resolveStackOverflow(project);
     }
 
-    public void update(Project project) {
+    public void update(Project projectDTO, Boolean patching) {
+        Project project = patching ? projectRepository.findById(projectDTO.getId()).get() : new Project();
+        autoMapper.map(projectDTO, project, patching);
         projectRepository.save(project);
     }
 

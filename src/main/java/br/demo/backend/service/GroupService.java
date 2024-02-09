@@ -2,20 +2,20 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.GroupNotFoundException;
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.chat.Chat;
 import br.demo.backend.repository.GroupRepository;
-import jakarta.persistence.EntityNotFoundException;
+import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -23,6 +23,9 @@ public class GroupService {
 
     private GroupRepository groupRepository;
     private ProjectService projectService;
+    private UserRepository userRepository;
+    private AutoMapper<Group> autoMapper;
+
 
     public Collection<Group> findAll() {
         Collection<Group> groups = groupRepository.findAll();
@@ -67,7 +70,11 @@ public class GroupService {
                 .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
     }
 
-    public void update(Group group) {
+    public void update(Group groupDTO, Boolean patching) {
+
+        Group group = patching ? groupRepository.findById(groupDTO.getId()).get() : new Group();
+        autoMapper.map(groupDTO, group, patching);
+
         Group groupOld = groupRepository.findById(group.getId()).get();
         Collection<Permission> permissions = groupOld.getPermission().stream().filter(p ->
                 group.getPermission().stream().anyMatch(p1 ->
@@ -87,6 +94,7 @@ public class GroupService {
                     p.getProject().getId().equals(permission.getId())).toList());
             permissions.add(permission);
             user.setPermission(permissions);
+            userRepository.save(user);
             return user;
         }).toList();
         group.setUsers(users);

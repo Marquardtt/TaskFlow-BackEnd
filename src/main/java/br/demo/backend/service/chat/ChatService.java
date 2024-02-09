@@ -6,8 +6,8 @@ import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfChat;
 import br.demo.backend.repository.chat.ChatRepository;
-import br.demo.backend.service.ProjectService;
-import br.demo.backend.service.ResolveStackOverflow;
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import java.util.HashSet;
 public class ChatService {
 
     private ChatRepository chatRepository;
-    private ProjectService projectService;
+    private AutoMapper<Chat> mapper;
 
 
     public Collection<Chat> findAllPrivate(Long userId) {
@@ -72,7 +72,12 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    public void update(Chat chat) {
+    public void update(Chat chatDto, Boolean patching) {
+        Chat chat = patching ?
+                chatRepository.findById(chatDto.getId()).get() :
+                new Chat();
+        mapper.map(chatDto, chat, patching);
+
         HashSet<Message> messages = new HashSet<>(chat.getMessages());
         chat.setLastMessage(messages.stream().max(Comparator.comparing(Message::getDateTime)).get());
         chatRepository.save(chat);

@@ -25,7 +25,11 @@ public class ProjectController {
     }
     @PutMapping
     public void upDate(@RequestBody Project project) {
-        projectService.update(project);
+        projectService.update(project, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody Project project) {
+        projectService.update(project, true);
     }
 
     @GetMapping("/{id}")

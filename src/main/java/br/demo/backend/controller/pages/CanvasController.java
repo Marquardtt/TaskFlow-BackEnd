@@ -22,7 +22,11 @@ public class CanvasController {
 
     @PutMapping
     public void upDate(@RequestBody Canvas canvas){
-        canvasService.update(canvas);
+        canvasService.update(canvas, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody Canvas canvas){
+        canvasService.update(canvas, true);
     }
 
     @PutMapping("/XandY")

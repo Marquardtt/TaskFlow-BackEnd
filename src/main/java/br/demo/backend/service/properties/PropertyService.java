@@ -2,27 +2,22 @@ package br.demo.backend.service.properties;
 
 
 import br.demo.backend.model.Project;
-import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.pages.Canvas;
-import br.demo.backend.model.pages.CommonPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
-import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.DateRepository;
 import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
-import br.demo.backend.service.ResolveStackOverflow;
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -39,6 +34,10 @@ public class PropertyService {
     private LimitedRepository limitedRepository;
     private SelectRepository selectRepository;
     private DateRepository dateRepository;
+    private AutoMapper<Limited> autoMapperLimited;
+    private AutoMapper<Select> autoMapperSelect;
+    private AutoMapper<Date> autoMapperDate;
+
 
     public Property findOne(Long id) {
         Property property = propertyRepository.findById(id).get();
@@ -48,10 +47,6 @@ public class PropertyService {
     public Collection<Property> findAll() {
         Collection<Property> properties = propertyRepository.findAll();
         return properties.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
-    }
-
-    public void update(Property property) {
-        propertyRepository.save(property);
     }
 
     private Property setInTheTasksThatAlreadyExists(Property property) {
@@ -75,15 +70,21 @@ public class PropertyService {
     public void saveSelect(Select property) {
         selectRepository.save((Select) setInTheTasksThatAlreadyExists(property));
     }
-    public void updateLimited(Limited property) {
+    public void updateLimited(Limited propertyDTO, Boolean patching) {
+        Limited property = patching ? limitedRepository.findById(propertyDTO.getId()).get() : new Limited();
+        autoMapperLimited.map(propertyDTO, property, patching);
         limitedRepository.save(property);
     }
 
-    public void updateDate(Date property) {
+    public void updateDate(Date propertyDTO, Boolean patching) {
+        Date property = patching ? dateRepository.findById(propertyDTO.getId()).get() : new Date();
+        autoMapperDate.map(propertyDTO, property, patching);
         dateRepository.save(property);
     }
 
-    public void updateSelect(Select property) {
+    public void updateSelect(Select propertyDTO, Boolean patching) {
+        Select property = patching ? selectRepository.findById(propertyDTO.getId()).get() : new Select();
+        autoMapperSelect.map(propertyDTO, property, patching);
         selectRepository.save(property);
     }
 
@@ -93,7 +94,7 @@ public class PropertyService {
             Page page = pageRepository.findById(p.getId()).get();
             page.setTasks(page.getTasks().stream().map(tP -> {
                 tP.getTask().getProperties().add(taskService.setTaskProperty(property));
-                taskService.update(tP.getTask());
+                taskService.update(tP.getTask(), true);
                 return tP;
             }).toList());
             return page;

@@ -1,20 +1,23 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
+import br.demo.backend.model.chat.Chat;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class UserService {
 
     private UserRepository userRepository;
+    private AutoMapper<User> autoMapper;
 
     public Collection<User> findAll() {
         Collection<User> users = userRepository.findAll();
@@ -32,6 +35,11 @@ public class UserService {
     }
 
     public void save(User user) {
+        userRepository.save(user);
+    }
+    public void update(User userDTO, Boolean patching) {
+        User user = patching ? userRepository.findById(userDTO.getId()).get() : new User();
+        autoMapper.map(userDTO, user, patching);
         userRepository.save(user);
     }
 
