@@ -34,9 +34,8 @@ public class ResolveStackOverflow {
         } catch (NullPointerException ignore) {
         }
         try {
-            page.getProject().setPages(null);
-            page.getProject().setProperties(null);
-            page.getProject().setOwner(null);
+            page.setProject(null);
+
         } catch (NullPointerException ignore) {
         }
         try {
