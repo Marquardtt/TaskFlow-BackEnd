@@ -17,8 +17,8 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/{pageId}/{userId}")
-    public void insert(@PathVariable Long pageId, @PathVariable Long userId){
-        taskService.save(pageId, userId);
+    public Task insert(@PathVariable Long pageId, @PathVariable Long userId){
+        return taskService.save(pageId, userId);
     }
 
     @PutMapping

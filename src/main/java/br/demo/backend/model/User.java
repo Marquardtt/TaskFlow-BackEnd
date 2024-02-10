@@ -22,7 +22,8 @@ public class User {
     private String password;
     private String address;
     //Patch
-    private String picture;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Archive picture;
     private String mail;
     private String phone;
     private String description;

@@ -7,6 +7,7 @@ import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.service.pages.CanvasService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -29,15 +30,15 @@ public class CanvasController {
         canvasService.update(canvas, true);
     }
 
-    @PutMapping("/XandY")
+    @PatchMapping("/XandY")
     public void upDate(@RequestBody TaskPage taskPage){
         canvasService.updateXAndY( taskPage);
     }
 
 
-    @PutMapping("/draw")
-    public void upDateDraw(@RequestBody Canvas canvas){
-        canvasService.updateDraw(canvas);
+    @PatchMapping("/draw/{id}")
+    public void upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id){
+        canvasService.updateDraw(draw, id);
     }
 
 

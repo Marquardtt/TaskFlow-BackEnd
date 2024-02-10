@@ -1,6 +1,7 @@
 package br.demo.backend.model.pages;
 
 
+import br.demo.backend.model.Archive;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,5 +17,6 @@ import lombok.NoArgsConstructor;
 public class Canvas extends Page {
 
     //Patch
-    private String draw;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Archive draw;
 }

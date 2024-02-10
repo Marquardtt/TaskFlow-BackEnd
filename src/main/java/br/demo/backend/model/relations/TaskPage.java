@@ -26,9 +26,9 @@ public class TaskPage {
     private Task task;
 
     //Patch
-    private Double x = 0.0;
+    private Double x = 100.0;
     //Patch
-    private Double y = 0.0;
+    private Double y = 100.0;
     //Patch
     private Integer indexAtColumn;
 }

@@ -1,6 +1,7 @@
 package br.demo.backend.service.pages;
 
 
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.repository.pages.CanvasRepository;
@@ -10,6 +11,7 @@ import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -33,16 +35,16 @@ public class CanvasService {
         return (Canvas)ResolveStackOverflow.resolveStackOverflow(canvas);
     }
 
-    public void updateXAndY(TaskPage taskPage) {
+            public void updateXAndY(TaskPage taskPage) {
         TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
-        taskPageRepository.save(taskPage);
         modelMapper.map(taskPage, oldTaskPage);
         taskPageRepository.save(oldTaskPage);
     }
 
-    public void updateDraw(Canvas canvas) {
-        Canvas oldCanvas = canvasRepository.findById(canvas.getId()).get();
-        oldCanvas.setDraw(canvas.getDraw());
+    public void updateDraw(MultipartFile draw, Long id) {
+        Canvas canvas = canvasRepository.findById(id).get();
+        Archive archive = new Archive(draw);
+        canvas.setDraw(archive);
         canvasRepository.save(canvas);
     }
 
