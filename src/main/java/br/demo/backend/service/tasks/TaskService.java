@@ -5,11 +5,12 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.pages.Canvas;
-import br.demo.backend.model.pages.CommonPage;
+import br.demo.backend.model.pages.CanvasPage;
+import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
@@ -17,8 +18,8 @@ import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
-import br.demo.backend.repository.pages.CanvasRepository;
-import br.demo.backend.repository.pages.CommonPageRepository;
+import br.demo.backend.repository.pages.CanvasPageRepository;
+import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
@@ -39,9 +40,9 @@ public class TaskService {
     private UserRepository userRepository;
     private TaskValueRepository taskValueRepository;
     private PageRepository pageRepositorry;
-    private CommonPageRepository commonPageRepository;
+    private OrderedPageRepository orderedPageRepository;
     private ProjectRepository projectRepository;
-    private CanvasRepository canvasRepository;
+    private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
 
 
@@ -82,14 +83,14 @@ public class TaskService {
 
     private void addTaskToPage(Task task, Long pageId) {
         Page page = pageRepositorry.findById(pageId).get();
-        if (page instanceof CommonPage) {
-            CommonPage commonPage = (CommonPage) page;
-            commonPage.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
-            commonPageRepository.save(commonPage);
+        if (page instanceof OrderedPage) {
+            OrderedPage orderedPage = (OrderedPage) page;
+            orderedPage.getTasks().add(new TaskPage(null, task, 0));
+            orderedPageRepository.save(orderedPage);
         } else {
-            Canvas canvas = (Canvas) page;
-            canvas.getTasks().add(new TaskPage(null, task, 0.0, 0.0, 0));
-            canvasRepository.save(canvas);
+            CanvasPage canvasPage = (CanvasPage) page;
+            canvasPage.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
+            canvasPageRepository.save(canvasPage);
         }
     }
 
@@ -157,7 +158,7 @@ public class TaskService {
     }
 
     public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
-        CommonPage page = commonPageRepository.findById(pageId).get();
+        OrderedPage page = orderedPageRepository.findById(pageId).get();
 
         return page.getTasks().stream().filter(t ->
                         t.getTask().getProperties().stream().anyMatch(p ->

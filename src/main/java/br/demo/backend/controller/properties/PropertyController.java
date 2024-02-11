@@ -1,6 +1,5 @@
 package br.demo.backend.controller.properties;
 
-import br.demo.backend.model.pages.Canvas;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;

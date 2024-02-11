@@ -3,7 +3,6 @@ package br.demo.backend.service;
 
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.model.Permission;
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.repository.PermissionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

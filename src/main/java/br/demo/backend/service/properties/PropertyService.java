@@ -3,6 +3,8 @@ package br.demo.backend.service.properties;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.CanvasPage;
+import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
@@ -92,11 +94,19 @@ public class PropertyService {
     private Property setRelationAtPage(Property property, Collection<Page> pages) {
         pages.stream().map(p -> {
             Page page = pageRepository.findById(p.getId()).get();
-            page.setTasks(page.getTasks().stream().map(tP -> {
-                tP.getTask().getProperties().add(taskService.setTaskProperty(property));
-                taskService.update(tP.getTask(), true);
-                return tP;
-            }).toList());
+            try{
+               ((OrderedPage) page).setTasks(((OrderedPage) page).getTasks().stream().map(tP -> {
+                    tP.getTask().getProperties().add(taskService.setTaskProperty(property));
+                    taskService.update(tP.getTask(), true);
+                    return tP;
+                }).toList());
+            } catch (ClassCastException e) {
+                ((CanvasPage) page).setTasks(((CanvasPage) page).getTasks().stream().map(tP -> {
+                    tP.getTask().getProperties().add(taskService.setTaskProperty(property));
+                    taskService.update(tP.getTask(), true);
+                    return tP;
+                }).toList());
+            }
             return page;
         });
         return property;

@@ -1,5 +1,6 @@
 package br.demo.backend.model.chat;
 
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 
 @Data
@@ -26,8 +28,10 @@ public class Message {
     private Long id;
     private String value;
     @ManyToOne
-    private User user;
+    private User sender;
     private LocalDateTime dateTime;
-    //Patch
-    private Boolean visualized = false;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<Destination> destination;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Archive annex;
 }

@@ -8,7 +8,6 @@ import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;

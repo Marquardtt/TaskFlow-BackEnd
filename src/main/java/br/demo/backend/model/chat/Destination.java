@@ -1,30 +1,26 @@
-package br.demo.backend.model.relations;
+package br.demo.backend.model.chat;
 
-import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.tasks.Task;
+import br.demo.backend.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
-
-@Entity
-@Table(name = "tb_task_page")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class TaskPage {
+@Table(name = "tb_destination")
+public class Destination {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
     @ManyToOne
-    private Task task;
+    private User user;
+    private Boolean visualized;
 
-    //Patch
-    private Integer indexAtColumn;
 }

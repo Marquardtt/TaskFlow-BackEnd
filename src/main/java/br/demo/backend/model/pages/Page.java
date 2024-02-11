@@ -20,6 +20,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
+//CALENDAR
 public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,10 +30,6 @@ public class Page {
 
     @Enumerated(value = EnumType.STRING)
     private TypeOfPage type;
-
-    //Cuidado para nao deletar as tasks sem querer
-    @ManyToMany(cascade = CascadeType.ALL)
-    private Collection<TaskPage> tasks;
 
     @ManyToMany(mappedBy = "pages")
     private Collection<Property> properties;

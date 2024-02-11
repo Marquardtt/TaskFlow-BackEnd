@@ -3,11 +3,15 @@ import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.Chat;
+import br.demo.backend.model.chat.ChatGroup;
+import br.demo.backend.model.chat.ChatPrivate;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.pages.CommonPage;
+import br.demo.backend.model.pages.CanvasPage;
+import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.repository.chat.ChatPrivateRepository;
 
 public class ResolveStackOverflow {
 
@@ -34,15 +38,19 @@ public class ResolveStackOverflow {
         } catch (NullPointerException ignore) {
         }
         try {
-            ((CommonPage) page).setPropertyOrdering(resolveStackOverflow(((CommonPage) page).getPropertyOrdering()));
-        } catch (NullPointerException | ClassCastException ignore) {
-        }
-        try {
-            page.setTasks(page.getTasks().stream().map(t -> {
+            ((OrderedPage) page).setPropertyOrdering(resolveStackOverflow(((OrderedPage) page).getPropertyOrdering()));
+            ((OrderedPage)page).setTasks(((OrderedPage)page).getTasks().stream().map(t -> {
                 t.setTask(resolveStackOverflow(t.getTask()));
                 return t;
             }).toList());
-        } catch (NullPointerException ignore) {
+        } catch (NullPointerException | ClassCastException ignore) {
+        }
+        try {
+            ((CanvasPage)page).setTasks(((CanvasPage)page).getTasks().stream().map(t -> {
+                t.setTask(resolveStackOverflow(t.getTask()));
+                return t;
+            }).toList());
+        } catch (NullPointerException | ClassCastException ignore) {
         }
         return page;
     }
@@ -88,7 +96,11 @@ public class ResolveStackOverflow {
 
         try {
             task.setComments(task.getComments().stream().map(m -> {
-                m.getUser().setPermission(null);
+                m.getSender().setPermission(null);
+                m.setDestination(m.getDestination().stream().map(d -> {
+                    d.getUser().setPermission(null);
+                    return d;
+                }).toList());
                 return m;
             }).toList());
         } catch (NullPointerException ignored) {
@@ -116,22 +128,51 @@ public class ResolveStackOverflow {
         return user;
     }
 
-    public static Chat resolveStackOverflow(Chat chat) {
+    public static ChatGroup resolveStackOverflow(ChatGroup chat) {
         try {
-            chat.setUsers(chat.getUsers().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
+                chat.setGroup(resolveStackOverflow(chat.getGroup()));
         } catch (NullPointerException ignored) {
         }
+        return (ChatGroup) resolveMessages(chat);
+    }
+
+    private static Chat resolveMessages(Chat chat) {
         try {
             chat.setMessages(chat.getMessages().stream().map(m -> {
-                m.setUser(resolveStackOverflow(m.getUser()));
+                m.setSender(resolveStackOverflow(m.getSender()));
+                m.setDestination(m.getDestination().stream().map(d -> {
+                    d.setUser(resolveStackOverflow(d.getUser()));
+                    return d;
+                }).toList());
                 return m;
             }).toList());
         } catch (NullPointerException ignored) {
         }
         try {
-            resolveStackOverflow(chat.getLastMessage().getUser());
+            chat.getLastMessage().setSender(resolveStackOverflow(chat.getLastMessage().getSender()));
+            chat.getLastMessage().setDestination(chat.getLastMessage().getDestination().stream().map(d -> {
+                d.setUser(resolveStackOverflow(d.getUser()));
+                return d;
+            }).toList());
         } catch (NullPointerException ignored) {
         }
         return chat;
+    }
+
+    public static ChatPrivate resolveStackOverflow(ChatPrivate chat) {
+        try {
+                chat.setUsers(chat.getUsers().stream().map(ResolveStackOverflow::resolveStackOverflow).toList());
+        } catch (NullPointerException ignored) {
+        }
+
+        return (ChatPrivate) resolveMessages(chat);
+    }
+
+    public static Chat resolveStackOverflow(Chat chat) {
+        if(chat instanceof ChatGroup){
+            return resolveStackOverflow((ChatGroup) chat);
+        }else{
+            return resolveStackOverflow((ChatPrivate) chat);
+        }
     }
 }

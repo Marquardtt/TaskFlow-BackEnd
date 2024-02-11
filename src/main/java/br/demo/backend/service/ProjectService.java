@@ -7,7 +7,6 @@ import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;

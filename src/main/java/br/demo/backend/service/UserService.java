@@ -5,7 +5,6 @@ import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

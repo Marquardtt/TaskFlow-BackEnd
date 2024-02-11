@@ -19,5 +19,6 @@ public class Date extends Property {
     private Boolean includesHours;
     private Boolean deadline;
     private Boolean scheduling;
+    private String color;
 
 }
