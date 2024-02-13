@@ -32,12 +32,19 @@ public class Configuration {
     private Language language;
     private Boolean libras;
     private Boolean textToSound;
+
+    //add, remove or change
     private Boolean notificTasks;
     private Boolean notificAtAddMeInAGroup;
     private Boolean notificWhenChangeMyPermission;
+    //when pass a specific number of points (1000, 5000, etc.)
     private Boolean notificMyPointsChange;
+    //when i schedule a task or project
     private Boolean notificSchedules;
+    //don't understand but can be replaced with deadlines or something like that
     private Boolean notificMylateProject;
+    //when i receive a message
     private Boolean notificChats;
+    //when ia task than i am responsible receive a comment
     private Boolean notificComments;
 }

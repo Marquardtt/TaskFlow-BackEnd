@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonDeserialize(using = DeserializerTaskPage.class)
 public class TaskPage {
+    // TODO: 13/02/2024 Id Composto
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

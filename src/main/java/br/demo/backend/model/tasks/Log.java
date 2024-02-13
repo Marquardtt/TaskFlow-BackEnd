@@ -19,6 +19,7 @@ public class Log {
     @Id
     private Long id;
     private String description;
+    @Enumerated(EnumType.STRING)
     private Action action;
     @ManyToOne
     private User user;

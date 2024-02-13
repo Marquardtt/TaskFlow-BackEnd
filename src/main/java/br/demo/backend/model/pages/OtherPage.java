@@ -13,7 +13,7 @@ import java.util.Collection;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-@Table(name = "db_other_page")
+@Table(name = "tb_other_page")
 
 //LIST, TABLE
 public class OtherPage extends Page {

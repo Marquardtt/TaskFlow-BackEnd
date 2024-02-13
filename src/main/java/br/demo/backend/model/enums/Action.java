@@ -4,5 +4,6 @@ public enum Action {
     CREATE,
     UPDATE,
     DELETE,
-    REDO
+    REDO,
+    COMPLETE
 }

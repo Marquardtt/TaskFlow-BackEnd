@@ -5,7 +5,6 @@ import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.OtherPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.TaskCanvas;
-import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,7 @@ public class PageController {
     // TODO: 11/02/2024 Ver se o indice pode ser atualizado no frontend de forma facil
     @PatchMapping("/{taskId}/{index}/{columnChanged}")
     public OrderedPage updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId, @PathVariable Integer index, @PathVariable Integer columnChanged) {
-        return pageService.updateIndexesVerifications(page, taskId, index, columnChanged);
+        return pageService.updateIndex(page, taskId, index, columnChanged);
     }
 
     @PutMapping("/ordered")
@@ -51,7 +50,7 @@ public class PageController {
 
     @PatchMapping("/{taskId}/{index}")
     public OtherPage updateIndexes(@RequestBody OtherPage page, @PathVariable Long taskId, @PathVariable Integer index) {
-        return pageService.updateIndexesVerifications(page, taskId, index);
+        return pageService.updateIndex(page, taskId, index);
     }
 
     @PutMapping("/other")

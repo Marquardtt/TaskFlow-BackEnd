@@ -31,10 +31,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -63,7 +61,7 @@ public class PageService {
         return ResolveStackOverflow.resolveStackOverflow(page);
     }
 
-    public OrderedPage updateIndexesVerifications(OrderedPage page, Long taskId, Integer index, Integer columnChaged) {
+    public OrderedPage updateIndex(OrderedPage page, Long taskId, Integer index, Integer columnChaged) {
         TaskPage taskOld = page.getTasks().stream().filter(task ->
                 task.getTask().getId().equals(taskId)).findFirst().get();
         Option columnOption = (Option) taskOld.getTask().getProperties().stream().filter(p ->
@@ -76,13 +74,13 @@ public class PageService {
                                     ((Option) p.getValue().getValue()).getId().equals(columnOption.getId()))
             ).findFirst().orElse(null);
             if (prop == null) return t;
-            updateIndexesVerifications((TaskOrdered)taskOld, (TaskOrdered) t, index, columnChaged);
+            updateIndexVerification((TaskOrdered)taskOld, (TaskOrdered) t, index, columnChaged);
             return t;
         }).toList());
         return (OrderedPage)ResolveStackOverflow.resolveStackOverflow(orderedPageRepository.save(page));
     }
 
-    private void updateIndexesVerifications(TaskOrdered taskOld, TaskOrdered t, Integer index, Integer columnChaged){
+    private void updateIndexVerification(TaskOrdered taskOld, TaskOrdered t, Integer index, Integer columnChaged){
         boolean verification = taskOld.getIndexAtColumn() > index || columnChaged == 1;
         if (t.equals(taskOld)) {
             t.setIndexAtColumn(index + (verification ? 0 : 1));
@@ -93,11 +91,11 @@ public class PageService {
         }
     }
 
-    public OtherPage updateIndexesVerifications(OtherPage page, Long taskId, Integer index) {
+    public OtherPage updateIndex(OtherPage page, Long taskId, Integer index) {
         TaskPage taskOld = page.getTasks().stream().filter(task ->
                 task.getTask().getId().equals(taskId)).findFirst().get();
         page.setTasks(page.getTasks().stream().map(t -> {
-            updateIndexesVerifications((TaskOrdered) taskOld, (TaskOrdered) t, index, 0);
+            updateIndexVerification((TaskOrdered) taskOld, (TaskOrdered) t, index, 0);
             return t;
         }).toList());
         return (OtherPage) ResolveStackOverflow.resolveStackOverflow(otherPageRepository.save(page));

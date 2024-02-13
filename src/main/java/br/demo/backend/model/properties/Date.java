@@ -21,7 +21,9 @@ public class Date extends Property {
 
     private Boolean canBePass;
     private Boolean includesHours;
+    //prazo  (quando deve estar pronto)
     private Boolean deadline;
+    //agendamento (quando deve ser feito)
     private Boolean scheduling;
     private String color;
 

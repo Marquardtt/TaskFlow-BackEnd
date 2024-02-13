@@ -29,7 +29,6 @@ public class Task {
     private Boolean deleted;
     //Patch
     private Boolean completed;
-    private LocalDate completedDate;
 
     //Patch
     @OneToMany(cascade = CascadeType.ALL)
