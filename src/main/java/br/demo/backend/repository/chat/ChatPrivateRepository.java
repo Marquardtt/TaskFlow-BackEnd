@@ -10,5 +10,8 @@ import java.util.Collection;
 @Repository
 public interface ChatPrivateRepository extends JpaRepository<ChatPrivate, Long> {
 
-    public Collection<ChatPrivate> findChatsByUsersContainingOrderByMessagesDateTimeDesc(User user);
+    public Collection<ChatPrivate> findChatsByUsersContainingOrderByLastMessage_DateCreateDesc(User user);
+
+    public Collection<ChatPrivate> findAllByUsersContaining(User user);
+
 }

@@ -21,6 +21,6 @@ public class Destination {
     private Long id;
     @ManyToOne
     private User user;
-    private Boolean visualized;
+    private Boolean visualized = false;
 
 }

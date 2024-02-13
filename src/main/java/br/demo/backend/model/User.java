@@ -35,7 +35,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
     @ManyToMany
-    private Collection<Permission> permission;
+    private Collection<Permission> permissions;
     public User (Long id){
         this.id = id;
     }

@@ -18,11 +18,12 @@ public class Group {
     private Long id;
     private String name;
     //Patch
-    private String picture;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Archive picture;
     private String description;
 
     @ManyToMany
-    private Collection<Permission> permission;
+    private Collection<Permission> permissions;
     @ManyToOne
     private User owner;
     @ManyToMany

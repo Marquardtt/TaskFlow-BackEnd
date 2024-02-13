@@ -3,6 +3,7 @@ package br.demo.backend.model.properties;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.values.DeserializerValue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -24,10 +25,10 @@ public class Property {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @EqualsAndHashCode.Include
-    private Long id = null;
+    private Long id;
     private String name;
-    private Boolean visible;
-    private Boolean obligatory;
+    private Boolean visible = true;
+    private Boolean obligatory = false;
     @Enumerated(value = EnumType.STRING)
     private TypeOfProperty type;
  

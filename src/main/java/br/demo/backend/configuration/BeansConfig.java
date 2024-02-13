@@ -16,6 +16,7 @@ public class BeansConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.getConfiguration().setAmbiguityIgnored(true);
         modelMapper.getConfiguration().setCollectionsMergeEnabled(true);
         return modelMapper;
     }

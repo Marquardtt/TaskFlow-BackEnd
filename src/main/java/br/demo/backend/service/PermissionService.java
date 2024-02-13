@@ -2,6 +2,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import br.demo.backend.model.Permission;
 import br.demo.backend.repository.PermissionRepository;
 import lombok.AllArgsConstructor;
@@ -18,11 +19,17 @@ public class PermissionService {
 
 
     public Collection<Permission> findAll() {
-        return permissionRepository.findAll();
+        return permissionRepository.findAll().stream().map(p -> {
+            p.setProject(ResolveStackOverflow.resolveStackOverflow(p.getProject()));
+            return p;
+        }).toList();
+
     }
 
     public Permission findOne(Long id) {
-        return permissionRepository.findById(id).get();
+        Permission permission = permissionRepository.findById(id).get();
+        permission.setProject(ResolveStackOverflow.resolveStackOverflow(permission.getProject()));
+        return permission;
     }
 
     public void save(Permission permission) {

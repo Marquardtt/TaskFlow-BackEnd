@@ -12,8 +12,7 @@ import java.util.Collection;
 public interface GroupRepository extends JpaRepository<Group, Long> {
     Collection<Group> findGroupsByUsersContaining(User user);
 
-    Collection<Group> findGroupsByPermission_Project(Project project);
+    Collection<Group> findGroupsByPermissions_Project(Project project);
 
-    Boolean existsByUsersContainingAndId(User user, Long id);
 
 }

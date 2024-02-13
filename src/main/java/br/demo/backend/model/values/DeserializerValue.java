@@ -61,7 +61,7 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                         if (type.equals("TEXT")) {
                             return new TaskValue(id, property, new TextValued(idTaskVl, value.asText()));
                         }else if(type.equals("ARCHIVE")){
-                            return new TaskValue(id, property, new ArchiveValued(idTaskVl, value.asText()));
+                            return new TaskValue(id, property, new ArchiveValued(idTaskVl, null));
                         }
                         else if(type.equals("DATE")){
                             return new TaskValue(id, property, new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));

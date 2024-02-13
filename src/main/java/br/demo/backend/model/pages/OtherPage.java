@@ -1,8 +1,6 @@
 package br.demo.backend.model.pages;
 
-
-import br.demo.backend.model.Archive;
-import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskOrdered;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,13 +12,10 @@ import java.util.Collection;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "db_canvas_page")
-//CANVAS
-public class CanvasPage extends Page {
+@Table(name = "db_other_page")
 
-    //Patch
-    @OneToOne(cascade = CascadeType.ALL)
-    private Archive draw;
+//LIST, TABLE
+public class OtherPage extends Page {
+
 }

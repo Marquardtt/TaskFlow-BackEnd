@@ -29,7 +29,9 @@ public class Message {
     private String value;
     @ManyToOne
     private User sender;
-    private LocalDateTime dateTime;
+    private LocalDateTime dateCreate;
+    private LocalDateTime dateUpdate;
+
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Destination> destination;
     @OneToOne(cascade = CascadeType.ALL)

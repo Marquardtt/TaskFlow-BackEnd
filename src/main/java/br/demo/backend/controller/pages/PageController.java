@@ -2,8 +2,10 @@ package br.demo.backend.controller.pages;
 
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
+import br.demo.backend.model.pages.OtherPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +33,6 @@ public class PageController {
         return pageService.updateIndexesVerifications(page, taskId, index, columnChanged);
     }
 
-    @PatchMapping("/{taskId}/{index}")
-    public OrderedPage updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId, @PathVariable Integer index) {
-        return pageService.updateIndexesVerifications(page, taskId, index);
-    }
-
     @PutMapping("/ordered")
     public void upDate(@RequestBody OrderedPage page) {
         pageService.update(page, false);
@@ -46,6 +43,26 @@ public class PageController {
         pageService.update(page, true);
     }
 
+    //OtherPage
+    @PostMapping("/other")
+    public void insert(@RequestBody OtherPage page) {
+        pageService.save(page);
+    }
+
+    @PatchMapping("/{taskId}/{index}")
+    public OtherPage updateIndexes(@RequestBody OtherPage page, @PathVariable Long taskId, @PathVariable Integer index) {
+        return pageService.updateIndexesVerifications(page, taskId, index);
+    }
+
+    @PutMapping("/other")
+    public void upDate(@RequestBody OtherPage page) {
+        pageService.update(page, false);
+    }
+
+    @PatchMapping("/other")
+    public void patch(@RequestBody OtherPage page) {
+        pageService.update(page, true);
+    }
 
     //CanvasPage
     @PostMapping("/canvas")
@@ -73,33 +90,24 @@ public class PageController {
         pageService.updateDraw(draw, id);
     }
 
-    //Page
-    @PostMapping
-    public void insert(@RequestBody Page page) {
-        pageService.save(page);
-    }
-    @PutMapping
-    public void upDate(@RequestBody Page page) {
-        pageService.update(page, false);
-    }
-
-    @PatchMapping
-    public void patch(@RequestBody Page page) {
-        pageService.update(page, true);
-    }
-
+    //General
     @GetMapping("/{id}")
     public Page findOne(@PathVariable Long id) {
         return pageService.findOne(id);
     }
 
     @GetMapping
-    public Collection<Page> findAll() {
+    public Collection<? extends Page> findAll() {
         return pageService.findAll();
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         pageService.delete(id);
+    }
+
+    @PatchMapping("/merge/{id}")
+    public void merge(@RequestBody Collection<Page> pages, @PathVariable Long id) {
+        pageService.merge(pages, id);
     }
 }

@@ -3,6 +3,7 @@ package br.demo.backend.model.properties;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;

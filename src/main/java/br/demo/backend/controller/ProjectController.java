@@ -2,9 +2,11 @@ package br.demo.backend.controller;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.User;
 import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -18,10 +20,13 @@ public class ProjectController {
         projectService.save(project);
     }
 
-
-    @PutMapping("/set-now")
-    public void setVisualizedNow(@RequestBody Project project) {
-        projectService.setVisualizedNow(project);
+    @PatchMapping("/picture/{id}")
+    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+        projectService.updatePicture(picture, id);
+    }
+    @PatchMapping("/set-now/{id}")
+    public void setVisualizedNow(@PathVariable Long id) {
+        projectService.setVisualizedNow(id);
     }
     @PutMapping
     public void upDate(@RequestBody Project project) {
@@ -50,5 +55,10 @@ public class ProjectController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         projectService.delete(id);
+    }
+
+    @PatchMapping("/change-owner/{projectId}")
+    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
+        projectService.updateOwner(newOwner, projectId);
     }
 }

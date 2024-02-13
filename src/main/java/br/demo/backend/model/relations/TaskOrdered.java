@@ -8,22 +8,17 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "tb_task_canvas")
+@Table(name = "tb_task_ordered")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class TaskCanvas extends TaskPage {
+public class TaskOrdered extends TaskPage {
 
-    //Patch
-    private Double x = 100.0;
-    //Patch
-    private Double y = 100.0;
+    private Integer indexAtColumn = 0;
 
-    public TaskCanvas(Long id, Task task, Double x, Double y){
+    public TaskOrdered(Long id, Task task, Integer indexAtColumn){
         super(id, task);
-        this.x = x;
-        this.y = y;
+        this.indexAtColumn = indexAtColumn;
     }
-
 }

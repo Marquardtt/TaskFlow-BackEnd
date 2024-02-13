@@ -7,11 +7,12 @@ import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
+import br.demo.backend.model.pages.OtherPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
-import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -20,6 +21,7 @@ import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
+import br.demo.backend.repository.pages.OtherPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
@@ -44,7 +46,7 @@ public class TaskService {
     private ProjectRepository projectRepository;
     private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
-
+    private OtherPageRepository otherPageRepository;
 
 
     public Collection<Task> findAll() {
@@ -81,21 +83,24 @@ public class TaskService {
         return ResolveStackOverflow.resolveStackOverflow(task);
     }
 
-    private void addTaskToPage(Task task, Long pageId) {
+    public void addTaskToPage(Task task, Long pageId) {
         Page page = pageRepositorry.findById(pageId).get();
-        if (page instanceof OrderedPage) {
-            OrderedPage orderedPage = (OrderedPage) page;
-            orderedPage.getTasks().add(new TaskPage(null, task, 0));
-            orderedPageRepository.save(orderedPage);
-        } else {
-            CanvasPage canvasPage = (CanvasPage) page;
-            canvasPage.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
-            canvasPageRepository.save(canvasPage);
+        if(page instanceof CanvasPage) {
+            page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
+            canvasPageRepository.save((CanvasPage) page);
+        }else{
+            page.getTasks().add(new TaskOrdered(null, task, 0));
+             if(page instanceof OtherPage){
+                 otherPageRepository.save((OtherPage) page);
+             }else{
+                 orderedPageRepository.save((OrderedPage) page);
+             }
         }
     }
 
+
     public void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
-        taskEmpty.getProperties().addAll(properties.stream().map(p -> setTaskProperty(p)).toList());
+        taskEmpty.getProperties().addAll(properties.stream().map(this::setTaskProperty).toList());
     }
 
     public TaskValue setTaskProperty(Property p) {
@@ -150,7 +155,7 @@ public class TaskService {
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
 
         return tasks.stream().filter(t ->
-                t.getProperties().stream().anyMatch(p ->
+                        t.getProperties().stream().anyMatch(p ->
                                 p.getProperty().getType().equals(TypeOfProperty.DATE) &&
                                         ((Date) p.getProperty()).getScheduling() &&
                                         p.getValue().getValue().equals(LocalDate.now())))

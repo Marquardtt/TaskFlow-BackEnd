@@ -1,11 +1,9 @@
 package br.demo.backend.service.chat;
 
 
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
-import br.demo.backend.model.chat.ChatGroup;
-import br.demo.backend.model.chat.ChatPrivate;
-import br.demo.backend.model.chat.Message;
+import br.demo.backend.model.chat.*;
 import br.demo.backend.model.dtos.chat.ChatGetDTO;
 import br.demo.backend.model.dtos.chat.ChatGroupGetDTO;
 import br.demo.backend.model.dtos.chat.ChatPrivateGetDTO;
@@ -15,14 +13,16 @@ import br.demo.backend.repository.chat.ChatPrivateRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ResolveStackOverflow;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -32,35 +32,51 @@ public class ChatService {
     private ChatPrivateRepository chatPrivateRepository;
     private ChatGroupRepository chatGroupRepository;
 
-    private AutoMapper<Chat> mapper;
+    private ObjectMapper objectMapper;
     private AutoMapper<ChatGroup> mapperGroup;
     private AutoMapper<ChatPrivate> mapperPrivate;
+    private AutoMapper<Message> mapperMessage;
 
 
     public Collection<ChatPrivateGetDTO> findAllPrivate(Long userId) {
         Collection<ChatPrivate> chats = chatPrivateRepository
-                .findChatsByUsersContainingOrderByMessagesDateTimeDesc(new User(userId));
-        return chats.stream().map(c -> {
-                    ChatPrivate chat = ResolveStackOverflow.resolveStackOverflow(c);
-                    ChatPrivateGetDTO chatGetDTO = new ChatPrivateGetDTO();
-                    BeanUtils.copyProperties(chat, chatGetDTO);
-                    chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-                    return chatGetDTO;
-                }
-        ).toList();
-
+                .findChatsByUsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
+        return chats.stream().map(c -> privateToGetDTO(c, userId)).toList();
     }
 
     public Collection<ChatGroupGetDTO> findAllGroup(Long userId) {
         Collection<ChatGroup> chatGroups = chatGroupRepository
-                .findChatsByGroup_UsersContainingOrderByMessagesDateTimeDesc(new User(userId));
-        return chatGroups.stream().map(c -> {
-            ChatGroup chat = ResolveStackOverflow.resolveStackOverflow(c);
-            ChatGroupGetDTO chatGetDTO = new ChatGroupGetDTO();
-            BeanUtils.copyProperties(chat, chatGetDTO);
-            chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-            return chatGetDTO;
-        }).toList();
+                .findChatsByGroup_UsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
+        return chatGroups.stream().map(c -> groupToGetDTO(c, userId)).toList();
+    }
+
+    private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, Long userId) {
+        ResolveStackOverflow.resolveStackOverflow(chat);
+        ChatPrivateGetDTO chatGetDTO = new ChatPrivateGetDTO();
+        BeanUtils.copyProperties(chat, chatGetDTO);
+        chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
+        User destination = chat.getUsers().stream().filter(u -> !u.getId().equals(userId)).findFirst().get();
+        chatGetDTO.setPicture(destination.getPicture());
+        chatGetDTO.setName(destination.getName());
+        return chatGetDTO;
+    }
+
+    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat, Long userId) {
+        ResolveStackOverflow.resolveStackOverflow(chat);
+        ChatGroupGetDTO chatGetDTO = new ChatGroupGetDTO();
+        BeanUtils.copyProperties(chat, chatGetDTO);
+        chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
+        chatGetDTO.setPicture(chat.getGroup().getPicture());
+        chatGetDTO.setName(chat.getGroup().getName());
+        return chatGetDTO;
+    }
+
+    private ChatGetDTO chatToGetDTO(Chat chat, Long userId) {
+        if(chat.getType().equals(TypeOfChat.PRIVATE)){
+            return privateToGetDTO((ChatPrivate) chat, userId);
+        }else{
+            return groupToGetDTO((ChatGroup) chat, userId);
+        }
     }
 
     private Integer setQuantityUnvisualized(Chat chat, Long userId) {
@@ -93,43 +109,24 @@ public class ChatService {
     }
 
     public Collection<ChatGetDTO> findGroupByName(String name, Long userId) {
-        Collection<ChatGroup> chatsGroups = chatGroupRepository.findAll();
-        Collection<ChatPrivate> chatsPrivate = chatPrivateRepository.findAll();
-
-        return Stream.concat(chatsGroups.stream(), chatsPrivate.stream())
-                .filter(c -> {
-                    if (c.getType().equals(TypeOfChat.GROUP)) {
-                        return ((ChatGroup) c).getGroup().getName().contains(name) &&
-                                ((ChatGroup) c).getGroup().getUsers().contains(new User(userId));
-                    } else {
-                        return ((ChatPrivate) c).getUsers().stream().anyMatch(u -> !u.getId().equals(userId) &&
-                                u.getName().contains(name) && ((ChatPrivate) c).getUsers().contains(new User(userId)));
-                    }
-                }).map(c -> {
-                            if (c.getType().equals(TypeOfChat.GROUP)) {
-                                ChatGroup chat = ResolveStackOverflow.resolveStackOverflow((ChatGroup) c);
-                                ChatGroupGetDTO chatGetDTO = new ChatGroupGetDTO();
-                                BeanUtils.copyProperties(chat, chatGetDTO);
-                                chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-                                return chatGetDTO;
-                            } else {
-                                ChatPrivate chat = ResolveStackOverflow.resolveStackOverflow((ChatPrivate) c);
-                                ChatPrivateGetDTO chatGetDTO = new ChatPrivateGetDTO();
-                                BeanUtils.copyProperties(chat, chatGetDTO);
-                                chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-                                return chatGetDTO;
-                            }
-                        }
-                ).toList();
-
+        Collection<ChatGroup> chatsGroups = chatGroupRepository.
+                findAllByGroup_UsersContaining(new User(userId));
+        Collection<ChatPrivate> chatsPrivate = chatPrivateRepository.
+                findAllByUsersContaining(new User(userId));
+        Collection<Chat> chats = new HashSet<>();
+        chats.addAll(chatsGroups);
+        chats.addAll(chatsPrivate);
+        return chats.stream().map(c -> chatToGetDTO(c, userId)).filter(c -> c.getName().contains(name)).toList();
     }
 
 
     public void save(ChatGroup chatGroup) {
+        chatGroup.setType(TypeOfChat.GROUP);
         chatGroupRepository.save(chatGroup);
     }
 
     public void save(ChatPrivate chatPrivate) {
+        chatPrivate.setType(TypeOfChat.PRIVATE);
         chatPrivateRepository.save(chatPrivate);
     }
 
@@ -138,7 +135,9 @@ public class ChatService {
                 chatGroupRepository.findById(chatGroupDto.getId()).get() :
                 new ChatGroup();
         mapperGroup.map(chatGroupDto, chat, patching);
-        chat = (ChatGroup) updateLastMessage(chat);
+        ChatGroup oldChat = chatGroupRepository.findById(chatGroupDto.getId()).get();
+        chat.setMessages(oldChat.getMessages());
+        chat.setType(TypeOfChat.GROUP);
         chatGroupRepository.save(chat);
     }
 
@@ -147,18 +146,61 @@ public class ChatService {
                 chatPrivateRepository.findById(chatGroupDto.getId()).get() :
                 new ChatPrivate();
         mapperPrivate.map(chatGroupDto, chat, patching);
-        chat = (ChatPrivate) updateLastMessage(chat);
+        ChatPrivate oldChat = chatPrivateRepository.findById(chatGroupDto.getId()).get();
+        chat.setMessages(oldChat.getMessages());
+        chat.setType(TypeOfChat.PRIVATE);
         chatPrivateRepository.save(chat);
     }
 
-    private Chat updateLastMessage(Chat chat) {
+    private void updateLastMessage(Chat chat) {
         HashSet<Message> messages = new HashSet<>(chat.getMessages());
-        chat.setLastMessage(messages.stream().max(Comparator.comparing(Message::getDateTime)).get());
-        return chat;
+        if(messages.isEmpty()) return;
+        chat.setLastMessage(messages.stream().max(Comparator.comparing(Message::getDateCreate)).get());
     }
 
 
     public void delete(Long id) {
         chatRepository.deleteById(id);
+    }
+
+    public void updateMessages(Message message, Long chatId) {
+        Chat chat = chatRepository.findById(chatId).get();
+        message = getMessage(chat, message);
+        chat.getMessages().remove(message);
+        chat.getMessages().add(message);
+        updateLastMessage(chat);
+        if(chat.getType().equals(TypeOfChat.PRIVATE)){
+            chatPrivateRepository.save((ChatPrivate) chat);
+        }else{
+            chatGroupRepository.save((ChatGroup)chat );
+        }
+    }
+
+    public void updateMessages(MultipartFile annex, String messageString, Long chatId) {
+        Chat chat = chatRepository.findById(chatId).get();
+        Message message = objectMapper.convertValue(messageString, Message.class);
+        message = getMessage(chat, message);
+        message.setAnnex(new Archive(annex));
+        chat.getMessages().remove(message);
+        chat.getMessages().add(message);
+        updateLastMessage(chat);
+        if(chat.getType().equals(TypeOfChat.PRIVATE)){
+            chatPrivateRepository.save((ChatPrivate) chat);
+        }else{
+            chatGroupRepository.save((ChatGroup)chat );
+        }
+    }
+
+    private Message getMessage(Chat chat, Message message) {
+        if(chat.getMessages().contains(message)){
+            Message finalMessage = message;
+            Message oldMessage = chat.getMessages().stream().filter(m -> m.equals(finalMessage)).findFirst().get();
+            mapperMessage.map(message, oldMessage, true);
+            message = oldMessage;
+            message.setDateUpdate(LocalDateTime.now());
+        }else{
+            message.setDateCreate(LocalDateTime.now());
+        }
+        return message;
     }
 }

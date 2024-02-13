@@ -1,5 +1,6 @@
 package br.demo.backend.model.dtos.chat;
 
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfChat;
 import jakarta.persistence.*;
@@ -21,4 +22,6 @@ public abstract class ChatGetDTO {
     private TypeOfChat type;
     private Message lastMessage;
     private Integer quantityUnvisualized;
+    private String name;
+    private Archive picture;
 }

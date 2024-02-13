@@ -1,6 +1,9 @@
 package br.demo.backend.model.values;
 
+import br.demo.backend.model.Archive;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,15 +16,16 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_archive_valued")
 public class ArchiveValued extends Value{
-    private String archive;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Archive archive;
 
-    public ArchiveValued(Long id, String archive){
+    public ArchiveValued(Long id, Archive archive){
         super(id);
         this.archive = archive;
     }
 
     @Override
-    public void setValue(Object value){this.archive = (String)value;}
+    public void setValue(Object value){this.archive = (Archive) value;}
 
     @Override
     public Object getValue(){

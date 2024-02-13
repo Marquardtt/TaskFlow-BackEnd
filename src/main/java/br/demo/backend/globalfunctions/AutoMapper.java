@@ -13,5 +13,9 @@ public class AutoMapper <T> {
         modelMapper.getConfiguration().setCollectionsMergeEnabled(patch);
         modelMapper.map(source, destinationType);
     }
-
+    public void map(Object source, T destinationType, Boolean patch, Boolean mergeCollections) {
+        modelMapper.getConfiguration().setSkipNullEnabled(patch);
+        modelMapper.getConfiguration().setCollectionsMergeEnabled(mergeCollections);
+        modelMapper.map(source, destinationType);
+    }
 }

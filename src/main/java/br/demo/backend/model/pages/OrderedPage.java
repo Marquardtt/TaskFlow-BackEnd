@@ -2,7 +2,7 @@ package br.demo.backend.model.pages;
 
 
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskOrdered;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,16 +16,19 @@ import java.util.Collection;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-@Table(name = "db_common_page")
+@Table(name = "db_ordered_page")
 
-//KANBAN, TIMELINE, LIST, TABLE
+//KANBAN, TIMELINE, CALENDAR
 public class OrderedPage extends Page {
     //Patch
     @ManyToOne
     private Property propertyOrdering;
 
-    //Cuidado para nao deletar as tasks sem querer
-    @ManyToMany(cascade = CascadeType.ALL)
-    private Collection<TaskPage> tasks;
 
+    @Override
+    public String toString() {
+        return "OrderedPage{" +
+                "propertyOrdering=" + propertyOrdering +
+                "} " + super.toString();
+    }
 }

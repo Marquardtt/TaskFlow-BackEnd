@@ -3,11 +3,13 @@ package br.demo.backend.service;
 
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ResolveStackOverflow;
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -25,8 +27,8 @@ public class UserService {
 
     public User findOne(Long id) {
         User user = userRepository.findById(id).get();
-        user.setPermission(
-                user.getPermission().stream().sorted(
+        user.setPermissions(
+                user.getPermissions().stream().sorted(
                         (p1, p2) -> p2.getProject().getVisualizedAt().compareTo(
                                 p1.getProject().getVisualizedAt()
                         )).toList());
@@ -53,7 +55,7 @@ public class UserService {
 
     public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
         User user = userRepository.findById(userId).get();
-        return user.getPermission().stream().filter(
+        return user.getPermissions().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
         ).findFirst().get();
     }
@@ -63,8 +65,15 @@ public class UserService {
         return ResolveStackOverflow.resolveStackOverflow(user);
     }
 
-    public User findByUserNameOrName(String name) {
-        User user = userRepository.findUserByUsernameOrName(name, name);
-        return ResolveStackOverflow.resolveStackOverflow(user);
+    public void updatePicture(MultipartFile picture, Long id) {
+        User user = userRepository.findById(id).get();
+        user.setPicture(new Archive(picture));
+        userRepository.save(user);
+    }
+
+
+    public Collection<User> findByUserNameOrName(String name) {
+        Collection<User> users = userRepository.findAllByUsernameContainingOrNameContaining(name, name);
+        return users.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 }

@@ -5,6 +5,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 
@@ -48,6 +49,10 @@ public class UserController {
     public User findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
         return userService.findByEmailAndPassword(email, password);
     }
+    @PatchMapping("/picture/{id}")
+    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+        userService.updatePicture(picture, id);
+    }
 
     @GetMapping
     public Collection<User> findAll(){
@@ -57,10 +62,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
         userService.delete(id);
+        //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 
-        @GetMapping("/name/{name}")
-    public User findByUserNameOrName(@PathVariable String name) {
+    @GetMapping("/name/{name}")
+    public Collection<User> findByUsersNameOrName(@PathVariable String name) {
         return userService.findByUserNameOrName(name);
     }
 }

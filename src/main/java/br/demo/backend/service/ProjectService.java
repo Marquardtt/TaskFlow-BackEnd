@@ -3,20 +3,20 @@ package br.demo.backend.service;
 
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ResolveStackOverflow;
-import br.demo.backend.model.Group;
-import br.demo.backend.model.Permission;
-import br.demo.backend.model.Project;
-import br.demo.backend.model.User;
+import br.demo.backend.model.*;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -26,6 +26,7 @@ public class ProjectService {
 
     private ProjectRepository projectRepository;
     private SelectRepository selectRepository;
+    private UserRepository userRepository;
     private GroupRepository groupRepository;
     private AutoMapper<Project> autoMapper;
 
@@ -36,10 +37,21 @@ public class ProjectService {
         return projects.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
+    public void updatePicture(MultipartFile picture, Long id) {
+        Project project = projectRepository.findById(id).get();
+        project.setPicture(new Archive(picture));
+        projectRepository.save(project);
+    }
+
+    public void updateOwner(User user, Long projectId) {
+        Project project = projectRepository.findById(projectId).get();
+        project.setOwner(user);
+        projectRepository.save(project);
+    }
+
     public Collection<Project> finAllOfAUser(Long id) {
         Collection<Project> projects = projectRepository.findProjectsByOwner_Id(id);
-        Collection<Group> groups = groupRepository.findGroupsByUsersContaining(new User(id));
-        projects.addAll(groups.stream().flatMap(g -> g.getPermission().stream().map(Permission::getProject)).toList());
+        projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
         return projects.stream().distinct().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
     public Project findOne(Long id) {
@@ -49,17 +61,19 @@ public class ProjectService {
 
     public void update(Project projectDTO, Boolean patching) {
         Project project = patching ? projectRepository.findById(projectDTO.getId()).get() : new Project();
+        User owner = project.getOwner();
         autoMapper.map(projectDTO, project, patching);
+        project.setOwner(owner);
         projectRepository.save(project);
     }
 
     public void save(Project project) {
         Project emptyProject = projectRepository.save(project);
-        HashSet<Option> options = new HashSet<>();
+        ArrayList<Option> options = new ArrayList<>();
         options.add(new Option(null, "To-do", "#FF7A00"));
         options.add(new Option(null, "Doing", "#F7624B"));
         options.add(new Option(null, "Done", "#F04A94"));
-        emptyProject.setProperties(new HashSet<>());
+        emptyProject.setProperties(new ArrayList<>());
         Select select = new Select(null, "Stats", true, false,
                 options, TypeOfProperty.SELECT, null, emptyProject);
         Select selectCreated = selectRepository.save(select);
@@ -67,7 +81,8 @@ public class ProjectService {
         projectRepository.save(emptyProject);
     }
 
-    public void setVisualizedNow(Project project) {
+    public void setVisualizedNow(Long id) {
+        Project project = projectRepository.findById(id).get();
         project.setVisualizedAt(LocalDateTime.now());
         projectRepository.save(project);
     }
