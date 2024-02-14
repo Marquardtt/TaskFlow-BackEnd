@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 
 
@@ -32,7 +33,7 @@ public class Message {
     private LocalDateTime dateCreate;
     private LocalDateTime dateUpdate;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "message")
     private Collection<Destination> destination;
     @OneToOne(cascade = CascadeType.ALL)
     private Archive annex;

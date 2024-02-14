@@ -59,7 +59,7 @@ public class TaskService {
         return ResolveStackOverflow.resolveStackOverflow(task);
     }
 
-    public Task save(Long idpage, Long userId) {
+    public Task save(Long idpage, String userId) {
 
         Page page = pageRepositorry.findById(idpage).get();
         User user = new User(userId);
@@ -136,20 +136,20 @@ public class TaskService {
         taskRepository.save(task);
     }
 
-    public void delete(Long id, Long userId) {
+    public void delete(Long id, String userId) {
         User user = userRepository.findById(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
     }
 
-    public void redo(Long id, Long userId) {
+    public void redo(Long id, String userId) {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
     }
 
-    public Collection<Task> getTasksToday(Long id) {
+    public Collection<Task> getTasksToday(String id) {
         User user = userRepository.findById(id).get();
         TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);

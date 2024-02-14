@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class BeansConfig {
+
     @Bean
-    public AutoMapper autoMapper() {
-        return new AutoMapper(new ModelMapper());
+    public AutoMapper<?> autoMapper() {
+        return new AutoMapper<>(new ModelMapper());
     }
 
     @Bean
@@ -17,7 +18,6 @@ public class BeansConfig {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.getConfiguration().setAmbiguityIgnored(true);
-        modelMapper.getConfiguration().setCollectionsMergeEnabled(true);
         return modelMapper;
     }
 }

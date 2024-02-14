@@ -1,5 +1,7 @@
 package br.demo.backend.model.relations;
 
+import br.demo.backend.model.ids.TaskPageId;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.DeserializerValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -18,7 +20,6 @@ import lombok.NoArgsConstructor;
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonDeserialize(using = DeserializerTaskPage.class)
 public class TaskPage {
-    // TODO: 13/02/2024 Id Composto
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +27,4 @@ public class TaskPage {
     private Long id;
     @ManyToOne
     private Task task;
-
 }

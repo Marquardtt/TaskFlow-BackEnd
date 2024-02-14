@@ -109,6 +109,7 @@ public class ResolveStackOverflow {
                 m.getSender().setPermissions(null);
                 m.setDestination(m.getDestination().stream().map(d -> {
                     d.getUser().setPermissions(null);
+                    d.setMessage(null);
                     return d;
                 }).toList());
                 return m;
@@ -152,6 +153,7 @@ public class ResolveStackOverflow {
                 m.setSender(resolveStackOverflow(m.getSender()));
                 m.setDestination(m.getDestination().stream().map(d -> {
                     d.setUser(resolveStackOverflow(d.getUser()));
+                    d.setMessage(null);
                     return d;
                 }).toList());
                 return m;
@@ -162,6 +164,7 @@ public class ResolveStackOverflow {
             chat.getLastMessage().setSender(resolveStackOverflow(chat.getLastMessage().getSender()));
             chat.getLastMessage().setDestination(chat.getLastMessage().getDestination().stream().map(d -> {
                 d.setUser(resolveStackOverflow(d.getUser()));
+                d.setMessage(null);
                 return d;
             }).toList());
         } catch (NullPointerException ignored) {

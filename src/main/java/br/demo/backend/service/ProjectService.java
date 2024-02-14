@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 @Service
 @AllArgsConstructor
@@ -49,8 +48,8 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    public Collection<Project> finAllOfAUser(Long id) {
-        Collection<Project> projects = projectRepository.findProjectsByOwner_Id(id);
+    public Collection<Project> finAllOfAUser(String id) {
+        Collection<Project> projects = projectRepository.findProjectsByOwner_Username(id);
         projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
         return projects.stream().distinct().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }

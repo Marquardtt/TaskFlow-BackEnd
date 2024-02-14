@@ -12,13 +12,14 @@ import java.util.Collection;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_user")
 public class User {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(generator = "uuid")
     @EqualsAndHashCode.Include
-    private Long id;
+    private String username;
+
     private String name;
     private String surname;
-    private String username;
     private String password;
     private String address;
     //Patch
@@ -36,7 +37,7 @@ public class User {
     private Configuration configuration;
     @ManyToMany
     private Collection<Permission> permissions;
-    public User (Long id){
-        this.id = id;
+    public User (String username){
+        this.username = username;
     }
 }

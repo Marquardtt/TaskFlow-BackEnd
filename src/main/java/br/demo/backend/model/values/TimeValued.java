@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
 @AllArgsConstructor
@@ -15,15 +16,15 @@ import java.time.LocalTime;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_time_valued")
 public class TimeValued extends Value {
-    private LocalTime time;
+    private Duration time;
 
-    public TimeValued(Long id, LocalTime time) {
+    public TimeValued(Long id, Duration time) {
         super(id);
         this.time = time;
     }
 
     @Override
-    public void setValue(Object value){this.time = (LocalTime) value;}
+    public void setValue(Object value){this.time = (Duration) value;}
     @Override
     public Object getValue() {
         return this.time;

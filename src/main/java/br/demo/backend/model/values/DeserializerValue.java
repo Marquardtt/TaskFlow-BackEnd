@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 import java.sql.Time;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -86,13 +87,13 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                             return new TaskValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
-                            return new TaskValue(id, property, new TimeValued(idTaskVl, LocalTime.parse(value.asText())));
+                            return new TaskValue(id, property, new TimeValued(idTaskVl, Duration.parse(value.asText())));
                         }
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
-                                    users.add(new User(valueF.get("id").asLong()));
+                                    users.add(new User(valueF.get("id").asText()));
                                 }
                             }
                             return new TaskValue(id, new Property(idProp), new UserValued(idTaskVl, users));

@@ -1,5 +1,7 @@
 package br.demo.backend.model.relations;
 
+import br.demo.backend.model.ids.TaskPageId;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

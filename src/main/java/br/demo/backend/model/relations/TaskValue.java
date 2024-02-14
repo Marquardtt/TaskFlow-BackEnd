@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_task_value")
 @JsonDeserialize(using = DeserializerValue.class)
 public class TaskValue {
-    // TODO: 13/02/2024 Id Composto
+    // TODO: 13/02/2024 Id Composto SE não for usado em project tambem
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

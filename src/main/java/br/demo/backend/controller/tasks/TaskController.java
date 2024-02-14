@@ -17,7 +17,7 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/{pageId}/{userId}")
-    public Task insert(@PathVariable Long pageId, @PathVariable Long userId){
+    public Task insert(@PathVariable Long pageId, @PathVariable String userId){
         return taskService.save(pageId, userId);
     }
 
@@ -46,17 +46,17 @@ public class TaskController {
     }
 
     @GetMapping("/today/{id}")
-    public Collection<Task> findTodaysTasks(@PathVariable Long id){
+    public Collection<Task> findTodaysTasks(@PathVariable String id){
         return taskService.getTasksToday(id);
     }
 
     @DeleteMapping("/{id}/{userId}")
-    public void delete(@PathVariable Long id , @PathVariable Long userId){
+    public void delete(@PathVariable Long id , @PathVariable String userId){
         taskService.delete(id, userId);
     }
 
     @PutMapping("/redo/{userId}")
-    public void redo(@PathVariable Long id , @PathVariable Long userId){
+    public void redo(@PathVariable Long id , @PathVariable String userId){
         taskService.redo(id, userId);
     }
 

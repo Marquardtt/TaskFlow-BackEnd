@@ -21,9 +21,9 @@ public class UserController {
     }
 
 
-    @GetMapping("/{userId}/{projectId}")
-    public Permission insert(@PathVariable Long userId, @PathVariable Long projectId){
-        return userService.getPermissionOfAUserInAProject(userId, projectId);
+    @GetMapping("/{username}/{projectId}")
+    public Permission insert(@PathVariable String username, @PathVariable Long projectId){
+        return userService.getPermissionOfAUserInAProject(username, projectId);
     }
 
     @PutMapping
@@ -35,9 +35,9 @@ public class UserController {
         userService.update(user, true);
     }
 
-    @GetMapping("/{id}")
-    public User findOne(@PathVariable Long id){
-        return userService.findOne(id);
+    @GetMapping("/{username}")
+    public User findOne(@PathVariable String username){
+        return userService.findOne(username);
     }
 
     @GetMapping("/username/{username}/{password}")
@@ -49,9 +49,9 @@ public class UserController {
     public User findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
         return userService.findByEmailAndPassword(email, password);
     }
-    @PatchMapping("/picture/{id}")
-    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        userService.updatePicture(picture, id);
+    @PatchMapping("/picture/{username}")
+    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
+        userService.updatePicture(picture, username);
     }
 
     @GetMapping
@@ -59,9 +59,9 @@ public class UserController {
         return userService.findAll();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        userService.delete(id);
+    @DeleteMapping("/{username}")
+    public void delete(@PathVariable String username){
+        userService.delete(username);
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 

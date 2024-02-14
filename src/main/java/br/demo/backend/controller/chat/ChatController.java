@@ -49,23 +49,23 @@ public class ChatController {
     }
 
     @PatchMapping("/group/visualized/{userId}")
-    public void upDateToVisualized(@RequestBody ChatGroup chat, @PathVariable Long userId){
+    public void upDateToVisualized(@RequestBody ChatGroup chat, @PathVariable String userId){
         chatService.updateMessagesToVisualized(chat, userId);
     }
     @PatchMapping("/private/visualized/{userId}")
-    public void upDateToVisualized(@RequestBody ChatPrivate chat, @PathVariable Long userId){
+    public void upDateToVisualized(@RequestBody ChatPrivate chat, @PathVariable String userId){
         chatService.updateMessagesToVisualized(chat, userId);
     }
     @GetMapping("/name/{userId}/{name}")
-    public Collection<ChatGetDTO> findByName(@PathVariable String name, @PathVariable Long userId){
+    public Collection<ChatGetDTO> findByName(@PathVariable String name, @PathVariable String userId){
         return chatService.findGroupByName(name, userId);
     }
     @GetMapping("/private/{userId}")
-    public Collection<ChatPrivateGetDTO> findAllPrivate(@PathVariable Long userId){
+    public Collection<ChatPrivateGetDTO> findAllPrivate(@PathVariable String userId){
         return chatService.findAllPrivate(userId);
     }
     @GetMapping("/group/{userId}")
-    public Collection<ChatGroupGetDTO> findAllGroup(@PathVariable Long userId){
+    public Collection<ChatGroupGetDTO> findAllGroup(@PathVariable String userId){
         return chatService.findAllGroup(userId);
     }
 

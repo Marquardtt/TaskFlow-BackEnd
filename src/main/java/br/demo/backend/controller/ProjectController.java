@@ -48,7 +48,7 @@ public class ProjectController {
     }
 
     @GetMapping("/user/{userId}")
-    public Collection<Project> findAllOfAUser(@PathVariable Long userId) {
+    public Collection<Project> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 

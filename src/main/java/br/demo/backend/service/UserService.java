@@ -25,7 +25,7 @@ public class UserService {
         return users.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
     }
 
-    public User findOne(Long id) {
+    public User findOne(String id) {
         User user = userRepository.findById(id).get();
         user.setPermissions(
                 user.getPermissions().stream().sorted(
@@ -39,12 +39,12 @@ public class UserService {
         userRepository.save(user);
     }
     public void update(User userDTO, Boolean patching) {
-        User user = patching ? userRepository.findById(userDTO.getId()).get() : new User();
+        User user = patching ? userRepository.findById(userDTO.getUsername()).get() : new User();
         autoMapper.map(userDTO, user, patching);
         userRepository.save(user);
     }
 
-    public void delete(Long id) {
+    public void delete(String id) {
         userRepository.deleteById(id);
     }
 
@@ -53,7 +53,7 @@ public class UserService {
         return ResolveStackOverflow.resolveStackOverflow(user);
     }
 
-    public Permission getPermissionOfAUserInAProject(Long userId, Long projectId){
+    public Permission getPermissionOfAUserInAProject(String userId, Long projectId){
         User user = userRepository.findById(userId).get();
         return user.getPermissions().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
@@ -65,7 +65,7 @@ public class UserService {
         return ResolveStackOverflow.resolveStackOverflow(user);
     }
 
-    public void updatePicture(MultipartFile picture, Long id) {
+    public void updatePicture(MultipartFile picture, String id) {
         User user = userRepository.findById(id).get();
         user.setPicture(new Archive(picture));
         userRepository.save(user);

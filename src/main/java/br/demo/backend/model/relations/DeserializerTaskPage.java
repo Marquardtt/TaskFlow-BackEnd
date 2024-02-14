@@ -1,6 +1,7 @@
 package br.demo.backend.model.relations;
 
 import br.demo.backend.model.User;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
@@ -19,7 +20,6 @@ import java.util.ArrayList;
 public class DeserializerTaskPage extends StdDeserializer<TaskPage> {
     JsonNode jsonNode;
 
-
     protected DeserializerTaskPage() {
         super(TaskPage.class);
     }
@@ -35,26 +35,25 @@ public class DeserializerTaskPage extends StdDeserializer<TaskPage> {
             System.out.println(e.getMessage());
         }
 
+
         if (isPresent(jsonNode, "task")) {
-            JsonNode jsonTask = jsonNode.get("task");
+            JsonNode jsonTask = jsonNode.findParent("task");
             if (isPresent(jsonTask, "id")) {
-                Long idTask = jsonTask.get("id").asLong();
-                Task task = new Task(idTask);
-                if(isPresent(jsonNode, "x") &&
-                        isPresent(jsonNode, "y")){
-                    Double x = jsonNode.get("x").asDouble();
-                    Double y = jsonNode.get("x").asDouble();
-                    return new TaskCanvas(id, task, x, y);
+                Long taskId = jsonTask.findValue("id").asLong();
+                if (isPresent(jsonNode, "x") && isPresent(jsonNode, "y")) {
+                    Double x = jsonNode.findValue("x").asDouble();
+                    Double y = jsonNode.findValue("y").asDouble();
+                    return new TaskCanvas(id, new Task(taskId), x, y);
                 }
-                if(isPresent(jsonNode, "index")){
-                    Integer index = jsonNode.get("index").asInt();
-                    return new TaskOrdered(id, task, index);
+                if (isPresent(jsonNode, "index")) {
+                    Integer index = jsonNode.findValue("index").asInt();
+                    return new TaskOrdered(id, new Task(taskId), index);
                 }
-                throw new RuntimeException("Subclass isn't clearly defined");
+                throw new RuntimeException("TaskPage subclass not clearly defined");
             }
-            throw new RuntimeException("Task id is not present");
+            throw new RuntimeException("Task id not found");
         }
-        throw new RuntimeException("Task is not present");
+        throw new RuntimeException("Task not found");
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {

@@ -47,7 +47,7 @@ public class GroupService {
         group.setOwner(user);
         groupRepository.save(group);
     }
-    public Collection<Group> findGroupsByUser(Long userId) {
+    public Collection<Group> findGroupsByUser(String userId) {
         Collection<Group> groups = groupRepository.findGroupsByUsersContaining(new User(userId));
         return groups.stream().distinct().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
     }

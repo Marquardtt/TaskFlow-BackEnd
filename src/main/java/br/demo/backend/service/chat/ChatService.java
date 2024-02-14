@@ -38,30 +38,30 @@ public class ChatService {
     private AutoMapper<Message> mapperMessage;
 
 
-    public Collection<ChatPrivateGetDTO> findAllPrivate(Long userId) {
+    public Collection<ChatPrivateGetDTO> findAllPrivate(String userId) {
         Collection<ChatPrivate> chats = chatPrivateRepository
                 .findChatsByUsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
         return chats.stream().map(c -> privateToGetDTO(c, userId)).toList();
     }
 
-    public Collection<ChatGroupGetDTO> findAllGroup(Long userId) {
+    public Collection<ChatGroupGetDTO> findAllGroup(String userId) {
         Collection<ChatGroup> chatGroups = chatGroupRepository
                 .findChatsByGroup_UsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
         return chatGroups.stream().map(c -> groupToGetDTO(c, userId)).toList();
     }
 
-    private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, Long userId) {
+    private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
         ResolveStackOverflow.resolveStackOverflow(chat);
         ChatPrivateGetDTO chatGetDTO = new ChatPrivateGetDTO();
         BeanUtils.copyProperties(chat, chatGetDTO);
         chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-        User destination = chat.getUsers().stream().filter(u -> !u.getId().equals(userId)).findFirst().get();
+        User destination = chat.getUsers().stream().filter(u -> !u.getUsername().equals(userId)).findFirst().get();
         chatGetDTO.setPicture(destination.getPicture());
         chatGetDTO.setName(destination.getName());
         return chatGetDTO;
     }
 
-    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat, Long userId) {
+    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat, String userId) {
         ResolveStackOverflow.resolveStackOverflow(chat);
         ChatGroupGetDTO chatGetDTO = new ChatGroupGetDTO();
         BeanUtils.copyProperties(chat, chatGetDTO);
@@ -71,7 +71,7 @@ public class ChatService {
         return chatGetDTO;
     }
 
-    private ChatGetDTO chatToGetDTO(Chat chat, Long userId) {
+    private ChatGetDTO chatToGetDTO(Chat chat, String userId) {
         if(chat.getType().equals(TypeOfChat.PRIVATE)){
             return privateToGetDTO((ChatPrivate) chat, userId);
         }else{
@@ -79,26 +79,26 @@ public class ChatService {
         }
     }
 
-    private Integer setQuantityUnvisualized(Chat chat, Long userId) {
+    private Integer setQuantityUnvisualized(Chat chat, String userId) {
         return chat.getMessages().stream().filter(m ->
                 m.getDestination().stream().anyMatch(d ->
-                        d.getUser().getId().equals(userId) && !d.getVisualized()
+                        d.getUser().getUsername().equals(userId) && !d.getVisualized()
                 )).toList().size();
     }
 
 
-    public void updateMessagesToVisualized(ChatPrivate chat, Long userId) {
+    public void updateMessagesToVisualized(ChatPrivate chat, String userId) {
         chatPrivateRepository.save((ChatPrivate) updateMessagesToVisualized((Chat) chat, userId));
     }
 
-    public void updateMessagesToVisualized(ChatGroup chat, Long userId) {
+    public void updateMessagesToVisualized(ChatGroup chat, String userId) {
         chatGroupRepository.save((ChatGroup) updateMessagesToVisualized((Chat) chat, userId));
     }
 
-    private Chat updateMessagesToVisualized(Chat chat, Long userId) {
+    private Chat updateMessagesToVisualized(Chat chat, String userId) {
         chat.setMessages(chat.getMessages().stream().map(m -> {
             m.setDestination(m.getDestination().stream().map(d -> {
-                if (d.getUser().getId().equals(userId)) {
+                if (d.getUser().getUsername().equals(userId)) {
                     d.setVisualized(true);
                 }
                 return d;
@@ -108,7 +108,7 @@ public class ChatService {
         return chat;
     }
 
-    public Collection<ChatGetDTO> findGroupByName(String name, Long userId) {
+    public Collection<ChatGetDTO> findGroupByName(String name, String userId) {
         Collection<ChatGroup> chatsGroups = chatGroupRepository.
                 findAllByGroup_UsersContaining(new User(userId));
         Collection<ChatPrivate> chatsPrivate = chatPrivateRepository.
@@ -176,6 +176,7 @@ public class ChatService {
         }
     }
 
+    // TODO: 14/02/2024 fazer os destinations automaticamente
     public void updateMessages(MultipartFile annex, String messageString, Long chatId) {
         Chat chat = chatRepository.findById(chatId).get();
         Message message = objectMapper.convertValue(messageString, Message.class);

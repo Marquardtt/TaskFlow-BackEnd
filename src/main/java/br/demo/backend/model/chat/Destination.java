@@ -1,6 +1,7 @@
 package br.demo.backend.model.chat;
 
 import br.demo.backend.model.User;
+import br.demo.backend.model.ids.DestinationId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,13 +16,16 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_destination")
 public class Destination {
 
-    // TODO: 13/02/2024 Id Composto
+    //TODO: 13/02/2024 Id Composto
     @EqualsAndHashCode.Include
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private DestinationId id;
     @ManyToOne
+    @MapsId("userUsername")
     private User user;
+    @ManyToOne
+    @MapsId("messageId")
+    private Message message;
     private Boolean visualized = false;
 
 }
