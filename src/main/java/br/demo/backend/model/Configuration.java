@@ -41,8 +41,8 @@ public class Configuration {
     private Boolean notificMyPointsChange;
     //when i schedule a task or project
     private Boolean notificSchedules;
-    //don't understand but can be replaced with deadlines or something like that
-    private Boolean notificMylateProject;
+    //when a project or task deadline is near
+    private Boolean notificDeadlines;
     //when i receive a message
     private Boolean notificChats;
     //when ia task than i am responsible receive a comment

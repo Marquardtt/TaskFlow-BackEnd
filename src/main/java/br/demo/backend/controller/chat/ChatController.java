@@ -1,13 +1,12 @@
 package br.demo.backend.controller.chat;
 
 
-import br.demo.backend.model.chat.Chat;
 import br.demo.backend.model.chat.ChatGroup;
 import br.demo.backend.model.chat.ChatPrivate;
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.dtos.chat.ChatGetDTO;
-import br.demo.backend.model.dtos.chat.ChatGroupGetDTO;
-import br.demo.backend.model.dtos.chat.ChatPrivateGetDTO;
+import br.demo.backend.model.dtos.chat.get.ChatGetDTO;
+import br.demo.backend.model.dtos.chat.get.ChatGroupGetDTO;
+import br.demo.backend.model.dtos.chat.get.ChatPrivateGetDTO;
 import br.demo.backend.service.chat.ChatService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package br.demo.backend.model.dtos.chat;
+package br.demo.backend.model.dtos.chat.get;
 
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.chat.Message;

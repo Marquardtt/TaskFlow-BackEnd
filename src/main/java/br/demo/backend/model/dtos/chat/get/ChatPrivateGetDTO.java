@@ -1,10 +1,6 @@
-package br.demo.backend.model.dtos.chat;
+package br.demo.backend.model.dtos.chat.get;
 
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
