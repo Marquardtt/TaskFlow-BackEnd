@@ -18,9 +18,9 @@ import java.util.Collection;
 public abstract class ChatGetDTO {
 
     private Long id;
-    private Collection<Message> messages;
+    private Collection<MessageGetDTO> messages;
     private TypeOfChat type;
-    private Message lastMessage;
+    private MessageGetDTO lastMessage;
     private Integer quantityUnvisualized;
     private String name;
     private Archive picture;

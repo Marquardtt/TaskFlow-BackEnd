@@ -27,8 +27,6 @@ public class PageGetDTO {
 
     private Collection<PropertyGetDTO> properties;
 
-    private ProjectGetDTO project;
-
     private Collection<TaskPageGetDTO> tasks;
 
 }
