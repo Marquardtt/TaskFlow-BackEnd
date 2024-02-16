@@ -1,6 +1,7 @@
 package br.demo.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.util.Collection;
@@ -40,4 +41,5 @@ public class User {
     public User (String username){
         this.username = username;
     }
+
 }

@@ -3,11 +3,17 @@ package br.demo.backend.service;
 
 import br.demo.backend.exception.GroupNotFoundException;
 import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ResolveStackOverflow;
+import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.*;
+import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.model.dtos.group.GroupPostDTO;
+import br.demo.backend.model.dtos.group.GroupPutDTO;
+import br.demo.backend.model.dtos.permission.PermissionGetDTO;
+import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,17 +31,17 @@ public class GroupService {
     private AutoMapper<Group> autoMapper;
 
 
-    public Collection<Group> findAll() {
-        Collection<Group> groups = groupRepository.findAll();
-        return groups.stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
+    public Collection<GroupGetDTO> findAll() {
+        return groupRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public Group findOne(Long id) {
-        Group group = groupRepository.findById(id).get();
-        return ResolveStackOverflow.resolveStackOverflow(group);
+    public GroupGetDTO findOne(Long id) {
+        return ModelToGetDTO.tranform(groupRepository.findById(id).get());
     }
 
-    public void save(Group group) {
+    public void save(GroupPostDTO groupDto) {
+        Group group = new Group();
+        BeanUtils.copyProperties(groupDto, group);
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
@@ -47,28 +53,20 @@ public class GroupService {
         group.setOwner(user);
         groupRepository.save(group);
     }
-    public Collection<Group> findGroupsByUser(String userId) {
-        Collection<Group> groups = groupRepository.findGroupsByUsersContaining(new User(userId));
-        return groups.stream().distinct().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
+    public Collection<GroupGetDTO> findGroupsByUser(String userId) {
+        return groupRepository.findGroupsByUsersContaining(new User(userId)).stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public Collection<User> findUsersByGroup(Long groupId) {
-        Group group = groupRepository.findById(groupId).get();
-        return group.getUsers().stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
-    }
-
-    public Permission findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
+    public PermissionGetDTO findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
         Permission permission = group.getPermissions().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
         ).findFirst().get();
-        permission.setProject(ResolveStackOverflow.resolveStackOverflow(permission.getProject()));
-        return permission;
+        return ModelToGetDTO.tranform(permission);
     }
 
-    public Collection<Group> findGroupsOfAProject(Long projectId) {
-        Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(new Project(projectId));
-        return groups.stream().map(ResolveStackOverflow::resolveStackOverflow).collect(Collectors.toList());
+    public Collection<GroupGetDTO> findGroupsOfAProject(Long projectId) {
+       return groupRepository.findGroupsByPermissions_Project(new Project(projectId)).stream().map(ModelToGetDTO::tranform).toList();
     }
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
@@ -78,9 +76,11 @@ public class GroupService {
                 .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
     }
 
-    public void update(Group groupDTO, Boolean patching) {
+    public void update(GroupPutDTO groupDTO, Boolean patching) {
+        Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
+        Archive picture = oldGroup.getPicture();
 
-        Group group = patching ? groupRepository.findById(groupDTO.getId()).get() : new Group();
+        Group group = patching ? oldGroup : new Group();
         User owner = group.getOwner();
         autoMapper.map(groupDTO, group, patching);
 
@@ -92,6 +92,7 @@ public class GroupService {
             updatePermission(group, permission);
         }
         group.setOwner(owner);
+        group.setPicture(picture);
         groupRepository.save(group);
     }
 

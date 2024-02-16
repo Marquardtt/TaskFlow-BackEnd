@@ -92,8 +92,8 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
-                                if(isPresent(valueF, "id")){
-                                    users.add(new User(valueF.get("id").asText()));
+                                if(isPresent(valueF, "username")){
+                                    users.add(new User(valueF.get("username").asText()));
                                 }
                             }
                             return new TaskValue(id, new Property(idProp), new UserValued(idTaskVl, users));

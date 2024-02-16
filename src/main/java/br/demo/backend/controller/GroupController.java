@@ -4,6 +4,11 @@ import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.Permission;
+import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.model.dtos.group.GroupPostDTO;
+import br.demo.backend.model.dtos.group.GroupPutDTO;
+import br.demo.backend.model.dtos.permission.PermissionGetDTO;
+import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +24,16 @@ public class GroupController {
     private GroupService groupService;
 
     @PostMapping
-    public void insert(@RequestBody Group group) {
+    public void insert(@RequestBody GroupPostDTO group) {
         groupService.save(group);
     }
 
     @PutMapping
-    public void upDate(@RequestBody Group group) {
+    public void upDate(@RequestBody GroupPutDTO group) {
         groupService.update(group, false);
     }
     @PatchMapping
-    public void patch(@RequestBody Group group) {
+    public void patch(@RequestBody GroupPutDTO group) {
         groupService.update(group, true);
     }
 
@@ -38,27 +43,27 @@ public class GroupController {
         groupService.updateUsers(user, groupId);
     }
     @GetMapping("/{id}")
-    public Group findOne(@PathVariable Long id) {
+    public GroupGetDTO findOne(@PathVariable Long id) {
         return groupService.findOne(id);
     }
 
     @GetMapping
-    public Collection<Group> findAll() {
+    public Collection<GroupGetDTO> findAll() {
         return groupService.findAll();
     }
 
     @GetMapping("/user/{userId}")
-    public Collection<Group> findGroupsByAUser(@PathVariable String userId) {
+    public Collection<GroupGetDTO> findGroupsByAUser(@PathVariable String userId) {
         return groupService.findGroupsByUser(userId);
     }
 
     @GetMapping("/project/{projectId}")
-    public Collection<Group> findGroupsOfAProject(@PathVariable Long projectId) {
+    public Collection<GroupGetDTO> findGroupsOfAProject(@PathVariable Long projectId) {
         return groupService.findGroupsOfAProject(projectId);
     }
 
     @GetMapping("/{groupId}/{projectId}")
-    public Permission findPermissionOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
+    public PermissionGetDTO findPermissionOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
         return groupService.findPermissionOfAGroupInAProject(groupId, projectId);
     }
 
@@ -67,12 +72,6 @@ public class GroupController {
     public ResponseEntity<Collection<Permission>> findAllPermissionsOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
         Collection<Permission> permissions = groupService.findAllPermissionsOfAGroupInAProject(groupId, projectId);
         return ResponseEntity.ok(permissions);
-    }
-
-    @GetMapping("/users/{groupId}")
-    //isso não precisa, group ja tem uma lista de users
-    public Collection<User> findUsersByGroup(@PathVariable Long groupId) {
-        return groupService.findUsersByGroup(groupId);
     }
 
     @DeleteMapping("/{id}")

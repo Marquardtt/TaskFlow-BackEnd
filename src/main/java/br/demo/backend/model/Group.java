@@ -12,6 +12,7 @@ import java.util.Collection;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_group")
 public class Group {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -25,6 +26,7 @@ public class Group {
     @ManyToMany
     private Collection<Permission> permissions;
     @ManyToOne
+    @JoinColumn(nullable = false)
     private User owner;
     @ManyToMany
     private Collection<User> users;

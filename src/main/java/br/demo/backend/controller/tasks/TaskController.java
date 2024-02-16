@@ -1,6 +1,8 @@
 package br.demo.backend.controller.tasks;
 
 import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
+import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.service.tasks.TaskService;
@@ -17,7 +19,7 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/{pageId}/{userId}")
-    public Task insert(@PathVariable Long pageId, @PathVariable String userId){
+    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId){
         return taskService.save(pageId, userId);
     }
 
@@ -31,22 +33,22 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public Task findOne(@PathVariable Long id){
+    public TaskGetDTO findOne(@PathVariable Long id){
         return taskService.findOne(id);
     }
 
     @GetMapping("/name/{name}")
-    public Collection<Task> findByName(@PathVariable String name){
+    public Collection<TaskGetDTO> findByName(@PathVariable String name){
         return taskService.findByName(name);
     }
 
     @GetMapping
-    public Collection<Task> findAll(){
+    public Collection<TaskGetDTO> findAll(){
         return taskService.findAll();
     }
 
     @GetMapping("/today/{id}")
-    public Collection<Task> findTodaysTasks(@PathVariable String id){
+    public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
         return taskService.getTasksToday(id);
     }
 
@@ -61,9 +63,9 @@ public class TaskController {
     }
 
     @GetMapping("/month/{month}/{pageId}/{propertyId}")
-    public Collection<Task> getTasksOfMonth(@PathVariable Integer month,
-                                            @PathVariable Long pageId,
-                                            @PathVariable Long propertyId){
+    public Collection<TaskPageGetDTO> getTasksOfMonth(@PathVariable Integer month,
+                                                      @PathVariable Long pageId,
+                                                      @PathVariable Long propertyId){
         return taskService.getTasksOfMonth(month, pageId, propertyId);
     }
 

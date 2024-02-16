@@ -1,6 +1,7 @@
 package br.demo.backend.model.dtos.pages.post;
 
 
+import br.demo.backend.model.Project;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
@@ -20,6 +21,6 @@ public class PagePostDTO {
 
     private TypeOfPage type;
 
-    private ProjectGetDTO project;
+    private Project project;
 
 }

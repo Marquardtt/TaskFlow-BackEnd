@@ -2,6 +2,10 @@ package br.demo.backend.controller;
 
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.permission.PermissionGetDTO;
+import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.UserPostDTO;
+import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,37 +20,36 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public void insert(@RequestBody User user){
+    public void insert(@RequestBody UserPostDTO user){
         userService.save(user);
     }
 
 
     @GetMapping("/{username}/{projectId}")
-    public Permission insert(@PathVariable String username, @PathVariable Long projectId){
+    public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
         return userService.getPermissionOfAUserInAProject(username, projectId);
     }
 
     @PutMapping
-    public void upDate(@RequestBody User user){
+    public void upDate(@RequestBody UserPutDTO user){
         userService.update(user, false);
     }
     @PatchMapping
-    public void patch(@RequestBody User user){
+    public void patch(@RequestBody UserPutDTO user){
         userService.update(user, true);
     }
 
     @GetMapping("/{username}")
-    public User findOne(@PathVariable String username){
+    public UserGetDTO findOne(@PathVariable String username){
         return userService.findOne(username);
     }
 
     @GetMapping("/username/{username}/{password}")
-    public User findByUsernameAndPassword(@PathVariable String username, @PathVariable String password){
+    public UserGetDTO findByUsernameAndPassword(@PathVariable String username, @PathVariable String password){
         return userService.findByUsernameAndPassword(username, password);
     }
     @GetMapping("/email/{email}/{password}")
-
-    public User findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
+    public UserGetDTO findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
         return userService.findByEmailAndPassword(email, password);
     }
     @PatchMapping("/picture/{username}")
@@ -55,7 +58,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAll(){
+    public Collection<UserGetDTO> findAll(){
         return userService.findAll();
     }
 
@@ -66,7 +69,9 @@ public class UserController {
     }
 
     @GetMapping("/name/{name}")
-    public Collection<User> findByUsersNameOrName(@PathVariable String name) {
+    public Collection<UserGetDTO> findByUsersNameOrName(@PathVariable String name) {
         return userService.findByUserNameOrName(name);
     }
+
+    //TODO:Requisição que atualiza a senha dele
 }

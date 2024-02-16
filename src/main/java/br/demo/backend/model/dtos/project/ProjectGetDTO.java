@@ -3,6 +3,7 @@ package br.demo.backend.model.dtos.project;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
+import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class ProjectGetDTO {
     private Archive picture;
     private LocalDate deadline;
     private LocalDateTime visualizedAt;
-    private UserGetDTO owner;
+    private SimpleUserGetDTO owner;
     private Collection<PageGetDTO> pages;
     private Collection<PropertyGetDTO> properties;
 

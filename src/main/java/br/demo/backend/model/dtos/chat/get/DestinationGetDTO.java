@@ -1,5 +1,6 @@
 package br.demo.backend.model.dtos.chat.get;
 
+import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.ids.DestinationId;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class DestinationGetDTO {
     @EqualsAndHashCode.Include
     private DestinationId id;
-    private UserGetDTO user;
+    private SimpleUserGetDTO user;
     private Boolean visualized ;
 
 }

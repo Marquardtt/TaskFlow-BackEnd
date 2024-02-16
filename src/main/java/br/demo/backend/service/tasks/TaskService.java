@@ -1,13 +1,15 @@
 package br.demo.backend.service.tasks;
 
 
+import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
+import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
-import br.demo.backend.model.pages.OtherPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
@@ -21,13 +23,12 @@ import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
-import br.demo.backend.repository.pages.OtherPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ResolveStackOverflow;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -46,20 +47,18 @@ public class TaskService {
     private ProjectRepository projectRepository;
     private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
-    private OtherPageRepository otherPageRepository;
+    private PageRepository otherPageRepository;
 
 
-    public Collection<Task> findAll() {
-        Collection<Task> tasks = taskRepository.findAll();
-        return tasks.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
+    public Collection<TaskGetDTO> findAll() {
+        return taskRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public Task findOne(Long id) {
-        Task task = taskRepository.findById(id).get();
-        return ResolveStackOverflow.resolveStackOverflow(task);
+    public TaskGetDTO findOne(Long id) {
+        return ModelToGetDTO.tranform(taskRepository.findById(id).get());
     }
 
-    public Task save(Long idpage, String userId) {
+    public TaskGetDTO save(Long idpage, String userId) {
 
         Page page = pageRepositorry.findById(idpage).get();
         User user = new User(userId);
@@ -80,7 +79,8 @@ public class TaskService {
         System.out.println(taskEmpty);
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page.getId());
-        return ResolveStackOverflow.resolveStackOverflow(task);
+
+        return ModelToGetDTO.tranform(task);
     }
 
     public void addTaskToPage(Task task, Long pageId) {
@@ -90,10 +90,10 @@ public class TaskService {
             canvasPageRepository.save((CanvasPage) page);
         }else{
             page.getTasks().add(new TaskOrdered(null, task, 0));
-             if(page instanceof OtherPage){
-                 otherPageRepository.save((OtherPage) page);
-             }else{
+             if(page instanceof OrderedPage){
                  orderedPageRepository.save((OrderedPage) page);
+             }else{
+                 otherPageRepository.save(page);
              }
         }
     }
@@ -125,9 +125,8 @@ public class TaskService {
         return new TaskValue(null, p, value);
     }
 
-    public Collection<Task> findByName(String name) {
-        Collection<Task> tasks = taskRepository.findTasksByNameContains(name);
-        return tasks.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
+    public Collection<TaskGetDTO> findByName(String name) {
+        return taskRepository.findTasksByNameContains(name).stream().map(ModelToGetDTO::tranform).toList();
     }
 
     public void update(Task taskDTO, Boolean patching) {
@@ -149,7 +148,7 @@ public class TaskService {
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
     }
 
-    public Collection<Task> getTasksToday(String id) {
+    public Collection<TaskGetDTO> getTasksToday(String id) {
         User user = userRepository.findById(id).get();
         TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
@@ -159,10 +158,10 @@ public class TaskService {
                                 p.getProperty().getType().equals(TypeOfProperty.DATE) &&
                                         ((Date) p.getProperty()).getScheduling() &&
                                         p.getValue().getValue().equals(LocalDate.now())))
-                .map(ResolveStackOverflow::resolveStackOverflow).toList();
+                .map(ModelToGetDTO::tranform).toList();
     }
 
-    public Collection<Task> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
+    public Collection<TaskPageGetDTO> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
         OrderedPage page = orderedPageRepository.findById(pageId).get();
 
         return page.getTasks().stream().filter(t ->
@@ -170,8 +169,7 @@ public class TaskService {
                                 p.getProperty().getId().equals(propertyId) &&
                                         ((LocalDateTime) p.getValue()
                                                 .getValue()).getMonthValue() == month))
-                .map(t -> ResolveStackOverflow.resolveStackOverflow(t.getTask())).toList();
-
+                .map(ModelToGetDTO::tranform).toList();
     }
 
 }

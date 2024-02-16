@@ -20,6 +20,5 @@ public class GroupPutDTO {
     private String name;
     private String description;
     private Collection<Permission> permissions;
-    private User owner;
     private Collection<User> users;
 }

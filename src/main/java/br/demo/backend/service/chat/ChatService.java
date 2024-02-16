@@ -7,12 +7,15 @@ import br.demo.backend.model.chat.*;
 import br.demo.backend.model.dtos.chat.get.ChatGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatGroupGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatPrivateGetDTO;
+import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
+import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
 import br.demo.backend.model.enums.TypeOfChat;
 import br.demo.backend.repository.chat.ChatGroupRepository;
 import br.demo.backend.repository.chat.ChatPrivateRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ResolveStackOverflow;
+import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.repository.chat.MessageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +34,7 @@ public class ChatService {
     private ChatRepository chatRepository;
     private ChatPrivateRepository chatPrivateRepository;
     private ChatGroupRepository chatGroupRepository;
+    private MessageRepository messageRepository;
 
     private ObjectMapper objectMapper;
     private AutoMapper<ChatGroup> mapperGroup;
@@ -51,9 +55,7 @@ public class ChatService {
     }
 
     private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
-        ResolveStackOverflow.resolveStackOverflow(chat);
-        ChatPrivateGetDTO chatGetDTO = new ChatPrivateGetDTO();
-        BeanUtils.copyProperties(chat, chatGetDTO);
+        ChatPrivateGetDTO chatGetDTO = (ChatPrivateGetDTO) ModelToGetDTO.tranform(chat);
         chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
         User destination = chat.getUsers().stream().filter(u -> !u.getUsername().equals(userId)).findFirst().get();
         chatGetDTO.setPicture(destination.getPicture());
@@ -62,9 +64,7 @@ public class ChatService {
     }
 
     private ChatGroupGetDTO groupToGetDTO(ChatGroup chat, String userId) {
-        ResolveStackOverflow.resolveStackOverflow(chat);
-        ChatGroupGetDTO chatGetDTO = new ChatGroupGetDTO();
-        BeanUtils.copyProperties(chat, chatGetDTO);
+        ChatGroupGetDTO chatGetDTO = (ChatGroupGetDTO) ModelToGetDTO.tranform(chat);
         chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
         chatGetDTO.setPicture(chat.getGroup().getPicture());
         chatGetDTO.setName(chat.getGroup().getName());
@@ -86,26 +86,15 @@ public class ChatService {
                 )).toList().size();
     }
 
-
-    public void updateMessagesToVisualized(ChatPrivate chat, String userId) {
-        chatPrivateRepository.save((ChatPrivate) updateMessagesToVisualized((Chat) chat, userId));
-    }
-
-    public void updateMessagesToVisualized(ChatGroup chat, String userId) {
-        chatGroupRepository.save((ChatGroup) updateMessagesToVisualized((Chat) chat, userId));
-    }
-
-    private Chat updateMessagesToVisualized(Chat chat, String userId) {
-        chat.setMessages(chat.getMessages().stream().map(m -> {
-            m.setDestination(m.getDestination().stream().map(d -> {
-                if (d.getUser().getUsername().equals(userId)) {
-                    d.setVisualized(true);
-                }
-                return d;
-            }).toList());
-            return m;
+    public void updateMessagesToVisualized(Message messagePut, String userId) {
+        Message message = messageRepository.findById(messagePut.getId()).get();
+        message.setDestination(message.getDestination().stream().map(d->{
+            if(d.getUser().getUsername().equals(userId)){
+                d.setVisualized(true);
+            }
+            return d;
         }).toList());
-        return chat;
+        messageRepository.save(message);
     }
 
     public Collection<ChatGetDTO> findGroupByName(String name, String userId) {
@@ -120,14 +109,18 @@ public class ChatService {
     }
 
 
-    public void save(ChatGroup chatGroup) {
-        chatGroup.setType(TypeOfChat.GROUP);
-        chatGroupRepository.save(chatGroup);
+    public void save(ChatGroupPostDTO chatGroup) {
+        ChatGroup chat = new ChatGroup();
+        BeanUtils.copyProperties(chatGroup, chat);
+        chat.setType(TypeOfChat.GROUP);
+        chatGroupRepository.save(chat);
     }
 
-    public void save(ChatPrivate chatPrivate) {
-        chatPrivate.setType(TypeOfChat.PRIVATE);
-        chatPrivateRepository.save(chatPrivate);
+    public void save(ChatPrivatePostDTO chatPrivate) {
+        ChatPrivate chat = new ChatPrivate();
+        BeanUtils.copyProperties(chatPrivate, chat);
+        chat.setType(TypeOfChat.PRIVATE);
+        chatPrivateRepository.save(chat);
     }
 
     public void update(ChatGroup chatGroupDto, Boolean patching) {

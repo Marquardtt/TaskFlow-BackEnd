@@ -7,6 +7,8 @@ import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.dtos.chat.get.ChatGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatGroupGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatPrivateGetDTO;
+import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
+import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
 import br.demo.backend.service.chat.ChatService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,41 +22,20 @@ import java.util.Collection;
 public class ChatController {
     private ChatService chatService;
     @PostMapping("/group")
-    public void saveGroup(@RequestBody ChatGroup chat){
+    public void saveGroup(@RequestBody ChatGroupPostDTO chat){
         chatService.save(chat);
     }
     @PostMapping("/private")
-    public void savePrivate(@RequestBody ChatPrivate chat){
+    public void savePrivate(@RequestBody ChatPrivatePostDTO chat){
         chatService.save(chat);
     }
-    @PutMapping("/group")
-    public void upDate(@RequestBody ChatGroup chat){
-        chatService.update(chat, false);
+
+
+    @PatchMapping("/visualized/{userId}")
+    public void upDateToVisualized(@RequestBody Message message, @PathVariable String userId){
+        chatService.updateMessagesToVisualized(message, userId);
     }
 
-    @PatchMapping("/group")
-    public void patch(@RequestBody ChatGroup chat){
-        chatService.update(chat, true);
-    }
-
-    @PutMapping("/private")
-    public void upDate(@RequestBody ChatPrivate chat){
-        chatService.update(chat, false);
-    }
-
-    @PatchMapping("/private")
-    public void patch(@RequestBody ChatPrivate chat){
-        chatService.update(chat, true);
-    }
-
-    @PatchMapping("/group/visualized/{userId}")
-    public void upDateToVisualized(@RequestBody ChatGroup chat, @PathVariable String userId){
-        chatService.updateMessagesToVisualized(chat, userId);
-    }
-    @PatchMapping("/private/visualized/{userId}")
-    public void upDateToVisualized(@RequestBody ChatPrivate chat, @PathVariable String userId){
-        chatService.updateMessagesToVisualized(chat, userId);
-    }
     @GetMapping("/name/{userId}/{name}")
     public Collection<ChatGetDTO> findByName(@PathVariable String name, @PathVariable String userId){
         return chatService.findGroupByName(name, userId);

@@ -2,8 +2,11 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ResolveStackOverflow;
+import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.*;
+import br.demo.backend.model.dtos.project.ProjectGetDTO;
+import br.demo.backend.model.dtos.project.ProjectPostDTO;
+import br.demo.backend.model.dtos.project.ProjectPutDTO;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;
@@ -12,6 +15,7 @@ import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,9 +35,8 @@ public class ProjectService {
 
 
 
-    public Collection<Project> findAll() {
-        Collection<Project> projects = projectRepository.findAll();
-        return projects.stream().map(ResolveStackOverflow::resolveStackOverflow).toList();
+    public Collection<ProjectGetDTO> findAll() {
+        return projectRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
     public void updatePicture(MultipartFile picture, Long id) {
@@ -48,25 +51,30 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    public Collection<Project> finAllOfAUser(String id) {
+    public Collection<ProjectGetDTO> finAllOfAUser(String id) {
         Collection<Project> projects = projectRepository.findProjectsByOwner_Username(id);
         projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
-        return projects.stream().distinct().map(ResolveStackOverflow::resolveStackOverflow).toList();
+        return projects.stream().map(ModelToGetDTO::tranform).toList();
     }
-    public Project findOne(Long id) {
-        Project project = projectRepository.findById(id).get();
-        return ResolveStackOverflow.resolveStackOverflow(project);
+    public ProjectGetDTO findOne(Long id) {
+        return ModelToGetDTO.tranform(projectRepository.findById(id).get());
     }
 
-    public void update(Project projectDTO, Boolean patching) {
-        Project project = patching ? projectRepository.findById(projectDTO.getId()).get() : new Project();
+    public void update(ProjectPutDTO projectDTO, Boolean patching) {
+        Project oldProject = projectRepository.findById(projectDTO.getId()).get();
+        Project project = patching ? oldProject : new Project();
         User owner = project.getOwner();
         autoMapper.map(projectDTO, project, patching);
         project.setOwner(owner);
+        project.setPages(oldProject.getPages());
+        project.setProperties(oldProject.getProperties());
+        project.setPicture(oldProject.getPicture());
         projectRepository.save(project);
     }
 
-    public void save(Project project) {
+    public void save(ProjectPostDTO projectDto) {
+        Project project = new Project();
+        BeanUtils.copyProperties(projectDto, project);
         Project emptyProject = projectRepository.save(project);
         ArrayList<Option> options = new ArrayList<>();
         options.add(new Option(null, "To-do", "#FF7A00"));
@@ -77,6 +85,7 @@ public class ProjectService {
                 options, TypeOfProperty.SELECT, null, emptyProject);
         Select selectCreated = selectRepository.save(select);
         emptyProject.getProperties().add(selectCreated);
+        emptyProject.setVisualizedAt(LocalDateTime.now());
         projectRepository.save(emptyProject);
     }
 

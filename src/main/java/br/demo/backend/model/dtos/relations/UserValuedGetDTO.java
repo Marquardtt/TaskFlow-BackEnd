@@ -1,8 +1,8 @@
-package br.demo.backend.model.dtos.chat.get;
+package br.demo.backend.model.dtos.relations;
 
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.values.Value;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,10 +10,20 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
-@Data
 @AllArgsConstructor
+@Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ChatPrivateGetDTO extends ChatGetDTO {
+public class UserValuedGetDTO extends Value {
     private Collection<SimpleUserGetDTO> users;
+
+    @Override
+    public void setValue(Object value) {
+        this.users = (Collection<SimpleUserGetDTO>) value;
+    }
+
+    @Override
+    public Object getValue() {
+        return users;
+    }
 }

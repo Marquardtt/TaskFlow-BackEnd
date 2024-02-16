@@ -3,6 +3,9 @@ package br.demo.backend.controller;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.project.ProjectGetDTO;
+import br.demo.backend.model.dtos.project.ProjectPostDTO;
+import br.demo.backend.model.dtos.project.ProjectPutDTO;
 import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +19,7 @@ import java.util.Collection;
 public class ProjectController {
     private ProjectService projectService;
     @PostMapping
-    public void insert(@RequestBody Project project) {
+    public void insert(@RequestBody ProjectPostDTO project) {
         projectService.save(project);
     }
 
@@ -24,31 +27,33 @@ public class ProjectController {
     public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
         projectService.updatePicture(picture, id);
     }
+
+    //TODO:pode mudar do id para o projeto direto
     @PatchMapping("/set-now/{id}")
     public void setVisualizedNow(@PathVariable Long id) {
         projectService.setVisualizedNow(id);
     }
     @PutMapping
-    public void upDate(@RequestBody Project project) {
+    public void upDate(@RequestBody ProjectPutDTO project) {
         projectService.update(project, false);
     }
     @PatchMapping
-    public void patch(@RequestBody Project project) {
+    public void patch(@RequestBody ProjectPutDTO project) {
         projectService.update(project, true);
     }
 
     @GetMapping("/{id}")
-    public Project findOne(@PathVariable Long id) {
+    public ProjectGetDTO findOne(@PathVariable Long id) {
         return projectService.findOne(id);
     }
 
     @GetMapping
-    public Collection<Project> findAll() {
+    public Collection<ProjectGetDTO> findAll() {
         return projectService.findAll();
     }
 
     @GetMapping("/user/{userId}")
-    public Collection<Project> findAllOfAUser(@PathVariable String userId) {
+    public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 

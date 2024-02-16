@@ -1,9 +1,11 @@
 package br.demo.backend.controller.pages;
 
-import br.demo.backend.model.pages.CanvasPage;
+import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
+import br.demo.backend.model.dtos.pages.get.PageGetDTO;
+import br.demo.backend.model.dtos.pages.post.PagePostDTO;
 import br.demo.backend.model.pages.OrderedPage;
-import br.demo.backend.model.pages.OtherPage;
 import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;
@@ -22,64 +24,30 @@ public class PageController {
 
 
     //OrderedPage
-    @PostMapping("/ordered")
-    public void insert(@RequestBody OrderedPage page) {
-        pageService.save(page);
+    @PostMapping("/{subclass}")
+    public void insert(@RequestBody PagePostDTO page, @PathVariable String subclass) {
+        pageService.save(page, subclass);
     }
+
     //TODO: 11/02/2024 Ver se o indice pode ser atualizado no frontend de forma facil
     @PatchMapping("/{taskId}/{index}/{columnChanged}")
-    public OrderedPage updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId, @PathVariable Integer index, @PathVariable Integer columnChanged) {
+    public OrderedPageGetDTO updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId, @PathVariable Integer index, @PathVariable Integer columnChanged) {
         return pageService.updateIndex(page, taskId, index, columnChanged);
     }
 
-    @PutMapping("/ordered")
-    public void upDate(@RequestBody OrderedPage page) {
-        pageService.update(page, false);
+    @PatchMapping("/{id}")
+    public void upDate(@RequestBody String name, @PathVariable Long id) {
+        pageService.update(name, id);
     }
 
-    @PatchMapping("/ordered")
-    public void patch(@RequestBody OrderedPage page) {
-        pageService.update(page, true);
-    }
-
-    //OtherPage
-    @PostMapping("/other")
-    public void insert(@RequestBody OtherPage page) {
-        pageService.save(page);
-    }
 
     @PatchMapping("/{taskId}/{index}")
-    public OtherPage updateIndexes(@RequestBody OtherPage page, @PathVariable Long taskId, @PathVariable Integer index) {
+    public PageGetDTO updateIndexes(@RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
         return pageService.updateIndex(page, taskId, index);
     }
 
-    @PutMapping("/other")
-    public void upDate(@RequestBody OtherPage page) {
-        pageService.update(page, false);
-    }
 
-    @PatchMapping("/other")
-    public void patch(@RequestBody OtherPage page) {
-        pageService.update(page, true);
-    }
-
-    //CanvasPage
-    @PostMapping("/canvas")
-    public void insert(@RequestBody CanvasPage page) {
-        pageService.save(page);
-    }
-
-    @PutMapping("/canvas")
-    public void upDate(@RequestBody CanvasPage page) {
-        pageService.update(page, false);
-    }
-
-    @PatchMapping("/canvas")
-    public void patch(@RequestBody CanvasPage page) {
-        pageService.update(page, true);
-    }
-
-    @PatchMapping("/XandY")
+    @PatchMapping("/x-and-y")
     public void upDate(@RequestBody TaskCanvas taskPage) {
         pageService.updateXAndY(taskPage);
     }
@@ -89,14 +57,19 @@ public class PageController {
         pageService.updateDraw(draw, id);
     }
 
+    @PatchMapping("/prop-ordering/{id}")
+    public void updatePropertiesOrdering(@RequestBody Property property, @PathVariable Long id) {
+        pageService.updatePropertiesOrdering(property, id);
+    }
+
     //General
     @GetMapping("/{id}")
-    public Page findOne(@PathVariable Long id) {
+    public PageGetDTO findOne(@PathVariable Long id) {
         return pageService.findOne(id);
     }
 
     @GetMapping
-    public Collection<? extends Page> findAll() {
+    public Collection<PageGetDTO> findAll() {
         return pageService.findAll();
     }
 

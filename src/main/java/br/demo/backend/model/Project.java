@@ -32,6 +32,7 @@ public class Project {
     //Patch
     private LocalDateTime visualizedAt;
     @ManyToOne
+    @JoinColumn(nullable = false)
     private User owner;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;

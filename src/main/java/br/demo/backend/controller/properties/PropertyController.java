@@ -1,5 +1,6 @@
 package br.demo.backend.controller.properties;
 
+import br.demo.backend.model.dtos.properties.PropertyGetDTO;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
@@ -58,12 +59,12 @@ public class PropertyController {
     }
 
     @GetMapping("/{id}")
-    public Property findOne(@PathVariable Long id){
+    public PropertyGetDTO findOne(@PathVariable Long id){
         return propertyService.findOne(id);
     }
 
     @GetMapping
-    public Collection<Property> findAll(){
+    public Collection<PropertyGetDTO> findAll(){
         return propertyService.findAll();
     }
     @DeleteMapping("/{id}")
