@@ -28,6 +28,7 @@ import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
 import lombok.AllArgsConstructor;
+import org.apache.el.stream.Stream;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -99,7 +100,10 @@ public class TaskService {
 
 
     public void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
-        taskEmpty.getProperties().addAll(properties.stream().map(this::setTaskProperty).toList());
+        Collection<TaskValue> taskValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
+        taskValues.addAll(taskEmpty.getProperties());
+        taskEmpty.setProperties(taskValues);
+        System.out.println(ModelToGetDTO.tranform(taskEmpty));
     }
 
     public TaskValue setTaskProperty(Property p) {

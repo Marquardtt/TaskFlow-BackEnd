@@ -194,11 +194,13 @@ public class ModelToGetDTO {
         BeanUtils.copyProperties(obj, taskValue);
         taskValue.setProperty(tranform(obj.getProperty()));
         if(obj.getValue() instanceof UserValued userValued){
-            UserValuedGetDTO userValuedGet = new UserValuedGetDTO();
-            userValuedGet.setValue(((Collection<User>)userValued.getValue())
-                    .stream().map(ModelToGetDTO::tranformSimple).toList());
-            userValuedGet.setId(userValued.getId());
-            taskValue.setValue(userValuedGet);
+            try{
+                UserValuedGetDTO userValuedGet = new UserValuedGetDTO();
+                userValuedGet.setValue(((Collection<User>)userValued.getValue())
+                        .stream().map(ModelToGetDTO::tranformSimple).toList());
+                userValuedGet.setId(userValued.getId());
+                taskValue.setValue(userValuedGet);
+            }catch (NullPointerException ignore) {}
         }
         return taskValue;
     }
