@@ -19,4 +19,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_limited")
 public class Limited extends Property {
     private Integer maximum;
+
+    @Override
+    public String toString() {
+        return "Limited{" +
+                "maximum=" + maximum +
+                "} " + super.toString();
+    }
 }

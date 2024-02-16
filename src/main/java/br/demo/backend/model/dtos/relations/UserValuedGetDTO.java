@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import java.util.Collection;
 
 @AllArgsConstructor
-@Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class UserValuedGetDTO extends Value {

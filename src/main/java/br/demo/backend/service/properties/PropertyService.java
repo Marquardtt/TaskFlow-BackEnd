@@ -28,6 +28,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -63,16 +64,18 @@ public class PropertyService {
     }
 
     public void saveLimited(Limited property) {
-        limitedRepository.save((Limited) setInTheTasksThatAlreadyExists(property));
+        limitedRepository.save(property);
+        setInTheTasksThatAlreadyExists(property);
     }
 
     public void saveDate(Date property) {
-        dateRepository.save((Date) setInTheTasksThatAlreadyExists(property));
-
+        dateRepository.save(property);
+        setInTheTasksThatAlreadyExists(property);
     }
 
-    public void saveSelect(Select property) {
-        selectRepository.save((Select) setInTheTasksThatAlreadyExists(property));
+    public void saveSelect(Select property){
+        selectRepository.save(property);
+        setInTheTasksThatAlreadyExists(property);
     }
 
     public void updateLimited(Limited propertyDTO, Boolean patching) {
@@ -94,16 +97,13 @@ public class PropertyService {
     }
 
     private Property setRelationAtPage(Property property, Collection<Page> pages) {
-        pages.stream().map(p -> {
+        pages.stream().forEach(p -> {
             Page page = pageRepository.findById(p.getId()).get();
-
-            Collection<TaskPage> list = page.getTasks().stream().map(tP -> {
+            page.getTasks().stream().map(tP -> {
                 tP.getTask().getProperties().add(taskService.setTaskProperty(property));
                 taskService.update(tP.getTask(), true);
                 return tP;
             }).toList();
-            page.setTasks(list);
-            return page;
         });
         return property;
     }

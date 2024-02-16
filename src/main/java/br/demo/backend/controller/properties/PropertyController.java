@@ -18,6 +18,8 @@ public class PropertyController {
 
     private PropertyService propertyService;
 
+    //TODO: quando a property ser adicionada adicionala as tasks
+
     @PostMapping("/limited")
     public void save(@RequestBody Limited property){
         propertyService.saveLimited(property);

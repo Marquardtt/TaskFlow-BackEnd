@@ -76,7 +76,6 @@ public class TaskService {
         taskEmpty.setLogs(new HashSet<>());
         taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
 
-        System.out.println(taskEmpty);
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page.getId());
 
