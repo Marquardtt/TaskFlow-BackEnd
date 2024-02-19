@@ -27,6 +27,7 @@ public class Configuration {
 
     private String primaryColor = "#F04A94";
     private String secondaryColor = "#F76858";
+
     @Enumerated(value = EnumType.STRING)
     private Theme theme = Theme.LIGHT;
     private Integer fontSize;

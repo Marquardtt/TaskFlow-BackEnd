@@ -5,6 +5,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,10 +41,9 @@ public class Project {
     private Collection<Page> pages;
     ///////////////////
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
+
     private Collection<Property> properties;
     /////////////////
-
-
     public Project(Long id){
         this.id = id;
     }

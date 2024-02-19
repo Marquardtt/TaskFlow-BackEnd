@@ -36,6 +36,7 @@ public class Property {
     private Collection<Page> pages;
 
     @ManyToOne
+    @JsonIgnore
     private Project project;
 
     public Property(Long id){

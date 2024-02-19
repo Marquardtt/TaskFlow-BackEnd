@@ -92,6 +92,7 @@ public class ProjectService {
     public void setVisualizedNow(Project projectPut) {
         Project project = projectRepository.findById(projectPut.getId()).get();
         project.setVisualizedAt(LocalDateTime.now());
+
         projectRepository.save(project);
     }
 

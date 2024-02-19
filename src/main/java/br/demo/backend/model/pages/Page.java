@@ -5,6 +5,7 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.relations.TaskPage;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,7 +36,7 @@ public class Page {
     private Collection<Property> properties;
 
     @ManyToOne
-    private Project project;
+    private Project project
 
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<TaskPage> tasks;
