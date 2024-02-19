@@ -2,6 +2,7 @@ package br.demo.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.util.Collection;
@@ -10,30 +11,37 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_user")
 public class User {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+//    @GeneratedValue(generator = "uuid")
+    @EqualsAndHashCode.Include
+    private String username;
+
     private String name;
     private String surname;
-    private String username;
     private String password;
     private String address;
-    private String picture;
+    //Patch
+    @OneToOne(cascade = CascadeType.ALL)
+    ////////////////////////////////////
+    private Archive picture;
     private String mail;
     private String phone;
     private String description;
+    ////////////////////////////
+    //Patch
     private Integer points;
-    @OneToOne(cascade = CascadeType.PERSIST)
+
+    //Patch
+    @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration;
     @ManyToMany
-    @JsonIgnore
-    private Collection<Group> groups;
-    @OneToMany
-    @JsonIgnore // vai ocorrer problemas futuramente
-    private Collection<Project> project;
-    public User (Long id){
-        this.id = id;
+    private Collection<Permission> permissions;
+    public User (String username){
+        this.username = username;
     }
+
 }

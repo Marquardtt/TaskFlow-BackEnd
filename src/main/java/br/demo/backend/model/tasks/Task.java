@@ -2,17 +2,14 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.properties.relations.Multivalued;
-import br.demo.backend.model.properties.relations.Univalued;
-import br.demo.backend.model.properties.relations.UserValue;
-import br.demo.backend.model.relations.TaskPage;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.demo.backend.model.relations.TaskValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 @Entity
@@ -20,31 +17,34 @@ import java.util.Collection;
 @AllArgsConstructor
 @Table(name = "tb_task")
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
 public class Task {
-
+    @EqualsAndHashCode.Include
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //Patch
     private String name;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
-    private Collection<Multivalued> multiProperties;
-    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
-    private Collection<Univalued> uniProperties;
-    @OneToMany(mappedBy = "task", cascade = CascadeType.MERGE)
-    private Collection<UserValue> userProperties;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Collection<TaskPage> pages;
-
+    //Patch
     private Boolean deleted;
-    @OneToMany(cascade = CascadeType.ALL)
-    Collection<Log> logs;
-    @OneToMany(cascade = CascadeType.ALL)
-    Collection<Message> comments;
+    //Patch
+    private Boolean completed;
 
+    //Patch
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<TaskValue> properties;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<Log> logs;
+
+    //Patch
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<Message> comments;
+    public Task(Long id){
+        this.id= id;
+    }
 
 }

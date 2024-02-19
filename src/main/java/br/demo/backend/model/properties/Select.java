@@ -1,6 +1,9 @@
 package br.demo.backend.model.properties;
 
+import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -14,14 +17,16 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_select")
 public class Select extends Property {
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.ALL)
+    //Patch
     private Collection<Option> options;
 
-
-    public Select(Long id, String name, Boolean visible, Boolean obligatory, Collection<Option> options) {
-        super(id, name, visible, obligatory, TypeOfProperty.SELECT, null, null);
+    public Select(Long id, String name, Boolean visible, Boolean obligatory,
+                  Collection<Option> options, TypeOfProperty type, Collection<Page> page, Project project) {
+        super(id, name, visible, obligatory, type, page, project);
         this.options = options;
     }
 

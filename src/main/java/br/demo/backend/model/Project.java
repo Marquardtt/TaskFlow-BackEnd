@@ -2,36 +2,49 @@ package br.demo.backend.model;
 
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_project")
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     private String name;
     private String description;
-    private Date date;
-    private String picture;
-
-    @OneToMany
-    private Collection<Group> groups;
+    //Patch
+    @OneToOne(cascade = CascadeType.ALL)
+    ////////////
+    private Archive picture;
+    private LocalDate deadline;
+    //Patch
+    private LocalDateTime visualizedAt;
     @ManyToOne
-    @JsonIgnore
+    @JoinColumn(nullable = false)
+    ///////////////
     private User owner;
-    @OneToMany
-    @JsonIgnore
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;
-    @OneToMany(cascade = CascadeType.ALL)
+    ///////////////////
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
+
     private Collection<Property> properties;
+    /////////////////
+    public Project(Long id){
+        this.id = id;
+    }
 }

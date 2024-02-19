@@ -4,10 +4,13 @@ import br.demo.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, String> {
 
     public User findByUsernameAndPassword(String email, String password);
     public User findByMailAndPassword(String mail, String password);
-    public User findByNameContains(String name);
+    public Collection<User> findAllByUsernameContainingOrNameContaining(String name, String userName);
+
 }

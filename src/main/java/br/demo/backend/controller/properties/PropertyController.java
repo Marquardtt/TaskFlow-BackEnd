@@ -1,6 +1,13 @@
 package br.demo.backend.controller.properties;
 
+import br.demo.backend.model.dtos.properties.DateGetDTO;
+import br.demo.backend.model.dtos.properties.LimitedGetDTO;
+import br.demo.backend.model.dtos.properties.PropertyGetDTO;
+import br.demo.backend.model.dtos.properties.SelectGetDTO;
+import br.demo.backend.model.properties.Date;
+import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.properties.Select;
 import br.demo.backend.service.properties.PropertyService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -11,30 +18,62 @@ import java.util.Collection;
 @AllArgsConstructor
 @RequestMapping("/property")
 public class PropertyController {
+
     private PropertyService propertyService;
 
-    @PostMapping
-    public void insert(@RequestBody Property property){
-        propertyService.save(property);
+    @PostMapping("/limited")
+    public void save(@RequestBody Limited property){
+        propertyService.saveLimited(property);
+    }
+    @PostMapping("/select")
+    public void save(@RequestBody Select property){
+        propertyService.saveSelect(property);
+    }
+    @PostMapping("/date")
+    public void save(@RequestBody Date property){
+        propertyService.saveDate(property);
     }
 
-    @PutMapping
-    public void upDate(@RequestBody Property property){
-        propertyService.save(property);
+    @PutMapping("/limited")
+    public void update(@RequestBody LimitedGetDTO property){
+        propertyService.updateLimited(property, false);
+    }
+    @PutMapping("/select")
+    public void update(@RequestBody SelectGetDTO property){
+        propertyService.updateSelect(property, false);
+    }
+    @PutMapping("/date")
+    public void update(@RequestBody DateGetDTO property){
+        propertyService.updateDate(property, false);
+    }
+    @PatchMapping("/limited")
+    public void patch(@RequestBody LimitedGetDTO property){
+        propertyService.updateLimited(property, true);
+    }
+    @PatchMapping("/select")
+
+    public void patch(@RequestBody SelectGetDTO property){
+        propertyService.updateSelect(property, true);
+    }
+    @PatchMapping("/date")
+
+    public void patch(@RequestBody DateGetDTO property){
+        propertyService.updateDate(property, true);
     }
 
     @GetMapping("/{id}")
-    public Property findOne(@PathVariable Long id){
+    public PropertyGetDTO findOne(@PathVariable Long id){
         return propertyService.findOne(id);
     }
 
     @GetMapping
-    public Collection<Property> findAll(){
+    public Collection<PropertyGetDTO> findAll(){
         return propertyService.findAll();
     }
-
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
         propertyService.delete(id);
     }
+
+
 }

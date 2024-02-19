@@ -1,26 +1,37 @@
 package br.demo.backend.service.tasks;
 
 
+import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.chat.Chat;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
+import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.CanvasPage;
+import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.properties.relations.Multivalued;
-import br.demo.backend.model.properties.relations.Univalued;
-import br.demo.backend.model.properties.relations.UserValue;
-import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskOrdered;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.tasks.TaskPostDTO;
+import br.demo.backend.model.values.*;
+import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
+
+import br.demo.backend.repository.pages.CanvasPageRepository;
+import br.demo.backend.repository.pages.OrderedPageRepository;
+
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
+import br.demo.backend.repository.relations.TaskValueRepository;
+import br.demo.backend.globalfunctions.AutoMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
+import org.apache.el.stream.Stream;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,92 +42,143 @@ import java.util.*;
 @AllArgsConstructor
 public class TaskService {
 
-    TaskRepository taskRepository;
-    UserRepository userRepository;
-    PageRepository pageRepository;
+    private TaskRepository taskRepository;
+    private UserRepository userRepository;
+    private TaskValueRepository taskValueRepository;
+    private PageRepository pageRepositorry;
+    private OrderedPageRepository orderedPageRepository;
+    private ProjectRepository projectRepository;
+    private CanvasPageRepository canvasPageRepository;
+    private AutoMapper<Task> autoMapper;
+    private PageRepository otherPageRepository;
 
-    public Collection<Task> findAll() {
-        return taskRepository.findAll();
+
+
+    public Collection<TaskGetDTO> findAll() {
+        return taskRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public Task findOne(Long id) {
-        return taskRepository.findById(id).get();
+    public TaskGetDTO findOne(Long id) {
+        return ModelToGetDTO.tranform(taskRepository.findById(id).get());
     }
 
-    public Task save(Page page, Long id) {
+    public TaskGetDTO save(Long idpage, String userId) {
+
+        Page page = pageRepositorry.findById(idpage).get();
+        User user = new User(userId);
+
         Task taskEmpty = taskRepository.save(new Task());
 
         Collection<Property> propertiesPage = page.getProperties();
 
-        Project project = page.getProject();
+        Project project = projectRepository.findByPagesContaining(page);
         Collection<Property> propertiesProject = project.getProperties();
 
 
-        taskEmpty.setUniProperties(new ArrayList<>());
-        taskEmpty.setMultiProperties(new ArrayList<>());
-        taskEmpty.setUserProperties(new ArrayList<>());
-        taskEmpty.setLogs(new ArrayList<>());
-        taskEmpty.setComments(new ArrayList<>());
-
+        taskEmpty.setProperties(new HashSet<>());
         setTaskProperties(propertiesPage, taskEmpty);
         setTaskProperties(propertiesProject, taskEmpty);
-        taskEmpty.setPages(new ArrayList<>());
-        taskEmpty.getPages().add(new TaskPage(taskEmpty.getId(), page.getId(), taskEmpty, page, null, null));
-        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, userRepository.findById(id).get(), LocalDateTime.now()));
 
-        return taskRepository.save(taskEmpty);
+        taskEmpty.setLogs(new HashSet<>());
+        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
+
+
+        Task task = taskRepository.save(taskEmpty);
+        addTaskToPage(task, page.getId());
+
+        return ModelToGetDTO.tranform(task);
     }
 
-    private void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
-        for (Property p : properties) {
-            if (p.getType().equals(TypeOfProperty.USER)) {
-                UserValue userValue = new UserValue(taskEmpty.getId(), p.getId(), new HashSet<>(), taskEmpty, p);
-                taskEmpty.getUserProperties().add(userValue);
-            } else if (p.getType().equals(TypeOfProperty.CHECKBOX) ||
-            p.getType().equals(TypeOfProperty.TAG)) {
-                Multivalued multivalued = new Multivalued(taskEmpty.getId(), p.getId(), new ArrayList<>(), taskEmpty, p);
-                taskEmpty.getMultiProperties().add(multivalued);
-            } else {
-                Univalued univalued = new Univalued(taskEmpty.getId(), p.getId(), "", taskEmpty, p);
-                taskEmpty.getUniProperties().add(univalued);
-            }
+    public void addTaskToPage(Task task, Long pageId) {
+        Page page = pageRepositorry.findById(pageId).get();
+        if(page instanceof CanvasPage) {
+            page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
+            canvasPageRepository.save((CanvasPage) page);
+        }else{
+            page.getTasks().add(new TaskOrdered(null, task, 0));
+             if(page instanceof OrderedPage){
+                 orderedPageRepository.save((OrderedPage) page);
+             }else{
+                 otherPageRepository.save(page);
+             }
         }
     }
 
-    public Collection<Task> findByName(String name) {
-        return taskRepository.findTasksByNameContains(name);
+
+    public void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
+        Collection<TaskValue> taskValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
+        taskValues.addAll(taskEmpty.getProperties());
+        taskEmpty.setProperties(taskValues);
+        System.out.println(ModelToGetDTO.tranform(taskEmpty));
     }
 
-    public void update(Task task) {
+    public TaskValue setTaskProperty(Property p) {
+        Value value = null;
+        if (p.getType() == TypeOfProperty.SELECT) {
+            value = new UniOptionValued();
+        } else if (p.getType() == TypeOfProperty.RADIO || p.getType() == TypeOfProperty.CHECKBOX || p.getType() == TypeOfProperty.TAG) {
+            value = new MultiOptionValued();
+        } else if (p.getType() == TypeOfProperty.TEXT) {
+            value = new TextValued();
+        } else if (p.getType() == TypeOfProperty.DATE) {
+            value = new DateValued();
+        } else if (p.getType() == TypeOfProperty.NUMBER || p.getType() == TypeOfProperty.PROGRESS) {
+            value = new NumberValued();
+        } else if (p.getType() == TypeOfProperty.TIME) {
+            value = new TimeValued();
+        } else if (p.getType() == TypeOfProperty.ARCHIVE) {
+            value = new ArchiveValued();
+        } else if (p.getType() == TypeOfProperty.USER) {
+            value = new UserValued();
+        }
+        return new TaskValue(null, p, value);
+    }
+
+    public Collection<TaskGetDTO> findByName(String name) {
+        return taskRepository.findTasksByNameContains(name).stream().map(ModelToGetDTO::tranform).toList();
+    }
+
+    public void update(Task taskDTO, Boolean patching) {
+        Task task = patching ? taskRepository.findById(taskDTO.getId()).get() : new Task();
+        autoMapper.map(taskDTO, task, patching);
         taskRepository.save(task);
     }
 
-    public void delete(Long id, User user) {
-
+    public void delete(Long id, String userId) {
+        User user = userRepository.findById(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
     }
-    public void redo(Long id, User user) {
+
+    public void redo(Long id, String userId) {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
-        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, user, LocalDateTime.now()));
+        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
     }
 
-    public Collection<Task> getTasksToday(Long id) {
+    public Collection<TaskGetDTO> getTasksToday(String id) {
         User user = userRepository.findById(id).get();
-        Collection<Task> tasks = taskRepository.findTasksByUserPropertiesContaining(user);
-        Collection<Task> tasksToday = new ArrayList<>();
-        for(Task t : tasks){
-            for(Univalued u : t.getUniProperties()){
-                Property p = u.getProperty();
-                if(p.getType() == TypeOfProperty.DATE &&((Date)p).getScheduling()){
-                    if(LocalDate.parse(u.getValue()).equals(LocalDate.now())){
-                        tasksToday.add(t);
-                    }
-                }
-            }
-        }
-        return tasksToday;
+        TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
+        Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
+
+        return tasks.stream().filter(t ->
+                        t.getProperties().stream().anyMatch(p ->
+                                p.getProperty().getType().equals(TypeOfProperty.DATE) &&
+                                        ((Date) p.getProperty()).getScheduling() &&
+                                        p.getValue().getValue().equals(LocalDate.now())))
+                .map(ModelToGetDTO::tranform).toList();
     }
+
+    public Collection<TaskPageGetDTO> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
+        OrderedPage page = orderedPageRepository.findById(pageId).get();
+
+        return page.getTasks().stream().filter(t ->
+                        t.getTask().getProperties().stream().anyMatch(p ->
+                                p.getProperty().getId().equals(propertyId) &&
+                                        ((LocalDateTime) p.getValue()
+                                                .getValue()).getMonthValue() == month))
+                .map(ModelToGetDTO::tranform).toList();
+    }
+
 }

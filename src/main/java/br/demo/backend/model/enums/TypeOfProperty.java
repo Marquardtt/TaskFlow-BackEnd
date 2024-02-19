@@ -15,7 +15,7 @@ public enum TypeOfProperty {
     DATE,
 //  Limited
     TIME,
-//  User
+//  Limited
     USER,
 //  Limited
     PROGRESS,
@@ -24,5 +24,10 @@ public enum TypeOfProperty {
 //  Select
     CHECKBOX,
 //  Limited
-    NUMBER
+    NUMBER,
+//    //Os dois proximos são para atender o requisito de dependencia entre tarefas e projetos
+//    //Limited
+//    TASK,
+//    //  Limited
+//    PROJECT
 }

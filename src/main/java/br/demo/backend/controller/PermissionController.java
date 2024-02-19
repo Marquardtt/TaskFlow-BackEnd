@@ -2,6 +2,9 @@ package br.demo.backend.controller;
 
 
 import br.demo.backend.model.Permission;
+import br.demo.backend.model.dtos.permission.PermissionGetDTO;
+import br.demo.backend.model.dtos.permission.PermissionPostDTO;
+import br.demo.backend.model.dtos.permission.PermissionPutDTO;
 import br.demo.backend.service.PermissionService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,22 +17,26 @@ import java.util.Collection;
 public class PermissionController {
     private PermissionService permissionService;
     @PostMapping
-    public void insert(@RequestBody Permission permission){
+    public void insert(@RequestBody PermissionPostDTO permission){
         permissionService.save(permission);
     }
 
     @PutMapping
-    public void upDate(@RequestBody Permission permission){
-        permissionService.save(permission);
+    public void upDate(@RequestBody PermissionPutDTO permission){
+        permissionService.update(permission, false);
+    }
+    @PatchMapping
+    public void patch(@RequestBody PermissionPutDTO permission){
+        permissionService.update(permission, true);
     }
 
     @GetMapping("/{id}")
-    public Permission findOne(@PathVariable Long id){
+    public PermissionGetDTO findOne(@PathVariable Long id){
         return permissionService.findOne(id);
     }
 
     @GetMapping
-    public Collection<Permission> findAll(){
+    public Collection<PermissionGetDTO> findAll(){
         return permissionService.findAll();
     }
 
