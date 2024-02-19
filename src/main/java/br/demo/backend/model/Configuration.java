@@ -23,30 +23,30 @@ public class Configuration {
     @EqualsAndHashCode.Include
     private Long id;
 
-    private Boolean notifications;
+    private Boolean notifications = true;
 
-    private String primaryColor;
-    private String secondaryColor;
+    private String primaryColor = "#F04A94";
+    private String secondaryColor = "#F76858";
     @Enumerated(value = EnumType.STRING)
-    private Theme theme;
+    private Theme theme = Theme.LIGHT;
     private Integer fontSize;
     @Enumerated(value = EnumType.STRING)
-    private Language language;
-    private Boolean libras;
-    private Boolean textToSound;
+    private Language language = Language.PORTUGUESE;
+    private Boolean libras = false;
+    private Boolean textToSound = false;
 
     //add, remove or change
-    private Boolean notificTasks;
-    private Boolean notificAtAddMeInAGroup;
-    private Boolean notificWhenChangeMyPermission;
+    private Boolean notificTasks = true;
+    private Boolean notificAtAddMeInAGroup = true;
+    private Boolean notificWhenChangeMyPermission = true;
     //when pass a specific number of points (1000, 5000, etc.)
-    private Boolean notificMyPointsChange;
+    private Boolean notificMyPointsChange = true;
     //when i schedule a task or project
-    private Boolean notificSchedules;
+    private Boolean notificSchedules = true;
     //when a project or task deadline is near
-    private Boolean notificDeadlines;
+    private Boolean notificDeadlines = true;
     //when i receive a message
-    private Boolean notificChats;
+    private Boolean notificChats = true;
     //when ia task than i am responsible receive a comment
-    private Boolean notificComments;
+    private Boolean notificComments = true;
 }
