@@ -89,8 +89,8 @@ public class ProjectService {
         projectRepository.save(emptyProject);
     }
 
-    public void setVisualizedNow(Long id) {
-        Project project = projectRepository.findById(id).get();
+    public void setVisualizedNow(Project projectPut) {
+        Project project = projectRepository.findById(projectPut.getId()).get();
         project.setVisualizedAt(LocalDateTime.now());
         projectRepository.save(project);
     }

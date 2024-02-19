@@ -59,7 +59,7 @@ public class ModelToGetDTO {
         BeanUtils.copyProperties(obj, message);
         message.setSender(tranformSimple(obj.getSender()));
         try {
-            message.setDestination(obj.getDestination().stream().map(ModelToGetDTO::tranform).toList());
+            message.setDestinations(obj.getDestinations().stream().map(ModelToGetDTO::tranform).toList());
         }catch (NullPointerException ignore) {}
         return message;
     }

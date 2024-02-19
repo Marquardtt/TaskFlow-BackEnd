@@ -19,6 +19,8 @@ import java.util.Collection;
 public class UserController {
     private UserService userService;
 
+    // TODO: 16/02/2024 O Usuario esta perdendo algumas de suas props
+
     @PostMapping
     public void insert(@RequestBody UserPostDTO user){
         userService.save(user);
@@ -57,6 +59,11 @@ public class UserController {
         userService.updatePicture(picture, username);
     }
 
+    @PatchMapping("/password/{username}")
+    public void upDatePassword(@PathVariable String username, @RequestBody String password) {
+        userService.updatePassword(username, password);
+    }
+
     @GetMapping
     public Collection<UserGetDTO> findAll(){
         return userService.findAll();
@@ -73,5 +80,4 @@ public class UserController {
         return userService.findByUserNameOrName(name);
     }
 
-    //TODO:Requisição que atualiza a senha dele
 }

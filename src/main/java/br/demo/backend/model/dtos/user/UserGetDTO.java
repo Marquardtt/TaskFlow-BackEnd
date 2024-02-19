@@ -25,6 +25,7 @@ public class UserGetDTO {
     private String mail;
     private String phone;
     private String description;
+    private Integer points;
     private Configuration configuration;
     private Collection<PermissionGetDTO> permissions;
 }

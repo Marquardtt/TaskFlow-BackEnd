@@ -1,8 +1,8 @@
-package br.demo.backend.model.dtos.chat.get;
+package br.demo.backend.model.dtos.chat.post;
 
 import br.demo.backend.model.Archive;
+import br.demo.backend.model.dtos.chat.get.DestinationGetDTO;
 import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,14 +16,12 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class MessageGetDTO {
+public class MessagePostPutDTO {
     @EqualsAndHashCode.Include
 
     private Long id;
     private String value;
     private SimpleUserGetDTO sender;
-    private LocalDateTime dateCreate;
-    private LocalDateTime dateUpdate;
     private Collection<DestinationGetDTO> destinations;
-    private Archive annex;
+
 }

@@ -3,6 +3,7 @@ package br.demo.backend.model.dtos.group;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,4 +22,7 @@ public class GroupPutDTO {
     private String description;
     private Collection<Permission> permissions;
     private Collection<User> users;
+
+
+
 }

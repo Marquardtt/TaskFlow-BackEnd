@@ -78,21 +78,33 @@ public class PropertyService {
         setInTheTasksThatAlreadyExists(property);
     }
 
-    public void updateLimited(Limited propertyDTO, Boolean patching) {
-        Limited property = patching ? limitedRepository.findById(propertyDTO.getId()).get() : new Limited();
+    public void updateLimited(LimitedGetDTO propertyDTO, Boolean patching) {
+        Limited old = limitedRepository.findById(propertyDTO.getId()).get();
+        Limited property = patching ? old : new Limited();
         autoMapperLimited.map(propertyDTO, property, patching, true);
+        property.setType(old.getType());
+        property.setPages(old.getPages());
+        property.setProject(old.getProject());
         limitedRepository.save(property);
     }
 
-    public void updateDate(Date propertyDTO, Boolean patching) {
-        Date property = patching ? dateRepository.findById(propertyDTO.getId()).get() : new Date();
+    public void updateDate(DateGetDTO propertyDTO, Boolean patching) {
+        Date old = dateRepository.findById(propertyDTO.getId()).get();
+        Date property = patching ? old: new Date();
         autoMapperDate.map(propertyDTO, property, patching, true);
+        property.setType(old.getType());
+        property.setPages(old.getPages());
+        property.setProject(old.getProject());
         dateRepository.save(property);
     }
 
-    public void updateSelect(Select propertyDTO, Boolean patching) {
-        Select property = patching ? selectRepository.findById(propertyDTO.getId()).get() : new Select();
+    public void updateSelect(SelectGetDTO propertyDTO, Boolean patching) {
+        Select old = selectRepository.findById(propertyDTO.getId()).get();
+        Select property = patching ?old: new Select();
         autoMapperSelect.map(propertyDTO, property, patching, true);
+        property.setType(old.getType());
+        property.setPages(old.getPages());
+        property.setProject(old.getProject());
         selectRepository.save(property);
     }
 

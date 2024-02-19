@@ -1,9 +1,6 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.Group;
-import br.demo.backend.model.Project;
-import br.demo.backend.model.User;
-import br.demo.backend.model.Permission;
+import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;

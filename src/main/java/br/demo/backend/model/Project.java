@@ -27,17 +27,22 @@ public class Project {
     private String description;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
+    ////////////
     private Archive picture;
     private LocalDate deadline;
     //Patch
     private LocalDateTime visualizedAt;
     @ManyToOne
     @JoinColumn(nullable = false)
+    ///////////////
     private User owner;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;
+    ///////////////////
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Property> properties;
+    /////////////////
+
 
     public Project(Long id){
         this.id = id;

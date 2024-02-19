@@ -81,6 +81,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void updatePassword(String id, String password) {
+        User user = userRepository.findById(id).get();
+        user.setPassword(password);
+        userRepository.save(user);
+    }
+
 
     public Collection<UserGetDTO> findByUserNameOrName(String name) {
         return userRepository.findAllByUsernameContainingOrNameContaining(name, name).stream().map(ModelToGetDTO::tranform).toList();

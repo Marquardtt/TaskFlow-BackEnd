@@ -24,5 +24,4 @@ public class ProjectPutDTO {
     private String description;
     //TODO: Se mudar para project ter taskvalues tirar isso
     private LocalDate deadline;
-    private LocalDateTime visualizedAt;
 }

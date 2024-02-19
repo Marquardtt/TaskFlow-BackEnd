@@ -24,6 +24,7 @@ public class SimpleUserGetDTO {
     private Archive picture;
     private String mail;
     private String phone;
+    private Integer points;
     private String description;
     private Configuration configuration;
 }

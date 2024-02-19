@@ -1,6 +1,9 @@
 package br.demo.backend.controller.properties;
 
+import br.demo.backend.model.dtos.properties.DateGetDTO;
+import br.demo.backend.model.dtos.properties.LimitedGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
+import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
@@ -18,8 +21,6 @@ public class PropertyController {
 
     private PropertyService propertyService;
 
-    //TODO: quando a property ser adicionada adicionala as tasks
-
     @PostMapping("/limited")
     public void save(@RequestBody Limited property){
         propertyService.saveLimited(property);
@@ -34,29 +35,29 @@ public class PropertyController {
     }
 
     @PutMapping("/limited")
-    public void update(@RequestBody Limited property){
+    public void update(@RequestBody LimitedGetDTO property){
         propertyService.updateLimited(property, false);
     }
     @PutMapping("/select")
-    public void update(@RequestBody Select property){
+    public void update(@RequestBody SelectGetDTO property){
         propertyService.updateSelect(property, false);
     }
     @PutMapping("/date")
-    public void update(@RequestBody Date property){
+    public void update(@RequestBody DateGetDTO property){
         propertyService.updateDate(property, false);
     }
     @PatchMapping("/limited")
-    public void patch(@RequestBody Limited property){
+    public void patch(@RequestBody LimitedGetDTO property){
         propertyService.updateLimited(property, true);
     }
     @PatchMapping("/select")
 
-    public void patch(@RequestBody Select property){
+    public void patch(@RequestBody SelectGetDTO property){
         propertyService.updateSelect(property, true);
     }
     @PatchMapping("/date")
 
-    public void patch(@RequestBody Date property){
+    public void patch(@RequestBody DateGetDTO property){
         propertyService.updateDate(property, true);
     }
 

@@ -27,11 +27,9 @@ public class ProjectController {
     public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
         projectService.updatePicture(picture, id);
     }
-
-    //TODO:pode mudar do id para o projeto direto
-    @PatchMapping("/set-now/{id}")
-    public void setVisualizedNow(@PathVariable Long id) {
-        projectService.setVisualizedNow(id);
+    @PatchMapping("/set-now")
+    public void setVisualizedNow(@RequestBody Project project) {
+        projectService.setVisualizedNow(project);
     }
     @PutMapping
     public void upDate(@RequestBody ProjectPutDTO project) {

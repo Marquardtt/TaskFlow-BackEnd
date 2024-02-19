@@ -39,6 +39,8 @@ import java.util.Collection;
 @Service
 public class PageService {
 
+    //Todo: criar task page, canvas ou ordered de acordo como type
+
     private OrderedPageRepository orderedPageRepository;
     private CanvasPageRepository canvasPageRepository;
     private PageRepository pageRepository;

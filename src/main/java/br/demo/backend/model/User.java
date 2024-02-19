@@ -25,11 +25,12 @@ public class User {
     private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
+    ////////////////////////////////////
     private Archive picture;
     private String mail;
     private String phone;
     private String description;
-
+    ////////////////////////////
     //Patch
     private Integer points;
 

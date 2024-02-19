@@ -1,7 +1,11 @@
 package br.demo.backend.model.dtos.user;
 
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.Configuration;
 import br.demo.backend.model.Permission;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,4 +31,5 @@ public class UserPutDTO {
     private String description;
     private Configuration configuration;
     private Collection<Permission> permissions;
+
 }

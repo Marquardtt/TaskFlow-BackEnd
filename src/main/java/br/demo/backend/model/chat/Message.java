@@ -34,7 +34,7 @@ public class Message {
     private LocalDateTime dateUpdate;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "message")
-    private Collection<Destination> destination;
+    private Collection<Destination> destinations;
     @OneToOne(cascade = CascadeType.ALL)
     private Archive annex;
 }

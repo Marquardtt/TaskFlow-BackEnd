@@ -9,6 +9,7 @@ import br.demo.backend.model.dtos.chat.get.ChatGroupGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatPrivateGetDTO;
 import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
 import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
+import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.service.chat.ChatService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -55,7 +56,7 @@ public class ChatController {
     }
 
     @PatchMapping("/message/{chatId}")
-    public void updateMessages(@RequestBody Message message, @PathVariable Long chatId){
+    public void updateMessages(@RequestBody MessagePostPutDTO message, @PathVariable Long chatId){
         chatService.updateMessages(message, chatId);
     }
 

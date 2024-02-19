@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_destination")
 public class Destination {
 
-    //TODO: 13/02/2024 Id Composto
     @EqualsAndHashCode.Include
     @EmbeddedId
     private DestinationId id;
