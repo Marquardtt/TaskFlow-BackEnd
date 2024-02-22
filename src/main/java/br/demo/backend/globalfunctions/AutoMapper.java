@@ -10,7 +10,6 @@ public class AutoMapper <T> {
 
     public void map(Object source, T destinationType, Boolean patch) {
         modelMapper.getConfiguration().setSkipNullEnabled(patch);
-        modelMapper.getConfiguration().setCollectionsMergeEnabled(patch);
         modelMapper.map(source, destinationType);
     }
     public void map(Object source, T destinationType, Boolean patch, Boolean mergeCollections) {

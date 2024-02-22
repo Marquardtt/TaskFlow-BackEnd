@@ -11,10 +11,13 @@ import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.model.dtos.user.UserPutDTO;
+import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
@@ -24,6 +27,7 @@ import java.util.Collection;
 public class UserService {
 
     private UserRepository userRepository;
+    private PermissionRepository permissionRepository;
     private AutoMapper<User> autoMapper;
 
     public Collection<UserGetDTO> findAll() {
@@ -32,11 +36,6 @@ public class UserService {
 
     public UserGetDTO findOne(String id) {
         User user = userRepository.findById(id).get();
-        user.setPermissions(
-                user.getPermissions().stream().sorted(
-                        (p1, p2) -> p2.getProject().getVisualizedAt().compareTo(
-                                p1.getProject().getVisualizedAt()
-                        )).toList());
         return ModelToGetDTO.tranform(user);
     }
 
@@ -48,10 +47,13 @@ public class UserService {
     }
     public void update(UserPutDTO userDTO, Boolean patching) {
         User oldUser = userRepository.findById(userDTO.getUsername()).get();
+        System.out.println(userDTO);
         User user = patching ? oldUser : new User();
         autoMapper.map(userDTO, user, patching);
+
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
+        System.out.println(ModelToGetDTO.tranform(user));
         userRepository.save(user);
     }
 
@@ -86,6 +88,20 @@ public class UserService {
         user.setPassword(password);
         userRepository.save(user);
     }
+
+//    @Transactional
+//    public void putNewPermissionInAProject(String userId, Long permissionId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+//
+//        if (user.getPermissions() != null){
+//            user.getPermissions().clear();
+//        }
+//
+//        user.getPermissions().add(permissionRepository.findById(permissionId).get());
+//
+//        userRepository.save(user);
+//    }
 
 
     public Collection<UserGetDTO> findByUserNameOrName(String name) {

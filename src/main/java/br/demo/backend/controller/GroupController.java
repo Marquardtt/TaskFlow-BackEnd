@@ -34,11 +34,6 @@ public class GroupController {
         groupService.update(group, true);
     }
 
-    @PutMapping("/user/{groupId}")
-    //isso deveria ser feito no front
-    public void updateUser(@RequestBody User user, @PathVariable Long groupId) {
-        groupService.updateUsers(user, groupId);
-    }
     @GetMapping("/{id}")
     public GroupGetDTO findOne(@PathVariable Long id) {
         return groupService.findOne(id);
@@ -54,18 +49,7 @@ public class GroupController {
         return groupService.findGroupsByUser(userId);
     }
 
-    @GetMapping("/project/{projectId}")
-    public Collection<GroupGetDTO> findGroupsOfAProject(@PathVariable Long projectId) {
-        return groupService.findGroupsOfAProject(projectId);
-    }
-
-    @GetMapping("/{groupId}/{projectId}")
-    public PermissionGetDTO findPermissionOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
-        return groupService.findPermissionOfAGroupInAProject(groupId, projectId);
-    }
-
     @GetMapping("/{groupId}/permissions/{projectId}")
-    //um grupo em um projeto so tem uma permissão entao é a mesma coisa que o metodo de cima
     public ResponseEntity<Collection<Permission>> findAllPermissionsOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
         Collection<Permission> permissions = groupService.findAllPermissionsOfAGroupInAProject(groupId, projectId);
         return ResponseEntity.ok(permissions);
