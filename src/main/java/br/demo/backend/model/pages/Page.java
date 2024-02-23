@@ -31,14 +31,15 @@ public class Page {
     @Enumerated(value = EnumType.STRING)
     private TypeOfPage type;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<TaskPage> tasks;
+
     @ManyToMany(mappedBy = "pages")
     private Collection<Property> properties;
 
     @ManyToOne
     private Project project;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private Collection<TaskPage> tasks;
 
     public Page(Long id){
         this.id = id;

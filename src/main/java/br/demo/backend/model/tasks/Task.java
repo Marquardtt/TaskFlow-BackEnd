@@ -33,14 +33,14 @@ public class Task {
     private Boolean completed;
 
     //Patch
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<TaskValue> properties;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Log> logs;
 
     //Patch
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Message> comments;
     public Task(Long id){
         this.id= id;

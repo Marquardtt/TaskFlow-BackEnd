@@ -25,8 +25,11 @@ import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.DateRepository;
+import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.TaskCanvasRepository;
+import br.demo.backend.repository.relations.TaskPageRepository;
+import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,7 @@ public class PageService {
     private OrderedPageRepository orderedPageRepository;
     private CanvasPageRepository canvasPageRepository;
     private PageRepository pageRepository;
+    private PropertyRepository propertyRepository;
     private TaskCanvasRepository taskCanvasRepository;
     private SelectRepository selectRepository;
     private DateRepository dateRepository;
@@ -54,10 +58,12 @@ public class PageService {
     private AutoMapper<CanvasPage> autoMapperCanvas;
     private AutoMapper<TaskCanvas> autoMapperTaskCanvas;
     private AutoMapper<Page> autoMapperOther;
+
     public Collection<PageGetDTO> findAll() {
         Collection<Page> pages = pageRepository.findAll();
         return pages.stream().map(ModelToGetDTO::tranform).toList();
     }
+
     public PageGetDTO findOne(Long id) {
         return ModelToGetDTO.tranform(pageRepository.findById(id).get());
     }
@@ -81,13 +87,13 @@ public class PageService {
                                     ((Option) p.getValue().getValue()).getId().equals(columnOption.getId()))
             ).findFirst().orElse(null);
             if (prop == null) return t;
-            updateIndexVerification((TaskOrdered)taskOld, (TaskOrdered) t, index, columnChaged);
+            updateIndexVerification((TaskOrdered) taskOld, (TaskOrdered) t, index, columnChaged);
             return t;
         }).toList());
         return (OrderedPageGetDTO) ModelToGetDTO.tranform(orderedPageRepository.save(page));
     }
 
-    private void updateIndexVerification(TaskOrdered taskOld, TaskOrdered t, Integer index, Integer columnChaged){
+    private void updateIndexVerification(TaskOrdered taskOld, TaskOrdered t, Integer index, Integer columnChaged) {
         boolean verification = taskOld.getIndexAtColumn() > index || columnChaged == 1;
         if (t.equals(taskOld)) {
             t.setIndexAtColumn(index + (verification ? 0 : 1));
@@ -112,21 +118,20 @@ public class PageService {
     public void update(String name, Long id) {
         Page page = pageRepository.findById(id).get();
         page.setName(name);
-        if(page instanceof  CanvasPage canvasPage){
+        if (page instanceof CanvasPage canvasPage) {
             canvasPageRepository.save(canvasPage);
-        }else if(page instanceof OrderedPage orderedPage){
+        } else if (page instanceof OrderedPage orderedPage) {
             orderedPageRepository.save(orderedPage);
-        }else{
+        } else {
             pageRepository.save(page);
         }
     }
 
 
-
-    private Property propOrdSelect(OrderedPage page){
+    private Property propOrdSelect(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Select select = (Select) project.getProperties().stream().filter(p -> p instanceof Select).findFirst().orElse(null);
-        if(select == null) {
+        if (select == null) {
             ArrayList<Option> options = new ArrayList<>();
             options.add(new Option(null, "To-do", "#FF7A00"));
             options.add(new Option(null, "Doing", "#F7624B"));
@@ -142,13 +147,13 @@ public class PageService {
         return select;
     }
 
-    private Property propOrdDate(OrderedPage page){
+    private Property propOrdDate(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Date date = (Date) project.getProperties().stream().filter(p -> p.getType().equals(TypeOfProperty.DATE)).findFirst().orElse(null);
-        if(date == null) {
+        if (date == null) {
             ArrayList<Page> pages = new ArrayList<>();
             pages.add(page);
-            date = new Date(null, "Date", true, false, false,false, false, false, "#F04A94", TypeOfProperty.DATE, pages, null);
+            date = new Date(null, "Date", true, false, false, false, false, false, "#F04A94", TypeOfProperty.DATE, pages, null);
             page.setProperties(new ArrayList<>());
             date = dateRepository.save(date);
             page.getProperties().add(date);
@@ -156,11 +161,12 @@ public class PageService {
         return date;
     }
 
-    public void save(PagePostDTO page, String type) {
-        if(type.equals("canvas")) {
+    public PageGetDTO save(PagePostDTO page, String type) {
+        if (type.equals("canvas")) {
             CanvasPage canvasModel = new CanvasPage();
             autoMapperCanvas.map(page, canvasModel, false);
             canvasPageRepository.save(canvasModel);
+            return ModelToGetDTO.tranform(canvasModel);
         } else if (type.equals("ordered")) {
             OrderedPage canvasModel = new OrderedPage();
             autoMapperOrdered.map(page, canvasModel, false);
@@ -169,14 +175,23 @@ public class PageService {
                     propOrdSelect(pageSaved) : propOrdDate(pageSaved);
             canvasModel.setPropertyOrdering(propOrdering);
             orderedPageRepository.save(canvasModel);
-        }else {
+            return ModelToGetDTO.tranform(canvasModel);
+        } else {
             Page canvasModel = new Page();
             autoMapperOther.map(page, canvasModel, false);
             pageRepository.save(canvasModel);
+            return ModelToGetDTO.tranform(canvasModel);
         }
     }
+
     public void delete(Long id) {
-        orderedPageRepository.deleteById(id);
+        Page page = pageRepository.findById(id).get();
+        page.getProperties().stream().forEach(p -> {
+            p.getPages().remove(page);
+            propertyRepository.save(p);
+        });
+
+        pageRepository.deleteById(id);
     }
 
 
@@ -197,6 +212,7 @@ public class PageService {
         Page page = pageRepository.findById(id).get();
         pages.stream().forEach(p -> {
             page.getTasks().stream().forEach(t -> {
+                page.setTasks(new ArrayList<>());
                 taskService.addTaskToPage(t.getTask(), p.getId());
             });
         });
