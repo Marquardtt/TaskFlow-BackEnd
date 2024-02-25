@@ -85,6 +85,7 @@ public class TaskService {
 
     public void addTaskToPage(Task task, Long pageId) {
         Page page = pageRepositorry.findById(pageId).get();
+        System.out.println(ModelToGetDTO.tranform(page));
         if(page.getType().equals(TypeOfPage.CANVAS)) {
             page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
             canvasPageRepository.save((CanvasPage) page);

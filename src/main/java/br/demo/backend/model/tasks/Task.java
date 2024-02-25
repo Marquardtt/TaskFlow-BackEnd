@@ -33,9 +33,12 @@ public class Task {
     private Boolean completed = false;
 
     //Patch
+    @JoinColumn(name = "task_id")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<TaskValue> properties;
 
+
+    @JoinColumn(name = "task_id")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Log> logs;
 

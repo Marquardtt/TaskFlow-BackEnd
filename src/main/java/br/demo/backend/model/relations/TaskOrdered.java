@@ -1,5 +1,6 @@
 package br.demo.backend.model.relations;
 
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

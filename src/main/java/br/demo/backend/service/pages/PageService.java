@@ -155,7 +155,7 @@ public class PageService {
         if (date == null) {
             ArrayList<Page> pages = new ArrayList<>();
             pages.add(page);
-            date = new Date(null, "Date", true, false,  pages, null);
+            date = new Date(null, "Date", true, false, pages, null);
             page.setProperties(new ArrayList<>());
             Date dateSaved = dateRepository.save(date);
             page.getProperties().add(dateSaved);
@@ -163,7 +163,7 @@ public class PageService {
         return date;
     }
 
-//    public PageGetDTO save(PagePostDTO page, String type) {
+    //    public PageGetDTO save(PagePostDTO page, String type) {
 //        if (type.equals("canvas")) {
 //            CanvasPage canvasModel = new CanvasPage();
 //            autoMapperCanvas.map(page, canvasModel, false);
@@ -207,6 +207,7 @@ public class PageService {
             return ModelToGetDTO.tranform(canvasModel);
         }
     }
+
     public void delete(Long id) {
         Page page = pageRepository.findById(id).get();
         page.getProperties().stream().forEach(p -> {
@@ -233,9 +234,12 @@ public class PageService {
 
     public void merge(Collection<Page> pages, Long id) {
         Page page = pageRepository.findById(id).get();
-        pages.forEach(p -> page.getTasks().forEach(t -> {
-            page.setTasks(new ArrayList<>());
-            taskService.addTaskToPage(t.getTask(), p.getId());
-        }));
+        pages.forEach(p ->
+        {
+            p.setTasks(new ArrayList<>());
+            page.getTasks().forEach(t -> {
+                taskService.addTaskToPage(t.getTask(), p.getId());
+            });
+        });
     }
 }

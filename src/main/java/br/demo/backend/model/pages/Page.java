@@ -34,8 +34,11 @@ public class Page {
     @Column(nullable = false, updatable = false)
     private TypeOfPage type;
 
+
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "page_id")
     private Collection<TaskPage> tasks;
+
 
     @ManyToMany(mappedBy = "pages")
     private Collection<Property> properties;
@@ -46,7 +49,7 @@ public class Page {
     private Project project;
 
 
-    public Page(Long id){
+    public Page(Long id) {
         this.id = id;
     }
 }

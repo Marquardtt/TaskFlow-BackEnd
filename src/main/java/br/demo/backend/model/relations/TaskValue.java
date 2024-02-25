@@ -1,6 +1,7 @@
 package br.demo.backend.model.relations;
 
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.DeserializerValue;
 import br.demo.backend.model.values.Value;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
