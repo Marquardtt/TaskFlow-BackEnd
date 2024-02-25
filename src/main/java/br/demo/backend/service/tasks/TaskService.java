@@ -7,6 +7,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
@@ -48,7 +49,6 @@ public class TaskService {
     private ProjectRepository projectRepository;
     private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
-    private PageRepository otherPageRepository;
 
 
     public Collection<TaskGetDTO> findAll() {
@@ -85,15 +85,15 @@ public class TaskService {
 
     public void addTaskToPage(Task task, Long pageId) {
         Page page = pageRepositorry.findById(pageId).get();
-        if(page instanceof CanvasPage) {
+        if(page.getType().equals(TypeOfPage.CANVAS)) {
             page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
             canvasPageRepository.save((CanvasPage) page);
-        }else{
+        } else{
             page.getTasks().add(new TaskOrdered(null, task, 0));
              if(page instanceof OrderedPage){
                  orderedPageRepository.save((OrderedPage) page);
              }else{
-                 otherPageRepository.save(page);
+                 pageRepositorry.save(page);
              }
         }
     }

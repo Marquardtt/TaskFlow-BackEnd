@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -162,13 +163,40 @@ public class PageService {
         return date;
     }
 
-    public PageGetDTO save(PagePostDTO page, String type) {
-        if (type.equals("canvas")) {
+//    public PageGetDTO save(PagePostDTO page, String type) {
+//        if (type.equals("canvas")) {
+//            CanvasPage canvasModel = new CanvasPage();
+//            autoMapperCanvas.map(page, canvasModel, false);
+//            canvasPageRepository.save(canvasModel);
+//            return ModelToGetDTO.tranform(canvasModel);
+//        } else if (type.equals("ordered")) {
+//            OrderedPage canvasModel = new OrderedPage();
+//            autoMapperOrdered.map(page, canvasModel, false);
+//            OrderedPage pageServed = orderedPageRepository.save(canvasModel);
+//            Property propOrdering = page.getType().equals(TypeOfPage.KANBAN) ?
+//                    propOrdSelect(pageServed) : propOrdDate(pageServed);
+//            canvasModel.setPropertyOrdering(propOrdering);
+//            orderedPageRepository.save(canvasModel);
+//            return ModelToGetDTO.tranform(canvasModel);
+//        } else {
+//            Page canvasModel = new Page();
+//            autoMapperOther.map(page, canvasModel, false);
+//            pageRepository.save(canvasModel);
+//            return ModelToGetDTO.tranform(canvasModel);
+//        }
+//    }
+    public PageGetDTO save(PagePostDTO page) {
+        if (page.getType().equals(TypeOfPage.CANVAS)) {
             CanvasPage canvasModel = new CanvasPage();
             autoMapperCanvas.map(page, canvasModel, false);
             canvasPageRepository.save(canvasModel);
             return ModelToGetDTO.tranform(canvasModel);
-        } else if (type.equals("ordered")) {
+        } else if (List.of(TypeOfPage.TABLE, TypeOfPage.LIST).contains(page.getType())) {
+            Page canvasModel = new Page();
+            autoMapperOther.map(page, canvasModel, false);
+            pageRepository.save(canvasModel);
+            return ModelToGetDTO.tranform(canvasModel);
+        } else {
             OrderedPage canvasModel = new OrderedPage();
             autoMapperOrdered.map(page, canvasModel, false);
             OrderedPage pageServed = orderedPageRepository.save(canvasModel);
@@ -177,14 +205,8 @@ public class PageService {
             canvasModel.setPropertyOrdering(propOrdering);
             orderedPageRepository.save(canvasModel);
             return ModelToGetDTO.tranform(canvasModel);
-        } else {
-            Page canvasModel = new Page();
-            autoMapperOther.map(page, canvasModel, false);
-            pageRepository.save(canvasModel);
-            return ModelToGetDTO.tranform(canvasModel);
         }
     }
-
     public void delete(Long id) {
         Page page = pageRepository.findById(id).get();
         page.getProperties().stream().forEach(p -> {
@@ -211,11 +233,9 @@ public class PageService {
 
     public void merge(Collection<Page> pages, Long id) {
         Page page = pageRepository.findById(id).get();
-        pages.stream().forEach(p -> {
-            page.getTasks().stream().forEach(t -> {
-                page.setTasks(new ArrayList<>());
-                taskService.addTaskToPage(t.getTask(), p.getId());
-            });
-        });
+        pages.forEach(p -> page.getTasks().forEach(t -> {
+            page.setTasks(new ArrayList<>());
+            taskService.addTaskToPage(t.getTask(), p.getId());
+        }));
     }
 }
