@@ -11,6 +11,7 @@ import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
 import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
 import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.service.chat.ChatService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,7 +62,7 @@ public class ChatController {
     }
 
     @PatchMapping("/annex/{chatId}")
-    public void updateMessages(@RequestBody MultipartFile annex, @RequestParam String message, @PathVariable Long chatId){
+    public void updateMessages(@RequestBody MultipartFile annex, @RequestParam String message, @PathVariable Long chatId) throws JsonProcessingException {
         chatService.updateMessages(annex, message, chatId);
     }
 

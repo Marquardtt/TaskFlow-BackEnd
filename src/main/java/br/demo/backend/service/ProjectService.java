@@ -77,9 +77,9 @@ public class ProjectService {
         BeanUtils.copyProperties(projectDto, project);
         Project emptyProject = projectRepository.save(project);
         ArrayList<Option> options = new ArrayList<>();
-        options.add(new Option(null, "To-do", "#FF7A00"));
-        options.add(new Option(null, "Doing", "#F7624B"));
-        options.add(new Option(null, "Done", "#F04A94"));
+        options.add(new Option(null, "To-do", "#FF7A00", 0));
+        options.add(new Option(null, "Doing", "#F7624B", 1));
+        options.add(new Option(null, "Done", "#F04A94", 2));
         emptyProject.setProperties(new ArrayList<>());
         Select select = new Select(null, "Stats", true, false,
                 options, TypeOfProperty.SELECT, null, emptyProject);

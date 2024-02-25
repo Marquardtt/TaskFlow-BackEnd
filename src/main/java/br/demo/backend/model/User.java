@@ -2,7 +2,10 @@ package br.demo.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.GeneratedColumn;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.Collection;
 
@@ -21,22 +24,26 @@ public class User {
 
     private String name;
     private String surname;
+    @Length(min = 8)
+    @Column(nullable = false)
     private String password;
     private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    ////////////////////////////////////
-    private Archive picture;
+    private Archive picture = new Archive(null,  "picture", "jpg", new byte[0]);
+    @Email
     private String mail;
     private String phone;
     private String description;
-    ////////////////////////////
     //Patch
-    private Integer points;
-
+    @NotNull
+    @Column(nullable = false)
+    private Long points = 0L;
     //Patch
+    @NotNull
+    @JoinColumn(nullable = false, updatable = false)
     @OneToOne(cascade = CascadeType.ALL)
-    private Configuration configuration;
+    private Configuration configuration = new Configuration();
     @ManyToMany
     private Collection<Permission> permissions;
     public User (String username){

@@ -28,9 +28,9 @@ public class Task {
     private String name;
 
     //Patch
-    private Boolean deleted;
+    private Boolean deleted = false;
     //Patch
-    private Boolean completed;
+    private Boolean completed = false;
 
     //Patch
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

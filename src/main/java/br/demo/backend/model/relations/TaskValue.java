@@ -5,6 +5,7 @@ import br.demo.backend.model.values.DeserializerValue;
 import br.demo.backend.model.values.Value;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,8 +27,12 @@ public class TaskValue {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
+    @NotNull
+    @JoinColumn(nullable = false, updatable = false)
     private Property property;
-
+    
+    @NotNull
+    @JoinColumn(nullable = false, updatable = false)
     @OneToOne(cascade = CascadeType.ALL)
     private Value value;
 }

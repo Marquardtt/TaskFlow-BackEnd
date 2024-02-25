@@ -112,12 +112,13 @@ public class GroupService {
 
     public void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
-            User user = updatePermissionInAUser(u, permission);
+            User user = updatePermissionInAUser((userRepository.findById(u.getUsername()).get()), permission);
+            System.out.println(user.getPassword());
             userRepository.save(user);
             return user;
         }).toList();
         group.setUsers(users);
-        User owner = updatePermissionInAUser(group.getOwner(), permission);
+        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getUsername()).get(), permission);
         userRepository.save(owner);
         group.setOwner(owner);
     }

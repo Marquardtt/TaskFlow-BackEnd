@@ -29,7 +29,7 @@ public class Configuration {
     private String secondaryColor = "#F76858";
     @Enumerated(value = EnumType.STRING)
     private Theme theme = Theme.LIGHT;
-    private Integer fontSize;
+    private Integer fontSize = 16;
     @Enumerated(value = EnumType.STRING)
     private Language language = Language.PORTUGUESE;
     private Boolean libras = false;

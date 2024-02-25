@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
@@ -41,10 +42,15 @@ public class UserService {
     }
 
     public void save(UserPostDTO userDto) {
-        User user = new User();
-        BeanUtils.copyProperties(userDto, user);
-        user.setConfiguration(new Configuration());
-        userRepository.save(user);
+        try{
+            userRepository.findById(userDto.getUsername()).get();
+            throw new IllegalArgumentException("Username is already been using by other user0");
+        }catch (NoSuchElementException e){
+            User user = new User();
+            BeanUtils.copyProperties(userDto, user);
+            user.setConfiguration(new Configuration());
+            userRepository.save(user);
+        }
     }
     public void update(UserPutDTO userDTO, Boolean patching) {
         User oldUser = userRepository.findById(userDTO.getUsername()).get();
@@ -52,6 +58,7 @@ public class UserService {
         autoMapper.map(userDTO, user, patching);
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
+        user.setPassword(oldUser.getPassword());
         userRepository.save(user);
     }
 

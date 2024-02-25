@@ -18,6 +18,7 @@ import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.repository.chat.MessageRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -167,9 +168,9 @@ public class ChatService {
         saveTheUpdatableMessage(chat, message);
     }
 
-    public void updateMessages(MultipartFile annex, String messageString, Long chatId) {
+    public void updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
         Chat chat = chatRepository.findById(chatId).get();
-        MessagePostPutDTO messageDto = objectMapper.convertValue(messageString, MessagePostPutDTO.class);
+        MessagePostPutDTO messageDto = objectMapper.readValue(messageString, MessagePostPutDTO.class);
         Message message = getMessage(chat, messageDto);
         message.setAnnex(new Archive(annex));
         chat.getMessages().remove(message);

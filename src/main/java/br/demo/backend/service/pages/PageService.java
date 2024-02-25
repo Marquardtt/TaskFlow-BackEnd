@@ -32,6 +32,7 @@ import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -133,9 +134,9 @@ public class PageService {
         Select select = (Select) project.getProperties().stream().filter(p -> p instanceof Select).findFirst().orElse(null);
         if (select == null) {
             ArrayList<Option> options = new ArrayList<>();
-            options.add(new Option(null, "To-do", "#FF7A00"));
-            options.add(new Option(null, "Doing", "#F7624B"));
-            options.add(new Option(null, "Done", "#F04A94"));
+            options.add(new Option(null, "To-do", "#FF7A00", 0));
+            options.add(new Option(null, "Doing", "#F7624B", 1));
+            options.add(new Option(null, "Done", "#F04A94", 2));
             ArrayList<Page> pages = new ArrayList<>();
             pages.add(page);
             select = new Select(null, "Stats", true, false,
@@ -153,10 +154,10 @@ public class PageService {
         if (date == null) {
             ArrayList<Page> pages = new ArrayList<>();
             pages.add(page);
-            date = new Date(null, "Date", true, false, false, false, false, false, "#F04A94", TypeOfProperty.DATE, pages, null);
+            date = new Date(null, "Date", true, false,  pages, null);
             page.setProperties(new ArrayList<>());
-            date = dateRepository.save(date);
-            page.getProperties().add(date);
+            Date dateSaved = dateRepository.save(date);
+            page.getProperties().add(dateSaved);
         }
         return date;
     }
@@ -170,9 +171,9 @@ public class PageService {
         } else if (type.equals("ordered")) {
             OrderedPage canvasModel = new OrderedPage();
             autoMapperOrdered.map(page, canvasModel, false);
-            OrderedPage pageSaved = orderedPageRepository.save(canvasModel);
-            Property propOrdering = pageSaved.getType().equals(TypeOfPage.KANBAN) ?
-                    propOrdSelect(pageSaved) : propOrdDate(pageSaved);
+            OrderedPage pageServed = orderedPageRepository.save(canvasModel);
+            Property propOrdering = page.getType().equals(TypeOfPage.KANBAN) ?
+                    propOrdSelect(pageServed) : propOrdDate(pageServed);
             canvasModel.setPropertyOrdering(propOrdering);
             orderedPageRepository.save(canvasModel);
             return ModelToGetDTO.tranform(canvasModel);

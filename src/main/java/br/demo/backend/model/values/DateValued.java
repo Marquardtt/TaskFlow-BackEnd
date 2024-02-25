@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "tb_date_valued")
+@Table(name = "tb_valued_date")
 public class DateValued extends Value{
 
     private LocalDateTime dateTime;
