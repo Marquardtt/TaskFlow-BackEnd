@@ -27,6 +27,7 @@ public class Task {
     //Patch
     private String name;
 
+
     //Patch
     private Boolean deleted = false;
     //Patch

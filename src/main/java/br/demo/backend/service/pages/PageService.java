@@ -77,6 +77,7 @@ public class PageService {
     }
 
     public OrderedPageGetDTO updateIndex(OrderedPage page, Long taskId, Integer index, Integer columnChaged) {
+        System.out.println(page);
         TaskPage taskOld = page.getTasks().stream().filter(task ->
                 task.getTask().getId().equals(taskId)).findFirst().get();
         Option columnOption = (Option) taskOld.getTask().getProperties().stream().filter(p ->

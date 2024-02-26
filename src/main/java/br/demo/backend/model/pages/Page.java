@@ -5,6 +5,7 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.relations.TaskPage;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

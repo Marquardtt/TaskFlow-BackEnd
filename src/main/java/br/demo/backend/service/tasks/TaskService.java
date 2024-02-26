@@ -22,8 +22,10 @@ import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
+
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
+
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
@@ -51,6 +53,7 @@ public class TaskService {
     private AutoMapper<Task> autoMapper;
 
 
+
     public Collection<TaskGetDTO> findAll() {
         return taskRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
@@ -63,6 +66,7 @@ public class TaskService {
 
         Page page = pageRepositorry.findById(idpage).get();
         User user = new User(userId);
+
         Task taskEmpty = taskRepository.save(new Task());
 
         Collection<Property> propertiesPage = page.getProperties();
@@ -70,12 +74,14 @@ public class TaskService {
         Project project = projectRepository.findByPagesContaining(page);
         Collection<Property> propertiesProject = project.getProperties();
 
+
         taskEmpty.setProperties(new HashSet<>());
         setTaskProperties(propertiesPage, taskEmpty);
         setTaskProperties(propertiesProject, taskEmpty);
 
         taskEmpty.setLogs(new HashSet<>());
         taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
+
 
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page.getId());
