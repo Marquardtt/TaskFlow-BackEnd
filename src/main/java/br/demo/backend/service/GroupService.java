@@ -65,9 +65,6 @@ public class GroupService {
         return ModelToGetDTO.tranform(permission);
     }
 
-    public Collection<GroupGetDTO> findGroupsOfAProject(Long projectId) {
-       return groupRepository.findGroupsByPermissions_Project(new Project(projectId)).stream().map(ModelToGetDTO::tranform).toList();
-    }
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
@@ -81,7 +78,7 @@ public class GroupService {
         Archive picture = oldGroup.getPicture();
 
         Group group = patching ? oldGroup : new Group();
-        User owner = group.getOwner();
+        User owner = oldGroup.getOwner();
         autoMapper.map(groupDTO, group, patching);
 
         Group groupOld = groupRepository.findById(group.getId()).get();
@@ -109,23 +106,17 @@ public class GroupService {
         return user;
     }
 
-
     public void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
-            User user = updatePermissionInAUser(u, permission);
+            User user = updatePermissionInAUser((userRepository.findById(u.getUsername()).get()), permission);
+            System.out.println(user.getPassword());
             userRepository.save(user);
             return user;
         }).toList();
         group.setUsers(users);
-        User owner = updatePermissionInAUser(group.getOwner(), permission);
+        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getUsername()).get(), permission);
         userRepository.save(owner);
         group.setOwner(owner);
-    }
-
-    public void updateUsers(User user, Long groupId) {
-        Group group = groupRepository.findById(groupId).get();
-        group.getUsers().add(user);
-        groupRepository.save(group);
     }
 
     public void delete(Long id) {
@@ -137,9 +128,5 @@ public class GroupService {
         group.setPicture(new Archive(picture));
         groupRepository.save(group);
     }
-
-    public void updateUserPermission(Long projectId, Long groupId, Long userId, Long permissionId) {
-    }
-
 
 }

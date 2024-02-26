@@ -18,11 +18,11 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "tb_user_valued")
+@Table(name = "tb_valued_user")
 public class UserValued extends Value{
 
     @ManyToMany
-    private List<User> users;
+    private Collection<User> users;
 
     public UserValued(Long id, List<User> users){
         super(id);

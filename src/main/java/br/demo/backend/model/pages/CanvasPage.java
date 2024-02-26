@@ -4,6 +4,7 @@ package br.demo.backend.model.pages;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.relations.TaskCanvas;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,5 +23,7 @@ public class CanvasPage extends Page {
 
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    private Archive draw;
+    @NotNull
+    @JoinColumn(nullable = false)
+    private Archive draw = new Archive(null, "draw", "png", new byte[0]);
 }

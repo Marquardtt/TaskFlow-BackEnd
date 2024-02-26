@@ -19,16 +19,16 @@ import java.util.Collection;
 @Table(name = "tb_date")
 public class Date extends Property {
 
-    private Boolean canBePass;
-    private Boolean includesHours;
+    private Boolean canBePass = false;
+    private Boolean includesHours =false;
     //prazo  (quando deve estar pronto)
-    private Boolean deadline;
+    private Boolean deadline = true;
     //agendamento (quando deve ser feito)
-    private Boolean scheduling;
-    private String color;
+    private Boolean scheduling = true;
+    private String color = "#F04A94";
 
-    public Date (Long id, String name, Boolean visible, Boolean obligatory, Boolean canBePass, Boolean includesHours, Boolean deadline, Boolean scheduling, String color, TypeOfProperty type, Collection<Page> page, Project project) {
-        super(id, name, visible, obligatory, type, page, project);
+    public Date (Long id, String name, Boolean visible, Boolean obligatory, Collection<Page> page, Project project) {
+        super(id, name, visible, obligatory, TypeOfProperty.DATE, page, project);
         this.canBePass = canBePass;
         this.includesHours = includesHours;
         this.deadline = deadline;

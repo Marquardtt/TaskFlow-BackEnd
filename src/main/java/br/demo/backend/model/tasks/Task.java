@@ -29,19 +29,22 @@ public class Task {
 
 
     //Patch
-    private Boolean deleted;
+    private Boolean deleted = false;
     //Patch
-    private Boolean completed;
+    private Boolean completed = false;
 
     //Patch
-    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "task_id")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<TaskValue> properties;
 
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @JoinColumn(name = "task_id")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Log> logs;
 
     //Patch
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<Message> comments;
     public Task(Long id){
         this.id= id;

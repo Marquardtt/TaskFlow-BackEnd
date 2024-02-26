@@ -43,7 +43,6 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
         }
 
 
-
         if (isPresent(jsonNode, "property")) {
             JsonNode jsonProp = jsonNode.get("property");
             if (isPresent(jsonProp, "type") &&
@@ -60,12 +59,12 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                         Property property = new Property(idProp);
 
                         if (type.equals("TEXT")) {
-                            return new TaskValue(id, property, new TextValued(idTaskVl, value.asText()));
+                            return new TaskValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }else if(type.equals("ARCHIVE")){
-                            return new TaskValue(id, property, new ArchiveValued(idTaskVl, null));
+                            return new TaskValue(id, property,  new ArchiveValued(idTaskVl, null));
                         }
                         else if(type.equals("DATE")){
-                            return new TaskValue(id, property, new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
+                            return new TaskValue(id, property,  new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
                         }
                         else if(type.equals("NUMBER") || type.equals("PROGRESS")){
                             return new TaskValue(id, property, new NumberValued(idTaskVl, value.asInt()));
@@ -73,7 +72,7 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                         else if(type.equals("RADIO") || type.equals("SELECT")){
                             if(isPresent(value, "id")){
                                 Long idOpt = value.get("id").asLong();
-                                return new TaskValue(id, property, new UniOptionValued(idTaskVl, new Option(idOpt)));
+                                return new TaskValue(id, property,  new UniOptionValued(idTaskVl, new Option(idOpt)));
                             }
                             return new TaskValue(id, property, new UniOptionValued(idTaskVl, null));
                         }
