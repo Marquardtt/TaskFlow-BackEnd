@@ -20,6 +20,7 @@ import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.values.MultiOptionValued;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
@@ -27,6 +28,7 @@ import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.DateRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.TaskCanvasRepository;
+import br.demo.backend.repository.relations.TaskOrderedRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class PageService {
     private DateRepository dateRepository;
     private ProjectRepository projectRepository;
     private TaskService taskService;
+    private TaskOrderedRepository taskOrderedRepository;
 
     private AutoMapper<OrderedPage> autoMapperOrdered;
     private AutoMapper<CanvasPage> autoMapperCanvas;
@@ -68,24 +71,39 @@ public class PageService {
         orderedPageRepository.save(page);
     }
 
-    public OrderedPageGetDTO updateIndex(OrderedPage page, Long taskId, Integer index, Integer columnChaged) {
-        System.out.println(page);
+    public OrderedPageGetDTO updateIndex(OrderedPage pageDto, Long taskId, Integer index, Integer columnChaged) {
+        OrderedPage page = orderedPageRepository.findById(pageDto.getId()).get();
         TaskPage taskOld = page.getTasks().stream().filter(task ->
                 task.getTask().getId().equals(taskId)).findFirst().get();
-        Option columnOption = (Option) taskOld.getTask().getProperties().stream().filter(p ->
-                p.getProperty().equals(page.getPropertyOrdering())).findFirst().get().getValue().getValue();
 
+        Object column = taskOld.getTask().getProperties().stream().filter(p ->
+                p.getProperty().equals(page.getPropertyOrdering())).findFirst().get().getValue().getValue();
+        if(column instanceof Option singleColumn){
+            updateIndexesInAOption(page, singleColumn, taskOld, index, columnChaged);
+        }else{
+            Collection<Option> columns = (Collection<Option>) column;
+            for(Option o : columns){
+                updateIndexesInAOption(page, o, taskOld, index, columnChaged);
+            }
+        }
+        return (OrderedPageGetDTO) ModelToGetDTO.tranform(orderedPageRepository.findById(pageDto.getId()).get());
+    }
+
+    private void updateIndexesInAOption(OrderedPage page, Option columnOption, TaskPage taskOld, Integer index,
+                                                     Integer columnChanged ){
         page.setTasks(page.getTasks().stream().map(t -> {
             TaskValue prop = t.getTask().getProperties().stream().filter(p ->
                     p.getProperty().equals(page.getPropertyOrdering()) &&
                             (p.getValue().getValue() == null && columnOption == null ||
-                                    ((Option) p.getValue().getValue()).getId().equals(columnOption.getId()))
+                                    (p.getValue().getValue() instanceof Option && ((Option) p.getValue().getValue()).equals(columnOption))
+                                    || (((Collection<Option>)p.getValue().getValue()).contains(columnOption))
+                                    )
             ).findFirst().orElse(null);
             if (prop == null) return t;
-            updateIndexVerification((TaskOrdered)taskOld, (TaskOrdered) t, index, columnChaged);
+            updateIndexVerification((TaskOrdered)taskOld, (TaskOrdered) t, index, columnChanged);
+            taskOrderedRepository.save((TaskOrdered) t);
             return t;
         }).toList());
-        return (OrderedPageGetDTO) ModelToGetDTO.tranform(orderedPageRepository.save(page));
     }
 
     private void updateIndexVerification(TaskOrdered taskOld, TaskOrdered t, Integer index, Integer columnChaged){
@@ -99,7 +117,8 @@ public class PageService {
         }
     }
 
-    public PageGetDTO updateIndex(Page page, Long taskId, Integer index) {
+    public PageGetDTO updateIndex(Page pageDto, Long taskId, Integer index) {
+        OrderedPage page = orderedPageRepository.findById(pageDto.getId()).get();
         TaskPage taskOld = page.getTasks().stream().filter(task ->
                 task.getTask().getId().equals(taskId)).findFirst().get();
         page.setTasks(page.getTasks().stream().map(t -> {
