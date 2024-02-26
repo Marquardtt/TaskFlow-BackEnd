@@ -44,7 +44,6 @@ public class Property {
 
     @JoinColumn(updatable = false)
     @ManyToOne
-    @JsonIgnore
     private Project project;
 
     public Property(Long id){
