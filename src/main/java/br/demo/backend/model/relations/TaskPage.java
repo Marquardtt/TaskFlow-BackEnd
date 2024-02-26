@@ -1,16 +1,17 @@
 package br.demo.backend.model.relations;
 
-import br.demo.backend.model.ids.TaskPageId;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.values.DeserializerValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.mapping.Collection;
 
 @Entity
 @Table(name = "tb_task_page")
@@ -27,5 +28,7 @@ public class TaskPage {
     @EqualsAndHashCode.Include
     private Long id;
     @ManyToOne
+    @NotNull
+    @JoinColumn(nullable = false)
     private Task task;
 }

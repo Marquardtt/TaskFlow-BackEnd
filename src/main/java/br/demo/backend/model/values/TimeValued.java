@@ -14,7 +14,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Entity
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "tb_time_valued")
+@Table(name = "tb_valued_time")
 public class TimeValued extends Value {
     private Duration time;
 

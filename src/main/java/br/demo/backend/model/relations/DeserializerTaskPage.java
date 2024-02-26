@@ -49,7 +49,7 @@ public class DeserializerTaskPage extends StdDeserializer<TaskPage> {
                     Integer index = jsonNode.findValue("index").asInt();
                     return new TaskOrdered(id, new Task(taskId), index);
                 }
-                return new TaskPage(id, new Task(taskId));
+                throw new RuntimeException("The subtype of TaskPage isn't clearly defined");
             }
             throw new RuntimeException("Task id not found");
         }

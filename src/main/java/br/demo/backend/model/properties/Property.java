@@ -8,6 +8,7 @@ import br.demo.backend.model.values.DeserializerValue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
@@ -27,14 +28,21 @@ public class Property {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
+    @NotNull
+    @Column(nullable = false)
     private Boolean visible = true;
+    @NotNull
+    @Column(nullable = false)
     private Boolean obligatory = false;
     @Enumerated(value = EnumType.STRING)
+    @NotNull
+    @Column(nullable = false, updatable = false)
     private TypeOfProperty type;
  
     @ManyToMany
     private Collection<Page> pages;
 
+    @JoinColumn(updatable = false)
     @ManyToOne
     @JsonIgnore
     private Project project;

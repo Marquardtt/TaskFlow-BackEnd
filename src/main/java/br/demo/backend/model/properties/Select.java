@@ -4,10 +4,7 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.TaskPage;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -21,6 +18,7 @@ import java.util.Collection;
 @Table(name = "tb_select")
 public class Select extends Property {
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "select_id")
     //Patch
     private Collection<Option> options;
 

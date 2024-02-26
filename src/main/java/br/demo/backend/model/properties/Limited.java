@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_limited")
 public class Limited extends Property {
-    private Integer maximum;
+    private Long maximum;
 
     @Override
     public String toString() {

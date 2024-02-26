@@ -24,9 +24,9 @@ public class PageController {
 
 
     //OrderedPage
-    @PostMapping("/{subclass}")
-    public void insert(@RequestBody PagePostDTO page, @PathVariable String subclass) {
-        pageService.save(page, subclass);
+    @PostMapping
+    public PageGetDTO insert(@RequestBody PagePostDTO page) {
+        return pageService.save(page);
     }
 
     //TODO: 11/02/2024 Ver se o indice pode ser atualizado no frontend de forma facil
@@ -36,7 +36,7 @@ public class PageController {
     }
 
     @PatchMapping("/{id}")
-    public void upDate(@RequestBody String name, @PathVariable Long id) {
+    public void upDate(@RequestBody(required = false) String name, @PathVariable Long id) {
         pageService.update(name, id);
     }
 
