@@ -22,6 +22,7 @@ import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -39,6 +40,7 @@ public class PropertyService {
     private PageRepository pageRepository;
     private TaskService taskService;
     private LimitedRepository limitedRepository;
+    private TaskRepository taskRepository;
     private SelectRepository selectRepository;
     private DateRepository dateRepository;
     private AutoMapper<Limited> autoMapperLimited;
@@ -124,6 +126,11 @@ public class PropertyService {
     public void delete(Long id) {
         Property property = propertyRepository.findById(id).get();
         if (validateCanBeDeleted(property)) {
+            taskRepository.findAll().stream().forEach(t -> {
+                t.getProperties().removeIf(p -> p.getId().equals(id));
+                taskService.update(t, true);
+            });
+            //TODO: delete from pages prop ordering
             propertyRepository.delete(property);
         } else {
             throw new RuntimeException("Property can't be deleted");

@@ -16,6 +16,7 @@ import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -27,6 +28,7 @@ import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 
 import br.demo.backend.repository.pages.PageRepository;
+import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
@@ -51,6 +53,7 @@ public class TaskService {
     private ProjectRepository projectRepository;
     private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
+    private TaskPageRepository taskPageRepository;
 
 
 
@@ -150,12 +153,27 @@ public class TaskService {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
+        taskRepository.save(task);
+    }
+
+    public void deletePermanent(Long id) {
+        taskPageRepository.deleteAll(taskPageRepository.findAllByTask_Id(id));
+        taskRepository.deleteById(id);
     }
 
     public void redo(Long id, String userId) {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
+        taskRepository.save(task);
+    }
+
+    public Collection<TaskGetDTO> getDeletedTasks(Long projectId){
+        Project project = projectRepository.findById(projectId).get();
+        Collection<Page> pages = project.getPages();
+        return pages.stream().map(Page::getTasks).flatMap(Collection::stream)
+                .filter(t -> t.getTask().getDeleted()).map(TaskPage::getTask).map(ModelToGetDTO::tranform)
+                .distinct().toList();
     }
 
     public Collection<TaskGetDTO> getTasksToday(String id) {

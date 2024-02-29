@@ -29,6 +29,6 @@ public class TaskPage {
     private Long id;
     @ManyToOne
     @NotNull
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, updatable = false)
     private Task task;
 }

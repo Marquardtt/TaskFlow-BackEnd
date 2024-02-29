@@ -58,7 +58,12 @@ public class TaskController {
         taskService.delete(id, userId);
     }
 
-    @PutMapping("/redo/{userId}")
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
+        taskService.deletePermanent(id);
+    }
+
+    @PutMapping("/redo/{userId}/{id}")
     public void redo(@PathVariable Long id , @PathVariable String userId){
         taskService.redo(id, userId);
     }
@@ -68,6 +73,13 @@ public class TaskController {
                                                       @PathVariable Long pageId,
                                                       @PathVariable Long propertyId){
         return taskService.getTasksOfMonth(month, pageId, propertyId);
+    }
+
+
+
+    @GetMapping("/project/{projectId}")
+    public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
+        return taskService.getDeletedTasks(projectId);
     }
 
 }
