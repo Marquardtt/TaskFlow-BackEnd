@@ -27,7 +27,7 @@ public class TaskValue {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     private Property property;

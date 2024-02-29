@@ -1,6 +1,7 @@
 package br.demo.backend.model.values;
 
 import br.demo.backend.model.properties.Option;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
@@ -19,7 +20,7 @@ import java.util.List;
 @Table(name = "tb_valued_multi_option")
 public class MultiOptionValued extends Value{
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     private List<Option> multiOptions;
 
     public MultiOptionValued(Long id, List<Option> archive){
