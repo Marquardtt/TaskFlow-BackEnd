@@ -23,6 +23,7 @@ public class PropertyController {
 
     @PostMapping("/limited")
     public void save(@RequestBody Limited property){
+        System.out.println(property);
         propertyService.saveLimited(property);
     }
     @PostMapping("/select")

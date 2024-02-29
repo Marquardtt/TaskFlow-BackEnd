@@ -26,7 +26,7 @@ public class TaskValue {
     private Long id;
 
     @ManyToOne
-    private Property property;
+    private Property  property;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Value value;

@@ -36,7 +36,7 @@ public class Page {
     private Collection<Property> properties;
 
     @ManyToOne
-    private Project project
+    private Project project;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<TaskPage> tasks;
