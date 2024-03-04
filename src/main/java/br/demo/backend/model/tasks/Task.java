@@ -44,7 +44,6 @@ public class Task {
     private Collection<Log> logs;
 
     //Patch
-    @JoinColumn(name = "task_id")
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Message> comments;
     public Task(Long id){

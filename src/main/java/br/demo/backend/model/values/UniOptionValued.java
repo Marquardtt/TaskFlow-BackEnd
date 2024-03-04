@@ -1,10 +1,7 @@
 package br.demo.backend.model.values;
 
 import br.demo.backend.model.properties.Option;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_valued_uni_option")
 public class UniOptionValued extends Value{
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Option uniOption;
 
     public UniOptionValued(Long id, Option uniOption){
