@@ -35,16 +35,17 @@ public class Task {
 
     //Patch
     @JoinColumn(name = "task_id")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<TaskValue> properties;
 
 
     @JoinColumn(name = "task_id")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Log> logs;
 
     //Patch
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "task_id")
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Message> comments;
     public Task(Long id){
         this.id= id;

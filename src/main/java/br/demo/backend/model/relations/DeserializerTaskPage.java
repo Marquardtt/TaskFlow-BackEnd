@@ -45,8 +45,8 @@ public class DeserializerTaskPage extends StdDeserializer<TaskPage> {
                     Double y = jsonNode.findValue("y").asDouble();
                     return new TaskCanvas(id, new Task(taskId), x, y);
                 }
-                if (isPresent(jsonNode, "index")) {
-                    Integer index = jsonNode.findValue("index").asInt();
+                if (isPresent(jsonNode, "indexAtColumn")) {
+                    Integer index = jsonNode.findValue("indexAtColumn").asInt();
                     return new TaskOrdered(id, new Task(taskId), index);
                 }
                 throw new RuntimeException("The subtype of TaskPage isn't clearly defined");

@@ -31,7 +31,8 @@ public class PageController {
 
     //TODO: 11/02/2024 Ver se o indice pode ser atualizado no frontend de forma facil
     @PatchMapping("/{taskId}/{index}/{columnChanged}")
-    public OrderedPageGetDTO updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId, @PathVariable Integer index, @PathVariable Integer columnChanged) {
+    public OrderedPageGetDTO updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId,
+                                           @PathVariable Integer index, @PathVariable Integer columnChanged) {
         return pageService.updateIndex(page, taskId, index, columnChanged);
     }
 
