@@ -17,6 +17,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -53,7 +54,7 @@ public class PropertyService {
     private AutoMapper<Date> autoMapperDate;
     private OrderedPageRepository orderedPageRepository;
     private TaskValueRepository taskValueRepository;
-
+    private TaskRepository taskRepository;
 
     public PropertyGetDTO findOne(Long id) {
         return ModelToGetDTO.tranform(propertyRepository.findById(id).get());

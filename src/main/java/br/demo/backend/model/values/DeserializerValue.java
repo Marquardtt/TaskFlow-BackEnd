@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.io.IOException;
 import java.sql.Time;
@@ -49,7 +50,6 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                     isPresent(jsonProp, "id")) {
                 String type = jsonProp.get("type").asText();
                 Long idProp = jsonProp.get("id").asLong();
-
                 if (isPresent(jsonNode, "value")) {
                     JsonNode jsonValue = jsonNode.get("value");
                     if (isPresent(jsonValue, "value") &&
@@ -57,14 +57,17 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                         JsonNode value = jsonValue.get("value");
                         Long idTaskVl = jsonValue.get("id").asLong();
                         Property property = new Property(idProp);
-
                         if (type.equals("TEXT")) {
                             return new TaskValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }else if(type.equals("ARCHIVE")){
                             return new TaskValue(id, property,  new ArchiveValued(idTaskVl, null));
                         }
                         else if(type.equals("DATE")){
+                            if(value.isNull()){
+                                return new TaskValue(id, property,  new DateValued(idTaskVl, null));
+                            }
                             return new TaskValue(id, property,  new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
+
                         }
                         else if(type.equals("NUMBER") || type.equals("PROGRESS")){
                             return new TaskValue(id, property, new NumberValued(idTaskVl, value.asInt()));
@@ -86,6 +89,9 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                             return new TaskValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
+                            if(value.isNull()){
+                                return new TaskValue(id, property, new TimeValued(idTaskVl, null));
+                            }
                             return new TaskValue(id, property, new TimeValued(idTaskVl, Duration.parse(value.asText())));
                         }
                         else if(type.equals("USER")){
