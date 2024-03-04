@@ -54,7 +54,7 @@ public class PropertyService {
     private AutoMapper<Date> autoMapperDate;
     private OrderedPageRepository orderedPageRepository;
     private TaskValueRepository taskValueRepository;
-    private TaskRepository taskRepository;
+
 
     public PropertyGetDTO findOne(Long id) {
         return ModelToGetDTO.tranform(propertyRepository.findById(id).get());
