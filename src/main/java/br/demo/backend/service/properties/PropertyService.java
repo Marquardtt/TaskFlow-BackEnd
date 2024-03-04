@@ -22,6 +22,7 @@ import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -44,6 +45,7 @@ public class PropertyService {
     private AutoMapper<Limited> autoMapperLimited;
     private AutoMapper<Select> autoMapperSelect;
     private AutoMapper<Date> autoMapperDate;
+    private TaskRepository taskRepository;
 
 
     public PropertyGetDTO findOne(Long id) {
