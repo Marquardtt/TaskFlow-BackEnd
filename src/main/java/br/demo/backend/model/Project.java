@@ -4,6 +4,7 @@ import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
@@ -28,22 +29,21 @@ public class Project {
     private String description;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    ////////////
-    private Archive picture;
+    private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);
     private LocalDate deadline;
     //Patch
-    private LocalDateTime visualizedAt;
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime visualizedAt = LocalDateTime.now();
     @ManyToOne
+    @NotNull
     @JoinColumn(nullable = false)
-    ///////////////
     private User owner;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;
-    ///////////////////
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
 
     private Collection<Property> properties;
-    /////////////////
     public Project(Long id){
         this.id = id;
     }

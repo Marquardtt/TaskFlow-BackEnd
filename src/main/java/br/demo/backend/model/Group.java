@@ -1,6 +1,7 @@
 package br.demo.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Collection;
@@ -17,15 +18,18 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
+    @NotNull
+    @Column(nullable = false)
     private String name;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    private Archive picture;
+    private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);
     private String description;
 
     @ManyToMany
     private Collection<Permission> permissions;
     @ManyToOne
+    @NotNull
     @JoinColumn(nullable = false)
     private User owner;
     @ManyToMany

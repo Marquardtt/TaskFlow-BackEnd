@@ -2,6 +2,7 @@ package br.demo.backend.model;
 
 import br.demo.backend.model.enums.TypePermission;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,10 +21,16 @@ public class Permission {
     @GeneratedValue
     @EqualsAndHashCode.Include
     private Long id;
+    @NotNull
+    @Column(nullable = false)
     private String name;
+    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TypePermission permission;
     @ManyToOne
+    @JoinColumn(nullable = false)
+    @NotNull
     private Project project;
 
     public Permission(Long id) {

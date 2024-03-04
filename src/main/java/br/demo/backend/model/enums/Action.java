@@ -2,7 +2,7 @@ package br.demo.backend.model.enums;
 
 public enum Action {
     CREATE,
-    UPDATE,
+    UPDATE ,
     DELETE,
     REDO,
     COMPLETE

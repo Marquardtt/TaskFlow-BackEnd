@@ -2,6 +2,7 @@ package br.demo.backend.model.chat;
 
 import br.demo.backend.model.enums.TypeOfChat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,6 +29,8 @@ public abstract class Chat {
     private Collection<Message> messages;
 
     @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(nullable = false, updatable = false)
     private TypeOfChat type;
 
     @OneToOne

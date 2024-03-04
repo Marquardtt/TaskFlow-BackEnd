@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "tb_uni_option_valued")
+@Table(name = "tb_valued_uni_option")
 public class UniOptionValued extends Value{
 
     @ManyToOne

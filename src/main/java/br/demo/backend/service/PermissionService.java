@@ -7,6 +7,7 @@ import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
+import br.demo.backend.model.enums.TypePermission;
 import br.demo.backend.repository.PermissionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -32,12 +33,18 @@ public class PermissionService {
     }
 
     public void save(PermissionPostDTO permissionDto) {
+        if(permissionDto.getPermission() == null){
+            permissionDto.setPermission(TypePermission.READ);
+        }
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
         permissionRepository.save(permission);
     }
 
     public void update(PermissionPutDTO permissionDto, Boolean patching) {
+        if(permissionDto.getPermission() == null){
+            permissionDto.setPermission(TypePermission.READ);
+        }
         Permission oldPermission = permissionRepository.findById(permissionDto.getId()).get();
         Permission permission = patching ? oldPermission : new Permission();
         autoMapper.map(permissionDto, permission, patching);

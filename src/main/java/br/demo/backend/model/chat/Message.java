@@ -4,6 +4,7 @@ import br.demo.backend.model.Archive;
 import br.demo.backend.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,10 +28,13 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
+    @Column(length = 1000)
     private String value;
     @ManyToOne
+    @NotNull
+    @JoinColumn(nullable = false, updatable = false)
     private User sender;
-    private LocalDateTime dateCreate;
+    private LocalDateTime dateCreate = LocalDateTime.now();
     private LocalDateTime dateUpdate;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "message")

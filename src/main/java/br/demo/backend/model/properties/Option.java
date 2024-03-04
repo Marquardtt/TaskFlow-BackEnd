@@ -1,6 +1,7 @@
 package br.demo.backend.model.properties;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,7 +19,12 @@ public class Option {
     @Id
     private Long id;
     private String name;
-    private String color;
+    @NotNull
+    @Column(nullable = false)
+    private String color = "#F04A94";
+    @NotNull
+    @Column(nullable = false)
+    private Integer indexAtSelect = 0;
 
     public Option(Long id){
         this.id = id;
