@@ -115,9 +115,9 @@ public class TaskService {
 
     public TaskValue setTaskProperty(Property p) {
         Value value = null;
-        if (p.getType() == TypeOfProperty.SELECT) {
+        if (p.getType() == TypeOfProperty.RADIO ||p.getType() == TypeOfProperty.SELECT) {
             value = new UniOptionValued();
-        } else if (p.getType() == TypeOfProperty.RADIO || p.getType() == TypeOfProperty.CHECKBOX || p.getType() == TypeOfProperty.TAG) {
+        } else if ( p.getType() == TypeOfProperty.CHECKBOX || p.getType() == TypeOfProperty.TAG) {
             value = new MultiOptionValued();
         } else if (p.getType() == TypeOfProperty.TEXT) {
             value = new TextValued();
