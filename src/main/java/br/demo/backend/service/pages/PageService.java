@@ -84,8 +84,9 @@ public class PageService {
 
         Object column = taskOld.getTask().getProperties().stream().filter(p ->
                 p.getProperty().equals(page.getPropertyOrdering())).findFirst().get().getValue().getValue();
-        if(column instanceof Option singleColumn){
-            updateIndexesInAOption(page, singleColumn, taskOld, index, columnChaged);
+        if(!List.of(new TypeOfProperty[]{TypeOfProperty.CHECKBOX, TypeOfProperty.TAG}).contains(pageDto.getPropertyOrdering().getType())){
+            Option singleOption = (Option) column;
+            updateIndexesInAOption(page, singleOption, taskOld, index, columnChaged);
         }else{
             Collection<Option> columns = (Collection<Option>) column;
             for(Option o : columns){
