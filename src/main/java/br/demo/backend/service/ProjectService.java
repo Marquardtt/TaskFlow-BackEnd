@@ -4,6 +4,7 @@ package br.demo.backend.service;
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.*;
+import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
@@ -98,5 +99,9 @@ public class ProjectService {
 
     public void delete(Long id) {
         projectRepository.deleteById(id);
+    }
+
+    public Collection<GroupGetDTO> findAllGroupsOfAProject() {
+        return projectRepository.
     }
 }
