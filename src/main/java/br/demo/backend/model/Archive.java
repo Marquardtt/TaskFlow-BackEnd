@@ -21,17 +21,19 @@ public class Archive {
     private Long id;
     private String name;
     private String type;
-    @Lob
-    @Column(length = 1500000)
-    private byte[] data;
+    //    @Lob
+//    @Column(length = 1500000)
+//    private byte[] data;
+    private String awsKey;
 
     public Archive(MultipartFile file) {
         this.name = file.getOriginalFilename();
         this.type = file.getContentType();
-        try {
-            this.data = file.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+//        try {
+//            this.data = file.getBytes();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

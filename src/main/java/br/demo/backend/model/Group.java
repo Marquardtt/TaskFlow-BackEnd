@@ -23,7 +23,7 @@ public class Group {
     private String name;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);
+    private Archive picture ;
     private String description;
 
     @ManyToMany

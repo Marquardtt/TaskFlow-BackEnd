@@ -29,7 +29,7 @@ public class Project {
     private String description;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);
+    private Archive picture ;
     private LocalDate deadline;
     //Patch
     @NotNull

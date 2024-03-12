@@ -25,5 +25,5 @@ public class CanvasPage extends Page {
     @OneToOne(cascade = CascadeType.ALL)
     @NotNull
     @JoinColumn(nullable = false)
-    private Archive draw = new Archive(null, "draw", "png", new byte[0]);
+    private Archive draw ;
 }
