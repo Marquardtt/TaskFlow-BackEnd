@@ -73,9 +73,10 @@ public class PropertyService {
         }
     }
 
-    public void saveLimited(Limited property) {
-        limitedRepository.save(property);
+    public Limited saveLimited(Limited property) {
+        Limited limited = limitedRepository.save(property);
         setInTheTasksThatAlreadyExists(property);
+        return limited;
     }
 
     public void saveDate(Date property) {
@@ -166,7 +167,7 @@ public class PropertyService {
             });
             propertyRepository.delete(property);
         } else {
-            throw new RuntimeException("Property can't be deleted");
+            throw  new RuntimeException("Property can't be deleted");
         }
     }
 

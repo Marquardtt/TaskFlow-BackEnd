@@ -10,6 +10,8 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.service.properties.PropertyService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -22,16 +24,18 @@ public class PropertyController {
     private PropertyService propertyService;
 
     @PostMapping("/limited")
-    public void save(@RequestBody Limited property){
+    public ResponseEntity<Limited> save(@RequestBody Limited property){
         System.out.println(property);
-        propertyService.saveLimited(property);
+        return new ResponseEntity<Limited>(propertyService.saveLimited(property), HttpStatus.CREATED);
     }
     @PostMapping("/select")
     public void save(@RequestBody Select property){
+        System.out.println(property);
         propertyService.saveSelect(property);
     }
     @PostMapping("/date")
     public void save(@RequestBody Date property){
+        System.out.println(property);
         propertyService.saveDate(property);
     }
 
