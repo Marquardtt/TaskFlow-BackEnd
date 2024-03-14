@@ -29,14 +29,14 @@ public class PropertyController {
         return new ResponseEntity<Limited>(propertyService.saveLimited(property), HttpStatus.CREATED);
     }
     @PostMapping("/select")
-    public void save(@RequestBody Select property){
+    public ResponseEntity<Select> save(@RequestBody Select property){
         System.out.println(property);
-        propertyService.saveSelect(property);
+        return new ResponseEntity<>(propertyService.saveSelect(property), HttpStatus.CREATED);
     }
     @PostMapping("/date")
-    public void save(@RequestBody Date property){
+    public ResponseEntity<Date> save(@RequestBody Date property){
         System.out.println(property);
-        propertyService.saveDate(property);
+        return new ResponseEntity<>(propertyService.saveDate(property),HttpStatus.CREATED);
     }
 
     @PutMapping("/limited")
