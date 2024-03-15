@@ -101,7 +101,10 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-    public Collection<GroupGetDTO> findAllGroupsOfAProject() {
-        return projectRepository.
+    public Collection<Group> findAllGroupsOfAProject(Long id) {
+        ProjectGetDTO projectGet = findOne(id);
+        Project project = null;
+        BeanUtils.copyProperties(projectGet, project);
+        return groupRepository.findGroupsByPermissions_Project(project);
     }
 }

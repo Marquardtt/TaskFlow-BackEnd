@@ -1,6 +1,7 @@
 package br.demo.backend.controller;
 
 
+import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
@@ -56,8 +57,9 @@ public class ProjectController {
         return projectService.finAllOfAUser(userId);
     }
 
-    @GetMapping("/groups") public Collection<GroupGetDTO> findAllGroupsOfAProject() {
-        return projectService.findAllGroupsOfAProject();
+    @GetMapping("/{projectId}/groups")
+    public Collection<Group> findAllGroupsOfAProject(@PathVariable Long projectId) {
+        return projectService.findAllGroupsOfAProject(projectId);
     }
 
     @DeleteMapping("/{id}")
