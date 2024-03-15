@@ -1,8 +1,8 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;

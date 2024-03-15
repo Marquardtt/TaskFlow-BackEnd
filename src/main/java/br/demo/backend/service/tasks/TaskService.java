@@ -1,7 +1,7 @@
 package br.demo.backend.service.tasks;
 
 
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
@@ -31,10 +31,8 @@ import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
-import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
-import org.apache.el.stream.Stream;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

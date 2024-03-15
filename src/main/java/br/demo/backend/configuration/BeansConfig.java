@@ -1,6 +1,6 @@
 package br.demo.backend.configuration;
 
-import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.utils.AutoMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

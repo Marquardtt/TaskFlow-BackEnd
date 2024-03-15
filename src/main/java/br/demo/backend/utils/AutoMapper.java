@@ -1,4 +1,4 @@
-package br.demo.backend.globalfunctions;
+package br.demo.backend.utils;
 
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;

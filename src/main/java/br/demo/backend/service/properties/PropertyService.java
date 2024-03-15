@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.dtos.properties.DateGetDTO;
 import br.demo.backend.model.dtos.properties.LimitedGetDTO;
@@ -9,15 +9,12 @@ import br.demo.backend.model.dtos.properties.PropertyGetDTO;
 import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
-import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -25,17 +22,14 @@ import br.demo.backend.repository.properties.DateRepository;
 import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
-import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.repository.relations.TaskValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
