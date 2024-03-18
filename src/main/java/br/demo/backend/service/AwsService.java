@@ -4,7 +4,9 @@ import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -18,28 +20,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+@Service
+@AllArgsConstructor
+
 public class AwsService {
     private Environment environment;
     private ProjectRepository projectRepository;
 
-    public void update(Long id, MultipartFile file) {
+    public Archive update(Long id, MultipartFile file) throws IOException {
         Project project = projectRepository.findById(id).get();
-        Archive archive = new Archive(file);
-        String keyId = environment.getProperty("keyId");
-        String keySecret = environment.getProperty("keySrecret");
-
+        String awsKeyId = environment.getProperty("keyID");
+        String keySecret = environment.getProperty("keySecret");
         String bucket = environment.getProperty("bucket");
-
-        archive.setAwsKey(UUID.randomUUID().toString());
-        project.setPicture(archive);
-
-
-        AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(awsKeyId, awsKeySecret);
+        Archive fileMaked = new Archive(file);
+        fileMaked.setAwsKey(UUID.randomUUID().toString());
+        System.out.println(awsKeyId + keySecret + bucket);
+        project.setPicture(fileMaked);
+        String region = "us-east-1";
+        projectRepository.save(project);
+        return fileMaked;
 
     }
+
     public boolean uploadFile(Long id, MultipartFile file) {
         String keyId = environment.getProperty("keyId");
-        String keySecret = environment.getProperty("keySrecret");
+        String keySecret = environment.getProperty("keySecret");
         String region = "us-east-1";
         String bucket = environment.getProperty("bucket");
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(keyId, keySecret);
@@ -65,6 +70,7 @@ public class AwsService {
                         .build();
 
                 s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(fileInputStream, file.getSize()));
+                update(id, file);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
