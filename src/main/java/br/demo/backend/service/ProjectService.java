@@ -125,7 +125,6 @@ public class ProjectService {
                 }
             }
         }
-
         return groupsToSend;
 
     }
