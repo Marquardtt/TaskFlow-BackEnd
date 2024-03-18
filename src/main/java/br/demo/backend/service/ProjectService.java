@@ -5,6 +5,7 @@ import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
@@ -12,6 +13,7 @@ import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.GroupRepository;
+import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
@@ -23,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -32,6 +35,7 @@ public class ProjectService {
     private SelectRepository selectRepository;
     private UserRepository userRepository;
     private GroupRepository groupRepository;
+    private PermissionRepository permissionRepository;
     private AutoMapper<Project> autoMapper;
 
 
@@ -87,6 +91,7 @@ public class ProjectService {
         Select selectCreated = selectRepository.save(select);
         emptyProject.getProperties().add(selectCreated);
         emptyProject.setVisualizedAt(LocalDateTime.now());
+        System.out.println(groupRepository.findGroupsByPermissions_Project(project));
         projectRepository.save(emptyProject);
     }
 
@@ -101,10 +106,27 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
+//    public Collection<Group> findAllGroupsOfAProject(Long id) {
+//        ProjectGetDTO projectGet = findOne(id);
+//        Project project = null;
+//        BeanUtils.copyProperties(projectGet, project);
+//        return groupRepository.findGroupsByPermissions_Project(project);
+//    }
+
     public Collection<Group> findAllGroupsOfAProject(Long id) {
-        ProjectGetDTO projectGet = findOne(id);
-        Project project = null;
-        BeanUtils.copyProperties(projectGet, project);
-        return groupRepository.findGroupsByPermissions_Project(project);
+        List<Permission> permissions = permissionRepository.findAll();
+        List<Group> groups = groupRepository.findAll();
+
+        List<Group> groupsToSend = null;
+        for (Permission permission : permissions) {
+            for (Group group : groups) {
+                if (permission.getProject().getId() == id && group.getPermissions() == permission){
+                    groupsToSend.add(group);
+                }
+            }
+        }
+
+        return groupsToSend;
+
     }
 }
