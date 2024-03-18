@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/aws")
 public class AwsController {
 
-    AwsService service;
+    private AwsService service;
     @PostMapping("/{id}")
     public void postAws(@PathVariable Long id , @RequestParam MultipartFile file){
         try {

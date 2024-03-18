@@ -23,19 +23,19 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Service
-@NoArgsConstructor
 @Data
 public class AwsService {
 
     private ProjectRepository projectRepository;
     private Environment env;
-    private String awsKeyId = env.getProperty("KeyID");
-    private String awsKeySecret = env.getProperty("keySecret");
-    private String region = "us-east-1";
-    private String bucketName = env.getProperty("bucket");
+
 
     public boolean uploadFile(MultipartFile file, Long id) {
-        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(awsKeyId, awsKeySecret);
+         String keyID = env.getProperty("keyID");
+         String keySecret = env.getProperty("keySecret");
+         String region = "us-east-1";
+         String bucketName = env.getProperty("bucket");
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(keyID, keySecret);
 
         try (S3Client s3Client = S3Client.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
@@ -56,8 +56,6 @@ public class AwsService {
                         .key(stringAws)
                         .contentType(contentType)
                         .build();
-
-
                 s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(fileInputStream, file.getSize()));
                 Project project = projectRepository.findById(id).get();
                 Archive archive = new Archive(file);
@@ -69,8 +67,6 @@ public class AwsService {
                 e.printStackTrace();
                 return false;
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -85,5 +81,4 @@ public class AwsService {
             return false;
         }
     }
-
 }
