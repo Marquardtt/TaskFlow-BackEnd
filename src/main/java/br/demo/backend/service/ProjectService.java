@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -106,26 +107,15 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-//    public Collection<Group> findAllGroupsOfAProject(Long id) {
-//        ProjectGetDTO projectGet = findOne(id);
-//        Project project = null;
-//        BeanUtils.copyProperties(projectGet, project);
-//        return groupRepository.findGroupsByPermissions_Project(project);
-//    }
-
-    public Collection<Group> findAllGroupsOfAProject(Long id) {
-        List<Permission> permissions = permissionRepository.findAll();
-        List<Group> groups = groupRepository.findAll();
-
-        List<Group> groupsToSend = null;
-        for (Permission permission : permissions) {
-            for (Group group : groups) {
-                if (permission.getProject().getId() == id && group.getPermissions() == permission){
-                    groupsToSend.add(group);
-                }
-            }
+    public Collection<GroupGetDTO> findAllGroupsOfAProject(Long id) {
+        ProjectGetDTO projectGet = findOne(id);
+        Project project = new Project();
+        BeanUtils.copyProperties(projectGet, project);
+        List<GroupGetDTO> groups = new ArrayList<>();
+        for (Group group : groupRepository.findGroupsByPermissions_Project(project)) {
+            groups.add(ModelToGetDTO.tranform(group));
         }
-        return groupsToSend;
-
+        return groups;
     }
+
 }

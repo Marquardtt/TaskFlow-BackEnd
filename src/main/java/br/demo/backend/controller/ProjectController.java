@@ -58,7 +58,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/groups")
-    public Collection<Group> findAllGroupsOfAProject(@PathVariable Long projectId) {
+    public Collection<GroupGetDTO> findAllGroupsOfAProject(@PathVariable Long projectId) {
         return projectService.findAllGroupsOfAProject(projectId);
     }
 
