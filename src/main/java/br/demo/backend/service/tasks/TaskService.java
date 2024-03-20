@@ -1,6 +1,8 @@
 package br.demo.backend.service.tasks;
 
 
+import br.demo.backend.repository.values.UserValuedRepository;
+import br.demo.backend.repository.values.ValueRepository;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -52,6 +54,7 @@ public class TaskService {
     private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
     private TaskPageRepository taskPageRepository;
+    private UserValuedRepository userValuedRepository;
 
 
 
@@ -176,15 +179,35 @@ public class TaskService {
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
         User user = userRepository.findById(id).get();
-        TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
-        Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
+        Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
+        Collection<TaskValue> taskValues =
+                values.stream().map(v -> taskValueRepository
+                                .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
+                        .toList();
+        Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).toList();
 
         return tasks.stream().filter(t ->
                         t.getProperties().stream().anyMatch(p ->
-                                p.getProperty().getType().equals(TypeOfProperty.DATE) &&
-                                        ((Date) p.getProperty()).getScheduling() &&
-                                        p.getValue().getValue().equals(LocalDate.now())))
+                                p.getProperty().getType().equals(TypeOfProperty.DATE)
+                                        &&
+                                        ((((Date) p.getProperty()).getScheduling()
+                                                &&
+                                                !user.getConfiguration().getInitialPageTasksPerDeadline())
+                                        ||
+                                        (((Date) p.getProperty()).getDeadline()
+                                                &&
+                                                user.getConfiguration().getInitialPageTasksPerDeadline()))
+                                        &&
+                                        p.getValue().getValue() != null
+                                        &&
+                                        compareToThisDay((LocalDateTime) p.getValue().getValue())))
                 .map(ModelToGetDTO::tranform).toList();
+    }
+
+    private Boolean compareToThisDay(LocalDateTime time){
+        return time.getMonthValue() == LocalDate.now().getMonthValue() &&
+                time.getYear() == time.getYear() &&
+                time.getDayOfMonth() == time.getDayOfMonth();
     }
 
     public Collection<TaskPageGetDTO> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
