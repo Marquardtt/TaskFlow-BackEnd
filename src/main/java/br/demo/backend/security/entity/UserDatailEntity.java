@@ -1,6 +1,7 @@
 package br.demo.backend.security.entity;
 
-import jakarta.persistence.Entity;
+import br.demo.backend.model.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,9 +18,14 @@ import java.util.Collection;
 @Builder
 public class UserDatailEntity implements UserDetails {
 
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
     private String password;
+    @OneToOne(mappedBy = "UserDatailEntity")
+    private User user;
     private boolean enabled;
     private boolean accountNonExpired;
     private boolean accountNonLocked;

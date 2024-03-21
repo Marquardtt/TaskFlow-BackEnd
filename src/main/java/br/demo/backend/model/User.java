@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+import br.demo.backend.security.entity.UserDatailEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -47,6 +48,10 @@ public class User {
     private Configuration configuration = new Configuration();
     @ManyToMany
     private Collection<Permission> permissions;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
+    private UserDatailEntity userDetailsEntity;
     public User (String username){
         this.username = username;
     }
