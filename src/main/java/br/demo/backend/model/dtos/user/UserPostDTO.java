@@ -2,6 +2,7 @@ package br.demo.backend.model.dtos.user;
 
 import br.demo.backend.model.Archive;
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -20,4 +21,6 @@ public class UserPostDTO {
     private String surname;
     @Length(min = 8)
     private String password;
+    @Email
+    private String mail;
 }
