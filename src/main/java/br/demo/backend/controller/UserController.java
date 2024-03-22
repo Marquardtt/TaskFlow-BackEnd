@@ -1,7 +1,5 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
@@ -45,14 +43,7 @@ public class UserController {
         return userService.findOne(username);
     }
 
-    @GetMapping("/username/{username}/{password}")
-    public UserGetDTO findByUsernameAndPassword(@PathVariable String username, @PathVariable String password){
-        return userService.findByUsernameAndPassword(username, password);
-    }
-    @GetMapping("/email/{email}/{password}")
-    public UserGetDTO findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
-        return userService.findByEmailAndPassword(email, password);
-    }
+
     @PatchMapping("/picture/{username}")
     public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
         userService.updatePicture(picture, username);
@@ -68,9 +59,9 @@ public class UserController {
         return userService.findAll();
     }
 
-    @DeleteMapping("/{username}")
-    public void delete(@PathVariable String username){
-        userService.delete(username);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
+        userService.delete(id);
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 

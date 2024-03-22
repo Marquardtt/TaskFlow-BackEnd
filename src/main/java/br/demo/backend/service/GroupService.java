@@ -4,12 +4,14 @@ package br.demo.backend.service;
 import br.demo.backend.exception.GroupNotFoundException;
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
-import br.demo.backend.model.*;
+import br.demo.backend.model.Archive;
+import br.demo.backend.model.Group;
+import br.demo.backend.model.Permission;
+import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -19,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -108,13 +109,13 @@ public class GroupService {
 
     public void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
-            User user = updatePermissionInAUser((userRepository.findById(u.getUsername()).get()), permission);
-            System.out.println(user.getPassword());
+            User user = updatePermissionInAUser((userRepository.findById(u.getId()).get()), permission);
+            System.out.println(user.getUserDetailsEntity().getPassword());
             userRepository.save(user);
             return user;
         }).toList();
         group.setUsers(users);
-        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getUsername()).get(), permission);
+        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getId()).get(), permission);
         userRepository.save(owner);
         group.setOwner(owner);
     }

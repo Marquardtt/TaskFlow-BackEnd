@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 import java.util.Collection;
 
@@ -21,15 +20,12 @@ import java.util.Collection;
 public class User {
 
     @Id
-//    @GeneratedValue(generator = "uuid")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private String username;
+    private Long id;
 
     private String name;
     private String surname;
-    @Length(min = 8)
-    @Column(nullable = false)
-    private String password;
     private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
@@ -53,7 +49,8 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private UserDatailEntity userDetailsEntity;
     public User (String username){
-        this.username = username;
+        this.userDetailsEntity.setUsername(username);
     }
+
 
 }

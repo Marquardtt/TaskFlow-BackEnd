@@ -28,7 +28,6 @@ import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
@@ -36,10 +35,8 @@ import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
-import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class ModelToGetDTO {
@@ -48,6 +45,7 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         UserGetDTO user = new UserGetDTO();
         BeanUtils.copyProperties(obj, user);
+        user.setUsername(obj.getUserDetailsEntity().getUsername());
         try {
             user.setPermissions(obj.getPermissions().stream().map(ModelToGetDTO::tranform).toList());
         } catch (NullPointerException ignore) {}
@@ -231,6 +229,8 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
         BeanUtils.copyProperties(obj, simpleUser);
+        simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
+
         return simpleUser;
     }
 

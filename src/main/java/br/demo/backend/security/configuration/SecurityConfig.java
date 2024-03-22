@@ -24,17 +24,17 @@ public class SecurityConfig {
     private final FilterAuthorization filterAuthorization;
     @Bean
     public SecurityFilterChain config (HttpSecurity http) throws Exception {
-
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
         http.csrf(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests( authz -> authz
-                .requestMatchers(HttpMethod.GET,"/login").permitAll()
-                .requestMatchers(HttpMethod.GET,"/register").permitAll()
+                .requestMatchers(HttpMethod.POST,"/login").permitAll()
+                .requestMatchers(HttpMethod.POST,"/user").permitAll()
+                .requestMatchers(HttpMethod.POST,"/register").permitAll()
                 .requestMatchers(HttpMethod.POST , "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .anyRequest().authenticated());
 
         // Manter a sessão do usuário na requisição ativa
-        http.securityContext((context) -> context.securityContextRepository(repo));
+            http.securityContext((context) -> context.securityContextRepository(repo));
 
         http.formLogin(AbstractHttpConfigurer::disable); // este metodo habilita o formulario de login do spring security
         http.logout(Customizer.withDefaults()); // este metodo habilita o logout do spring security

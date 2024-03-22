@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -26,42 +27,49 @@ public class FilterAuthorization extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        UserDatailEntity userDatailEntity = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // Neste trecho o usuário logado é pego
-        User user = userDatailEntity.getUser(); // obtém o usuário que possui referência dentro de userDatailEntity
 
-        String projectIdString = request.getParameter("projectId");
-        if (projectIdString != null) {
-            Long projectId = Long.parseLong(projectIdString);
-            Optional<Permission> permission = user.getPermissions().stream().filter(
-                    p -> p.getProject().getId().equals(projectId)).findFirst();
-            if (permission.isEmpty()) {
-                throw new RuntimeException("Não tem permissão");
-            } else {
-                Permission per = permission.get();
-                String method = request.getMethod();
+        if (!publicRoute(request)) {
+            UserDatailEntity userDatailEntity = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // Neste trecho o usuário logado é pego
+            User user = userDatailEntity.getUser(); // obtém o usuário que possui referência dentro de userDatailEntity
 
-                if (method == "POST") {
-                    if (!List.of(TypePermission.CREATE, TypePermission.DELETE_CREATE, TypePermission.UPDATE_DELETE_CREATE, TypePermission.UPDATE_CREATE).
-                            contains(per)) {
-                        throw new RuntimeException("Não tem permissão");
-                    }
+            String projectIdString = request.getParameter("projectId");
+            if (projectIdString != null) {
+                Long projectId = Long.parseLong(projectIdString);
+                Optional<Permission> permission = user.getPermissions().stream().filter(
+                        p -> p.getProject().getId().equals(projectId)).findFirst();
+                if (permission.isEmpty()) {
+                    throw new RuntimeException("Não tem permissão");
+                } else {
+                    Permission per = permission.get();
+                    String method = request.getMethod();
 
-                } else if (method.equals("PUT") || method.equals("PATCH")) {
-                    if (!List.of(TypePermission.UPDATE, TypePermission.UPDATE_CREATE, TypePermission.UPDATE_DELETE, TypePermission.UPDATE_DELETE_CREATE).contains(per)) {
-                        throw new RuntimeException("Não possui permissão");
-                    }
-                } else if (method.equals("DELETE")) {
-                    if (!List.of(TypePermission.DELETE, TypePermission.UPDATE_DELETE, TypePermission.UPDATE_DELETE_CREATE, TypePermission.UPDATE_CREATE).contains(per)) {
-                        throw new RuntimeException("Não possui permissão");
+                    if (Objects.equals(method, "POST")) {
+                        if (!List.of(TypePermission.CREATE, TypePermission.DELETE_CREATE, TypePermission.UPDATE_DELETE_CREATE, TypePermission.UPDATE_CREATE).
+                                contains(per)) {
+                            throw new RuntimeException("Não tem permissão");
+                        }
+
+                    } else if (method.equals("PUT") || method.equals("PATCH")) {
+                        if (!List.of(TypePermission.UPDATE, TypePermission.UPDATE_CREATE, TypePermission.UPDATE_DELETE, TypePermission.UPDATE_DELETE_CREATE).contains(per)) {
+                            throw new RuntimeException("Não possui permissão");
+                        }
+                    } else if (method.equals("DELETE")) {
+                        if (!List.of(TypePermission.DELETE, TypePermission.UPDATE_DELETE, TypePermission.UPDATE_DELETE_CREATE, TypePermission.UPDATE_CREATE).contains(per)) {
+                            throw new RuntimeException("Não possui permissão");
+                        }
                     }
                 }
+
+
             }
 
 
         }
-
-
         filterChain.doFilter(request, response);
+    }
+
+    private boolean publicRoute(HttpServletRequest request) {
+        return   (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/user")) && request.getMethod().equals("POST");
     }
 
 

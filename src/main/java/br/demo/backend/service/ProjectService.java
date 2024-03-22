@@ -52,8 +52,9 @@ public class ProjectService {
     }
 
     public Collection<ProjectGetDTO> finAllOfAUser(String id) {
-        Collection<Project> projects = projectRepository.findProjectsByOwner_Username(id);
-        projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
+        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(id);
+        projects.addAll(userRepository.findByUserDetailsEntity_Username(id)
+                .get().getPermissions().stream().map(Permission::getProject).toList());
         return projects.stream().map(ModelToGetDTO::tranform).toList();
     }
     public ProjectGetDTO findOne(Long id) {

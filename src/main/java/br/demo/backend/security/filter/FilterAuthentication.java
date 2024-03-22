@@ -26,14 +26,19 @@ public class FilterAuthentication extends OncePerRequestFilter {
     private SecurityContextRepository securityContextRepository;
     private final CookieUtil cookieUtil = new CookieUtil();
     private final JwtUtil jwtUtil = new JwtUtil();
-
     private AuthenticationService userDatailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if(!publicRoute(request)) {
-
-            Cookie cookie = cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
+            Cookie cookie ;
+            try {
+                cookie= cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
+                System.out.println(cookie);
+            }catch (Exception e ){
+                response.sendError(401);
+                return;
+            }
             String token = cookie.getValue();// Get the token from the cookie
             String username = jwtUtil.getUsername(token);// Validate the token
 
@@ -54,7 +59,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     }
     private boolean publicRoute (HttpServletRequest request){
-        return request.getRequestURI().equals("/login") && request.getMethod().equals("POST");
+        return (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/user")) && request.getMethod().equals("POST");
     }
 
 }

@@ -1,6 +1,7 @@
 package br.demo.backend.service.tasks;
 
 
+import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -23,23 +24,20 @@ import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
-
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
-
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
-import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
-import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.repository.tasks.TaskRepository;
 import lombok.AllArgsConstructor;
-import org.apache.el.stream.Stream;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 @Service
 @AllArgsConstructor
@@ -149,7 +147,7 @@ public class TaskService {
     }
 
     public void delete(Long id, String userId) {
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
@@ -177,7 +175,7 @@ public class TaskService {
     }
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
-        User user = userRepository.findById(id).get();
+        User user = userRepository.findByUserDetailsEntity_Username(id).get();
         TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
 
