@@ -13,11 +13,9 @@ import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
@@ -47,6 +45,7 @@ public class UserService {
         }catch (NoSuchElementException e){
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
+
             user.setConfiguration(new Configuration());
             userRepository.save(user);
         }

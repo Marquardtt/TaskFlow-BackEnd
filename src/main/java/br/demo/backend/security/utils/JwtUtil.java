@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
 
-public class JwtUtils {
+public class JwtUtil {
 
     public String gerarToken(UserDetails userDetails){
         return JWT.create().withIssuer("WEG")

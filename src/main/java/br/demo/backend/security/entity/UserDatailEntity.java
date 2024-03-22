@@ -1,6 +1,7 @@
 package br.demo.backend.security.entity;
 
 import br.demo.backend.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,7 +25,8 @@ public class UserDatailEntity implements UserDetails {
     private Integer id;
     private String username;
     private String password;
-    @OneToOne(mappedBy = "UserDatailEntity")
+    @OneToOne(mappedBy = "userDetailsEntity")
+    @JsonIgnore
     private User user;
     private boolean enabled;
     private boolean accountNonExpired;

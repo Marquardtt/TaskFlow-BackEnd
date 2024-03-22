@@ -23,8 +23,8 @@ public class ProjectController {
         projectService.save(project);
     }
 
-    @PatchMapping("/picture/{id}")
-    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+    @PatchMapping("/picture/{projectId}")
+    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable("projectId") Long id) {
         projectService.updatePicture(picture, id);
     }
     @PatchMapping("/set-now")
@@ -40,8 +40,8 @@ public class ProjectController {
         projectService.update(project, true);
     }
 
-    @GetMapping("/{id}")
-    public ProjectGetDTO findOne(@PathVariable Long id) {
+    @GetMapping("/{projectId}")
+    public ProjectGetDTO findOne(@PathVariable("projectId") Long id) {
         return projectService.findOne(id);
     }
 
@@ -55,8 +55,8 @@ public class ProjectController {
         return projectService.finAllOfAUser(userId);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    @DeleteMapping("/{projectId}")
+    public void delete(@PathVariable("projectId") Long id) {
         projectService.delete(id);
     }
 

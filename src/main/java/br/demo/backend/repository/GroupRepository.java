@@ -13,6 +13,4 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Collection<Group> findGroupsByUsersContaining(User user);
 
     Collection<Group> findGroupsByPermissions_Project(Project project);
-
-
 }

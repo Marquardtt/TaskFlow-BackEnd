@@ -14,7 +14,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class AuthenticationService implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 

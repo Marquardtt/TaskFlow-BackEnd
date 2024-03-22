@@ -8,7 +8,7 @@ import org.springframework.web.util.WebUtils;
 public class CookieUtil {
 
     public Cookie gerarCookieJwt(UserDetails userDetails){
-        String token = new JwtUtils().gerarToken(userDetails);
+        String token = new JwtUtil().gerarToken(userDetails);
         Cookie cookie = new Cookie("JWT", token);
         cookie.setPath("/");
         cookie.setMaxAge(300);

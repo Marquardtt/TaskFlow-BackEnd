@@ -1,12 +1,13 @@
 package br.demo.backend.model;
 
 import br.demo.backend.security.entity.UserDatailEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.GeneratedColumn;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.Collection;
@@ -50,7 +51,6 @@ public class User {
     private Collection<Permission> permissions;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JsonIgnore
     private UserDatailEntity userDetailsEntity;
     public User (String username){
         this.username = username;
