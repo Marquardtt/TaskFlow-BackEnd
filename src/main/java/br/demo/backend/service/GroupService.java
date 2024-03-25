@@ -1,6 +1,8 @@
 package br.demo.backend.service;
 
 
+
+
 import br.demo.backend.exception.GroupNotFoundException;
 import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
@@ -17,13 +19,16 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+
 @Service
 @AllArgsConstructor
 public class GroupService {
+
 
     private GroupRepository groupRepository;
     private ProjectService projectService;
@@ -39,6 +44,7 @@ public class GroupService {
         return ModelToGetDTO.tranform(groupRepository.findById(id).get());
     }
 
+
     public void save(GroupPostDTO groupDto) {
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
@@ -48,6 +54,7 @@ public class GroupService {
         groupRepository.save(group);
     }
 
+
     public void updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
@@ -56,6 +63,7 @@ public class GroupService {
     public Collection<GroupGetDTO> findGroupsByUser(String userId) {
         return groupRepository.findGroupsByUsersContaining(new User(userId)).stream().map(ModelToGetDTO::tranform).toList();
     }
+
 
     public PermissionGetDTO findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
@@ -69,17 +77,22 @@ public class GroupService {
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
 
+
         return group.getPermissions().stream()
                 .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
     }
+
 
     public void update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
         Archive picture = oldGroup.getPicture();
 
+
         Group group = patching ? oldGroup : new Group();
         User owner = oldGroup.getOwner();
         autoMapper.map(groupDTO, group, patching);
+        group.setOwner(owner);
+
 
         Group groupOld = groupRepository.findById(group.getId()).get();
         Collection<Permission> permissions = group.getPermissions().stream().filter(p ->
@@ -88,12 +101,13 @@ public class GroupService {
         for(Permission permission : permissions) {
             updatePermission(group, permission);
         }
-        group.setOwner(owner);
         group.setPicture(picture);
         groupRepository.save(group);
     }
 
-    private User updatePermissionInAUser(User user, Permission permission){
+
+    private User updatePermissionInAUser(User userDTO, Permission permission){
+        User user = userRepository.findById(userDTO.getUsername()).get();
         Collection<Permission> permissions = user.getPermissions();
         if(user.getPermissions() != null) {
             permissions.removeAll(user.getPermissions().stream().filter(p ->
@@ -106,22 +120,24 @@ public class GroupService {
         return user;
     }
 
+
     public void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
-            User user = updatePermissionInAUser((userRepository.findById(u.getUsername()).get()), permission);
-            System.out.println(user.getPassword());
+            User user = updatePermissionInAUser(u, permission);
             userRepository.save(user);
             return user;
         }).toList();
         group.setUsers(users);
-        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getUsername()).get(), permission);
+        User owner = updatePermissionInAUser(group.getOwner(), permission);
         userRepository.save(owner);
         group.setOwner(owner);
     }
 
+
     public void delete(Long id) {
         groupRepository.deleteById(id);
     }
+
 
     public void updatePicture(MultipartFile picture, Long id) {
         Group group = groupRepository.findById(id).get();
@@ -129,4 +145,5 @@ public class GroupService {
         groupRepository.save(group);
     }
 
-}
+
+

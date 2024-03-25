@@ -31,13 +31,12 @@ public class User {
     private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
-    private Archive picture = new Archive(null,  "picture", "jpg", new byte[0]);
-    @Email
+    private Archive picture;
+
     private String mail;
     private String phone;
     private String description;
     //Patch
-    @NotNull
     @Column(nullable = false)
     private Long points = 0L;
     //Patch
