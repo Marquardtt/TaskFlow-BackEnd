@@ -41,6 +41,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class ModelToGetDTO {
 
@@ -233,5 +234,6 @@ public class ModelToGetDTO {
         BeanUtils.copyProperties(obj, simpleUser);
         return simpleUser;
     }
+
 
 }

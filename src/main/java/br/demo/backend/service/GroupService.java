@@ -36,8 +36,6 @@ public class GroupService {
     private AutoMapper<Group> autoMapper;
 
 
-
-
     public Collection<GroupGetDTO> findAll() {
         return groupRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
@@ -74,8 +72,6 @@ public class GroupService {
         ).findFirst().get();
         return ModelToGetDTO.tranform(permission);
     }
-
-
 
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
@@ -150,5 +146,4 @@ public class GroupService {
     }
 
 
-}
 
