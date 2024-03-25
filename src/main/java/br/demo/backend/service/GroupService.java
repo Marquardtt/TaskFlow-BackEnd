@@ -42,7 +42,6 @@ public class GroupService {
         return groupRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
-
     public GroupGetDTO findOne(Long id) {
         return ModelToGetDTO.tranform(groupRepository.findById(id).get());
     }
