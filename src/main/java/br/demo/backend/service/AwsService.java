@@ -1,10 +1,10 @@
 package br.demo.backend.service;
+
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -14,11 +14,16 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -31,10 +36,10 @@ public class AwsService {
 
 
     public boolean uploadFile(MultipartFile file, Long id) {
-         String keyID = env.getProperty("keyID");
-         String keySecret = env.getProperty("keySecret");
-         String region = "us-east-1";
-         String bucketName = env.getProperty("bucket");
+        String keyID = env.getProperty("keyID");
+        String keySecret = env.getProperty("keySecret");
+        String region = "us-east-1";
+        String bucketName = env.getProperty("bucket");
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(keyID, keySecret);
 
         try (S3Client s3Client = S3Client.builder()
@@ -71,6 +76,40 @@ public class AwsService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public String findById(long projectId) {
+        String keyID = env.getProperty("keyID");
+        String keySecret = env.getProperty("keySecret");
+        String region = "us-east-1";
+        String bucketName = env.getProperty("bucket");
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(keyID, keySecret);
+        S3Client s3Client = S3Client.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .region(Region.of(region))
+                .build();
+        if (doesBucketExist(s3Client, bucketName)) {
+            try (S3Presigner presigner = S3Presigner.builder().region(Region.of(region))
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                    .build()) {
+
+                String awsKey = projectRepository.findById(projectId).get().getPicture().getAwsKey();
+                GetObjectRequest objectRequest = GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(awsKey)
+                        .build();
+
+                GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofMinutes(10))  // The URL will expire in 10 minutes.
+                        .getObjectRequest(objectRequest)
+                        .build();
+
+                PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
+
+                return presignedRequest.url().toExternalForm();
+            }
+        }
+        return null;
     }
 
     private boolean doesBucketExist(S3Client s3Client, String bucketName) {

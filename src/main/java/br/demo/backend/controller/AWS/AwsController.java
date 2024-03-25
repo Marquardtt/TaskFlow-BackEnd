@@ -21,6 +21,14 @@ public class AwsController {
         }
 
     }
+    @GetMapping("/{projectId}")
+    public String getAws( @PathVariable Long projectId ){
+        try {
+            return service.findById(projectId);
+        }catch (Exception e ){
+            throw new RuntimeException(e);
+        }
+    }
 
 
 }
