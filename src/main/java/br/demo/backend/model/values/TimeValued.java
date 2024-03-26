@@ -1,14 +1,15 @@
 package br.demo.backend.model.values;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collection;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,17 +17,19 @@ import java.time.LocalTime;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_valued_time")
 public class TimeValued extends Value {
-    private Duration time;
-
-    public TimeValued(Long id, Duration time) {
+    @OneToOne(cascade = CascadeType.ALL)
+    private Intervals value;
+    public TimeValued(Long id, Duration time, Collection<LocalDateTime> starts,
+                      Collection<LocalDateTime> ends, String color) {
         super(id);
-        this.time = time;
+        this.value = new Intervals(null, time, starts, ends, color);
     }
 
     @Override
-    public void setValue(Object value){this.time = (Duration) value;}
+    public void setValue(Object value){this.value = (Intervals) value;}
+
     @Override
     public Object getValue() {
-        return this.time;
+        return this.value;
     }
 }

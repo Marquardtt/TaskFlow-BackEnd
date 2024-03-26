@@ -145,6 +145,7 @@ public class TaskService {
     public void update(Task taskDTO, Boolean patching) {
         Task task = patching ? taskRepository.findById(taskDTO.getId()).get() : new Task();
         autoMapper.map(taskDTO, task, patching);
+
         taskRepository.save(task);
     }
 
@@ -186,7 +187,8 @@ public class TaskService {
                                 p.getProperty().getType().equals(TypeOfProperty.DATE) &&
                                         ((Date) p.getProperty()).getScheduling() &&
                                         p.getValue().getValue().equals(LocalDate.now())))
-                .map(ModelToGetDTO::tranform).toList();
+                .map(ModelToGetDTO::tranform).toList()
+                ;
     }
 
     public Collection<TaskPageGetDTO> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
