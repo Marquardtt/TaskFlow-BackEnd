@@ -172,7 +172,9 @@ public class ChatService {
         Chat chat = chatRepository.findById(chatId).get();
         MessagePostPutDTO messageDto = objectMapper.readValue(messageString, MessagePostPutDTO.class);
         Message message = getMessage(chat, messageDto);
-        message.setAnnex(new Archive(annex));
+        if(annex != null){
+            message.setAnnex(new Archive(annex));
+        }
         chat.getMessages().remove(message);
         chat.getMessages().add(message);
         updateLastMessage(chat);

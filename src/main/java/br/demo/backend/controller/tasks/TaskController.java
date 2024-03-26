@@ -19,64 +19,48 @@ public class TaskController {
     private TaskService taskService;
 
 
+    //Precisa ter permissão de post no projeto
     @PostMapping("/{pageId}/{userId}")
     public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId){
         return taskService.save(pageId, userId);
     }
 
+    //Precisa ter permissão de put no projeto
     @PutMapping
     public void upDate(@RequestBody Task task){
         taskService.update(task, false);
     }
+    //Precisa ter permissão de put no projeto
     @PatchMapping
     public void patch(@RequestBody Task task){
         taskService.update(task, true);
     }
 
-    @GetMapping("/{id}")
-    public TaskGetDTO findOne(@PathVariable Long id){
-        return taskService.findOne(id);
-    }
-
-    @GetMapping("/name/{name}")
-    public Collection<TaskGetDTO> findByName(@PathVariable String name){
-        return taskService.findByName(name);
-    }
-
-    @GetMapping
-    public Collection<TaskGetDTO> findAll(){
-        return taskService.findAll();
-    }
-
+    //Precisa ser o mesmo usaurio do parametro
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
         return taskService.getTasksToday(id);
     }
 
+    //Precisa ter permissão de delete no projeto
     @DeleteMapping("/{id}/{userId}")
     public void delete(@PathVariable Long id , @PathVariable String userId){
         taskService.delete(id, userId);
     }
 
+    //Precisa ser o owner do projeto
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
         taskService.deletePermanent(id);
     }
 
+    //Precisa ter permissão de delete no projeto
     @PutMapping("/redo/{userId}/{id}")
     public void redo(@PathVariable Long id , @PathVariable String userId){
         taskService.redo(id, userId);
     }
 
-    @GetMapping("/month/{month}/{pageId}/{propertyId}")
-    public Collection<TaskPageGetDTO> getTasksOfMonth(@PathVariable Integer month,
-                                                      @PathVariable Long pageId,
-                                                      @PathVariable Long propertyId){
-        return taskService.getTasksOfMonth(month, pageId, propertyId);
-    }
-
-
-
+    //Precisa estar no projeto
     @GetMapping("/project/{projectId}")
     public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
         return taskService.getDeletedTasks(projectId);

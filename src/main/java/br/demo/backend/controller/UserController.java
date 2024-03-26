@@ -19,61 +19,55 @@ import java.util.Collection;
 public class UserController {
     private UserService userService;
 
-    // TODO: 16/02/2024 O Usuario esta perdendo algumas de suas props
-
+    //    precisa de nada
     @PostMapping
     public void insert(@RequestBody UserPostDTO user){
         userService.save(user);
     }
 
+    //    precisa estar logado e pertencer a esse projeto
     @GetMapping("/{username}/{projectId}")
     public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
         return userService.getPermissionOfAUserInAProject(username, projectId);
     }
 
+    //    precisa estar logado e ser o usuario
     @PutMapping
     public void upDate(@RequestBody UserPutDTO user){
         userService.update(user, false);
     }
+    //    precisa estar logado e ser o usuario
     @PatchMapping
     public void patch(@RequestBody UserPutDTO user){
         userService.update(user, true);
     }
 
+    //    precisa estar num mesmo projeto ou group que o outro user
     @GetMapping("/{username}")
     public UserGetDTO findOne(@PathVariable String username){
         return userService.findOne(username);
     }
 
-    @GetMapping("/username/{username}/{password}")
-    public UserGetDTO findByUsernameAndPassword(@PathVariable String username, @PathVariable String password){
-        return userService.findByUsernameAndPassword(username, password);
-    }
-    @GetMapping("/email/{email}/{password}")
-    public UserGetDTO findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
-        return userService.findByEmailAndPassword(email, password);
-    }
+    //precisa ser o usuario logado
     @PatchMapping("/picture/{username}")
     public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
         userService.updatePicture(picture, username);
     }
 
+    //precisa ser o usuario logado
     @PatchMapping("/password/{username}")
     public void upDatePassword(@PathVariable String username, @RequestBody String password) {
         userService.updatePassword(username, password);
     }
 
-    @GetMapping
-    public Collection<UserGetDTO> findAll(){
-        return userService.findAll();
-    }
-
+    //precisa ser o usuario logado
     @DeleteMapping("/{username}")
     public void delete(@PathVariable String username){
         userService.delete(username);
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 
+    //precisa ser o usuario logado
     @GetMapping("/name/{name}")
     public Collection<UserGetDTO> findByUsersNameOrName(@PathVariable String name) {
         return userService.findByUserNameOrName(name);

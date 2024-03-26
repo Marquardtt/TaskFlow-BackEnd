@@ -16,30 +16,25 @@ import java.util.Collection;
 @RequestMapping("/permission")
 public class PermissionController {
     private PermissionService permissionService;
+
+    //Precisa ser o owner do projeto da permission
     @PostMapping
     public void insert(@RequestBody PermissionPostDTO permission){
         permissionService.save(permission);
     }
 
+    //Precisa ser o owner do projeto da permission
     @PutMapping
     public void upDate(@RequestBody PermissionPutDTO permission){
         permissionService.update(permission, false);
     }
+    //Precisa ser o owner do projeto da permission
     @PatchMapping
     public void patch(@RequestBody PermissionPutDTO permission){
         permissionService.update(permission, true);
     }
 
-    @GetMapping("/{id}")
-    public PermissionGetDTO findOne(@PathVariable Long id){
-        return permissionService.findOne(id);
-    }
-
-    @GetMapping
-    public Collection<PermissionGetDTO> findAll(){
-        return permissionService.findAll();
-    }
-
+    //Precisa ser o owner do projeto da permission
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
         permissionService.delete(id);

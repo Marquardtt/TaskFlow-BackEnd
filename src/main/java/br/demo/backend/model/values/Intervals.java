@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.internal.IgnoreForbiddenApisErrors;
+import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ public class Intervals {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Duration time;
+
     private Collection<LocalDateTime> starts;
     private Collection<LocalDateTime> ends;
     private String color;

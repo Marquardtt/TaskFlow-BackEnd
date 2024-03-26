@@ -18,48 +18,53 @@ import java.util.Collection;
 @RequestMapping("/project")
 public class ProjectController {
     private ProjectService projectService;
+
+    //Precisa estar logado
     @PostMapping
     public void insert(@RequestBody ProjectPostDTO project) {
         projectService.save(project);
     }
 
+//    precisa ser o owner do projeto
     @PatchMapping("/picture/{id}")
     public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
         projectService.updatePicture(picture, id);
     }
+//    precisa ser o owner ou o membro do projeto
     @PatchMapping("/set-now")
     public void setVisualizedNow(@RequestBody Project project) {
         projectService.setVisualizedNow(project);
     }
+    //    precisa ser o owner do projeto
     @PutMapping
     public void upDate(@RequestBody ProjectPutDTO project) {
         projectService.update(project, false);
     }
+    //    precisa ser o owner do projeto
     @PatchMapping
     public void patch(@RequestBody ProjectPutDTO project) {
         projectService.update(project, true);
     }
 
+    //    precisa ser o owner do projeto ou um membro
     @GetMapping("/{id}")
     public ProjectGetDTO findOne(@PathVariable Long id) {
         return projectService.findOne(id);
     }
 
-    @GetMapping
-    public Collection<ProjectGetDTO> findAll() {
-        return projectService.findAll();
-    }
-
+    //    precisa estar logado com o mesmo user da requisição
     @GetMapping("/user/{userId}")
     public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 
+    //    precisa ser o owner do projeto
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         projectService.delete(id);
     }
 
+    //    precisa ser o owner do projeto
     @PatchMapping("/change-owner/{projectId}")
     public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
         projectService.updateOwner(newOwner, projectId);

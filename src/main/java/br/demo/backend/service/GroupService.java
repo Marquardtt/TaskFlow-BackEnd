@@ -64,7 +64,8 @@ public class GroupService {
         groupRepository.save(group);
     }
     public Collection<GroupGetDTO> findGroupsByUser(String userId) {
-        return groupRepository.findGroupsByUsersContaining(new User(userId)).stream().map(ModelToGetDTO::tranform).toList();
+        return groupRepository.findGroupsByOwnerOrUsersContaining(new User(userId), new User(userId))
+                .stream().map(ModelToGetDTO::tranform).toList();
     }
 
 

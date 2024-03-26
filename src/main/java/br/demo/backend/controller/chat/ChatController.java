@@ -23,46 +23,53 @@ import java.util.Collection;
 @RequestMapping("/chat")
 public class ChatController {
     private ChatService chatService;
+
+    //precisa ser o owner do grupo
     @PostMapping("/group")
     public void saveGroup(@RequestBody ChatGroupPostDTO chat){
         chatService.save(chat);
     }
+
+    //precisa estar em um grupo com essa pessoa ou trabalhar em um mesmo projeto
     @PostMapping("/private")
     public void savePrivate(@RequestBody ChatPrivatePostDTO chat){
         chatService.save(chat);
     }
 
-
+    //precisa estar logado
     @PatchMapping("/visualized/{userId}")
     public void upDateToVisualized(@RequestBody Message message, @PathVariable String userId){
         chatService.updateMessagesToVisualized(message, userId);
     }
 
+    //precisa estar logado
     @GetMapping("/name/{userId}/{name}")
     public Collection<ChatGetDTO> findByName(@PathVariable String name, @PathVariable String userId){
         return chatService.findGroupByName(name, userId);
     }
+
+    //precisa estar logado
     @GetMapping("/private/{userId}")
     public Collection<ChatPrivateGetDTO> findAllPrivate(@PathVariable String userId){
         return chatService.findAllPrivate(userId);
     }
+
+    //precisa estar logado
     @GetMapping("/group/{userId}")
     public Collection<ChatGroupGetDTO> findAllGroup(@PathVariable String userId){
         return chatService.findAllGroup(userId);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        chatService.delete(id);
-    }
+    //precisa ser um usuario do chat
+//    @PatchMapping("/message/{chatId}")
+//    public void updateMessages(@RequestBody MessagePostPutDTO message, @PathVariable Long chatId){
+//        chatService.updateMessages(message, chatId);
+//    }
 
-    @PatchMapping("/message/{chatId}")
-    public void updateMessages(@RequestBody MessagePostPutDTO message, @PathVariable Long chatId){
-        chatService.updateMessages(message, chatId);
-    }
-
+    //precisa ser um usuario do chat
     @PatchMapping("/annex/{chatId}")
-    public void updateMessages(@RequestBody MultipartFile annex, @RequestParam String message, @PathVariable Long chatId) throws JsonProcessingException {
+    public void updateMessages(@RequestBody(required = false) MultipartFile annex, @RequestParam String message,
+                               @PathVariable Long chatId) throws JsonProcessingException {
         chatService.updateMessages(annex, message, chatId);
     }
 

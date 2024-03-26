@@ -17,7 +17,6 @@ import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
-import br.demo.backend.model.values.MultiOptionValued;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
@@ -30,7 +29,6 @@ import br.demo.backend.repository.relations.TaskCanvasRepository;
 import br.demo.backend.repository.relations.TaskOrderedRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -136,7 +134,7 @@ public class PageService {
     }
 
 
-    public void update(String name, Long id) {
+    public void updateName(String name, Long id) {
         Page page = pageRepository.findById(id).get();
         page.setName(name);
         if (page instanceof CanvasPage canvasPage) {
