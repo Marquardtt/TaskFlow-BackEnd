@@ -48,7 +48,7 @@ public class GroupService {
     public void save(GroupPostDTO groupDto) {
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
-        if(group.getPermissions() != null){
+        if (group.getPermissions() != null) {
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
         groupRepository.save(group);
@@ -60,6 +60,7 @@ public class GroupService {
         group.setOwner(user);
         groupRepository.save(group);
     }
+
     public Collection<GroupGetDTO> findGroupsByUser(String userId) {
         return groupRepository.findGroupsByUsersContaining(new User(userId)).stream().map(ModelToGetDTO::tranform).toList();
     }
@@ -98,7 +99,7 @@ public class GroupService {
         Collection<Permission> permissions = group.getPermissions().stream().filter(p ->
                 !groupOld.getPermissions().contains(p)
         ).toList();
-        for(Permission permission : permissions) {
+        for (Permission permission : permissions) {
             updatePermission(group, permission);
         }
         group.setPicture(picture);
@@ -106,13 +107,13 @@ public class GroupService {
     }
 
 
-    private User updatePermissionInAUser(User userDTO, Permission permission){
+    private User updatePermissionInAUser(User userDTO, Permission permission) {
         User user = userRepository.findById(userDTO.getUsername()).get();
         Collection<Permission> permissions = user.getPermissions();
-        if(user.getPermissions() != null) {
+        if (user.getPermissions() != null) {
             permissions.removeAll(user.getPermissions().stream().filter(p ->
                     p.getProject().getId().equals(permission.getProject().getId())).toList());
-        }else{
+        } else {
             permissions = new HashSet<>();
         }
         permissions.add(permission);
@@ -122,7 +123,7 @@ public class GroupService {
 
 
     public void updatePermission(Group group, Permission permission) {
-        Collection <User> users = group.getUsers().stream().map( u -> {
+        Collection<User> users = group.getUsers().stream().map(u -> {
             User user = updatePermissionInAUser(u, permission);
             userRepository.save(user);
             return user;
@@ -144,6 +145,7 @@ public class GroupService {
         group.setPicture(new Archive(picture));
         groupRepository.save(group);
     }
+}
 
 
 
