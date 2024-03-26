@@ -144,6 +144,13 @@ public class PropertyService {
                         newPropOrd = getOtherProp(p.getProject(), property,
                                 new TypeOfProperty[]{TypeOfProperty.DATE});
                     }
+                }else if (property.getType().equals(TypeOfProperty.TIME)) {
+                    newPropOrd = getOtherProp(p, property,
+                            new TypeOfProperty[]{TypeOfProperty.TIME});
+                    if (newPropOrd == null) {
+                        newPropOrd = getOtherProp(p.getProject(), property,
+                                new TypeOfProperty[]{TypeOfProperty.TIME});
+                    }
                 } else {
                     newPropOrd = getOtherProp(p, property,
                             new TypeOfProperty[]{TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG});
@@ -182,10 +189,19 @@ public class PropertyService {
         } else if (property.getType().equals(TypeOfProperty.DATE)) {
             if (property.getProject() != null) {
                 TypeOfProperty[] typesOfProperty = {TypeOfProperty.DATE};
-                TypeOfPage[] typesOfPage = {TypeOfPage.TIMELINE, TypeOfPage.CALENDAR};
+                TypeOfPage[] typesOfPage = {TypeOfPage.CALENDAR};
                 return testInProject(typesOfProperty, typesOfPage, property);
             } else {
-                return testInPages(new TypeOfProperty[]{TypeOfProperty.DATE}, new TypeOfPage[]{TypeOfPage.TIMELINE, TypeOfPage.CALENDAR}, property, property.getPages());
+                return testInPages(new TypeOfProperty[]{TypeOfProperty.DATE}, new TypeOfPage[]{TypeOfPage.CALENDAR}, property, property.getPages());
+            }
+        }
+        else if (property.getType().equals(TypeOfProperty.TIME)) {
+            if (property.getProject() != null) {
+                TypeOfProperty[] typesOfProperty = {TypeOfProperty.TIME};
+                TypeOfPage[] typesOfPage = {TypeOfPage.TIMELINE};
+                return testInProject(typesOfProperty, typesOfPage, property);
+            } else {
+                return testInPages(new TypeOfProperty[]{TypeOfProperty.DATE}, new TypeOfPage[]{TypeOfPage.TIMELINE}, property, property.getPages());
             }
         }
         return true;
