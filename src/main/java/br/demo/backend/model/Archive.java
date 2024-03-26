@@ -31,8 +31,5 @@ public class Archive {
     public Archive(MultipartFile file) {
         this.name = file.getOriginalFilename();
         this.type = file.getContentType();
-        try{
-            this.data = file.getBytes();
-        }catch (IOException ignore){}
     }
 }

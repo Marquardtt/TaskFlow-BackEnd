@@ -18,8 +18,9 @@ public class AWSController {
         awsService.insertImage(id, file);
     }
 
-    @GetMapping("/{id}")
-    public void getFile (@PathVariable Long id) {
+    @GetMapping("/{key}")
+    public String getFile (@PathVariable String key) {
+        return awsService.getImage(key);
     }
 
 

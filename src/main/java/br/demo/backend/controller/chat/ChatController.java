@@ -13,6 +13,7 @@ import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.service.chat.ChatService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
