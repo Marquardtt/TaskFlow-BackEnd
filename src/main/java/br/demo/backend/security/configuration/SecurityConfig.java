@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,"/user").permitAll()
                 .requestMatchers(HttpMethod.POST,"/register").permitAll()
                 .requestMatchers(HttpMethod.POST , "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
+                .requestMatchers(HttpMethod.POST,"/projects").authenticated()
                 .anyRequest().authenticated());
 
         // Manter a sessão do usuário na requisição ativa
