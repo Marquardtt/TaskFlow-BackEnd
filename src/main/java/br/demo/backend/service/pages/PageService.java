@@ -20,7 +20,6 @@ import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
-import br.demo.backend.model.values.MultiOptionValued;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
@@ -32,7 +31,6 @@ import br.demo.backend.repository.relations.TaskCanvasRepository;
 import br.demo.backend.repository.relations.TaskOrderedRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -183,7 +181,8 @@ public class PageService {
         return date;
     }
 
-    public PageGetDTO save(PagePostDTO page) {
+    public PageGetDTO save(PagePostDTO page, Long projectId) {
+        page.setProject(projectRepository.findById(projectId).get());
         if (page.getType().equals(TypeOfPage.CANVAS)) {
             CanvasPage canvasModel = new CanvasPage();
             autoMapperCanvas.map(page, canvasModel, false);

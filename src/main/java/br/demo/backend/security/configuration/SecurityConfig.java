@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 
@@ -22,6 +24,7 @@ public class SecurityConfig {
 
     private final FilterAuthentication filterAuthentication;
     private final FilterAuthorization filterAuthorization;
+    private final AuthorizationManager<RequestAuthorizationContext> authorizationContextAuthorizationManager;
     @Bean
     public SecurityFilterChain config (HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
@@ -30,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,"/login").permitAll()
                 .requestMatchers(HttpMethod.POST,"/user").permitAll()
                 .requestMatchers(HttpMethod.POST,"/register").permitAll()
+                .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(authorizationContextAuthorizationManager)
                 .requestMatchers(HttpMethod.POST , "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .requestMatchers(HttpMethod.POST,"/projects").authenticated()
                 .anyRequest().authenticated());

@@ -34,7 +34,8 @@ public class FilterAuthentication extends OncePerRequestFilter {
             Cookie cookie ;
             try {
                 cookie= cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
-                System.out.println(cookie);
+                System.out.println(cookie.getValue());
+                System.out.println(cookieUtil.getCookieValue(request,"JWT"));
             }catch (Exception e ){
                 response.sendError(401);
                 return;

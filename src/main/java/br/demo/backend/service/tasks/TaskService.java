@@ -66,7 +66,7 @@ public class TaskService {
     public TaskGetDTO save(Long idpage, String userId) {
 
         Page page = pageRepositorry.findById(idpage).get();
-        User user = new User(userId);
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
 
         Task taskEmpty = taskRepository.save(new Task());
 

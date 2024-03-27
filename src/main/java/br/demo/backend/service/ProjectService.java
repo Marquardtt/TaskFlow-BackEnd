@@ -76,6 +76,8 @@ public class ProjectService {
     public void save(ProjectPostDTO projectDto) {
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
+        project.setOwner(userRepository.findByUserDetailsEntity_Username(projectDto.getOwner().getUserDetailsEntity().getUsername()).get());
+
         Project emptyProject = projectRepository.save(project);
         ArrayList<Option> options = new ArrayList<>();
         options.add(new Option(null, "To-do", "#FF7A00", 0));

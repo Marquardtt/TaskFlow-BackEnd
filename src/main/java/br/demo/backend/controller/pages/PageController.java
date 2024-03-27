@@ -25,8 +25,8 @@ public class PageController {
 
     //OrderedPage
     @PostMapping
-    public PageGetDTO insert(@RequestBody PagePostDTO page) {
-        return pageService.save(page);
+    public PageGetDTO insert(@RequestBody PagePostDTO page, @RequestParam Long projectId) {
+        return pageService.save(page,projectId);
     }
 
     //TODO: 11/02/2024 Ver se o indice pode ser atualizado no frontend de forma facil
