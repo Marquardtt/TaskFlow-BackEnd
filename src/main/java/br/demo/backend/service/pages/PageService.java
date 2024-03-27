@@ -4,9 +4,11 @@ import br.demo.backend.globalfunctions.AutoMapper;
 import br.demo.backend.globalfunctions.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
+import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
+import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
@@ -59,19 +61,10 @@ public class PageService {
     private AutoMapper<TaskCanvas> autoMapperTaskCanvas;
     private AutoMapper<Page> autoMapperOther;
 
-    public Collection<PageGetDTO> findAll() {
-        Collection<Page> pages = pageRepository.findAll();
-        return pages.stream().map(ModelToGetDTO::tranform).toList();
-    }
-
-    public PageGetDTO findOne(Long id) {
-        return ModelToGetDTO.tranform(pageRepository.findById(id).get());
-    }
-
-    public void updatePropertiesOrdering(Property prop, Long pageId) {
+    public OrderedPageGetDTO updatePropertiesOrdering(Property prop, Long pageId) {
         OrderedPage page = orderedPageRepository.findById(pageId).get();
         page.setPropertyOrdering(prop);
-        orderedPageRepository.save(page);
+        return (OrderedPageGetDTO) ModelToGetDTO.tranform(orderedPageRepository.save(page));
     }
 
     public OrderedPageGetDTO updateIndex(OrderedPage pageDto, Long taskId, Integer index, Integer columnChaged) {
@@ -134,16 +127,16 @@ public class PageService {
     }
 
 
-    public void updateName(String name, Long id) {
+    public PageGetDTO updateName(String name, Long id) {
         Page page = pageRepository.findById(id).get();
         page.setName(name);
         if (page instanceof CanvasPage canvasPage) {
-            canvasPageRepository.save(canvasPage);
+            return ModelToGetDTO.tranform(canvasPageRepository.save(canvasPage));
         } else if (page instanceof OrderedPage orderedPage) {
-            orderedPageRepository.save(orderedPage);
-        } else {
-            pageRepository.save(page);
+            return ModelToGetDTO.tranform(orderedPageRepository.save(orderedPage));
         }
+            return ModelToGetDTO.tranform(pageRepository.save(page));
+
     }
 
 
@@ -239,20 +232,20 @@ public class PageService {
     }
 
 
-    public void updateXAndY(TaskCanvas taskCanvas) {
+    public TaskCanvasGetDTO updateXAndY(TaskCanvas taskCanvas) {
         TaskCanvas oldTaskCanvas = taskCanvasRepository.findById(taskCanvas.getId()).get();
         autoMapperTaskCanvas.map(taskCanvas, oldTaskCanvas, true);
-        taskCanvasRepository.save(oldTaskCanvas);
+        return (TaskCanvasGetDTO) ModelToGetDTO.tranform(taskCanvasRepository.save(oldTaskCanvas));
     }
 
-    public void updateDraw(MultipartFile draw, Long id) {
+    public CanvasPageGetDTO updateDraw(MultipartFile draw, Long id) {
         CanvasPage canvasPage = canvasPageRepository.findById(id).get();
         Archive archive = new Archive(draw);
         canvasPage.setDraw(archive);
-        canvasPageRepository.save(canvasPage);
+        return (CanvasPageGetDTO) ModelToGetDTO.tranform(canvasPageRepository.save(canvasPage));
     }
 
-    public void merge(Collection<Page> pages, Long id) {
+    public Collection<PageGetDTO> merge(Collection<Page> pages, Long id) {
         Page page = pageRepository.findById(id).get();
         pages.forEach(p ->
         {
@@ -261,5 +254,6 @@ public class PageService {
                 taskService.addTaskToPage(t.getTask(), p.getId());
             });
         });
+        return  pages.stream().map(p -> ModelToGetDTO.tranform(pageRepository.findById(p.getId()).get())).toList();
     }
 }

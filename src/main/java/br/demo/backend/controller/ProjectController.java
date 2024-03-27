@@ -6,6 +6,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,29 +22,29 @@ public class ProjectController {
 
     //Precisa estar logado
     @PostMapping
-    public void insert(@RequestBody ProjectPostDTO project) {
-        projectService.save(project);
+    public ProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
+        return projectService.save(project);
     }
 
 //    precisa ser o owner do projeto
     @PatchMapping("/picture/{id}")
-    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        projectService.updatePicture(picture, id);
+    public ProjectGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+        return projectService.updatePicture(picture, id);
     }
 //    precisa ser o owner ou o membro do projeto
     @PatchMapping("/set-now")
-    public void setVisualizedNow(@RequestBody Project project) {
-        projectService.setVisualizedNow(project);
+    public ProjectGetDTO setVisualizedNow(@RequestBody Project project) {
+        return projectService.setVisualizedNow(project);
     }
     //    precisa ser o owner do projeto
     @PutMapping
-    public void upDate(@RequestBody ProjectPutDTO project) {
-        projectService.update(project, false);
+    public ProjectGetDTO upDate(@RequestBody ProjectPutDTO project) {
+        return projectService.update(project, false);
     }
     //    precisa ser o owner do projeto
     @PatchMapping
-    public void patch(@RequestBody ProjectPutDTO project) {
-        projectService.update(project, true);
+    public ProjectGetDTO patch(@RequestBody ProjectPutDTO project) {
+        return projectService.update(project, true);
     }
 
     //    precisa ser o owner do projeto ou um membro
@@ -54,7 +55,7 @@ public class ProjectController {
 
     //    precisa estar logado com o mesmo user da requisição
     @GetMapping("/user/{userId}")
-    public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
+    public Collection<SimpleProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 
@@ -66,7 +67,7 @@ public class ProjectController {
 
     //    precisa ser o owner do projeto
     @PatchMapping("/change-owner/{projectId}")
-    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
-        projectService.updateOwner(newOwner, projectId);
+    public ProjectGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
+        return projectService.updateOwner(newOwner, projectId);
     }
 }

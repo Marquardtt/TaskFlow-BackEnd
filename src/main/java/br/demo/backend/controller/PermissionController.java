@@ -19,19 +19,19 @@ public class PermissionController {
 
     //Precisa ser o owner do projeto da permission
     @PostMapping
-    public void insert(@RequestBody PermissionPostDTO permission){
-        permissionService.save(permission);
+    public PermissionGetDTO insert(@RequestBody PermissionPostDTO permission){
+        return permissionService.save(permission);
     }
 
     //Precisa ser o owner do projeto da permission
     @PutMapping
-    public void upDate(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, false);
+    public PermissionGetDTO upDate(@RequestBody PermissionPutDTO permission){
+        return permissionService.update(permission, false);
     }
     //Precisa ser o owner do projeto da permission
     @PatchMapping
-    public void patch(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, true);
+    public PermissionGetDTO patch(@RequestBody PermissionPutDTO permission){
+        return permissionService.update(permission, true);
     }
 
     //Precisa ser o owner do projeto da permission

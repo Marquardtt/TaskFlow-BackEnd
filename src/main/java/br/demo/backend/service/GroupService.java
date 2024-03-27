@@ -31,11 +31,8 @@ public class GroupService {
 
 
     private GroupRepository groupRepository;
-    private ProjectService projectService;
     private UserRepository userRepository;
     private AutoMapper<Group> autoMapper;
-
-
 
 
     public Collection<GroupGetDTO> findAll() {
@@ -48,20 +45,21 @@ public class GroupService {
     }
 
 
-    public void save(GroupPostDTO groupDto) {
+    public GroupGetDTO save(GroupPostDTO groupDto) {
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
+
     }
 
-
-    public void updateOwner(User user, Long groupId) {
+    public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
+
     }
     public Collection<GroupGetDTO> findGroupsByUser(String userId) {
         return groupRepository.findGroupsByOwnerOrUsersContaining(new User(userId), new User(userId))
@@ -82,14 +80,12 @@ public class GroupService {
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-
-
         return group.getPermissions().stream()
                 .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
     }
 
 
-    public void update(GroupPutDTO groupDTO, Boolean patching) {
+    public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
         Archive picture = oldGroup.getPicture();
 
@@ -108,7 +104,7 @@ public class GroupService {
             updatePermission(group, permission);
         }
         group.setPicture(picture);
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
 
@@ -127,7 +123,7 @@ public class GroupService {
     }
 
 
-    public void updatePermission(Group group, Permission permission) {
+    private void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
             User user = updatePermissionInAUser(u, permission);
             userRepository.save(user);
@@ -145,10 +141,10 @@ public class GroupService {
     }
 
 
-    public void updatePicture(MultipartFile picture, Long id) {
+    public GroupGetDTO updatePicture(MultipartFile picture, Long id) {
         Group group = groupRepository.findById(id).get();
         group.setPicture(new Archive(picture));
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
 

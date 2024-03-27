@@ -22,19 +22,21 @@ public class GroupController {
 
     //Precisa estar logado
     @PostMapping
-    public void insert(@RequestBody GroupPostDTO group) {
-        groupService.save(group);
+    public GroupGetDTO insert(@RequestBody GroupPostDTO group) {
+        return groupService.save(group);
     }
 
     //Precisa ser o owner do grupo
     @PutMapping
-    public void upDate(@RequestBody GroupPutDTO group) {
-        groupService.update(group, false);
+    public GroupGetDTO upDate(@RequestBody GroupPutDTO group) {
+
+        return groupService.update(group, false);
     }
     //Precisa ser o owner do grupo
     @PatchMapping
-    public void patch(@RequestBody GroupPutDTO group) {
-        groupService.update(group, true);
+    public GroupGetDTO patch(@RequestBody GroupPutDTO group) {
+
+        return groupService.update(group, true);
     }
 
     //Precisa que o usuario logado seja o mesmo do parametro
@@ -58,13 +60,13 @@ public class GroupController {
 
     //Precisa ser o owner do group
     @PatchMapping("/picture/{id}")
-    public void updatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        groupService.updatePicture(picture, id);
+    public GroupGetDTO updatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+        return groupService.updatePicture(picture, id);
     }
 
     //Precisa ser o owner do group
     @PatchMapping("/change-owner/{projectId}")
-    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
-        groupService.updateOwner(newOwner, projectId);
+    public GroupGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
+        return groupService.updateOwner(newOwner, projectId);
     }
 }

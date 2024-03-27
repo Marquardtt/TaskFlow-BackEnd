@@ -12,6 +12,7 @@ import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.model.dtos.properties.DateGetDTO;
 import br.demo.backend.model.dtos.properties.LimitedGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
@@ -28,7 +29,6 @@ import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
@@ -36,10 +36,8 @@ import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
-import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class ModelToGetDTO {
@@ -232,6 +230,19 @@ public class ModelToGetDTO {
         SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
         BeanUtils.copyProperties(obj, simpleUser);
         return simpleUser;
+    }
+
+    public static SimpleProjectGetDTO tranformSimple(Project obj, Collection<Group> groups){
+
+        Collection<Task> tasks = obj.getPages().stream()
+                .flatMap(page -> page.getTasks().stream()).map(TaskPage::getTask).toList();
+        tasks = tasks.stream().distinct().toList();
+
+        Integer progress = Math.toIntExact(100 / tasks.size() * tasks.stream().filter(Task::getCompleted).count());
+        return new SimpleProjectGetDTO(
+                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups
+        );
+
     }
 
 }

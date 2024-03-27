@@ -142,11 +142,11 @@ public class TaskService {
         return taskRepository.findTasksByNameContains(name).stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public void update(Task taskDTO, Boolean patching) {
+    public TaskGetDTO update(Task taskDTO, Boolean patching) {
         Task task = patching ? taskRepository.findById(taskDTO.getId()).get() : new Task();
         autoMapper.map(taskDTO, task, patching);
 
-        taskRepository.save(task);
+        return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 
     public void delete(Long id, String userId) {
@@ -162,11 +162,11 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public void redo(Long id, String userId) {
+    public TaskGetDTO redo(Long id, String userId) {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
-        taskRepository.save(task);
+        return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 
     public Collection<TaskGetDTO> getDeletedTasks(Long projectId){

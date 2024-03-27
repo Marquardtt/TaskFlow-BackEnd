@@ -27,13 +27,13 @@ public class TaskController {
 
     //Precisa ter permissão de put no projeto
     @PutMapping
-    public void upDate(@RequestBody Task task){
-        taskService.update(task, false);
+    public TaskGetDTO upDate(@RequestBody Task task){
+        return taskService.update(task, false);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping
-    public void patch(@RequestBody Task task){
-        taskService.update(task, true);
+    public TaskGetDTO patch(@RequestBody Task task){
+        return taskService.update(task, true);
     }
 
     //Precisa ser o mesmo usaurio do parametro
@@ -56,8 +56,8 @@ public class TaskController {
 
     //Precisa ter permissão de delete no projeto
     @PutMapping("/redo/{userId}/{id}")
-    public void redo(@PathVariable Long id , @PathVariable String userId){
-        taskService.redo(id, userId);
+    public TaskGetDTO redo(@PathVariable Long id , @PathVariable String userId){
+        return taskService.redo(id, userId);
     }
 
     //Precisa estar no projeto

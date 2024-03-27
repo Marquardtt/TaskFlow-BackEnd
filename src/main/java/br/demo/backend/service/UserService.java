@@ -30,17 +30,12 @@ public class UserService {
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
     private AutoMapper<User> autoMapper;
-
-    public Collection<UserGetDTO> findAll() {
-        return userRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
-
     public UserGetDTO findOne(String id) {
         User user = userRepository.findById(id).get();
         return ModelToGetDTO.tranform(user);
     }
 
-    public void save(UserPostDTO userDto) {
+    public UserGetDTO save(UserPostDTO userDto) {
         try{
             userRepository.findById(userDto.getUsername()).get();
             throw new IllegalArgumentException("Username is already been using by other user0");
@@ -48,10 +43,10 @@ public class UserService {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
-            userRepository.save(user);
+            return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
-    public void update(UserPutDTO userDTO, Boolean patching) {
+    public UserGetDTO update(UserPutDTO userDTO, Boolean patching) {
         User oldUser = userRepository.findById(userDTO.getUsername()).get();
         System.out.println(userDTO);
         User user = patching ? oldUser : new User();
@@ -60,15 +55,11 @@ public class UserService {
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
         user.setPassword(oldUser.getPassword());
-        userRepository.save(user);
+        return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
     public void delete(String id) {
         userRepository.deleteById(id);
-    }
-
-    public UserGetDTO findByUsernameAndPassword(String username, String password) {
-        return ModelToGetDTO.tranform(userRepository.findByUsernameAndPassword(username, password));
     }
 
     public PermissionGetDTO getPermissionOfAUserInAProject(String userId, Long projectId){
@@ -79,35 +70,19 @@ public class UserService {
         return ModelToGetDTO.tranform(permission);
     }
 
-    public UserGetDTO findByEmailAndPassword(String mail, String password) {
-        return ModelToGetDTO.tranform(userRepository.findByMailAndPassword(mail, password));
-    }
-
-    public void updatePicture(MultipartFile picture, String id) {
+    public UserGetDTO updatePicture(MultipartFile picture, String id) {
         User user = userRepository.findById(id).get();
         user.setPicture(new Archive(picture));
-        userRepository.save(user);
+        return ModelToGetDTO.tranform(userRepository.save(user));
+
     }
 
-    public void updatePassword(String id, String password) {
+    public UserGetDTO updatePassword(String id, String password) {
         User user = userRepository.findById(id).get();
         user.setPassword(password);
-        userRepository.save(user);
-    }
+        return ModelToGetDTO.tranform(userRepository.save(user));
 
-//    @Transactional
-//    public void putNewPermissionInAProject(String userId, Long permissionId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-//
-//        if (user.getPermissions() != null){
-//            user.getPermissions().clear();
-//        }
-//
-//        user.getPermissions().add(permissionRepository.findById(permissionId).get());
-//
-//        userRepository.save(user);
-//    }
+    }
 
 
     public Collection<UserGetDTO> findByUserNameOrName(String name) {
