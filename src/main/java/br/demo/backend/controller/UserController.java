@@ -42,7 +42,7 @@ public class UserController {
         return userService.update(user, true);
     }
 
-    //    precisa estar num mesmo projeto ou group que o outro user
+    //    precisa estar num mesmo projeto ou group que o outro user   IMPLEMENTAR O ACCESS => BECKER
     @GetMapping("/{username}")
     public UserGetDTO findOne(@PathVariable String username){
         return userService.findOne(username);
