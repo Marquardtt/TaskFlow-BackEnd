@@ -21,26 +21,26 @@ public class TaskController {
         return taskService.save(pageId, userId);
     }
 
-    @PutMapping
+    @PutMapping("/project/{projectId}")
     public void upDate(@RequestBody Task task){
         taskService.update(task, false);
     }
-    @PatchMapping
+    @PatchMapping("/project/{projectId}")
     public void patch(@RequestBody Task task){
         taskService.update(task, true);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/project/{projectId}/{id}")
     public TaskGetDTO findOne(@PathVariable Long id){
         return taskService.findOne(id);
     }
 
-    @GetMapping("/name/{name}")
+    @GetMapping("/project/{projectId}/name/{name}")
     public Collection<TaskGetDTO> findByName(@PathVariable String name){
         return taskService.findByName(name);
     }
 
-    @GetMapping
+    @GetMapping("/project/{projectId}")
     public Collection<TaskGetDTO> findAll(){
         return taskService.findAll();
     }
@@ -55,12 +55,12 @@ public class TaskController {
         taskService.delete(id, userId);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/project/{projectId}/{id}")
     public void delete(@PathVariable Long id){
         taskService.deletePermanent(id);
     }
 
-    @PutMapping("/redo/{userId}/{id}")
+    @PutMapping("/project/{projectId}/redo/{userId}/{id}")
     public void redo(@PathVariable Long id , @PathVariable String userId){
         taskService.redo(id, userId);
     }

@@ -23,19 +23,19 @@ public class ProjectController {
         projectService.save(project);
     }
 
-    @PatchMapping("/picture/{projectId}")
+    @PatchMapping("/{projectId}/picture")
     public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable("projectId") Long id) {
         projectService.updatePicture(picture, id);
     }
-    @PatchMapping("/set-now")
+    @PatchMapping("/{projectId}/set-now")
     public void setVisualizedNow(@RequestBody Project project) {
         projectService.setVisualizedNow(project);
     }
-    @PutMapping
+    @PutMapping("/{projectId}")
     public void upDate(@RequestBody ProjectPutDTO project) {
         projectService.update(project, false);
     }
-    @PatchMapping
+    @PatchMapping("/{projectId}")
     public void patch(@RequestBody ProjectPutDTO project) {
         projectService.update(project, true);
     }
@@ -45,12 +45,12 @@ public class ProjectController {
         return projectService.findOne(id);
     }
 
-    @GetMapping
+    @GetMapping("/{projectId}")
     public Collection<ProjectGetDTO> findAll() {
         return projectService.findAll();
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/{projectId}/user/{userId}")
     public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
@@ -60,7 +60,7 @@ public class ProjectController {
         projectService.delete(id);
     }
 
-    @PatchMapping("/change-owner/{projectId}")
+    @PatchMapping("/{projectId}/change-owner/{projectId}")
     public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
         projectService.updateOwner(newOwner, projectId);
     }

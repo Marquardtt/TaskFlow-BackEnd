@@ -2,17 +2,16 @@ package br.demo.backend.model;
 
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.Cascade;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -42,7 +41,6 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
-
     private Collection<Property> properties;
     public Project(Long id){
         this.id = id;

@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 public class AuthorizationRequestsRoutes implements AuthorizationManager<RequestAuthorizationContext> {
 
     ProjectRepository projectRepository;
+
     @Override
     public void verify(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
         AuthorizationManager.super.verify(authentication, object);
@@ -34,15 +35,24 @@ public class AuthorizationRequestsRoutes implements AuthorizationManager<Request
         Project project = projectRepository.findById(projectId).get();
         boolean decision = false;
         if (!project.getOwner().equals(((UserDatailEntity) authentication.getPrincipal()).getUser())) {
-            for (GrantedAuthority simple :
-                    userDatailEntity.getAuthorities()) {
-                if ((("Project_" + projectId + "_").contains(simple.getAuthority()) && (object.getRequest().getMethod()).contains(simple.getAuthority()))){
-                    decision = true;
-                    break;
+            if (!object.getRequest().getRequestURI().contains("picture")) {
+
+                if (userDatailEntity.getAuthorities() != null) {
+                    for (GrantedAuthority simple :
+                            userDatailEntity.getAuthorities()) {
+                        if (!(object.getRequest().getRequestURI().contains("redo") && simple.getAuthority().contains("Project_" + projectId + "_DELETE"))) {  // verifica se for uma task e se for o método redo, pois o mesmo precisa da permissão DELETE para realizar o redo
+                            if ((("Project_" + projectId + "_").contains(simple.getAuthority()) && (object.getRequest().getMethod()).contains(simple.getAuthority()))) {
+                                decision = true;
+                                break;
+                            }
+                        }else {
+                            decision = true;
+                        }
+                    }
                 }
             }
-        }else {
-            decision=true;
+        } else {
+            decision = true;
         }
         return new AuthorizationDecision(decision);
     }

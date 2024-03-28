@@ -50,6 +50,7 @@ public class UserService {
         }
     }
     public void update(UserPutDTO userDTO, Boolean patching) {
+//        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User oldUser = userRepository.findById(userDTO.getId()).get();
         System.out.println(userDTO);
         User user = patching ? oldUser : new User();

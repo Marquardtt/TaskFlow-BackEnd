@@ -43,7 +43,7 @@ public class User {
     @JoinColumn(nullable = false, updatable = false)
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration = new Configuration();
-    @ManyToMany
+    @ManyToMany (fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
 
     @OneToOne(cascade = CascadeType.ALL)
