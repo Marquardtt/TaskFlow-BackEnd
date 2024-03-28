@@ -2,6 +2,8 @@ package br.demo.backend.model.tasks;
 
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.model.values.Value;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -32,4 +34,6 @@ public class Log {
     @JoinColumn(nullable = false)
     private User user;
     private LocalDateTime datetime = LocalDateTime.now();
+    @OneToOne(cascade = CascadeType.ALL)
+    private PropertyValue value;
 }

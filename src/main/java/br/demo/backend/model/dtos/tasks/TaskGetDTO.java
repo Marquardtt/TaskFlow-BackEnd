@@ -3,7 +3,6 @@ package br.demo.backend.model.dtos.tasks;
 
 import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
 import br.demo.backend.model.dtos.relations.TaskValueGetDTO;
-import br.demo.backend.model.relations.TaskValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

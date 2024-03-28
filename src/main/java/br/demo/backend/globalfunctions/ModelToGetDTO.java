@@ -32,7 +32,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
@@ -191,7 +191,7 @@ public class ModelToGetDTO {
         BeanUtils.copyProperties(obj, property);
         return property;
     }
-    public static TaskValueGetDTO tranform(TaskValue obj){
+    public static TaskValueGetDTO tranform(PropertyValue obj){
         if(obj == null) return null;
         TaskValueGetDTO taskValue = new TaskValueGetDTO();
         BeanUtils.copyProperties(obj, taskValue);
@@ -239,14 +239,14 @@ public class ModelToGetDTO {
 
     public static SimpleProjectGetDTO tranformSimple(Project obj, Collection<Group> groups){
 
-        Collection<Task> tasks = obj.getPages().stream()
-                .flatMap(page -> page.getTasks().stream()).map(TaskPage::getTask).toList();
-        tasks = tasks.stream().distinct().toList();
-
         Integer progress = 0;
         try {
+            Collection<Task> tasks = obj.getPages().stream()
+                    .flatMap(page -> page.getTasks().stream()).map(TaskPage::getTask).toList();
+            tasks = tasks.stream().distinct().toList();
             progress = Math.toIntExact(100 / tasks.size() * tasks.stream().filter(Task::getCompleted).count());
-        } catch (ArithmeticException ignore) {
+        } catch (ArithmeticException | NullPointerException ignore) {
+            progress = 100;
         }
         return new SimpleProjectGetDTO(
                 obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups

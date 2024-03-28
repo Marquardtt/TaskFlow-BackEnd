@@ -1,18 +1,16 @@
 package br.demo.backend.model;
 
+import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.PropertyValue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -42,8 +40,13 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
-
     private Collection<Property> properties;
+    @OneToMany
+    private Collection<Message> comments;
+    @JoinColumn(name = "project_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<PropertyValue> values;
+
     public Project(Long id){
         this.id = id;
     }

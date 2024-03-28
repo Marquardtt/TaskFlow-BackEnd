@@ -1,39 +1,30 @@
 package br.demo.backend.model.values;
 
-import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskValue;
-import br.demo.backend.model.values.*;
+import br.demo.backend.model.relations.PropertyValue;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
-public class DeserializerValue extends StdDeserializer<TaskValue> {
+public class DeserializerValue extends StdDeserializer<PropertyValue> {
     JsonNode jsonNode;
 
 
     protected DeserializerValue() {
-        super(TaskValue.class);
+        super(PropertyValue.class);
     }
 
     @Override
-    public TaskValue deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public PropertyValue deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
 
         Long id = null;
         jsonNode = deserializationContext.readTree(jsonParser);
@@ -58,26 +49,26 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                         Long idTaskVl = jsonValue.get("id").asLong();
                         Property property = new Property(idProp);
                         if (type.equals("TEXT")) {
-                            return new TaskValue(id, property,  new TextValued(idTaskVl, value.asText()));
+                            return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }else if(type.equals("ARCHIVE")){
-                            return new TaskValue(id, property,  new ArchiveValued(idTaskVl, null));
+                            return new PropertyValue(id, property,  new ArchiveValued(idTaskVl, null));
                         }
                         else if(type.equals("DATE")){
                             if(value.isNull()){
-                                return new TaskValue(id, property,  new DateValued(idTaskVl, null));
+                                return new PropertyValue(id, property,  new DateValued(idTaskVl, null));
                             }
-                            return new TaskValue(id, property,  new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
+                            return new PropertyValue(id, property,  new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
 
                         }
                         else if(type.equals("NUMBER") || type.equals("PROGRESS")){
-                            return new TaskValue(id, property, new NumberValued(idTaskVl, value.asInt()));
+                            return new PropertyValue(id, property, new NumberValued(idTaskVl, value.asInt()));
                         }
                         else if(type.equals("RADIO") || type.equals("SELECT")){
                             if(isPresent(value, "id")){
                                 Long idOpt = value.get("id").asLong();
-                                return new TaskValue(id, property,  new UniOptionValued(idTaskVl, new Option(idOpt)));
+                                return new PropertyValue(id, property,  new UniOptionValued(idTaskVl, new Option(idOpt)));
                             }
-                            return new TaskValue(id, property, new UniOptionValued(idTaskVl, null));
+                            return new PropertyValue(id, property, new UniOptionValued(idTaskVl, null));
                         }
                         else if(type.equals("CHECKBOX") || type.equals("TAG")){
                             ArrayList<Option> options = new ArrayList<>();
@@ -86,7 +77,7 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                                     options.add(new Option(valueF.get("id").asLong()));
                                 }
                             }
-                            return new TaskValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
+                            return new PropertyValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
@@ -100,9 +91,9 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                             }
                             JsonNode time = value.get("time");
                             if(time.isNull()){
-                                return new TaskValue(id, property, new TimeValued(idTaskVl, null, starts, ends, color));
+                                return new PropertyValue(id, property, new TimeValued(idTaskVl, null, starts, ends, color));
                             }
-                            return new TaskValue(id, property, new TimeValued(idTaskVl, Duration.parse(time.asText()), starts, ends, color));
+                            return new PropertyValue(id, property, new TimeValued(idTaskVl, Duration.parse(time.asText()), starts, ends, color));
                         }
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
@@ -111,7 +102,7 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                                     users.add(new User(valueF.get("username").asText()));
                                 }
                             }
-                            return new TaskValue(id, new Property(idProp), new UserValued(idTaskVl, users));
+                            return new PropertyValue(id, new Property(idProp), new UserValued(idTaskVl, users));
                         }
                         throw new RuntimeException("Property have a unknown type");
                     }

@@ -17,7 +17,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
@@ -33,8 +33,6 @@ import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
 import br.demo.backend.globalfunctions.AutoMapper;
 import lombok.AllArgsConstructor;
-import org.apache.el.stream.Stream;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -83,8 +81,7 @@ public class TaskService {
         setTaskProperties(propertiesProject, taskEmpty);
 
         taskEmpty.setLogs(new HashSet<>());
-        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now()));
-
+        taskEmpty.getLogs().add(new Log(null, "Task created", Action.CREATE, user, LocalDateTime.now(), null) );
 
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page.getId());
@@ -110,13 +107,13 @@ public class TaskService {
 
 
     public void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
-        Collection<TaskValue> taskValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
-        taskValues.addAll(taskEmpty.getProperties());
-        taskEmpty.setProperties(taskValues);
+        Collection<PropertyValue> propertyValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
+        propertyValues.addAll(taskEmpty.getProperties());
+        taskEmpty.setProperties(propertyValues);
         System.out.println(ModelToGetDTO.tranform(taskEmpty));
     }
 
-    public TaskValue setTaskProperty(Property p) {
+    public PropertyValue setTaskProperty(Property p) {
         Value value = null;
         if (p.getType() == TypeOfProperty.RADIO ||p.getType() == TypeOfProperty.SELECT) {
             value = new UniOptionValued();
@@ -135,7 +132,7 @@ public class TaskService {
         } else if (p.getType() == TypeOfProperty.USER) {
             value = new UserValued();
         }
-        return new TaskValue(null, p, value);
+        return new PropertyValue(null, p, value);
     }
 
     public Collection<TaskGetDTO> findByName(String name) {
@@ -179,7 +176,7 @@ public class TaskService {
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
         User user = userRepository.findById(id).get();
-        TaskValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
+        PropertyValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
         Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
 
         return tasks.stream().filter(t ->

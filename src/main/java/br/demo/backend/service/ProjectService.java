@@ -77,7 +77,7 @@ public class ProjectService {
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
-    public ProjectGetDTO save(ProjectPostDTO projectDto) {
+    public SimpleProjectGetDTO save(ProjectPostDTO projectDto) {
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
         Project emptyProject = projectRepository.save(project);
@@ -91,7 +91,7 @@ public class ProjectService {
         Select selectCreated = selectRepository.save(select);
         emptyProject.getProperties().add(selectCreated);
         emptyProject.setVisualizedAt(LocalDateTime.now());
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        return ModelToGetDTO.tranformSimple(projectRepository.save(project),new ArrayList<>());
     }
 
     public ProjectGetDTO setVisualizedNow(Project projectPut) {

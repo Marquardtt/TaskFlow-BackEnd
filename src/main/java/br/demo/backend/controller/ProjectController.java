@@ -22,7 +22,7 @@ public class ProjectController {
 
     //FEITO
     @PostMapping
-    public ProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
+    public SimpleProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
         return projectService.save(project);
     }
 

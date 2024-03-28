@@ -18,7 +18,7 @@ import br.demo.backend.model.properties.*;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
@@ -89,7 +89,7 @@ public class PageService {
     private void updateIndexesInAOption(OrderedPage page, Option columnOption, TaskPage taskOld, Integer index,
                                                      Integer columnChanged ){
         page.setTasks(page.getTasks().stream().map(t -> {
-            TaskValue prop = t.getTask().getProperties().stream().filter(p ->
+            PropertyValue prop = t.getTask().getProperties().stream().filter(p ->
                     p.getProperty().equals(page.getPropertyOrdering()) &&
                             (p.getValue().getValue() == null && columnOption == null ||
                                     (p.getValue().getValue() instanceof Option && ((Option) p.getValue().getValue()).equals(columnOption))

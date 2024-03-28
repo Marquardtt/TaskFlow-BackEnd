@@ -1,7 +1,6 @@
 package br.demo.backend.model.relations;
 
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.DeserializerValue;
 import br.demo.backend.model.values.Value;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -19,7 +18,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_task_value")
 @JsonDeserialize(using = DeserializerValue.class)
-public class TaskValue {
+public class PropertyValue {
     // TODO: 13/02/2024 Id Composto SE não for usado em project tambem
 
     @Id
