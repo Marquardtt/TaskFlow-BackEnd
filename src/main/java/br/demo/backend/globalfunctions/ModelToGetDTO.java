@@ -38,6 +38,7 @@ import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class ModelToGetDTO {
@@ -146,10 +147,14 @@ public class ModelToGetDTO {
         }
         try {
             page.setProperties(obj.getProperties().stream().map(ModelToGetDTO::tranform).toList());
-        } catch (NullPointerException ignore) {}
+        } catch (NullPointerException ignore) {
+            page.setProperties(new ArrayList<>());
+        }
         try {
             page.setTasks(obj.getTasks().stream().map(ModelToGetDTO::tranform).toList());
-        }catch (NullPointerException ignore) {}
+        }catch (NullPointerException ignore) {
+            page.setTasks(new ArrayList<>());
+        }
         return page;
     }
     private static OrderedPageGetDTO tranform(OrderedPage obj){
