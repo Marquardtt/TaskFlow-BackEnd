@@ -213,7 +213,7 @@ public class PageService {
             }else if (page.getType().equals(TypeOfPage.TIMELINE)){
                 propOrdering = propOrdTime(pageServed);
             }else{
-                propOrdDate(pageServed);
+                propOrdering = propOrdDate(pageServed);
             }
             canvasModel.setPropertyOrdering(propOrdering);
             orderedPageRepository.save(canvasModel);

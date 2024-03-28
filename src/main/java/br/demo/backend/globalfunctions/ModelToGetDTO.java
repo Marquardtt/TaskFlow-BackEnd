@@ -241,8 +241,7 @@ public class ModelToGetDTO {
         Integer progress = 0;
         try {
             progress = Math.toIntExact(100 / tasks.size() * tasks.stream().filter(Task::getCompleted).count());
-        } catch (ArithmeticException e) {
-            throw new RuntimeException(e);
+        } catch (ArithmeticException ignore) {
         }
         return new SimpleProjectGetDTO(
                 obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups
