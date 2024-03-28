@@ -25,7 +25,7 @@ public class PageController {
 
 
     //OrderedPage
-    //Precisa ter permissão de post no projeto
+    //FEITO
     @PostMapping
     public PageGetDTO insert(@RequestBody PagePostDTO page) {
         return pageService.save(page);
@@ -37,38 +37,38 @@ public class PageController {
 //        return pageService.updateIndex(page, taskId, index, columnChanged);
 //    }
 
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PatchMapping("/{id}")
     public PageGetDTO upDateName(@RequestBody(required = false) String name, @PathVariable Long id) {
         return pageService.updateName(name, id);
     }
 
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PatchMapping("/x-and-y")
     public TaskCanvasGetDTO upDate(@RequestBody TaskCanvas taskPage) {
         return pageService.updateXAndY(taskPage);
     }
 
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PatchMapping("/draw/{id}")
     public CanvasPageGetDTO upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
         return pageService.updateDraw(draw, id);
     }
 
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PatchMapping("/prop-ordering/{id}")
     public OrderedPageGetDTO updatePropertiesOrdering(@RequestBody Property property, @PathVariable Long id) {
         return pageService.updatePropertiesOrdering(property, id);
     }
 
     //General
-    //Precisa ter permissão de delete no projeto
+    //FEITO
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         pageService.delete(id);
     }
 
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PatchMapping("/merge/{id}")
     public Collection<PageGetDTO> merge(@RequestBody Collection<Page> pages, @PathVariable Long id) {
         return pageService.merge(pages, id);
