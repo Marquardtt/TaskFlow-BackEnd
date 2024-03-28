@@ -1,6 +1,5 @@
 package br.demo.backend.controller;
 
-
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
