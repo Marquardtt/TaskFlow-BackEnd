@@ -196,13 +196,11 @@ public class PageService {
         if (page.getType().equals(TypeOfPage.CANVAS)) {
             CanvasPage canvasModel = new CanvasPage();
             autoMapperCanvas.map(page, canvasModel, false);
-            canvasPageRepository.save(canvasModel);
-            return ModelToGetDTO.tranform(canvasModel);
+            return ModelToGetDTO.tranform(canvasPageRepository.save(canvasModel));
         } else if (List.of(TypeOfPage.TABLE, TypeOfPage.LIST).contains(page.getType())) {
             Page canvasModel = new Page();
             autoMapperOther.map(page, canvasModel, false);
-            pageRepository.save(canvasModel);
-            return ModelToGetDTO.tranform(canvasModel);
+            return ModelToGetDTO.tranform(pageRepository.save(canvasModel));
         } else {
             OrderedPage canvasModel = new OrderedPage();
             autoMapperOrdered.map(page, canvasModel, false);
@@ -216,8 +214,7 @@ public class PageService {
                 propOrdering = propOrdDate(pageServed);
             }
             canvasModel.setPropertyOrdering(propOrdering);
-            orderedPageRepository.save(canvasModel);
-            return ModelToGetDTO.tranform(canvasModel);
+            return ModelToGetDTO.tranform(orderedPageRepository.save(canvasModel));
         }
     }
 
