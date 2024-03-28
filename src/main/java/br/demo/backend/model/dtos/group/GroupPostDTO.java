@@ -3,6 +3,7 @@ package br.demo.backend.model.dtos.group;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // Importe a classe @JsonIgnoreProperties
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,11 +14,11 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(value = {"permissions"})
 public class GroupPostDTO {
     private String name;
     private String description;
     private Collection<Permission> permissions;
     private User owner;
     private Collection<User> users;
-
 }
