@@ -19,48 +19,48 @@ public class TaskController {
     private TaskService taskService;
 
 
-    //Precisa ter permissão de post no projeto
+    //FEITO
     @PostMapping("/{pageId}/{userId}")
     public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId){
         return taskService.save(pageId, userId);
     }
 
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PutMapping
     public TaskGetDTO upDate(@RequestBody Task task){
         return taskService.update(task, false);
     }
-    //Precisa ter permissão de put no projeto
+    //FEITO
     @PatchMapping
     public TaskGetDTO patch(@RequestBody Task task){
         return taskService.update(task, true);
     }
 
-    //Precisa ser o mesmo usaurio do parametro
+    //FEITO
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
         return taskService.getTasksToday(id);
     }
 
-    //Precisa ter permissão de delete no projeto
+    //FEITO
     @DeleteMapping("/{id}/{userId}")
     public void delete(@PathVariable Long id , @PathVariable String userId){
         taskService.delete(id, userId);
     }
 
-    //Precisa ser o owner do projeto
+    //FEITO
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
         taskService.deletePermanent(id);
     }
 
-    //Precisa ter permissão de delete no projeto
+    //FEITO
     @PutMapping("/redo/{userId}/{id}")
     public TaskGetDTO redo(@PathVariable Long id , @PathVariable String userId){
         return taskService.redo(id, userId);
     }
 
-    //Precisa estar no projeto
+    //FEITO
     @GetMapping("/project/{projectId}")
     public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
         return taskService.getDeletedTasks(projectId);

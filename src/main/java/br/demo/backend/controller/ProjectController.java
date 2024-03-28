@@ -20,52 +20,52 @@ import java.util.Collection;
 public class ProjectController {
     private ProjectService projectService;
 
-    //Precisa estar logado
+    //FEITO
     @PostMapping
     public ProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
         return projectService.save(project);
     }
 
-//    precisa ser o owner do projeto
+//   FEITO
     @PatchMapping("/picture/{id}")
     public ProjectGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
         return projectService.updatePicture(picture, id);
     }
-//    precisa ser o owner ou o membro do projeto
+//    FEITO
     @PatchMapping("/set-now")
     public ProjectGetDTO setVisualizedNow(@RequestBody Project project) {
         return projectService.setVisualizedNow(project);
     }
-    //    precisa ser o owner do projeto
+    //    FEITO
     @PutMapping
     public ProjectGetDTO upDate(@RequestBody ProjectPutDTO project) {
         return projectService.update(project, false);
     }
-    //    precisa ser o owner do projeto
+    //    FEITO
     @PatchMapping
     public ProjectGetDTO patch(@RequestBody ProjectPutDTO project) {
         return projectService.update(project, true);
     }
 
-    //    precisa ser o owner do projeto ou um membro
+    //    FEITO
     @GetMapping("/{id}")
     public ProjectGetDTO findOne(@PathVariable Long id) {
         return projectService.findOne(id);
     }
 
-    //    precisa estar logado com o mesmo user da requisição
+    //    FEITO
     @GetMapping("/user/{userId}")
     public Collection<SimpleProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 
-    //    precisa ser o owner do projeto
+    //    FEITO
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         projectService.delete(id);
     }
 
-    //    precisa ser o owner do projeto
+    //    FEITO
     @PatchMapping("/change-owner/{projectId}")
     public ProjectGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
         return projectService.updateOwner(newOwner, projectId);
