@@ -19,24 +19,24 @@ import java.util.Collection;
 public class UserController {
     private UserService userService;
 
-    //    precisa de nada
+    //   FEITO
     @PostMapping
     public UserGetDTO insert(@RequestBody UserPostDTO user){
         return userService.save(user);
     }
 
-    //    precisa estar logado e pertencer a esse projeto
+    //  FEITO => PORÉM PROVÁVEL QUE TERÁ ALTERAÇÕES
     @GetMapping("/{username}/{projectId}")
     public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
         return userService.getPermissionOfAUserInAProject(username, projectId);
     }
 
-    //    precisa estar logado e ser o usuario
+    //   FEITO
     @PutMapping
     public UserGetDTO upDate(@RequestBody UserPutDTO user){
         return userService.update(user, false);
     }
-    //    precisa estar logado e ser o usuario
+    //   FEITO
     @PatchMapping
     public UserGetDTO patch(@RequestBody UserPutDTO user) {
         return userService.update(user, true);
@@ -48,26 +48,26 @@ public class UserController {
         return userService.findOne(username);
     }
 
-    //precisa ser o usuario logado
+    //FEITO
     @PatchMapping("/picture/{username}")
     public UserGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
         return userService.updatePicture(picture, username);
     }
 
-    //precisa ser o usuario logado
+    //FEITO
     @PatchMapping("/password/{username}")
     public UserGetDTO upDatePassword(@PathVariable String username, @RequestBody String password) {
         return userService.updatePassword(username, password);
     }
 
-    //precisa ser o usuario logado
+    //FEITO
     @DeleteMapping("/{username}")
     public void delete(@PathVariable String username){
         userService.delete(username);
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 
-    //precisa ser o usuario logado
+    //FEITO
     @GetMapping("/name/{name}")
     public Collection<UserGetDTO> findByUsersNameOrName(@PathVariable String name) {
         return userService.findByUserNameOrName(name);
