@@ -26,7 +26,7 @@ public class PropertyValue {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     private Property property;

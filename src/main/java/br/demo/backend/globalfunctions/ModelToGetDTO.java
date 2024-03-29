@@ -115,6 +115,15 @@ public class ModelToGetDTO {
         try {
             project.setProperties(obj.getProperties().stream().map(ModelToGetDTO::tranform).toList());
         } catch (NullPointerException ignore) {}
+
+        try{
+            project.setComments(obj.getComments().stream().map(ModelToGetDTO::tranform).toList());
+        }catch (NullPointerException ignore){}
+
+        try{
+            project.setValues(obj.getValues().stream().map(ModelToGetDTO::tranform).toList());
+        }catch (NullPointerException ignore){}
+
         project.setOwner(tranformSimple(obj.getOwner()));
         return project;
     }
@@ -191,9 +200,9 @@ public class ModelToGetDTO {
         BeanUtils.copyProperties(obj, property);
         return property;
     }
-    public static TaskValueGetDTO tranform(PropertyValue obj){
+    public static PropertyValueGetDTO tranform(PropertyValue obj){
         if(obj == null) return null;
-        TaskValueGetDTO taskValue = new TaskValueGetDTO();
+        PropertyValueGetDTO taskValue = new PropertyValueGetDTO();
         BeanUtils.copyProperties(obj, taskValue);
         taskValue.setProperty(tranform(obj.getProperty()));
         if(obj.getValue() instanceof UserValued userValued){

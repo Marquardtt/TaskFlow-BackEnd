@@ -2,6 +2,11 @@ package br.demo.backend.model.dtos.project;
 
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Group;
+import br.demo.backend.model.chat.Message;
+import br.demo.backend.model.relations.PropertyValue;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

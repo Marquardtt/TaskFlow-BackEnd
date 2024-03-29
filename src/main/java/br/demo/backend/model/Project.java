@@ -41,11 +41,13 @@ public class Project {
     private Collection<Page> pages;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Property> properties;
-    @OneToMany
+    //===================== Adições
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Message> comments;
     @JoinColumn(name = "project_id")
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<PropertyValue> values;
+    //===================== /Adições
 
     public Project(Long id){
         this.id = id;

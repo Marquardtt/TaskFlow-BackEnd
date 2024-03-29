@@ -68,7 +68,7 @@ public class ProjectService {
     public ProjectGetDTO update(ProjectPutDTO projectDTO, Boolean patching) {
         Project oldProject = projectRepository.findById(projectDTO.getId()).get();
         Project project = patching ? oldProject : new Project();
-        User owner = project.getOwner();
+        User owner = oldProject.getOwner();
         autoMapper.map(projectDTO, project, patching);
         project.setOwner(owner);
         project.setPages(oldProject.getPages());

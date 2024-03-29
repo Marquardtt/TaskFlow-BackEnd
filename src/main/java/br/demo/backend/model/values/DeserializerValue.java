@@ -1,6 +1,7 @@
 package br.demo.backend.model.values;
 
 import br.demo.backend.model.User;
+import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.PropertyValue;
@@ -40,14 +41,24 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             if (isPresent(jsonProp, "type") &&
                     isPresent(jsonProp, "id")) {
                 String type = jsonProp.get("type").asText();
-                Long idProp = jsonProp.get("id").asLong();
+                System.out.println(type);
+                Long idProp = null;
+                try {
+                    idProp = jsonProp.get("id").asLong();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
                 if (isPresent(jsonNode, "value")) {
                     JsonNode jsonValue = jsonNode.get("value");
-                    if (isPresent(jsonValue, "value") &&
-                            isPresent(jsonValue, "id")) {
+                    if (isPresent(jsonValue, "value")) {
                         JsonNode value = jsonValue.get("value");
-                        Long idTaskVl = jsonValue.get("id").asLong();
-                        Property property = new Property(idProp);
+                        Long idTaskVl = null;
+                        try {
+                            idTaskVl = jsonValue.get("id").asLong();
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
+                        Property property = new Property(idProp, TypeOfProperty.valueOf(type));
                         if (type.equals("TEXT")) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }else if(type.equals("ARCHIVE")){

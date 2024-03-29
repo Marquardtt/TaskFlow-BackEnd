@@ -1,10 +1,11 @@
 package br.demo.backend.model.dtos.project;
 
 import br.demo.backend.model.Archive;
+import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
+import br.demo.backend.model.dtos.relations.PropertyValueGetDTO;
 import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,5 +30,7 @@ public class ProjectGetDTO {
     private SimpleUserGetDTO owner;
     private Collection<PageGetDTO> pages;
     private Collection<PropertyGetDTO> properties;
+    private Collection<MessageGetDTO> comments;
+    private Collection<PropertyValueGetDTO> values;
 
 }

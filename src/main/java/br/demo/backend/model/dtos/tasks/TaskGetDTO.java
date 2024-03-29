@@ -2,7 +2,7 @@ package br.demo.backend.model.dtos.tasks;
 
 
 import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
-import br.demo.backend.model.dtos.relations.TaskValueGetDTO;
+import br.demo.backend.model.dtos.relations.PropertyValueGetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,7 +22,7 @@ public class TaskGetDTO {
     private Boolean deleted;
     private Boolean completed;
 
-    private Collection<TaskValueGetDTO> properties;
+    private Collection<PropertyValueGetDTO> properties;
 
     private Collection<LogGetDTO> logs;
 

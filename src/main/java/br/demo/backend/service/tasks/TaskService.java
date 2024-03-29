@@ -150,7 +150,7 @@ public class TaskService {
         User user = userRepository.findById(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
-        task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
+        task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now(), null));
         taskRepository.save(task);
     }
 
@@ -162,7 +162,7 @@ public class TaskService {
     public TaskGetDTO redo(Long id, String userId) {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
-        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
+        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now(), null));
         return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 
