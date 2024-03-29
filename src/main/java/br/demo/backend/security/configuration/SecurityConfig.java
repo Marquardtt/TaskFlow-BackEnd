@@ -37,8 +37,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/user/{username}").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "user/pciture/{username}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/name/{name}").authenticated()
+                .requestMatchers(HttpMethod.GET,"/user/{username}/project/{projectId}").access(isOwnerOrMemberAuthorization)
 
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
@@ -50,7 +52,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.GET, "/project/user/{userId}").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
-
 
                 //TASK
                 .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}/{userId}").access(authorizationRequestsRoutes)
@@ -73,6 +74,27 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/property/project/{projectId}/select").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/property/project/{projectId}/date").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.DELETE, "/property/project/{projectId}/{id}").access(authorizationRequestsRoutes)
+
+                //PAGE
+                .requestMatchers(HttpMethod.POST, "/page/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/{columnChanged}project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/x-and-y/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/draw/{id/}project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/project/{projectId}/prop-ordering/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.GET, "/page/project/{projectId}/{id}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.GET, "/page/project/{projectId}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/page/merge/{id}/project/{projectId}").access(authorizationRequestsRoutes)
+
+                //PERMISSION
+                .requestMatchers(HttpMethod.POST, "/permission/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PUT, "/permission/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/permission/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
 
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha

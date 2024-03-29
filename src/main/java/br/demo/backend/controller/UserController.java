@@ -24,7 +24,7 @@ public class UserController {
         userService.save(user);
     }
 
-    @GetMapping("/{username}/{projectId}")
+    @GetMapping("/{username}/project/{projectId}")
     public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
         return userService.getPermissionOfAUserInAProject(username, projectId);
     }
