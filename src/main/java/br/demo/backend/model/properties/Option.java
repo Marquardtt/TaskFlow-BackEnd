@@ -26,7 +26,8 @@ public class Option {
     @Column(nullable = false)
     private Integer indexAtSelect = 0;
 
-    public Option(Long id){
+    public Option(Long id, String name){
         this.id = id;
+        this.name = name;
     }
 }

@@ -2,6 +2,7 @@ package br.demo.backend.service.tasks;
 
 
 import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
@@ -13,6 +14,7 @@ import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
+import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
@@ -35,8 +37,11 @@ import br.demo.backend.globalfunctions.AutoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 
 @Service
@@ -53,15 +58,6 @@ public class TaskService {
     private AutoMapper<Task> autoMapper;
     private TaskPageRepository taskPageRepository;
 
-
-
-    public Collection<TaskGetDTO> findAll() {
-        return taskRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
-
-    public TaskGetDTO findOne(Long id) {
-        return ModelToGetDTO.tranform(taskRepository.findById(id).get());
-    }
 
     public TaskGetDTO save(Long idpage, String userId) {
 
@@ -135,16 +131,86 @@ public class TaskService {
         return new PropertyValue(null, p, value);
     }
 
-    public Collection<TaskGetDTO> findByName(String name) {
-        return taskRepository.findTasksByNameContains(name).stream().map(ModelToGetDTO::tranform).toList();
-    }
-
     public TaskGetDTO update(Task taskDTO, Boolean patching) {
-        Task task = patching ? taskRepository.findById(taskDTO.getId()).get() : new Task();
+        Task oldTask = taskRepository.findById(taskDTO.getId()).get();
+        Task task = patching ? oldTask : new Task();
         autoMapper.map(taskDTO, task, patching);
-
+        task.setLogs(oldTask.getLogs());
+        if(!task.getName().equals(oldTask.getName())){
+            //TODO: Mudar o user null para o user logado
+            task.getLogs().add(new Log(null, "The task's name was changed to '"+
+                    task.getName()+"'", Action.UPDATE, new User("jonatas"),
+                    LocalDateTime.now(), null));
+        }
+        createUpdateLogs(task, oldTask);
         return ModelToGetDTO.tranform(taskRepository.save(task));
     }
+
+    private void createUpdateLogs(Task task, Task old){
+        Collection<Log> logs = task.getProperties().stream()
+                .map(prop -> {
+                    PropertyValue first = old.getProperties().stream()
+                            .filter(p-> p.getValue().getId().equals(prop.getValue().getId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (first != null && !prop.getValue().getValue().equals(first.getValue().getValue())) {
+                        //TODO: Mudar o user null para o user logado
+                        PropertyValue propertyValue = new PropertyValue(first);
+                        return new Log(null, descriptionUpdate(prop), Action.UPDATE,
+                                new User("jonatas"), LocalDateTime.now(), propertyValue);
+                    }
+                    return null; // Se não há alteração, retorna null
+                })
+                .filter(Objects::nonNull).toList();
+        task.getLogs().addAll(logs);
+    }
+
+    private String descriptionUpdate(PropertyValue value){
+        String base = "The property '"+value.getProperty().getName()+"' was changed to '";
+        base += switch (value.getProperty().getType()){
+            case DATE -> formatDate(value)+"'";
+            case SELECT, RADIO -> ((Option)value.getValue().getValue()).getName()+"'";
+            case TIME -> (formateDuration(((Intervals)value.getValue().getValue()).getTime()))+"'";
+            case CHECKBOX, TAG -> listString(((Collection<Option>)value.getValue().getValue())
+                    .stream().map(Option::getName).toList())+"'";
+            case USER -> listString(((Collection<User>)value.getValue().getValue())
+                    .stream().map(User::getUsername).toList())+"'";
+            case ARCHIVE -> ((Archive)value.getValue().getValue()).getName() +"."+
+                    ((Archive)value.getValue().getValue()).getType()+"'";
+            case TEXT, NUMBER -> value.getValue().getValue()+"'";
+            case PROGRESS -> value.getValue().getValue()+"%'";
+        };
+        return base;
+    }
+
+
+    private String listString(Collection<String> strs){
+        StringJoiner base = new StringJoiner(", ", "", " and ");
+        for(String str : strs){
+            base.add(str);
+        }
+        return base.toString();
+    }
+
+    private String formateDuration (Duration value){
+        long hours = value.toHours();
+        long minutes = value.minusHours(hours).toMinutes();
+        long seconds = value.minusHours(hours).minusMinutes(minutes).getSeconds();
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private String formatDate (PropertyValue value){
+        DateTimeFormatter formatter = null;
+        if(((Date)value.getProperty()).getIncludesHours()){
+            formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).localizedBy(Locale.getDefault());
+        }else{
+            formatter =  DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).localizedBy(Locale.getDefault());
+        }
+        return ((LocalDateTime)value.getValue().getValue()).format(formatter);
+    }
+
+
 
     public void delete(Long id, String userId) {
         User user = userRepository.findById(userId).get();
@@ -187,16 +253,4 @@ public class TaskService {
                 .map(ModelToGetDTO::tranform).toList()
                 ;
     }
-
-    public Collection<TaskPageGetDTO> getTasksOfMonth(Integer month, Long pageId, Long propertyId) {
-        OrderedPage page = orderedPageRepository.findById(pageId).get();
-
-        return page.getTasks().stream().filter(t ->
-                        t.getTask().getProperties().stream().anyMatch(p ->
-                                p.getProperty().getId().equals(propertyId) &&
-                                        ((LocalDateTime) p.getValue()
-                                                .getValue()).getMonthValue() == month))
-                .map(ModelToGetDTO::tranform).toList();
-    }
-
 }

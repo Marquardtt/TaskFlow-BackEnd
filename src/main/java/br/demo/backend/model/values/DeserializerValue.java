@@ -38,15 +38,13 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
 
         if (isPresent(jsonNode, "property")) {
             JsonNode jsonProp = jsonNode.get("property");
-            if (isPresent(jsonProp, "type") &&
-                    isPresent(jsonProp, "id")) {
+            if (isPresent(jsonProp, "type")) {
                 String type = jsonProp.get("type").asText();
-                System.out.println(type);
                 Long idProp = null;
                 try {
                     idProp = jsonProp.get("id").asLong();
                 } catch (Exception e) {
-                    System.out.println(e);
+                    System.out.println("Deu erro no id da prop");
                 }
                 if (isPresent(jsonNode, "value")) {
                     JsonNode jsonValue = jsonNode.get("value");
@@ -56,12 +54,14 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         try {
                             idTaskVl = jsonValue.get("id").asLong();
                         } catch (Exception e) {
-                            System.out.println(e);
+                            System.out.println("Deu erro no id da propValue");
                         }
                         Property property = new Property(idProp, TypeOfProperty.valueOf(type));
+                        System.out.println(property);
                         if (type.equals("TEXT")) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
-                        }else if(type.equals("ARCHIVE")){
+                        }
+                        else if(type.equals("ARCHIVE")){
                             return new PropertyValue(id, property,  new ArchiveValued(idTaskVl, null));
                         }
                         else if(type.equals("DATE")){
@@ -72,12 +72,13 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
 
                         }
                         else if(type.equals("NUMBER") || type.equals("PROGRESS")){
-                            return new PropertyValue(id, property, new NumberValued(idTaskVl, value.asInt()));
+                            return new PropertyValue(id, property, new NumberValued(idTaskVl, value.asDouble()));
                         }
                         else if(type.equals("RADIO") || type.equals("SELECT")){
                             if(isPresent(value, "id")){
                                 Long idOpt = value.get("id").asLong();
-                                return new PropertyValue(id, property,  new UniOptionValued(idTaskVl, new Option(idOpt)));
+                                String name = value.get("name").asText();
+                                return new PropertyValue(id, property,  new UniOptionValued(idTaskVl, new Option(idOpt, name)));
                             }
                             return new PropertyValue(id, property, new UniOptionValued(idTaskVl, null));
                         }
@@ -85,7 +86,9 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             ArrayList<Option> options = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
-                                    options.add(new Option(valueF.get("id").asLong()));
+                                    String name = value.get("name").asText();
+                                    Long idOpt = value.get("id").asLong();
+                                    options.add(new Option(idOpt, name));
                                 }
                             }
                             return new PropertyValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
@@ -93,6 +96,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
                             ArrayList<LocalDateTime> starts = new ArrayList<>();
+                            Long idIntervals = value.get("id").asLong();
                             for(JsonNode valueF : value.get("starts")){
                                 starts.add(LocalDateTime.parse(valueF.asText()));
                             }
@@ -102,10 +106,11 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             }
                             JsonNode time = value.get("time");
                             if(time.isNull()){
-                                return new PropertyValue(id, property, new TimeValued(idTaskVl, null, starts, ends, color));
+                                return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
                             }
-                            return new PropertyValue(id, property, new TimeValued(idTaskVl, Duration.parse(time.asText()), starts, ends, color));
+                            return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, Duration.parse(time.asText()), starts, ends, color)));
                         }
+                        //TODO: username virara id de novo e username devera ser pego de userdetailsentity
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
