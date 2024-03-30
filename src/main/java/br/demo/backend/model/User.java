@@ -46,6 +46,8 @@ public class User {
     private Configuration configuration = new Configuration();
     @ManyToMany
     private Collection<Permission> permissions;
+    @OneToMany
+    private Collection<Notification> notifications;
     public User (String username){
         this.username = username;
     }

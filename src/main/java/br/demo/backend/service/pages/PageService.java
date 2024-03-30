@@ -1,7 +1,7 @@
 package br.demo.backend.service.pages;
 
-import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;

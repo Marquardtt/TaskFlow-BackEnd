@@ -1,11 +1,10 @@
 package br.demo.backend.service.tasks;
 
 
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfPage;
@@ -33,7 +32,7 @@ import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
-import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -215,6 +214,7 @@ public class TaskService {
     public void delete(Long id, String userId) {
         User user = userRepository.findById(userId).get();
         Task task = taskRepository.findById(id).get();
+        task.setDateDeleted(LocalDateTime.now());
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now(), null));
         taskRepository.save(task);

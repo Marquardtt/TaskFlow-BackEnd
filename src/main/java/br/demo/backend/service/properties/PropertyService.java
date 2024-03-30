@@ -1,7 +1,7 @@
 package br.demo.backend.service.properties;
 
 
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.dtos.properties.DateGetDTO;
 import br.demo.backend.model.dtos.properties.LimitedGetDTO;
@@ -22,7 +22,7 @@ import br.demo.backend.repository.properties.DateRepository;
 import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
-import br.demo.backend.globalfunctions.AutoMapper;
+import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.repository.relations.TaskValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;

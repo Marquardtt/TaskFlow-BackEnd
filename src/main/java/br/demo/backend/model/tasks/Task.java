@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Entity
@@ -27,8 +28,10 @@ public class Task {
     private String name;
 
 
+    private LocalDateTime dateDeleted;
     //Patch
     private Boolean deleted = false;
+    private LocalDateTime dateCompleted;
     //Patch
     private Boolean completed = false;
 

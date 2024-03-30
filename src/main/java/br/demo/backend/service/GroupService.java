@@ -4,14 +4,13 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.GroupNotFoundException;
-import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 
 
 @Service

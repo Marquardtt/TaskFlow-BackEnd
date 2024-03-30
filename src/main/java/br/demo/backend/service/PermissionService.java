@@ -1,8 +1,8 @@
 package br.demo.backend.service;
 
 
-import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
@@ -12,8 +12,6 @@ import br.demo.backend.repository.PermissionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
 
 @Service
 @AllArgsConstructor
