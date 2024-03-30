@@ -4,6 +4,7 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.GroupNotFoundException;
+import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -30,6 +32,7 @@ public class GroupService {
 
     private GroupRepository groupRepository;
     private UserRepository userRepository;
+    private NotificationService notificationService;;
     private AutoMapper<Group> autoMapper;
 
 
@@ -93,7 +96,7 @@ public class GroupService {
         autoMapper.map(groupDTO, group, patching);
         group.setOwner(owner);
 
-
+        //TODO: verificar se ao adicionar em membro se ele terá uma permission
         Group groupOld = groupRepository.findById(group.getId()).get();
         Collection<Permission> permissions = group.getPermissions().stream().filter(p ->
                 !groupOld.getPermissions().contains(p)
@@ -102,6 +105,18 @@ public class GroupService {
             updatePermission(group, permission);
         }
         group.setPicture(picture);
+        Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
+                !groupOld.getUsers().contains(u)
+        ).toList());
+        usersAddedAndRemoved.addAll(groupOld.getUsers().stream().filter(u ->
+                !group.getUsers().contains(u)
+        ).toList());
+        usersAddedAndRemoved.forEach(u -> {
+            if(!u.equals(group.getOwner())){
+                //TODO: mudar para passar o id do user
+                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, 0L, group.getId());
+            }
+        });
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
@@ -110,8 +125,15 @@ public class GroupService {
         User user = userRepository.findById(userDTO.getUsername()).get();
         Collection<Permission> permissions = user.getPermissions();
         if(user.getPermissions() != null) {
-            permissions.removeAll(user.getPermissions().stream().filter(p ->
-                    p.getProject().getId().equals(permission.getProject().getId())).toList());
+            Permission oldPermission = user.getPermissions().stream().filter(p ->
+                    p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
+            if(oldPermission != null ){
+                if(!oldPermission.equals(permission)){
+                    //TODO:mudar para passar o id do user
+                    notificationService.generateNotification(TypeOfNotification.CHANGEPERMISSION, 0L, permission.getProject().getId());
+                }
+                permissions.remove(oldPermission);
+            }
         }else{
             permissions = new HashSet<>();
         }

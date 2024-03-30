@@ -19,6 +19,10 @@ import java.util.Collection;
 public class UserController {
     private UserService userService;
 
+    //TODO: Verificar com os outros quais informações que o
+    // usuario pode ver de outro usuario (mudar na getDTO) e
+    // tambem tem que ver as informações que seram encriptadas
+
     //   FEITO
     @PostMapping
     public UserGetDTO insert(@RequestBody UserPostDTO user){
@@ -48,6 +52,11 @@ public class UserController {
         return userService.findOne(username);
     }
 
+    @GetMapping("/logged")
+    public UserGetDTO findLogged(){
+        return userService.findLogged();
+    }
+
     //FEITO
     @PatchMapping("/picture/{username}")
     public UserGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
@@ -68,9 +77,21 @@ public class UserController {
     }
 
     //FEITO
-    @GetMapping("/name/{name}")
-    public Collection<UserGetDTO> findByUsersNameOrName(@PathVariable String name) {
-        return userService.findByUserNameOrName(name);
+    @GetMapping
+    public Collection<UserGetDTO> findAll() {
+        return userService.findAll();
+    }
+
+    @PatchMapping("/add-points/{username}")
+    public UserGetDTO updatePoints(@PathVariable String username, @RequestBody Integer points) {
+        return userService.addPoints(username, points);
+
+    }
+
+    //precisa ser o dono do grupo em que o usuario esta nesse projeto
+    @PatchMapping("{username}/update-permission")
+    public PermissionGetDTO updatePermission(@PathVariable String username, @RequestBody Permission permission){
+        return userService.updatePermission(username, permission);
     }
 
 }

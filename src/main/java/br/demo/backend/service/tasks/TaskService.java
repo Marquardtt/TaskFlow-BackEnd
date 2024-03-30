@@ -1,6 +1,9 @@
 package br.demo.backend.service.tasks;
 
 
+import br.demo.backend.model.chat.Message;
+import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.service.NotificationService;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
@@ -55,6 +58,7 @@ public class TaskService {
     private ProjectRepository projectRepository;
     private CanvasPageRepository canvasPageRepository;
     private AutoMapper<Task> autoMapper;
+    private NotificationService notificationService;
     private TaskPageRepository taskPageRepository;
 
 
@@ -80,7 +84,7 @@ public class TaskService {
 
         Task task = taskRepository.save(taskEmpty);
         addTaskToPage(task, page.getId());
-
+        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return ModelToGetDTO.tranform(task);
     }
 
@@ -135,6 +139,8 @@ public class TaskService {
         Task task = patching ? oldTask : new Task();
         autoMapper.map(taskDTO, task, patching);
         task.setLogs(oldTask.getLogs());
+        task.setCompleted(false);
+        task.setDeleted(false);
         if(!task.getName().equals(oldTask.getName())){
             //TODO: Mudar o user null para o user logado
             task.getLogs().add(new Log(null, "The task's name was changed to '"+
@@ -142,6 +148,9 @@ public class TaskService {
                     LocalDateTime.now(), null));
         }
         createUpdateLogs(task, oldTask);
+        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+        Collection<Message> comments = task.getComments().stream().filter(c -> !oldTask.getComments().contains(c)).toList();
+        comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
         return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 
@@ -218,6 +227,7 @@ public class TaskService {
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now(), null));
         taskRepository.save(task);
+        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
     }
 
     public void deletePermanent(Long id) {
@@ -229,6 +239,7 @@ public class TaskService {
         Task task = taskRepository.findById(id).get();
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now(), null));
+        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 
@@ -252,5 +263,15 @@ public class TaskService {
                                         p.getValue().getValue().equals(LocalDate.now())))
                 .map(ModelToGetDTO::tranform).toList()
                 ;
+    }
+
+    public TaskGetDTO complete(Long id, String userId) {
+        User user = userRepository.findById(userId).get();
+        Task task = taskRepository.findById(id).get();
+        task.setCompleted(true);
+        task.setDateCompleted(LocalDateTime.now());
+        task.getLogs().add(new Log(null, "Task completed", Action.COMPLETE, user, LocalDateTime.now(), null));
+        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+        return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 }

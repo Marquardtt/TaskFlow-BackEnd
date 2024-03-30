@@ -3,7 +3,7 @@ package br.demo.backend.model.enums;
 public enum TypeOfNotification {
 
     CHANGETASK,
-    ADDINGROUP,
+    ADDORREMOVEINGROUP,
     CHANGEPERMISSION,
     //when pass a specific number of points (1000, 5000, etc.)
     POINTS,

@@ -12,10 +12,12 @@ import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
 import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
 import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.model.enums.TypeOfChat;
+import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.ids.DestinationId;
 import br.demo.backend.repository.chat.ChatGroupRepository;
 import br.demo.backend.repository.chat.ChatPrivateRepository;
 import br.demo.backend.repository.chat.ChatRepository;
+import br.demo.backend.service.NotificationService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.repository.chat.MessageRepository;
@@ -39,6 +41,7 @@ public class ChatService {
     private ChatPrivateRepository chatPrivateRepository;
     private ChatGroupRepository chatGroupRepository;
     private MessageRepository messageRepository;
+    private NotificationService notificationService;
 
     private ObjectMapper objectMapper;
     private AutoMapper<ChatGroup> mapperGroup;
@@ -198,7 +201,9 @@ public class ChatService {
         } else {
             chatGroupRepository.save((ChatGroup) chat);
         }
-        return ModelToGetDTO.tranform(message);
+        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(message);
+        notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
+        return messageGetDTO;
     }
 
 

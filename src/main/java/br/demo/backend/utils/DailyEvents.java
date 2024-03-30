@@ -1,10 +1,12 @@
 package br.demo.backend.utils;
 
+import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.NotificationService;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 public class DailyEvents {
 
     private TaskRepository taskRepository;
+    private ProjectRepository projectRepository;
     private NotificationService notificationService;
 
     @Scheduled(cron = "0 0 0 * * *")
@@ -40,6 +43,21 @@ public class DailyEvents {
                 if(checkIfIsDeadlineDate(property.getProperty())){
                     if(checkIfIsIn24Hours((LocalDateTime) property.getValue().getValue())){
                         notificationService.generateNotification(TypeOfNotification.DEADLINE, task.getId(), property.getId());
+                    }
+                }
+            });
+        });
+
+        projectRepository.findAll().forEach(project -> {
+            project.getValues().forEach(property -> {
+                if(checkIfIsSchedulingDate(property.getProperty())){
+                    if(checkIfIsIn24Hours((LocalDateTime) property.getValue().getValue())){
+                        notificationService.generateDeadlineOrSchedulingInProjct(project.getId(), TypeOfNotification.SCHEDULE);
+                    }
+                }
+                if(checkIfIsDeadlineDate(property.getProperty())){
+                    if(checkIfIsIn24Hours((LocalDateTime) property.getValue().getValue())){
+                        notificationService.generateDeadlineOrSchedulingInProjct(project.getId(), TypeOfNotification.DEADLINE);
                     }
                 }
             });

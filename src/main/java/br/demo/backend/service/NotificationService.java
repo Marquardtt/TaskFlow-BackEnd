@@ -4,7 +4,6 @@
     import br.demo.backend.model.Notification;
     import br.demo.backend.model.Project;
     import br.demo.backend.model.User;
-    import br.demo.backend.model.chat.Chat;
     import br.demo.backend.model.chat.Message;
     import br.demo.backend.model.enums.TypeOfNotification;
     import br.demo.backend.model.pages.Page;
@@ -19,7 +18,6 @@
     import br.demo.backend.repository.pages.PageRepository;
     import br.demo.backend.repository.tasks.TaskRepository;
     import lombok.AllArgsConstructor;
-    import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
     import org.springframework.stereotype.Service;
 
     import java.util.ArrayList;
@@ -35,18 +33,25 @@
         private ProjectRepository projectRepository;
         private PageRepository pageRepository;
         private GroupRepository groupRepository;
-        private ChatRepository chatRepository;
         private MessageRepository messageRepository;
 
         public void generateNotification(TypeOfNotification type, Long idPrincipal, Long auxiliary){
             switch (type){
+//                When someone change my permission in a project
                 case CHANGEPERMISSION -> generateChangePermission(idPrincipal, auxiliary, type) ;
-                case ADDINGROUP -> generateAddInGroup(idPrincipal, auxiliary, type);
-                case CHANGETASK -> generateChangeTask(idPrincipal, auxiliary, type);
+//                When someone add me in a group
+                case ADDORREMOVEINGROUP -> generateAddInGroup(idPrincipal, auxiliary, type);
+//                When someone change something in a task
+                case CHANGETASK -> generateChangeTask(idPrincipal, type);
+//                When someone send a message in a chat
                 case CHAT -> generateChat(idPrincipal, auxiliary, type);
-                case COMMENTS -> generateComment(idPrincipal, type);
-                case DEADLINE -> generateDeadlineOrScheduling(idPrincipal, auxiliary, type, false);
-                case SCHEDULE -> generateDeadlineOrScheduling(idPrincipal, auxiliary, type, true);
+//                When someone comment in a task
+                case COMMENTS -> generateComment(idPrincipal, auxiliary, type);
+//                When some deadline is in 24 hours
+                case DEADLINE -> generateDeadlineOrScheduling(idPrincipal, type);
+//                When some schedule is in 24 hours
+                case SCHEDULE -> generateDeadlineOrScheduling(idPrincipal, type);
+//                When someone pass the target of points
                 case POINTS -> generatePoints(idPrincipal, auxiliary, type);
             }
         }
@@ -75,16 +80,22 @@
             //Verify if the user wants to recive a notification for this
             if(!user.getConfiguration().getNotificAtAddMeInAGroup()) return;
             Group group = groupRepository.findById(groupId).get();
-            notificationRepository.save(new Notification(null, "You was added at group '"+group.getName()+"'",
-                    type, "/"+user.getUsername()+"/group/"+groupId, user, false ));
+            if(group.getUsers().contains(user)){
+                notificationRepository.save(new Notification(null, "You was added at group '"+group.getName()+"'",
+                        type, "/"+user.getUsername()+"/group/"+groupId, user, false ));
+            }else{
+                notificationRepository.save(new Notification(null, "You was removed at group '"+group.getName()+"'",
+                        type, "", user, false ));
+            }
 
         }
 
-        private void generateChangeTask(Long taskId, Long userId, TypeOfNotification type){
+        private void generateChangeTask(Long taskId, TypeOfNotification type){
             Task task = taskRepository.findById(taskId).get();
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
+            //TODO:mudar para pegar o id do user logado
     //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
             users.stream().filter(u -> !u.getUsername().equals("jonatas")).forEach(user -> {
                 //Verify if the user wants to recive a notification for this
@@ -121,8 +132,9 @@
             });
         }
 
-        private void generateComment(Long idTask, TypeOfNotification type){
+        private void generateComment(Long idTask, Long idComment, TypeOfNotification type){
             Task task = taskRepository.findById(idTask).get();
+            Message message = messageRepository.findById(idComment).get();
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
@@ -131,7 +143,7 @@
                 //Verify if the user wants to recive a notification for this
                 if (!user.getConfiguration().getNotificComments()) return;
                 //TODO: ver como abrir o  modal de edição de task;
-                notificationRepository.save(new Notification(null, "Somepeople comment in the task '"+task.getName()+"'", type,
+                notificationRepository.save(new Notification(null, message.getSender().getUsername() + " comment in the task '"+task.getName()+"' '"+message.getValue()+"'" , type,
                         "/"+user.getUsername()+"/"+project.getId() +"/"+page.getId(), user, false));
             });
         }
@@ -149,7 +161,7 @@
                     "/"+user.getUsername()+"/configurations/account", user, false));
         }
 
-        private void generateDeadlineOrScheduling(Long idTask, Long idProperty, TypeOfNotification type, Boolean scheduling){
+        private void generateDeadlineOrScheduling(Long idTask, TypeOfNotification type){
             Task task = taskRepository.findById(idTask).get();
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
@@ -157,10 +169,23 @@
             //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
             users.stream().filter(u -> !u.getUsername().equals("jonatas")).forEach(user -> {
                 //Verify if the user wants to recive a notification for this
-                if (!scheduling && !user.getConfiguration().getNotificDeadlines()) return;
-                if (scheduling && !user.getConfiguration().getNotificSchedules()) return;
-                notificationRepository.save(new Notification(null, "The task '"+task.getName()+"' has a "+(scheduling ? "schedule" : "deadline")+" in 24 hours",
+                if (TypeOfNotification.DEADLINE.equals(type) && !user.getConfiguration().getNotificDeadlines()) return;
+                if (TypeOfNotification.SCHEDULE.equals(type) && !user.getConfiguration().getNotificSchedules()) return;
+                notificationRepository.save(new Notification(null, "The task '"+task.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
                         type, "/"+user.getUsername()+"/"+project.getId() +"/"+page.getId(), user, false ));
+            });
+        }
+
+        public void generateDeadlineOrSchedulingInProjct(Long idProject, TypeOfNotification type){
+            Project project = projectRepository.findById(idProject).get();
+            Collection<User> users = userRepository.findAllByPermissions_Project(project);
+            //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
+            users.stream().filter(u -> !u.getUsername().equals("jonatas")).forEach(user -> {
+                //Verify if the user wants to recive a notification for this
+                if (TypeOfNotification.DEADLINE.equals(type) && !user.getConfiguration().getNotificDeadlines()) return;
+                if (TypeOfNotification.SCHEDULE.equals(type) && !user.getConfiguration().getNotificSchedules()) return;
+                notificationRepository.save(new Notification(null, "The project '"+project.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
+                        type, "/"+user.getUsername()+"/"+project.getId(), user, false ));
             });
         }
     }

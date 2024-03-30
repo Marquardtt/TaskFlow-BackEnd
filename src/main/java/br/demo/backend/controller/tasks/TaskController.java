@@ -65,5 +65,11 @@ public class TaskController {
     public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
         return taskService.getDeletedTasks(projectId);
     }
+    //Só os donos do projeto podem completar
+    //TODO:Depois eu vou mudar para ser o usuario logado do context
+    @PatchMapping("/{id}/complete/user/{username}")
+    public TaskGetDTO complete(@PathVariable Long id,@PathVariable String username){
+        return taskService.complete(id, username);
+    }
 
 }
