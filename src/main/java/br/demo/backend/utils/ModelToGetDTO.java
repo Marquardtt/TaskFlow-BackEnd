@@ -258,8 +258,9 @@ public class ModelToGetDTO {
         } catch (ArithmeticException | NullPointerException ignore) {
             progress = 100;
         }
+        SimpleUserGetDTO user = tranformSimple(obj.getOwner());
         return new SimpleProjectGetDTO(
-                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups
+                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups, user
         );
 
     }
