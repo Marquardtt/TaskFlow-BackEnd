@@ -160,8 +160,7 @@ public class ModelToGetDTO {
             page.setProperties(new ArrayList<>());
         }
         try {
-            page.setTasks(obj.getTasks().stream().filter(t -> !t.getTask().getCompleted()
-                            && !t.getTask().getDeleted())
+            page.setTasks(obj.getTasks().stream().filter(t -> !t.getTask().getDeleted())
                     .map(ModelToGetDTO::tranform).toList());
         }catch (NullPointerException ignore) {
             page.setTasks(new ArrayList<>());
