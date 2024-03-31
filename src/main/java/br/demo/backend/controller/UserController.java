@@ -52,6 +52,7 @@ public class UserController {
         return userService.findOne(username);
     }
 
+    //precisa estar logado
     @GetMapping("/logged")
     public UserGetDTO findLogged(){
         return userService.findLogged();
@@ -82,6 +83,7 @@ public class UserController {
         return userService.findAll();
     }
 
+    //Dono de algum projeto em que o usuario esteja
     @PatchMapping("/add-points/{username}")
     public UserGetDTO updatePoints(@PathVariable String username, @RequestBody Integer points) {
         return userService.addPoints(username, points);

@@ -161,7 +161,7 @@ public class ModelToGetDTO {
         }
         try {
             page.setTasks(obj.getTasks().stream().filter(t -> !t.getTask().getCompleted()
-                            && t.getTask().getDeleted())
+                            && !t.getTask().getDeleted())
                     .map(ModelToGetDTO::tranform).toList());
         }catch (NullPointerException ignore) {
             page.setTasks(new ArrayList<>());
