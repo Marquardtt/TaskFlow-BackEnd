@@ -1,7 +1,7 @@
 package br.demo.backend.service.pages;
 
-import br.demo.backend.globalfunctions.AutoMapper;
-import br.demo.backend.globalfunctions.ModelToGetDTO;
+import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
@@ -12,10 +12,7 @@ import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.properties.Date;
-import br.demo.backend.model.properties.Option;
-import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.properties.Select;
+import br.demo.backend.model.properties.*;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
@@ -25,6 +22,7 @@ import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.properties.DateRepository;
+import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.TaskCanvasRepository;
@@ -47,6 +45,7 @@ public class PageService {
     private OrderedPageRepository orderedPageRepository;
     private CanvasPageRepository canvasPageRepository;
     private PageRepository pageRepository;
+    private LimitedRepository limitedRepository;
     private PropertyRepository propertyRepository;
     private TaskCanvasRepository taskCanvasRepository;
     private SelectRepository selectRepository;
@@ -181,6 +180,26 @@ public class PageService {
         return date;
     }
 
+
+    private Property propOrdTime(OrderedPage page) {
+        Project project = projectRepository.findById(page.getProject().getId()).get();
+        Limited limited = (Limited) project
+                .getProperties()
+                .stream()
+                .filter(p -> p.getType().equals(TypeOfProperty.TIME))
+                .findFirst()
+                .orElse(null);
+        if (limited == null) {
+            ArrayList<Page> pages = new ArrayList<>();
+            pages.add(page);
+            limited = new Limited(null, "Time", true, false, TypeOfProperty.TIME, pages, null, 28800L );
+            page.setProperties(new ArrayList<>());
+            Limited limitedSaved = limitedRepository.save(limited);
+            page.getProperties().add(limitedSaved);
+        }
+        return limited;
+    }
+
     public PageGetDTO save(PagePostDTO page, Long projectId) {
         page.setProject(projectRepository.findById(projectId).get());
         if (page.getType().equals(TypeOfPage.CANVAS)) {
@@ -197,8 +216,14 @@ public class PageService {
             OrderedPage canvasModel = new OrderedPage();
             autoMapperOrdered.map(page, canvasModel, false);
             OrderedPage pageServed = orderedPageRepository.save(canvasModel);
-            Property propOrdering = page.getType().equals(TypeOfPage.KANBAN) ?
-                    propOrdSelect(pageServed) : propOrdDate(pageServed);
+            Property propOrdering = null;
+            if( page.getType().equals(TypeOfPage.KANBAN)){
+                propOrdering = propOrdSelect(pageServed);
+            }else if (page.getType().equals(TypeOfPage.TIMELINE)){
+                propOrdering = propOrdTime(pageServed);
+            }else{
+                propOrdDate(pageServed);
+            }
             canvasModel.setPropertyOrdering(propOrdering);
             orderedPageRepository.save(canvasModel);
             return ModelToGetDTO.tranform(canvasModel);
@@ -231,9 +256,11 @@ public class PageService {
 
     public void merge(Collection<Page> pages, Long id) {
         Page page = pageRepository.findById(id).get();
+
         pages.forEach(p ->
         {
             p.setTasks(new ArrayList<>());
+            p.getProperties().addAll(page.getProperties());
             page.getTasks().forEach(t -> {
                 taskService.addTaskToPage(t.getTask(), p.getId());
             });

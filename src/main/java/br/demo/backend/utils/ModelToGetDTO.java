@@ -1,4 +1,4 @@
-package br.demo.backend.globalfunctions;
+package br.demo.backend.utils;
 
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;

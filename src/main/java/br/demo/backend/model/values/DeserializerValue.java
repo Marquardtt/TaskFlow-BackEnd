@@ -89,10 +89,20 @@ public class DeserializerValue extends StdDeserializer<TaskValue> {
                             return new TaskValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
-                            if(value.isNull()){
-                                return new TaskValue(id, property, new TimeValued(idTaskVl, null));
+                            String color = value.get("color").asText();
+                            ArrayList<LocalDateTime> starts = new ArrayList<>();
+                            for(JsonNode valueF : value.get("starts")){
+                                starts.add(LocalDateTime.parse(valueF.asText()));
                             }
-                            return new TaskValue(id, property, new TimeValued(idTaskVl, Duration.parse(value.asText())));
+                            ArrayList<LocalDateTime> ends = new ArrayList<>();
+                            for(JsonNode valueF : value.get("ends")){
+                                ends.add(LocalDateTime.parse(valueF.asText()));
+                            }
+                            JsonNode time = value.get("time");
+                            if(time.isNull()){
+                                return new TaskValue(id, property, new TimeValued(idTaskVl, null, starts, ends, color));
+                            }
+                            return new TaskValue(id, property, new TimeValued(idTaskVl, Duration.parse(time.asText()), starts, ends, color));
                         }
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
