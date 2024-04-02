@@ -146,6 +146,7 @@ public class TaskService {
     public void update(Task taskDTO, Boolean patching) {
         Task task = patching ? taskRepository.findById(taskDTO.getId()).get() : new Task();
         autoMapper.map(taskDTO, task, patching);
+
         taskRepository.save(task);
     }
 
