@@ -1,12 +1,13 @@
 package br.demo.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.demo.backend.security.entity.UserDatailEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.GeneratedColumn;
-import org.hibernate.validator.constraints.Length;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
@@ -19,15 +20,12 @@ import java.util.Collection;
 public class User {
 
     @Id
-//    @GeneratedValue(generator = "uuid")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private String username;
+    private Long id;
 
     private String name;
     private String surname;
-    @Length(min = 8)
-    @Column(nullable = false)
-    private String password;
     private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
@@ -44,10 +42,14 @@ public class User {
     @JoinColumn(nullable = false, updatable = false)
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration = new Configuration();
-    @ManyToMany
+    @ManyToMany (fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private UserDatailEntity userDetailsEntity;
     public User (String username){
-        this.username = username;
+        this.userDetailsEntity.setUsername(username);
     }
+
 
 }

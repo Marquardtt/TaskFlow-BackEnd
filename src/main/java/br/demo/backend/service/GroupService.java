@@ -4,9 +4,12 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.GroupNotFoundException;
+import br.demo.backend.model.Archive;
+import br.demo.backend.model.Group;
+import br.demo.backend.model.Permission;
+import br.demo.backend.model.User;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
-import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
@@ -21,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
 import java.util.HashSet;
-
 
 @Service
 @AllArgsConstructor
@@ -110,7 +112,7 @@ public class GroupService {
 
 
     private User updatePermissionInAUser(User userDTO, Permission permission){
-        User user = userRepository.findById(userDTO.getUsername()).get();
+        User user = userRepository.findByUserDetailsEntity_Username(userDTO.getUserDetailsEntity().getUsername()).get();
         Collection<Permission> permissions = user.getPermissions();
         if(user.getPermissions() != null) {
             permissions.removeAll(user.getPermissions().stream().filter(p ->
@@ -126,11 +128,15 @@ public class GroupService {
 
     public void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
+//            User user = updatePermissionInAUser((userRepository.findById(u.getId()).get()), permission);
+//            System.out.println(user.getUserDetailsEntity().getPassword());
             User user = updatePermissionInAUser(u, permission);
             userRepository.save(user);
             return user;
         }).toList();
         group.setUsers(users);
+//        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getId()).get(), permission);
+
         User owner = updatePermissionInAUser(group.getOwner(), permission);
         userRepository.save(owner);
         group.setOwner(owner);

@@ -1,7 +1,6 @@
 package br.demo.backend.controller;
 
 
-import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
@@ -16,31 +15,31 @@ import java.util.Collection;
 @RequestMapping("/permission")
 public class PermissionController {
     private PermissionService permissionService;
-    @PostMapping
+    @PostMapping("/project/{projectId}")
     public void insert(@RequestBody PermissionPostDTO permission){
         permissionService.save(permission);
     }
 
-    @PutMapping
+    @PutMapping("/project/{projectId}")
     public void upDate(@RequestBody PermissionPutDTO permission){
         permissionService.update(permission, false);
     }
-    @PatchMapping
+    @PatchMapping("/project/{projectId}")
     public void patch(@RequestBody PermissionPutDTO permission){
         permissionService.update(permission, true);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/project/{projectId}")
     public PermissionGetDTO findOne(@PathVariable Long id){
         return permissionService.findOne(id);
     }
 
-    @GetMapping
+    @GetMapping("/project/{projectId}")
     public Collection<PermissionGetDTO> findAll(){
         return permissionService.findAll();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/project/{projectId}")
     public void delete(@PathVariable Long id){
         permissionService.delete(id);
     }

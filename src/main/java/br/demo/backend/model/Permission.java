@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
-
 @Entity
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -28,7 +26,7 @@ public class Permission {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TypePermission permission;
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(nullable = false)
     @NotNull
     private Project project;

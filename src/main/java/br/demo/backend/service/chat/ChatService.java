@@ -60,7 +60,7 @@ public class ChatService {
     private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
         ChatPrivateGetDTO chatGetDTO = (ChatPrivateGetDTO) ModelToGetDTO.tranform(chat);
         chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-        User destination = chat.getUsers().stream().filter(u -> !u.getUsername().equals(userId)).findFirst().get();
+        User destination = chat.getUsers().stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(userId)).findFirst().get();
         chatGetDTO.setPicture(destination.getPicture());
         chatGetDTO.setName(destination.getName());
         return chatGetDTO;
@@ -85,14 +85,14 @@ public class ChatService {
     private Integer setQuantityUnvisualized(Chat chat, String userId) {
         return chat.getMessages().stream().filter(m ->
                 m.getDestinations().stream().anyMatch(d ->
-                        d.getUser().getUsername().equals(userId) && !d.getVisualized()
+                        d.getUser().getUserDetailsEntity().getUsername().equals(userId) && !d.getVisualized()
                 )).toList().size();
     }
 
     public void updateMessagesToVisualized(Message messagePut, String userId) {
         Message message = messageRepository.findById(messagePut.getId()).get();
         message.setDestinations(message.getDestinations().stream().map(d->{
-            if(d.getUser().getUsername().equals(userId)){
+            if(d.getUser().getUserDetailsEntity().getUsername().equals(userId)){
                 d.setVisualized(true);
             }
             return d;
@@ -183,7 +183,7 @@ public class ChatService {
         Collection<User> users = chat.getType().equals(TypeOfChat.PRIVATE) ?
                 ((ChatPrivate) chat).getUsers() : ((ChatGroup) chat).getGroup().getUsers();
         message.setDestinations(users.stream().filter(u-> !u.equals(message.getSender())).map(u -> new Destination(
-                            new DestinationId(u.getUsername(), message.getId()), u, message, false)
+                            new DestinationId(u.getId(), message.getId()), u, message, false)
                     ).toList());
         if(chat.getType().equals(TypeOfChat.PRIVATE)){
             chatPrivateRepository.save((ChatPrivate) chat);

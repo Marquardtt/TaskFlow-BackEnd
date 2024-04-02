@@ -45,6 +45,7 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         UserGetDTO user = new UserGetDTO();
         BeanUtils.copyProperties(obj, user);
+        user.setUsername(obj.getUserDetailsEntity().getUsername());
         try {
             user.setPermissions(obj.getPermissions().stream().map(ModelToGetDTO::tranform).toList());
         } catch (NullPointerException ignore) {}
@@ -228,6 +229,8 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
         BeanUtils.copyProperties(obj, simpleUser);
+        simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
+
         return simpleUser;
     }
 

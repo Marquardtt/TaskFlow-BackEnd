@@ -180,6 +180,7 @@ public class PageService {
         return date;
     }
 
+
     private Property propOrdTime(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Limited limited = (Limited) project
@@ -199,7 +200,8 @@ public class PageService {
         return limited;
     }
 
-    public PageGetDTO save(PagePostDTO page) {
+    public PageGetDTO save(PagePostDTO page, Long projectId) {
+        page.setProject(projectRepository.findById(projectId).get());
         if (page.getType().equals(TypeOfPage.CANVAS)) {
             CanvasPage canvasModel = new CanvasPage();
             autoMapperCanvas.map(page, canvasModel, false);

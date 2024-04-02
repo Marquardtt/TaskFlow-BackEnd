@@ -23,40 +23,40 @@ public class ProjectController {
         projectService.save(project);
     }
 
-    @PatchMapping("/picture/{id}")
-    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+    @PatchMapping("/{projectId}/picture")
+    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable("projectId") Long id) {
         projectService.updatePicture(picture, id);
     }
-    @PatchMapping("/set-now")
+    @PatchMapping("/{projectId}/set-now")
     public void setVisualizedNow(@RequestBody Project project) {
         projectService.setVisualizedNow(project);
     }
-    @PutMapping
+    @PutMapping("/{projectId}")
     public void upDate(@RequestBody ProjectPutDTO project) {
         projectService.update(project, false);
     }
-    @PatchMapping
+    @PatchMapping("/{projectId}")
     public void patch(@RequestBody ProjectPutDTO project) {
         projectService.update(project, true);
     }
 
-    @GetMapping("/{id}")
-    public ProjectGetDTO findOne(@PathVariable Long id) {
+    @GetMapping("/{projectId}")
+    public ProjectGetDTO findOne(@PathVariable("projectId") Long id) {
         return projectService.findOne(id);
     }
 
-    @GetMapping
+    @GetMapping("")
     public Collection<ProjectGetDTO> findAll() {
         return projectService.findAll();
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/{projectId}/user/{userId}")
     public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    @DeleteMapping("/{projectId}")
+    public void delete(@PathVariable("projectId") Long id) {
         projectService.delete(id);
     }
 

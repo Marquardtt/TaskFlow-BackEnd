@@ -1,8 +1,8 @@
 package br.demo.backend.service.tasks;
 
 
+
 import br.demo.backend.repository.values.UserValuedRepository;
-import br.demo.backend.repository.values.ValueRepository;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -25,21 +25,21 @@ import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
-
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
-
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
-import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
+import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 @Service
 @AllArgsConstructor
@@ -69,7 +69,7 @@ public class TaskService {
     public TaskGetDTO save(Long idpage, String userId) {
 
         Page page = pageRepositorry.findById(idpage).get();
-        User user = new User(userId);
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
 
         Task taskEmpty = taskRepository.save(new Task());
 
@@ -151,7 +151,7 @@ public class TaskService {
     }
 
     public void delete(Long id, String userId) {
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDeleted(true);
         task.getLogs().add(new Log(null, "Task deleted", Action.DELETE, user, LocalDateTime.now()));
@@ -168,6 +168,7 @@ public class TaskService {
         task.setDeleted(false);
         task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now()));
         taskRepository.save(task);
+
     }
 
     public Collection<TaskGetDTO> getDeletedTasks(Long projectId){
@@ -179,14 +180,13 @@ public class TaskService {
     }
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
-        User user = userRepository.findById(id).get();
+        User user = userRepository.findByUserDetailsEntity_Username(id).get();
         Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
         Collection<TaskValue> taskValues =
                 values.stream().map(v -> taskValueRepository
                                 .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
                         .toList();
         Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).toList();
-
         return tasks.stream().filter(t ->
                         t.getProperties().stream().anyMatch(p ->
                                 p.getProperty().getType().equals(TypeOfProperty.DATE)

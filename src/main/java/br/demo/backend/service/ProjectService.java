@@ -52,8 +52,9 @@ public class ProjectService {
     }
 
     public Collection<ProjectGetDTO> finAllOfAUser(String id) {
-        Collection<Project> projects = projectRepository.findProjectsByOwner_Username(id);
-        projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
+        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(id);
+        projects.addAll(userRepository.findByUserDetailsEntity_Username(id)
+                .get().getPermissions().stream().map(Permission::getProject).toList());
         return projects.stream().map(ModelToGetDTO::tranform).toList();
     }
     public ProjectGetDTO findOne(Long id) {
@@ -75,6 +76,8 @@ public class ProjectService {
     public void save(ProjectPostDTO projectDto) {
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
+        project.setOwner(userRepository.findByUserDetailsEntity_Username(projectDto.getOwner().getUserDetailsEntity().getUsername()).get());
+
         Project emptyProject = projectRepository.save(project);
         ArrayList<Option> options = new ArrayList<>();
         options.add(new Option(null, "To-do", "#FF7A00", 0));
