@@ -15,26 +15,33 @@ import java.util.Collection;
 @RequestMapping("/permission")
 public class PermissionController {
     private PermissionService permissionService;
-
-    //FEITO
-    @PostMapping
-    public PermissionGetDTO insert(@RequestBody PermissionPostDTO permission){
-        return permissionService.save(permission);
+    @PostMapping("/project/{projectId}")
+    public void insert(@RequestBody PermissionPostDTO permission){
+        permissionService.save(permission);
     }
 
-    //FEITO
-    @PutMapping
-    public PermissionGetDTO upDate(@RequestBody PermissionPutDTO permission){
-        return permissionService.update(permission, false);
+    @PutMapping("/project/{projectId}")
+    public void upDate(@RequestBody PermissionPutDTO permission){
+        permissionService.update(permission, false);
     }
-    //FEITO
-    @PatchMapping
-    public PermissionGetDTO patch(@RequestBody PermissionPutDTO permission){
-        return permissionService.update(permission, true);
+    @PatchMapping("/project/{projectId}")
+    public void patch(@RequestBody PermissionPutDTO permission){
+        permissionService.update(permission, true);
     }
 
-    //FEITO
-    @DeleteMapping("/{id}")
+    @GetMapping("/{id}/project/{projectId}")
+    public PermissionGetDTO findOne(@PathVariable Long id){
+        return permissionService.findOne(id);
+    }
+  
+  //TODO: filtra por permissions desse projeto
+
+    @GetMapping("/project/{projectId}")
+    public Collection<PermissionGetDTO> findAll(){
+        return permissionService.findAll();
+    }
+
+    @DeleteMapping("/{id}/project/{projectId}")
     public void delete(@PathVariable Long id){
         permissionService.delete(id);
     }

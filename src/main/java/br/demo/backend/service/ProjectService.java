@@ -58,7 +58,6 @@ public class ProjectService {
             Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(p);
             return ModelToGetDTO.tranformSimple(p, groups);
         }).toList();
-
     }
 
     public ProjectGetDTO findOne(Long id) {
@@ -80,6 +79,8 @@ public class ProjectService {
     public SimpleProjectGetDTO save(ProjectPostDTO projectDto) {
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
+        project.setOwner(userRepository.findByUserDetailsEntity_Username(projectDto.getOwner().getUserDetailsEntity().getUsername()).get());
+
         Project emptyProject = projectRepository.save(project);
         ArrayList<Option> options = new ArrayList<>();
         options.add(new Option(null, "To-do", "#FF7A00", 0));

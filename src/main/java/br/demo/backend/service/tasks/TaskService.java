@@ -1,6 +1,9 @@
 package br.demo.backend.service.tasks;
 
 
+
+import br.demo.backend.repository.values.UserValuedRepository;
+import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.service.NotificationService;
@@ -27,14 +30,12 @@ import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
-
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
-
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
-import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.relations.TaskValueRepository;
+import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
@@ -60,12 +64,13 @@ public class TaskService {
     private AutoMapper<Task> autoMapper;
     private NotificationService notificationService;
     private TaskPageRepository taskPageRepository;
+    private UserValuedRepository userValuedRepository;
 
 
     public TaskGetDTO save(Long idpage, String userId) {
 
         Page page = pageRepositorry.findById(idpage).get();
-        User user = new User(userId);
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
 
         Task taskEmpty = taskRepository.save(new Task());
 
@@ -221,7 +226,7 @@ public class TaskService {
 
 
     public void delete(Long id, String userId) {
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDateDeleted(LocalDateTime.now());
         task.setDeleted(true);
@@ -252,17 +257,36 @@ public class TaskService {
     }
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
-        User user = userRepository.findById(id).get();
-        PropertyValue value = taskValueRepository.findTaskValuesByProperty_TypeAndValueContaining(TypeOfProperty.USER, user);
-        Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(value);
+        User user = userRepository.findByUserDetailsEntity_Username(id).get();
+        Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
+        Collection<TaskValue> taskValues =
+                values.stream().map(v -> taskValueRepository
+                                .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
+                        .toList();
+        Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).toList();
 
         return tasks.stream().filter(t ->
                         t.getProperties().stream().anyMatch(p ->
-                                p.getProperty().getType().equals(TypeOfProperty.DATE) &&
-                                        ((Date) p.getProperty()).getScheduling() &&
-                                        p.getValue().getValue().equals(LocalDate.now())))
-                .map(ModelToGetDTO::tranform).toList()
-                ;
+                                p.getProperty().getType().equals(TypeOfProperty.DATE)
+                                        &&
+                                        ((((Date) p.getProperty()).getScheduling()
+                                                &&
+                                                !user.getConfiguration().getInitialPageTasksPerDeadline())
+                                        ||
+                                        (((Date) p.getProperty()).getDeadline()
+                                                &&
+                                                user.getConfiguration().getInitialPageTasksPerDeadline()))
+                                        &&
+                                        p.getValue().getValue() != null
+                                        &&
+                                        compareToThisDay((LocalDateTime) p.getValue().getValue())))
+                .map(ModelToGetDTO::tranform).toList();
+    }
+
+    private Boolean compareToThisDay(LocalDateTime time){
+        return time.getMonthValue() == LocalDate.now().getMonthValue() &&
+                time.getYear() == time.getYear() &&
+                time.getDayOfMonth() == time.getDayOfMonth();
     }
 
     public TaskGetDTO complete(Long id, String userId) {

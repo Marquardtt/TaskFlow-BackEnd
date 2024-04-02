@@ -1,6 +1,8 @@
 package br.demo.backend.repository.relations;
 
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.values.Value;
 import br.demo.backend.model.relations.PropertyValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

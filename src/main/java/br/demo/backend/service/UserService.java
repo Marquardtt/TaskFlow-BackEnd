@@ -31,13 +31,13 @@ public class UserService {
     private AutoMapper<User> autoMapper;
     private NotificationService notificationService;
     public UserGetDTO findOne(String id) {
-        User user = userRepository.findById(id).get();
+        User user = userRepository.findByUserDetailsEntity_Username(id).get();
         return ModelToGetDTO.tranform(user);
     }
 
     public UserGetDTO save(UserPostDTO userDto) {
         try{
-            userRepository.findById(userDto.getUsername()).get();
+            userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
             throw new IllegalArgumentException("Username is already been using by other user0");
         }catch (NoSuchElementException e){
             User user = new User();
@@ -46,37 +46,62 @@ public class UserService {
             return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
-    public UserGetDTO update(UserPutDTO userDTO, Boolean patching) {
-        User oldUser = userRepository.findById(userDTO.getUsername()).get();
+    public void update(UserPutDTO userDTO, Boolean patching) {
+//        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User oldUser = userRepository.findById(userDTO.getId()).get();
+
         System.out.println(userDTO);
         User user = patching ? oldUser : new User();
         autoMapper.map(userDTO, user, patching);
 
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
-        user.setPassword(oldUser.getPassword());
+        user.getUserDetailsEntity().setPassword(oldUser.getUserDetailsEntity().getPassword());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
-    public void delete(String id) {
+    public void delete(Long id) {
         userRepository.deleteById(id);
     }
 
     public PermissionGetDTO getPermissionOfAUserInAProject(String userId, Long projectId){
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
         Permission permission = user.getPermissions().stream().filter(
                 p -> p.getProject().getId().equals(projectId)
         ).findFirst().get();
         return ModelToGetDTO.tranform(permission);
     }
 
-    public UserGetDTO updatePicture(MultipartFile picture, String id) {
-        User user = userRepository.findById(id).get();
+
+    public void updatePicture(MultipartFile picture, String id) {
+        User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.setPicture(new Archive(picture));
         return ModelToGetDTO.tranform(userRepository.save(user));
 
     }
 
+    public void updatePassword(String id, String password) {
+        User user = userRepository.findByUserDetailsEntity_Username(id).get();
+        user.getUserDetailsEntity().setPassword(password);
+        userRepository.save(user);
+    }
+
+//    @Transactional
+//    public void putNewPermissionInAProject(String userId, Long permissionId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+//
+//        if (user.getPermissions() != null){
+//            user.getPermissions().clear();
+//        }
+//
+//        user.getPermissions().add(permissionRepository.findById(permissionId).get());
+//
+//        userRepository.save(user);
+//    }
+
+
+  
     public UserGetDTO updatePassword(String id, String password) {
         User user = userRepository.findById(id).get();
         user.setPassword(password);

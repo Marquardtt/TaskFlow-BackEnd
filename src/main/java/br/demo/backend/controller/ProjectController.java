@@ -26,42 +26,35 @@ public class ProjectController {
         return projectService.save(project);
     }
 
-//   FEITO
-    @PatchMapping("/picture/{id}")
-    public ProjectGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        return projectService.updatePicture(picture, id);
+    @PatchMapping("/{projectId}/picture")
+    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable("projectId") Long id) {
+        projectService.updatePicture(picture, id);
     }
-//    FEITO
-    @PatchMapping("/set-now")
-    public ProjectGetDTO setVisualizedNow(@RequestBody Project project) {
-        return projectService.setVisualizedNow(project);
+    @PatchMapping("/{projectId}/set-now")
+    public void setVisualizedNow(@RequestBody Project project) {
+        projectService.setVisualizedNow(project);
     }
-    //    FEITO
-    @PutMapping
-    public ProjectGetDTO upDate(@RequestBody ProjectPutDTO project) {
-        return projectService.update(project, false);
+    @PutMapping("/{projectId}")
+    public void upDate(@RequestBody ProjectPutDTO project) {
+        projectService.update(project, false);
     }
-    //    FEITO
-    @PatchMapping
-    public ProjectGetDTO patch(@RequestBody ProjectPutDTO project) {
-        return projectService.update(project, true);
+    @PatchMapping("/{projectId}")
+    public void patch(@RequestBody ProjectPutDTO project) {
+        projectService.update(project, true);
     }
 
-    //    FEITO
-    @GetMapping("/{id}")
-    public ProjectGetDTO findOne(@PathVariable Long id) {
+    @GetMapping("/{projectId}")
+    public ProjectGetDTO findOne(@PathVariable("projectId") Long id) {
         return projectService.findOne(id);
     }
 
-    //    FEITO
-    @GetMapping("/user/{userId}")
-    public Collection<SimpleProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
+    @GetMapping("/{projectId}/user/{userId}")
+    public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
     }
 
-    //    FEITO
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    @DeleteMapping("/{projectId}")
+    public void delete(@PathVariable("projectId") Long id) {
         projectService.delete(id);
     }
 

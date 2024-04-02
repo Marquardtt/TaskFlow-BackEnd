@@ -32,6 +32,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -47,6 +48,7 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         UserGetDTO user = new UserGetDTO();
         BeanUtils.copyProperties(obj, user);
+        user.setUsername(obj.getUserDetailsEntity().getUsername());
         try {
             user.setPermissions(obj.getPermissions().stream().map(ModelToGetDTO::tranform).toList());
         } catch (NullPointerException ignore) {}
@@ -115,7 +117,6 @@ public class ModelToGetDTO {
         try {
             project.setProperties(obj.getProperties().stream().map(ModelToGetDTO::tranform).toList());
         } catch (NullPointerException ignore) {}
-
         try{
             project.setComments(obj.getComments().stream().map(ModelToGetDTO::tranform).toList());
         }catch (NullPointerException ignore){}
@@ -244,6 +245,8 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
         BeanUtils.copyProperties(obj, simpleUser);
+        simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
+
         return simpleUser;
     }
 

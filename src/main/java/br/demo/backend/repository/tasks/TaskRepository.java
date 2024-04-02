@@ -10,8 +10,9 @@ import java.util.Collection;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    public Collection<Task> findTasksByNameContains(String name);
+     Collection<Task> findTasksByNameContains(String name);
 
+     Task findByPropertiesContaining(TaskValue prop);
     public Collection<Task> findTasksByPropertiesContaining(PropertyValue prop);
 
 }

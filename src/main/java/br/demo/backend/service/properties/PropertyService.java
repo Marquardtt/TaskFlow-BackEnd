@@ -14,6 +14,7 @@ import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
@@ -67,19 +68,22 @@ public class PropertyService {
         }
     }
 
-    public void saveLimited(Limited property) {
-        limitedRepository.save(property);
+    public Limited saveLimited(Limited property) {
+        Limited limited = limitedRepository.save(property);
         setInTheTasksThatAlreadyExists(property);
+        return limited;
     }
 
-    public void saveDate(Date property) {
-        dateRepository.save(property);
+    public Date saveDate(Date property) {
+        Date date = dateRepository.save(property);
         setInTheTasksThatAlreadyExists(property);
+        return date;
     }
 
-    public void saveSelect(Select property) {
-        selectRepository.save(property);
+    public Select saveSelect(Select property) {
+        Select select = selectRepository.save(property);
         setInTheTasksThatAlreadyExists(property);
+        return select;
     }
 
     public void updateLimited(LimitedGetDTO propertyDTO, Boolean patching) {
@@ -167,7 +171,7 @@ public class PropertyService {
             });
             propertyRepository.delete(property);
         } else {
-            throw new RuntimeException("Property can't be deleted");
+            throw  new RuntimeException("Property can't be deleted");
         }
     }
 

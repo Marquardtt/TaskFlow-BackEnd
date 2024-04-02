@@ -1,13 +1,10 @@
 package br.demo.backend.controller.tasks;
 
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
-import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -19,22 +16,20 @@ public class TaskController {
     private TaskService taskService;
 
 
-    //FEITO
-    @PostMapping("/{pageId}/{userId}")
-    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId){
+    @PostMapping("/{projectId}/{pageId}/{userId}")
+    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId, @PathVariable String projectId){
         return taskService.save(pageId, userId);
     }
 
-    //FEITO
-    @PutMapping
-    public TaskGetDTO upDate(@RequestBody Task task){
-        return taskService.update(task, false);
+    @PutMapping("/project/{projectId}")
+    public void upDate(@RequestBody Task task){
+        taskService.update(task, false);
     }
-    //FEITO
-    @PatchMapping
-    public TaskGetDTO patch(@RequestBody Task task){
-        return taskService.update(task, true);
+    @PatchMapping("/project/{projectId}")
+    public void patch(@RequestBody Task task){
+        taskService.update(task, true);
     }
+
 
     //FEITO
     @GetMapping("/today/{id}")
@@ -42,22 +37,20 @@ public class TaskController {
         return taskService.getTasksToday(id);
     }
 
-    //FEITO
+    //TODO: verificar se o becker fez isso
     @DeleteMapping("/{id}/{userId}")
     public void delete(@PathVariable Long id , @PathVariable String userId){
         taskService.delete(id, userId);
     }
 
-    //FEITO
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/project/{projectId}/{id}")
     public void delete(@PathVariable Long id){
         taskService.deletePermanent(id);
     }
 
-    //FEITO
-    @PutMapping("/redo/{userId}/{id}")
-    public TaskGetDTO redo(@PathVariable Long id , @PathVariable String userId){
-        return taskService.redo(id, userId);
+    @PutMapping("/project/{projectId}/redo/{userId}/{id}")
+    public void redo(@PathVariable Long id , @PathVariable String userId){
+        taskService.redo(id, userId);
     }
 
     //FEITO

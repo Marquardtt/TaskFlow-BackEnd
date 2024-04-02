@@ -1,11 +1,10 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.*;
+import br.demo.backend.model.Permission;
+import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
-import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +25,18 @@ public class GroupController {
         return groupService.save(group);
     }
 
-    //Precisa ser o owner do grupo
-    @PutMapping
-    public GroupGetDTO upDate(@RequestBody GroupPutDTO group) {
-
-        return groupService.update(group, false);
+    @PutMapping("/{groupId}")
+    public void upDate(@RequestBody GroupPutDTO group) {
+        groupService.update(group, false);
     }
-    //Precisa ser o owner do grupo
-    @PatchMapping
-    public GroupGetDTO patch(@RequestBody GroupPutDTO group) {
-
-        return groupService.update(group, true);
+    @PatchMapping("/{groupId}")
+    public void patch(@RequestBody GroupPutDTO group) {
+        groupService.update(group, true);
     }
+
+    @GetMapping("/{groupId}")
+    public GroupGetDTO findOne(@PathVariable Long id) {
+        return groupService.findOne(id);
 
     //Precisa que o usuario logado seja o mesmo do parametro
     @GetMapping("/user/{userId}")
@@ -52,21 +51,18 @@ public class GroupController {
         return ResponseEntity.ok(permissions);
     }
 
-    //Precisa ser o owner do group
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        groupService.delete(id);
+    @DeleteMapping("/{groupId}")
+    public void delete(@PathVariable Long groupId) {
+        groupService.delete(groupId);
+    }
+    @PatchMapping("/{groupId}/picture/{id}")
+    public void updatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
+        groupService.updatePicture(picture, id);
     }
 
-    //Precisa ser o owner do group
-    @PatchMapping("/picture/{id}")
-    public GroupGetDTO updatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        return groupService.updatePicture(picture, id);
-    }
+    @PatchMapping("/{groupId}/change-owner/{projectId}")
+    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
+        groupService.updateOwner(newOwner, projectId);
 
-    //Precisa ser o owner do group
-    @PatchMapping("/change-owner/{projectId}")
-    public GroupGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
-        return groupService.updateOwner(newOwner, projectId);
     }
 }

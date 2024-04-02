@@ -18,6 +18,7 @@ import br.demo.backend.model.properties.*;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
@@ -173,6 +174,7 @@ public class PageService {
         return date;
     }
 
+
     private Property propOrdTime(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Limited limited = (Limited) project
@@ -192,7 +194,8 @@ public class PageService {
         return limited;
     }
 
-    public PageGetDTO save(PagePostDTO page) {
+    public PageGetDTO save(PagePostDTO page, Long projectId) {
+        page.setProject(projectRepository.findById(projectId).get());
         if (page.getType().equals(TypeOfPage.CANVAS)) {
             CanvasPage canvasModel = new CanvasPage();
             autoMapperCanvas.map(page, canvasModel, false);
@@ -244,9 +247,11 @@ public class PageService {
 
     public Collection<PageGetDTO> merge(Collection<Page> pages, Long id) {
         Page page = pageRepository.findById(id).get();
+
         pages.forEach(p ->
         {
             p.setTasks(new ArrayList<>());
+            p.getProperties().addAll(page.getProperties());
             page.getTasks().forEach(t -> {
                 taskService.addTaskToPage(t.getTask(), p.getId());
             });
