@@ -25,6 +25,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,16 +51,18 @@ public class ChatService {
     private AutoMapper<Message> mapperMessage;
 
 
-    public Collection<ChatPrivateGetDTO> findAllPrivate(String userId) {
+    public Collection<ChatPrivateGetDTO> findAllPrivate() {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         Collection<ChatPrivate> chats = chatPrivateRepository
-                .findChatsByUsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
-        return chats.stream().map(c -> privateToGetDTO(c, userId)).toList();
+                .findChatsByUsers_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
+        return chats.stream().map(c -> privateToGetDTO(c, username)).toList();
     }
 
-    public Collection<ChatGroupGetDTO> findAllGroup(String userId) {
+    public Collection<ChatGroupGetDTO> findAllGroup() {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         Collection<ChatGroup> chatGroups = chatGroupRepository
-                .findChatsByGroup_UsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
-        return chatGroups.stream().map(c -> groupToGetDTO(c, userId)).toList();
+                .findChatsByGroup_Users_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
+        return chatGroups.stream().map(c -> groupToGetDTO(c, username)).toList();
     }
 
     private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
@@ -93,11 +97,12 @@ public class ChatService {
                 )).toList().size();
     }
 
-    public ChatGetDTO updateMessagesToVisualized(Long chatId, String userId) {
+    public ChatGetDTO updateMessagesToVisualized(Long chatId) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         Chat chat = chatRepository.findById(chatId).get();
         Collection<Message> messages = chat.getMessages().stream().map(m -> {
             m.setDestinations(m.getDestinations().stream().map(d -> {
-                if (d.getUser().getUserDetailsEntity().getUsername().equals(userId)) {
+                if (d.getUser().getUserDetailsEntity().getUsername().equals(username)) {
                     d.setVisualized(true);
                 }
                 return d;

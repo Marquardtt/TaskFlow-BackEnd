@@ -16,9 +16,9 @@ public class TaskController {
     private TaskService taskService;
 
 
-    @PostMapping("/{projectId}/{pageId}/{userId}")
-    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId, @PathVariable String projectId){
-        return taskService.save(pageId, userId);
+    @PostMapping("/{projectId}/{pageId}")
+    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String projectId){
+        return taskService.save(pageId);
     }
 
     @PutMapping("/project/{projectId}")
@@ -37,6 +37,7 @@ public class TaskController {
         return taskService.getTasksToday(id);
     }
 
+
     @DeleteMapping("/project/{projectId}/{id}")
     public void delete(@PathVariable Long id){
         taskService.delete(id);
@@ -47,9 +48,9 @@ public class TaskController {
         taskService.deletePermanent(id);
     }
 
-    @PutMapping("/project/{projectId}/redo/{userId}/{id}")
-    public void redo(@PathVariable Long id , @PathVariable String userId){
-        taskService.redo(id, userId);
+    @PutMapping("/project/{projectId}/redo/{id}")
+    public void redo(@PathVariable Long id){
+        taskService.redo(id);
     }
 
     //FEITO

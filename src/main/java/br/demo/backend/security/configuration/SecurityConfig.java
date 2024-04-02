@@ -57,9 +57,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
 
                 //TASK
-                .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}/{userId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PUT, "/task/project/{projectId").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{userId}/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)

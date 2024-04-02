@@ -40,18 +40,22 @@ import br.demo.backend.model.values.UserValued;
 import br.demo.backend.repository.GroupRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 
+@Component
 public class ModelToGetDTO {
 
     private static GroupRepository groupRepository;
-
-    public ModelToGetDTO(GroupRepository groupRepositoryParameter) {
-        groupRepository = groupRepositoryParameter;
+    @Autowired
+    public void setUserRepository(GroupRepository repo) {
+        ModelToGetDTO.groupRepository= repo;
     }
+
 
     public static UserGetDTO tranform(User obj){
         if(obj == null) return null;

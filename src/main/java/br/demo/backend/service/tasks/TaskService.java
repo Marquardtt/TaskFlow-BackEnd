@@ -68,10 +68,11 @@ public class TaskService {
     private UserValuedRepository userValuedRepository;
 
 
-    public TaskGetDTO save(Long idpage, String userId) {
+    public TaskGetDTO save(Long idpage) {
 
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         Page page = pageRepositorry.findById(idpage).get();
-        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
 
         Task taskEmpty = taskRepository.save(new Task());
 
@@ -242,10 +243,12 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public TaskGetDTO redo(Long id, String userId) {
+    public TaskGetDTO redo(Long id) {
         Task task = taskRepository.findById(id).get();
+        String userId = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
         task.setDeleted(false);
-        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, new User(userId), LocalDateTime.now(), null));
+        task.getLogs().add(new Log(null, "Task Redo", Action.REDO, user, LocalDateTime.now(), null));
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return ModelToGetDTO.tranform(taskRepository.save(task));
     }
