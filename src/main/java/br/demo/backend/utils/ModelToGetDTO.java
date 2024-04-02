@@ -12,6 +12,7 @@ import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.model.dtos.properties.DateGetDTO;
 import br.demo.backend.model.dtos.properties.LimitedGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
@@ -32,11 +33,13 @@ import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class ModelToGetDTO {
@@ -114,6 +117,14 @@ public class ModelToGetDTO {
         try {
             project.setProperties(obj.getProperties().stream().map(ModelToGetDTO::tranform).toList());
         } catch (NullPointerException ignore) {}
+        try{
+            project.setComments(obj.getComments().stream().map(ModelToGetDTO::tranform).toList());
+        }catch (NullPointerException ignore){}
+
+        try{
+            project.setValues(obj.getValues().stream().map(ModelToGetDTO::tranform).toList());
+        }catch (NullPointerException ignore){}
+
         project.setOwner(tranformSimple(obj.getOwner()));
         return project;
     }
@@ -146,10 +157,15 @@ public class ModelToGetDTO {
         }
         try {
             page.setProperties(obj.getProperties().stream().map(ModelToGetDTO::tranform).toList());
-        } catch (NullPointerException ignore) {}
+        } catch (NullPointerException ignore) {
+            page.setProperties(new ArrayList<>());
+        }
         try {
-            page.setTasks(obj.getTasks().stream().map(ModelToGetDTO::tranform).toList());
-        }catch (NullPointerException ignore) {}
+            page.setTasks(obj.getTasks().stream().filter(t -> !t.getTask().getDeleted())
+                    .map(ModelToGetDTO::tranform).toList());
+        }catch (NullPointerException ignore) {
+            page.setTasks(new ArrayList<>());
+        }
         return page;
     }
     private static OrderedPageGetDTO tranform(OrderedPage obj){
@@ -186,9 +202,9 @@ public class ModelToGetDTO {
         BeanUtils.copyProperties(obj, property);
         return property;
     }
-    public static TaskValueGetDTO tranform(TaskValue obj){
+    public static PropertyValueGetDTO tranform(PropertyValue obj){
         if(obj == null) return null;
-        TaskValueGetDTO taskValue = new TaskValueGetDTO();
+        PropertyValueGetDTO taskValue = new PropertyValueGetDTO();
         BeanUtils.copyProperties(obj, taskValue);
         taskValue.setProperty(tranform(obj.getProperty()));
         if(obj.getValue() instanceof UserValued userValued){
@@ -232,6 +248,24 @@ public class ModelToGetDTO {
         simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
 
         return simpleUser;
+    }
+
+    public static SimpleProjectGetDTO tranformSimple(Project obj, Collection<Group> groups){
+
+        Integer progress = 0;
+        try {
+            Collection<Task> tasks = obj.getPages().stream()
+                    .flatMap(page -> page.getTasks().stream()).map(TaskPage::getTask).toList();
+            tasks = tasks.stream().distinct().toList();
+            progress = Math.toIntExact(100 / tasks.size() * tasks.stream().filter(Task::getCompleted).count());
+        } catch (ArithmeticException | NullPointerException ignore) {
+            progress = 100;
+        }
+        SimpleUserGetDTO user = tranformSimple(obj.getOwner());
+        return new SimpleProjectGetDTO(
+                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups, user
+        );
+
     }
 
 }

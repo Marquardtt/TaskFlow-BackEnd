@@ -15,6 +15,7 @@ import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -160,12 +161,12 @@ public class PropertyService {
                 orderedPageRepository.save(p);
             });
             taskRepository.findAll().stream().forEach(t -> {
-                TaskValue taskValue = t.getProperties().stream().filter(p ->
+                PropertyValue propertyValue = t.getProperties().stream().filter(p ->
                         p.getProperty().getId().equals(id)).findFirst().orElse(null);
-                if(taskValue != null){
-                    t.getProperties().remove(taskValue);
+                if(propertyValue != null){
+                    t.getProperties().remove(propertyValue);
                     taskService.update(t, true);
-                    taskValueRepository.deleteById(taskValue.getId());
+                    taskValueRepository.deleteById(propertyValue.getId());
                 }
             });
             propertyRepository.delete(property);

@@ -2,14 +2,14 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.model.relations.PropertyValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Entity
@@ -28,15 +28,17 @@ public class Task {
     private String name;
 
 
+    private LocalDateTime dateDeleted;
     //Patch
     private Boolean deleted = false;
+    private LocalDateTime dateCompleted;
     //Patch
     private Boolean completed = false;
 
     //Patch
     @JoinColumn(name = "task_id")
     @OneToMany(cascade = CascadeType.ALL)
-    private Collection<TaskValue> properties;
+    private Collection<PropertyValue> properties;
 
 
     @JoinColumn(name = "task_id")

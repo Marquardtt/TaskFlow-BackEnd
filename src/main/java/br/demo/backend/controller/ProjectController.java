@@ -6,6 +6,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,11 @@ import java.util.Collection;
 @RequestMapping("/project")
 public class ProjectController {
     private ProjectService projectService;
+
+    //FEITO
     @PostMapping
-    public void insert(@RequestBody ProjectPostDTO project) {
-        projectService.save(project);
+    public SimpleProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
+        return projectService.save(project);
     }
 
     @PatchMapping("/{projectId}/picture")
@@ -45,11 +48,6 @@ public class ProjectController {
         return projectService.findOne(id);
     }
 
-    @GetMapping("")
-    public Collection<ProjectGetDTO> findAll() {
-        return projectService.findAll();
-    }
-
     @GetMapping("/{projectId}/user/{userId}")
     public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
         return projectService.finAllOfAUser(userId);
@@ -60,8 +58,9 @@ public class ProjectController {
         projectService.delete(id);
     }
 
+    //    FEITO
     @PatchMapping("/change-owner/{projectId}")
-    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
-        projectService.updateOwner(newOwner, projectId);
+    public ProjectGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
+        return projectService.updateOwner(newOwner, projectId);
     }
 }

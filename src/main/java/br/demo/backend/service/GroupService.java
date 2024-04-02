@@ -10,6 +10,10 @@ import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
@@ -22,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -31,11 +36,9 @@ public class GroupService {
 
 
     private GroupRepository groupRepository;
-    private ProjectService projectService;
     private UserRepository userRepository;
+    private NotificationService notificationService;;
     private AutoMapper<Group> autoMapper;
-
-
 
 
     public Collection<GroupGetDTO> findAll() {
@@ -48,23 +51,25 @@ public class GroupService {
     }
 
 
-    public void save(GroupPostDTO groupDto) {
+    public GroupGetDTO save(GroupPostDTO groupDto) {
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
+
     }
 
-
-    public void updateOwner(User user, Long groupId) {
+    public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
+
     }
     public Collection<GroupGetDTO> findGroupsByUser(String userId) {
-        return groupRepository.findGroupsByUsersContaining(new User(userId)).stream().map(ModelToGetDTO::tranform).toList();
+        return groupRepository.findGroupsByOwnerOrUsersContaining(new User(userId), new User(userId))
+                .stream().map(ModelToGetDTO::tranform).toList();
     }
 
 
@@ -81,14 +86,12 @@ public class GroupService {
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-
-
         return group.getPermissions().stream()
                 .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
     }
 
 
-    public void update(GroupPutDTO groupDTO, Boolean patching) {
+    public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
         Archive picture = oldGroup.getPicture();
 
@@ -98,7 +101,7 @@ public class GroupService {
         autoMapper.map(groupDTO, group, patching);
         group.setOwner(owner);
 
-
+        //TODO: verificar se ao adicionar em membro se ele terá uma permission
         Group groupOld = groupRepository.findById(group.getId()).get();
         Collection<Permission> permissions = group.getPermissions().stream().filter(p ->
                 !groupOld.getPermissions().contains(p)
@@ -107,7 +110,19 @@ public class GroupService {
             updatePermission(group, permission);
         }
         group.setPicture(picture);
-        groupRepository.save(group);
+        Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
+                !groupOld.getUsers().contains(u)
+        ).toList());
+        usersAddedAndRemoved.addAll(groupOld.getUsers().stream().filter(u ->
+                !group.getUsers().contains(u)
+        ).toList());
+        usersAddedAndRemoved.forEach(u -> {
+            if(!u.equals(group.getOwner())){
+                //TODO: mudar para passar o id do user
+                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, 0L, group.getId());
+            }
+        });
+        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
 
@@ -115,8 +130,15 @@ public class GroupService {
         User user = userRepository.findByUserDetailsEntity_Username(userDTO.getUserDetailsEntity().getUsername()).get();
         Collection<Permission> permissions = user.getPermissions();
         if(user.getPermissions() != null) {
-            permissions.removeAll(user.getPermissions().stream().filter(p ->
-                    p.getProject().getId().equals(permission.getProject().getId())).toList());
+            Permission oldPermission = user.getPermissions().stream().filter(p ->
+                    p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
+            if(oldPermission != null ){
+                if(!oldPermission.equals(permission)){
+                    //TODO:mudar para passar o id do user
+                    notificationService.generateNotification(TypeOfNotification.CHANGEPERMISSION, 0L, permission.getProject().getId());
+                }
+                permissions.remove(oldPermission);
+            }
         }else{
             permissions = new HashSet<>();
         }
@@ -126,7 +148,7 @@ public class GroupService {
     }
 
 
-    public void updatePermission(Group group, Permission permission) {
+    private void updatePermission(Group group, Permission permission) {
         Collection <User> users = group.getUsers().stream().map( u -> {
 //            User user = updatePermissionInAUser((userRepository.findById(u.getId()).get()), permission);
 //            System.out.println(user.getUserDetailsEntity().getPassword());
@@ -148,10 +170,10 @@ public class GroupService {
     }
 
 
-    public void updatePicture(MultipartFile picture, Long id) {
+    public GroupGetDTO updatePicture(MultipartFile picture, Long id) {
         Group group = groupRepository.findById(id).get();
         group.setPicture(new Archive(picture));
-        groupRepository.save(group);
+        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
 

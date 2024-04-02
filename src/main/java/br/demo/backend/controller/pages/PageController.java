@@ -1,9 +1,10 @@
 package br.demo.backend.controller.pages;
 
+import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
-import br.demo.backend.model.pages.OrderedPage;
+import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
@@ -26,11 +27,11 @@ public class PageController {
         return pageService.save(page, projectId);
     }
 
-    @PatchMapping("/{taskId}/{index}/{columnChanged}/project/{projectId}")
-    public OrderedPageGetDTO updateIndexes(@PathVariable Long projectId, @RequestBody OrderedPage page, @PathVariable Long taskId,
-                                           @PathVariable Integer index, @PathVariable Integer columnChanged) {
-        return pageService.updateIndex(page, taskId, index, columnChanged);
-    }
+    //@PatchMapping("/{taskId}/{index}/{columnChanged}/project/{projectId}")
+    //public OrderedPageGetDTO updateIndexes(@PathVariable Long projectId, @RequestBody OrderedPage page, @PathVariable Long taskId,
+    //                                       @PathVariable Integer index, @PathVariable Integer columnChanged) {
+    //    return pageService.updateIndex(page, taskId, index, columnChanged);
+    //}
 
     @PatchMapping("/{id}/project/{projectId}")
     public void upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
@@ -55,17 +56,6 @@ public class PageController {
     @PatchMapping("/prop-ordering/{id}/project/{projectId}")
     public void updatePropertiesOrdering(@PathVariable Long projectId, @RequestBody Property property, @PathVariable Long id) {
         pageService.updatePropertiesOrdering(property, id);
-    }
-
-    // General
-    @GetMapping("/{id}/project/{projectId}")
-    public PageGetDTO findOne(@PathVariable Long projectId, @PathVariable Long id) {
-        return pageService.findOne(id);
-    }
-
-    @GetMapping("/project/{projectId}")
-    public Collection<PageGetDTO> findAll(@PathVariable Long projectId) {
-        return pageService.findAll();
     }
 
     @DeleteMapping("/{id}/project/{projectId}")

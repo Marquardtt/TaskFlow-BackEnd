@@ -30,26 +30,14 @@ public class TaskController {
         taskService.update(task, true);
     }
 
-    @GetMapping("/project/{projectId}/{id}")
-    public TaskGetDTO findOne(@PathVariable Long id){
-        return taskService.findOne(id);
-    }
 
-    @GetMapping("/project/{projectId}/name/{name}")
-    public Collection<TaskGetDTO> findByName(@PathVariable String name){
-        return taskService.findByName(name);
-    }
-
-    @GetMapping("/project/{projectId}/findAll")
-    public Collection<TaskGetDTO> findAll(){
-        return taskService.findAll();
-    }
-
+    //FEITO
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
         return taskService.getTasksToday(id);
     }
 
+    //TODO: verificar se o becker fez isso
     @DeleteMapping("/{id}/{userId}")
     public void delete(@PathVariable Long id , @PathVariable String userId){
         taskService.delete(id, userId);
@@ -65,18 +53,16 @@ public class TaskController {
         taskService.redo(id, userId);
     }
 
-    @GetMapping("/month/{month}/{pageId}/{propertyId}")
-    public Collection<TaskPageGetDTO> getTasksOfMonth(@PathVariable Integer month,
-                                                      @PathVariable Long pageId,
-                                                      @PathVariable Long propertyId){
-        return taskService.getTasksOfMonth(month, pageId, propertyId);
-    }
-
-
-
+    //FEITO
     @GetMapping("/project/{projectId}")
     public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
         return taskService.getDeletedTasks(projectId);
+    }
+    //Só os donos do projeto podem completar
+    //TODO:Depois eu vou mudar para ser o usuario logado do context
+    @PatchMapping("/{id}/complete/user/{username}")
+    public TaskGetDTO complete(@PathVariable Long id,@PathVariable String username){
+        return taskService.complete(id, username);
     }
 
 }

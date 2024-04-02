@@ -7,14 +7,17 @@ import br.demo.backend.model.chat.*;
 import br.demo.backend.model.dtos.chat.get.ChatGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatGroupGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatPrivateGetDTO;
+import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
 import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
 import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
 import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.model.enums.TypeOfChat;
+import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.ids.DestinationId;
 import br.demo.backend.repository.chat.ChatGroupRepository;
 import br.demo.backend.repository.chat.ChatPrivateRepository;
 import br.demo.backend.repository.chat.ChatRepository;
+import br.demo.backend.service.NotificationService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.repository.chat.MessageRepository;
@@ -38,6 +41,7 @@ public class ChatService {
     private ChatPrivateRepository chatPrivateRepository;
     private ChatGroupRepository chatGroupRepository;
     private MessageRepository messageRepository;
+    private NotificationService notificationService;
 
     private ObjectMapper objectMapper;
     private AutoMapper<ChatGroup> mapperGroup;
@@ -75,9 +79,9 @@ public class ChatService {
     }
 
     private ChatGetDTO chatToGetDTO(Chat chat, String userId) {
-        if(chat.getType().equals(TypeOfChat.PRIVATE)){
+        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
             return privateToGetDTO((ChatPrivate) chat, userId);
-        }else{
+        } else {
             return groupToGetDTO((ChatGroup) chat, userId);
         }
     }
@@ -89,15 +93,20 @@ public class ChatService {
                 )).toList().size();
     }
 
-    public void updateMessagesToVisualized(Message messagePut, String userId) {
-        Message message = messageRepository.findById(messagePut.getId()).get();
-        message.setDestinations(message.getDestinations().stream().map(d->{
-            if(d.getUser().getUserDetailsEntity().getUsername().equals(userId)){
-                d.setVisualized(true);
-            }
-            return d;
-        }).toList());
-        messageRepository.save(message);
+    public ChatGetDTO updateMessagesToVisualized(Long chatId, String userId) {
+        Chat chat = chatRepository.findById(chatId).get();
+        Collection<Message> messages = chat.getMessages().stream().map(m -> {
+            m.setDestinations(m.getDestinations().stream().map(d -> {
+                if (d.getUser().getUsername().equals(userId)) {
+                    d.setVisualized(true);
+                }
+                return d;
+            }).toList());
+        messageRepository.save(m);
+            return m;
+        }).toList();
+        chat.setMessages(messages);
+        return ModelToGetDTO.tranform(chat);
     }
 
     public Collection<ChatGetDTO> findGroupByName(String name, String userId) {
@@ -112,18 +121,18 @@ public class ChatService {
     }
 
 
-    public void save(ChatGroupPostDTO chatGroup) {
+    public ChatGroupGetDTO save(ChatGroupPostDTO chatGroup) {
         ChatGroup chat = new ChatGroup();
         BeanUtils.copyProperties(chatGroup, chat);
         chat.setType(TypeOfChat.GROUP);
-        chatGroupRepository.save(chat);
+        return (ChatGroupGetDTO) ModelToGetDTO.tranform(chatGroupRepository.save(chat));
     }
 
-    public void save(ChatPrivatePostDTO chatPrivate) {
+    public ChatPrivateGetDTO save(ChatPrivatePostDTO chatPrivate) {
         ChatPrivate chat = new ChatPrivate();
         BeanUtils.copyProperties(chatPrivate, chat);
         chat.setType(TypeOfChat.PRIVATE);
-        chatPrivateRepository.save(chat);
+        return (ChatPrivateGetDTO) ModelToGetDTO.tranform(chatPrivateRepository.save(chat));
     }
 
     public void update(ChatGroup chatGroupDto, Boolean patching) {
@@ -150,7 +159,7 @@ public class ChatService {
 
     private void updateLastMessage(Chat chat) {
         HashSet<Message> messages = new HashSet<>(chat.getMessages());
-        if(messages.isEmpty()) return;
+        if (messages.isEmpty()) return;
         chat.setLastMessage(messages.stream().max(Comparator.comparing(Message::getDateCreate)).get());
     }
 
@@ -168,18 +177,20 @@ public class ChatService {
         saveTheUpdatableMessage(chat, message);
     }
 
-    public void updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
+    public MessageGetDTO updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
         Chat chat = chatRepository.findById(chatId).get();
         MessagePostPutDTO messageDto = objectMapper.readValue(messageString, MessagePostPutDTO.class);
         Message message = getMessage(chat, messageDto);
-        message.setAnnex(new Archive(annex));
+        if (annex != null) {
+            message.setAnnex(new Archive(annex));
+        }
         chat.getMessages().remove(message);
         chat.getMessages().add(message);
         updateLastMessage(chat);
-        saveTheUpdatableMessage(chat, message);
+        return saveTheUpdatableMessage(chat, message);
     }
 
-    private void saveTheUpdatableMessage(Chat chat, Message message){
+    private MessageGetDTO saveTheUpdatableMessage(Chat chat, Message message) {
         Collection<User> users = chat.getType().equals(TypeOfChat.PRIVATE) ?
                 ((ChatPrivate) chat).getUsers() : ((ChatGroup) chat).getGroup().getUsers();
         message.setDestinations(users.stream().filter(u-> !u.equals(message.getSender())).map(u -> new Destination(
@@ -187,20 +198,23 @@ public class ChatService {
                     ).toList());
         if(chat.getType().equals(TypeOfChat.PRIVATE)){
             chatPrivateRepository.save((ChatPrivate) chat);
-        }else{
-            chatGroupRepository.save((ChatGroup)chat );
+        } else {
+            chatGroupRepository.save((ChatGroup) chat);
         }
+        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(message);
+        notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
+        return messageGetDTO;
     }
 
 
     private Message getMessage(Chat chat, MessagePostPutDTO messageDto) {
         Message message;
-        if(chat.getMessages().stream().anyMatch(m -> m.getId().equals(messageDto.getId()))){
+        if (chat.getMessages().stream().anyMatch(m -> m.getId().equals(messageDto.getId()))) {
             message = messageRepository.findById(messageDto.getId()).get();
             mapperMessage.map(messageDto, message, true);
             message.setDateCreate(message.getDateCreate());
             message.setDateUpdate(LocalDateTime.now());
-        }else{
+        } else {
             message = new Message();
             mapperMessage.map(messageDto, message, true);
             message.setDateCreate(LocalDateTime.now());

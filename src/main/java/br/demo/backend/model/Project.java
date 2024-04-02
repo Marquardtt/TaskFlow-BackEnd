@@ -1,5 +1,6 @@
 package br.demo.backend.model;
 
+import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import jakarta.persistence.*;
@@ -8,6 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import br.demo.backend.model.relations.PropertyValue;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,6 +47,14 @@ public class Project {
     private Collection<Page> pages;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Property> properties;
+    //===================== Adições
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<Message> comments;
+    @JoinColumn(name = "project_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<PropertyValue> values;
+    //===================== /Adições
+
     public Project(Long id){
         this.id = id;
     }

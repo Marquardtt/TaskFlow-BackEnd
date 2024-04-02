@@ -13,8 +13,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-
 @Service
 @AllArgsConstructor
 public class PermissionService {
@@ -22,26 +20,16 @@ public class PermissionService {
     private PermissionRepository permissionRepository;
     private AutoMapper<Permission> autoMapper;
 
-
-    public Collection<PermissionGetDTO> findAll() {
-        return permissionRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-
-    }
-
-    public PermissionGetDTO findOne(Long id) {
-        return ModelToGetDTO.tranform(permissionRepository.findById(id).get());
-    }
-
-    public void save(PermissionPostDTO permissionDto) {
+    public PermissionGetDTO save(PermissionPostDTO permissionDto) {
         if(permissionDto.getPermission() == null){
             permissionDto.setPermission(TypePermission.READ);
         }
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
-        permissionRepository.save(permission);
+        return ModelToGetDTO.tranform(permissionRepository.save(permission));
     }
 
-    public void update(PermissionPutDTO permissionDto, Boolean patching) {
+    public PermissionGetDTO update(PermissionPutDTO permissionDto, Boolean patching) {
         if(permissionDto.getPermission() == null){
             permissionDto.setPermission(TypePermission.READ);
         }
@@ -49,7 +37,8 @@ public class PermissionService {
         Permission permission = patching ? oldPermission : new Permission();
         autoMapper.map(permissionDto, permission, patching);
         permission.setProject(oldPermission.getProject());
-        permissionRepository.save(permission);
+        return ModelToGetDTO.tranform(permissionRepository.save(permission));
+
     }
 
     public void delete(Long id) {

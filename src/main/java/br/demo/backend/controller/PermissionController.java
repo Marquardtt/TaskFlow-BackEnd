@@ -1,6 +1,6 @@
 package br.demo.backend.controller;
 
-
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
@@ -33,6 +33,8 @@ public class PermissionController {
     public PermissionGetDTO findOne(@PathVariable Long id){
         return permissionService.findOne(id);
     }
+  
+  //TODO: filtra por permissions desse projeto
 
     @GetMapping("/project/{projectId}")
     public Collection<PermissionGetDTO> findAll(){

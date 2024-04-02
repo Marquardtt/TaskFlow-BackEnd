@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -26,19 +28,14 @@ import java.util.NoSuchElementException;
 public class UserService {
 
     private UserRepository userRepository;
-    private PermissionRepository permissionRepository;
     private AutoMapper<User> autoMapper;
-
-    public Collection<UserGetDTO> findAll() {
-        return userRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
-
+    private NotificationService notificationService;
     public UserGetDTO findOne(String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         return ModelToGetDTO.tranform(user);
     }
 
-    public void save(UserPostDTO userDto) {
+    public UserGetDTO save(UserPostDTO userDto) {
         try{
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
             throw new IllegalArgumentException("Username is already been using by other user0");
@@ -46,12 +43,13 @@ public class UserService {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
-            userRepository.save(user);
+            return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
     public void update(UserPutDTO userDTO, Boolean patching) {
 //        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User oldUser = userRepository.findById(userDTO.getId()).get();
+
         System.out.println(userDTO);
         User user = patching ? oldUser : new User();
         autoMapper.map(userDTO, user, patching);
@@ -59,7 +57,7 @@ public class UserService {
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
         user.getUserDetailsEntity().setPassword(oldUser.getUserDetailsEntity().getPassword());
-        userRepository.save(user);
+        return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
     public void delete(Long id) {
@@ -78,7 +76,8 @@ public class UserService {
     public void updatePicture(MultipartFile picture, String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.setPicture(new Archive(picture));
-        userRepository.save(user);
+        return ModelToGetDTO.tranform(userRepository.save(user));
+
     }
 
     public void updatePassword(String id, String password) {
@@ -102,7 +101,57 @@ public class UserService {
 //    }
 
 
-    public Collection<UserGetDTO> findByUserNameOrName(String name) {
-        return userRepository.findByUserDetailsEntity_UsernameContainingOrNameContaining(name, name).stream().map(ModelToGetDTO::tranform).toList();
+  
+    public UserGetDTO updatePassword(String id, String password) {
+        User user = userRepository.findById(id).get();
+        user.setPassword(password);
+        return ModelToGetDTO.tranform(userRepository.save(user));
+
+    }
+    public Collection<UserGetDTO> findAll(){
+        return userRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
+    }
+
+    public UserGetDTO addPoints(String username, Integer points) {
+        List<Long> targets = List.of(1000L, 5000L, 10000L, 15000L, 30000L, 50000L, 100000L, 200000L, 500000L, 1000000L);
+
+        User user = userRepository.findById(username).get();
+
+        for (Long target : targets) {
+            if (user.getPoints() < target && user.getPoints() + points >= target) {
+                //TODO: Mudar para 0L ser o id do usuario
+                notificationService.generateNotification(TypeOfNotification.POINTS, 0L, target);
+            }
+        }
+
+        user.setPoints(user.getPoints() + points);
+        return ModelToGetDTO.tranform(userRepository.save(user));
+    }
+
+    public UserGetDTO findLogged() {
+        //TODO: Mudar para pegar o usuario logado
+        return ModelToGetDTO.tranform(userRepository.findById("admin").get());
+    }
+
+    public PermissionGetDTO updatePermission(String username, Permission permission) {
+        User user = userRepository.findById(username).get();
+        Collection<Permission> permissions = user.getPermissions();
+        if(user.getPermissions() != null) {
+            Permission oldPermission = user.getPermissions().stream().filter(p ->
+                    p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
+            if(oldPermission != null ) {
+                if (!oldPermission.equals(permission)) {
+                   //TODO: mudar para passar o id do user
+                    notificationService.generateNotification(TypeOfNotification.CHANGEPERMISSION,0L, permission.getProject().getId());
+                }
+                permissions.remove(oldPermission);
+            }
+        } else {
+            permissions = List.of();
+        }
+        permissions.add(permission);
+        user.setPermissions(permissions);
+        return ModelToGetDTO.tranform(permission);
     }
 }
+

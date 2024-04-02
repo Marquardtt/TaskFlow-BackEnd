@@ -44,9 +44,10 @@ public class User {
     private Configuration configuration = new Configuration();
     @ManyToMany (fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
-
     @OneToOne(cascade = CascadeType.ALL)
     private UserDatailEntity userDetailsEntity;
+    @OneToMany
+    private Collection<Notification> notifications;
     public User (String username){
         this.userDetailsEntity.setUsername(username);
     }

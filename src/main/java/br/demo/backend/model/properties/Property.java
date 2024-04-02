@@ -49,4 +49,8 @@ public class Property {
     public Property(Long id){
         this.id = id;
     }
+    public Property(Long id, TypeOfProperty type){
+        this.id = id;
+        this.type = type;
+    }
 }
