@@ -8,6 +8,7 @@ import br.demo.backend.model.Archive;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.User;
+import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
@@ -22,6 +23,7 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,8 +69,10 @@ public class GroupService {
         return ModelToGetDTO.tranform(groupRepository.save(group));
 
     }
-    public Collection<GroupGetDTO> findGroupsByUser(String userId) {
-        return groupRepository.findGroupsByOwnerOrUsersContaining(new User(userId), new User(userId))
+    public Collection<GroupGetDTO> findGroupsByUser() {
+        UserDatailEntity userDatail = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByUserDetailsEntity_Username(userDatail.getUsername()).get();
+        return groupRepository.findGroupsByOwnerOrUsersContaining(user, user)
                 .stream().map(ModelToGetDTO::tranform).toList();
     }
 

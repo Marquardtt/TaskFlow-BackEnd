@@ -16,9 +16,9 @@ public class TaskController {
     private TaskService taskService;
 
 
-    @PostMapping("/{projectId}/{pageId}/{userId}")
-    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId, @PathVariable String projectId){
-        return taskService.save(pageId, userId);
+    @PostMapping("/{projectId}/{pageId}")
+    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String projectId){
+        return taskService.save(pageId);
     }
 
     @PutMapping("/project/{projectId}")
@@ -37,20 +37,20 @@ public class TaskController {
         return taskService.getTasksToday(id);
     }
 
-    //TODO: verificar se o becker fez isso
-    @DeleteMapping("/{id}/{userId}")
-    public void delete(@PathVariable Long id , @PathVariable String userId){
-        taskService.delete(id, userId);
-    }
 
     @DeleteMapping("/project/{projectId}/{id}")
     public void delete(@PathVariable Long id){
+        taskService.delete(id);
+    }
+
+    @DeleteMapping("/project/{projectId}/{id}/permanent")
+    public void deletePermanent(@PathVariable Long id){
         taskService.deletePermanent(id);
     }
 
-    @PutMapping("/project/{projectId}/redo/{userId}/{id}")
-    public void redo(@PathVariable Long id , @PathVariable String userId){
-        taskService.redo(id, userId);
+    @PutMapping("/project/{projectId}/redo/{id}")
+    public void redo(@PathVariable Long id){
+        taskService.redo(id);
     }
 
     //FEITO
@@ -60,9 +60,9 @@ public class TaskController {
     }
     //Só os donos do projeto podem completar
     //TODO:Depois eu vou mudar para ser o usuario logado do context
-    @PatchMapping("/{id}/complete/user/{username}")
-    public TaskGetDTO complete(@PathVariable Long id,@PathVariable String username){
-        return taskService.complete(id, username);
+    @PatchMapping("/{id}/project/{projectId}/complete")
+    public TaskGetDTO complete(@PathVariable Long id){
+        return taskService.complete(id);
     }
 
 }

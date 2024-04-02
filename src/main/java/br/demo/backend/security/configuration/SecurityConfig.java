@@ -39,33 +39,33 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/user/{username}").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "user/pciture/{username}").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/name/{name}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/user").authenticated()
+                .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
                 .requestMatchers(HttpMethod.GET,"/user/{username}/project/{projectId}").access(isOwnerOrMemberAuthorization)
 
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId/set-now}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.GET, "/project").authenticated()
-                .requestMatchers(HttpMethod.GET, "/project/user/{userId}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/project/me-owner").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
 
                 //TASK
-                .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}/{userId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PUT, "/task/project/{projectId").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{userId}/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
-                .requestMatchers(HttpMethod.GET, "/project/{projectId}/findAll").authenticated()
-                .requestMatchers(HttpMethod.GET, "/task/project/{projectId").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "task/project/{projectId}/{id}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId/{id}/{userId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectid}/complete").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId/{id}").access(authorizationRequestsRoutes)
 
                 //PROPERTY
                 .requestMatchers(HttpMethod.POST, "/property/project/{projectId}/limited").access(authorizationRequestsRoutes)
@@ -81,14 +81,12 @@ public class SecurityConfig {
 
                 //PAGE
                 .requestMatchers(HttpMethod.POST, "/page/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/{columnChanged}project/{projectId}").access(authorizationRequestsRoutes)
+//                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/{columnChanged}project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/project/{projectId}").access(authorizationRequestsRoutes)
+//                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/x-and-y/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/draw/{id/}project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/draw/{id}/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/project/{projectId}/prop-ordering/{id}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.GET, "/page/project/{projectId}/{id}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.GET, "/page/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/page/merge/{id}/project/{projectId}").access(authorizationRequestsRoutes)
 
@@ -106,11 +104,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group").authenticated()
-                .requestMatchers(HttpMethod.GET, "/group/{groupId}/user/{userId}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/group/{groupId}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}/permissions/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture/{id}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
 
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha

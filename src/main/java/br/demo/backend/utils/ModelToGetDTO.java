@@ -32,17 +32,30 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.TaskValue;
+
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
+import br.demo.backend.repository.GroupRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+
+@Component
 public class ModelToGetDTO {
+
+    private static GroupRepository groupRepository;
+    @Autowired
+    public void setUserRepository(GroupRepository repo) {
+        ModelToGetDTO.groupRepository= repo;
+    }
+
 
     public static UserGetDTO tranform(User obj){
         if(obj == null) return null;
@@ -104,7 +117,7 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         PermissionGetDTO permission = new PermissionGetDTO();
         BeanUtils.copyProperties(obj, permission);
-        permission.setProject(tranform(obj.getProject()));
+        permission.setProject(tranformSimple(obj.getProject()));
         return permission;
     }
     public static ProjectGetDTO tranform(Project obj){
@@ -250,7 +263,10 @@ public class ModelToGetDTO {
         return simpleUser;
     }
 
-    public static SimpleProjectGetDTO tranformSimple(Project obj, Collection<Group> groups){
+    public static SimpleProjectGetDTO tranformSimple(Project obj){
+
+        //TODO: testar se isso vai de fato funcionar e depois criar um dto com nome, foto e id
+        Collection <Group> groups = groupRepository.findGroupsByPermissions_Project(obj);
 
         Integer progress = 0;
         try {

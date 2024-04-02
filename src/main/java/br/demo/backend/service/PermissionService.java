@@ -1,6 +1,8 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.Project;
+import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Permission;
@@ -13,12 +15,15 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+
 @Service
 @AllArgsConstructor
 public class PermissionService {
 
     private PermissionRepository permissionRepository;
     private AutoMapper<Permission> autoMapper;
+    private ProjectRepository projectRepository;
 
     public PermissionGetDTO save(PermissionPostDTO permissionDto) {
         if(permissionDto.getPermission() == null){
@@ -39,6 +44,12 @@ public class PermissionService {
         permission.setProject(oldPermission.getProject());
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
 
+    }
+
+    public Collection<PermissionGetDTO> findAll(Long projectId) {
+
+        Project project = projectRepository.findById(projectId).get();
+        return permissionRepository.findByProject(project).stream().map(ModelToGetDTO::tranform).toList();
     }
 
     public void delete(Long id) {

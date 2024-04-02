@@ -39,27 +39,21 @@ public class ChatController {
     }
 
     //precisa estar logado
-    @PatchMapping("/visualized/{chatId}/{userId}")
-    public ChatGetDTO upDateToVisualized(@PathVariable Long chatId, @PathVariable String userId){
-        return chatService.updateMessagesToVisualized(chatId, userId);
+    @PatchMapping("/visualized/{chatId}")
+    public ChatGetDTO upDateToVisualized(@PathVariable Long chatId){
+        return chatService.updateMessagesToVisualized(chatId);
     }
 
     //precisa estar logado
-    @GetMapping("/name/{userId}/{name}")
-    public Collection<ChatGetDTO> findByName(@PathVariable String name, @PathVariable String userId){
-        return chatService.findGroupByName(name, userId);
+    @GetMapping("/private")
+    public Collection<ChatPrivateGetDTO> findAllPrivate(){
+        return chatService.findAllPrivate();
     }
 
     //precisa estar logado
-    @GetMapping("/private/{userId}")
-    public Collection<ChatPrivateGetDTO> findAllPrivate(@PathVariable String userId){
-        return chatService.findAllPrivate(userId);
-    }
-
-    //precisa estar logado
-    @GetMapping("/group/{userId}")
-    public Collection<ChatGroupGetDTO> findAllGroup(@PathVariable String userId){
-        return chatService.findAllGroup(userId);
+    @GetMapping("/group")
+    public Collection<ChatGroupGetDTO> findAllGroup(){
+        return chatService.findAllGroup();
     }
 
     //precisa ser um usuario do chat

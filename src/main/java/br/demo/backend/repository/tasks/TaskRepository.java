@@ -12,7 +12,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
      Collection<Task> findTasksByNameContains(String name);
 
-     Task findByPropertiesContaining(TaskValue prop);
+     Task findByPropertiesContaining(PropertyValue prop);
     public Collection<Task> findTasksByPropertiesContaining(PropertyValue prop);
 
 }

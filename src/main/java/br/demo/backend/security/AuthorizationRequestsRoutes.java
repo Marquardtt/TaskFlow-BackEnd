@@ -36,7 +36,6 @@ public class AuthorizationRequestsRoutes implements AuthorizationManager<Request
         boolean decision = false;
         if (!project.getOwner().equals(((UserDatailEntity) authentication.getPrincipal()).getUser())) {
             if (!object.getRequest().getRequestURI().contains("picture")) {
-
                 if (userDatailEntity.getAuthorities() != null) {
                     for (GrantedAuthority simple :
                             userDatailEntity.getAuthorities()) {

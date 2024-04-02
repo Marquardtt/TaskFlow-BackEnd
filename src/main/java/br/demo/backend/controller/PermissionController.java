@@ -29,16 +29,9 @@ public class PermissionController {
         permissionService.update(permission, true);
     }
 
-    @GetMapping("/{id}/project/{projectId}")
-    public PermissionGetDTO findOne(@PathVariable Long id){
-        return permissionService.findOne(id);
-    }
-  
-  //TODO: filtra por permissions desse projeto
-
     @GetMapping("/project/{projectId}")
-    public Collection<PermissionGetDTO> findAll(){
-        return permissionService.findAll();
+    public Collection<PermissionGetDTO> findAll(@PathVariable Long projectId){
+        return permissionService.findAll(projectId);
     }
 
     @DeleteMapping("/{id}/project/{projectId}")
