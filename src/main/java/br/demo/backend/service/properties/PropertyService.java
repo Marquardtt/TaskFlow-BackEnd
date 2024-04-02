@@ -14,7 +14,6 @@ import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
-import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
@@ -24,7 +23,7 @@ import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.repository.relations.TaskValueRepository;
+import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
@@ -48,7 +47,7 @@ public class PropertyService {
     private AutoMapper<Select> autoMapperSelect;
     private AutoMapper<Date> autoMapperDate;
     private OrderedPageRepository orderedPageRepository;
-    private TaskValueRepository taskValueRepository;
+    private PropertyValueRepository taskValueRepository;
 
 
     public PropertyGetDTO findOne(Long id) {

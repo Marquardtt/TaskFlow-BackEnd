@@ -35,21 +35,21 @@ public class PageController {
 
     @PatchMapping("/{id}/project/{projectId}")
     public void upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
-        pageService.update(name, id);
+        pageService.updateName(name, id);
     }
 
-    @PatchMapping("/{taskId}/{index}/project/{projectId}")
-    public PageGetDTO updateIndexes(@PathVariable Long projectId, @RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
-        return pageService.updateIndex(page, taskId, index);
-    }
+//    @PatchMapping("/{taskId}/{index}/project/{projectId}")
+//    public PageGetDTO updateIndexes(@RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
+//        return pageService.updateIndex(page, taskId, index);
+//    }
 
     @PatchMapping("/x-and-y/project/{projectId}")
-    public void upDate(@PathVariable Long projectId, @RequestBody TaskCanvas taskPage) {
+    public void upDate(@RequestBody TaskCanvas taskPage) {
         pageService.updateXAndY(taskPage);
     }
 
     @PatchMapping("/draw/{id}/project/{projectId}")
-    public void upDateDraw(@PathVariable Long projectId, @RequestParam MultipartFile draw, @PathVariable Long id) {
+    public void upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
         pageService.updateDraw(draw, id);
     }
 
@@ -59,12 +59,12 @@ public class PageController {
     }
 
     @DeleteMapping("/{id}/project/{projectId}")
-    public void delete(@PathVariable Long projectId, @PathVariable Long id) {
+    public void delete( @PathVariable Long id) {
         pageService.delete(id);
     }
 
     @PatchMapping("/merge/{id}/project/{projectId}")
-    public void merge(@PathVariable Long projectId, @RequestBody Collection<Page> pages, @PathVariable Long id) {
+    public void merge( @RequestBody Collection<Page> pages, @PathVariable Long id) {
         pageService.merge(pages, id);
     }
 }

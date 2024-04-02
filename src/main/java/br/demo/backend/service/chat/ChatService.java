@@ -97,7 +97,7 @@ public class ChatService {
         Chat chat = chatRepository.findById(chatId).get();
         Collection<Message> messages = chat.getMessages().stream().map(m -> {
             m.setDestinations(m.getDestinations().stream().map(d -> {
-                if (d.getUser().getUsername().equals(userId)) {
+                if (d.getUser().getUserDetailsEntity().getUsername().equals(userId)) {
                     d.setVisualized(true);
                 }
                 return d;

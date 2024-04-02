@@ -37,14 +37,14 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public GroupGetDTO findOne(@PathVariable Long id) {
         return groupService.findOne(id);
-
-    //Precisa que o usuario logado seja o mesmo do parametro
-    @GetMapping("/user/{userId}")
-    public Collection<GroupGetDTO> findGroupsByAUser(@PathVariable String userId) {
-        return groupService.findGroupsByUser(userId);
+    }
+    @GetMapping
+    public Collection<GroupGetDTO> findGroupsByAUser() {
+        return groupService.findGroupsByUser();
     }
 
     //Precisa ser o owner do group ou ser um membro
+    //TODO: Verficar se precisa mesmo dessa requisição
     @GetMapping("/{groupId}/permissions/{projectId}")
     public ResponseEntity<Collection<Permission>> findAllPermissionsOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
         Collection<Permission> permissions = groupService.findAllPermissionsOfAGroupInAProject(groupId, projectId);
@@ -55,14 +55,14 @@ public class GroupController {
     public void delete(@PathVariable Long groupId) {
         groupService.delete(groupId);
     }
-    @PatchMapping("/{groupId}/picture/{id}")
-    public void updatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        groupService.updatePicture(picture, id);
+    @PatchMapping("/{groupId}/picture")
+    public void updatePicture(@RequestParam MultipartFile picture, @PathVariable Long groupId) {
+        groupService.updatePicture(picture, groupId);
     }
 
-    @PatchMapping("/{groupId}/change-owner/{projectId}")
-    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
-        groupService.updateOwner(newOwner, projectId);
+    @PatchMapping("/{groupId}/change-owner")
+    public void updateOwner(@RequestBody User newOwner, @PathVariable Long groupId) {
+        groupService.updateOwner(newOwner, groupId);
 
     }
 }

@@ -10,6 +10,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.service.properties.PropertyService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,12 @@ import java.util.Collection;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/property")
+@RequestMapping("/property/project/{projectId}")
 public class PropertyController {
 
     private PropertyService propertyService;
 
-    //Precisa ter permissão de post no projeto
+ //Precisa ter permissão de post no projeto
     @PostMapping("/limited")
     public ResponseEntity<Limited> save(@RequestBody Limited property){
         System.out.println(property);

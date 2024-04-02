@@ -18,7 +18,6 @@ import br.demo.backend.model.properties.*;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.TaskValue;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;

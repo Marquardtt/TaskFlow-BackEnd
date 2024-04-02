@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
@@ -17,6 +18,8 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,13 +54,10 @@ public class ProjectService {
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
-    public Collection<SimpleProjectGetDTO> finAllOfAUser(String id) {
-        Collection<Project> projects = projectRepository.findProjectsByOwner_Username(id);
-        projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
-        return projects.stream().map(p -> {
-            Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(p);
-            return ModelToGetDTO.tranformSimple(p, groups);
-        }).toList();
+    public Collection<SimpleProjectGetDTO> finAllOfAUser() {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
+        return projects.stream().map(ModelToGetDTO::tranformSimple).toList();
     }
 
     public ProjectGetDTO findOne(Long id) {
@@ -79,6 +79,7 @@ public class ProjectService {
     public SimpleProjectGetDTO save(ProjectPostDTO projectDto) {
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
+
         project.setOwner(userRepository.findByUserDetailsEntity_Username(projectDto.getOwner().getUserDetailsEntity().getUsername()).get());
 
         Project emptyProject = projectRepository.save(project);
@@ -92,13 +93,12 @@ public class ProjectService {
         Select selectCreated = selectRepository.save(select);
         emptyProject.getProperties().add(selectCreated);
         emptyProject.setVisualizedAt(LocalDateTime.now());
-        return ModelToGetDTO.tranformSimple(projectRepository.save(project),new ArrayList<>());
+        return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
 
-    public ProjectGetDTO setVisualizedNow(Project projectPut) {
-        Project project = projectRepository.findById(projectPut.getId()).get();
+    public ProjectGetDTO setVisualizedNow(Long projectId) {
+        Project project = projectRepository.findById(projectId).get();
         project.setVisualizedAt(LocalDateTime.now());
-
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 

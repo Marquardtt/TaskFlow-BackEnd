@@ -1,5 +1,6 @@
 package br.demo.backend.controller;
 
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Collection;
 
 @RestController
@@ -21,31 +23,30 @@ public class UserController {
     // usuario pode ver de outro usuario (mudar na getDTO) e
     // tambem tem que ver as informações que seram encriptadas
 
-    //   FEITO
     @PostMapping
     public UserGetDTO insert(@RequestBody UserPostDTO user){
         return userService.save(user);
     }
 
-  //TODO: verificar com a heloisa se eu posso tirar isso
+    //TODO: verificar com a heloisa se eu posso tirar isso
     @GetMapping("/{username}/project/{projectId}")
     //  FEITO => PORÉM PROVÁVEL QUE TERÁ ALTERAÇÕE
     public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
         return userService.getPermissionOfAUserInAProject(username, projectId);
     }
 
-    //   FEITO
     @PutMapping
-    public UserGetDTO upDate(@RequestBody UserPutDTO user){
+    public UserGetDTO upDate(@RequestBody UserPutDTO user) throws AccessDeniedException {
         return userService.update(user, false);
     }
-    //   FEITO
     @PatchMapping
-    public UserGetDTO patch(@RequestBody UserPutDTO user) {
+    public UserGetDTO patch(@RequestBody UserPutDTO user) throws AccessDeniedException {
         return userService.update(user, true);
     }
 
     //    precisa estar num mesmo projeto ou group que o outro user   IMPLEMENTAR O ACCESS => BECKER
+
+    //TODO: Precisa fazer uma dto que esconda certa infos, alem disso teria que ver se o usuario pode fazer isso
     @GetMapping("/{username}")
     public UserGetDTO findOne(@PathVariable String username){
         return userService.findOne(username);
@@ -57,9 +58,9 @@ public class UserController {
         return userService.findLogged();
     }
 
-    @PatchMapping("/picture/{username}")
-    public UserGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
-        return userService.updatePicture(picture, username);
+    @PatchMapping("/picture")
+    public UserGetDTO upDatePicture(@RequestParam MultipartFile picture) {
+        return userService.updatePicture(picture);
     }
 
     //FEITO
@@ -68,28 +69,21 @@ public class UserController {
         return userService.updatePassword(username, password);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        userService.delete(id)
+    @DeleteMapping
+    public void delete() throws AccessDeniedException {
+        userService.delete();
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 
-    //FEITO
+    //TODO: precisa fausa a dto mencionada acima
     @GetMapping
     public Collection<UserGetDTO> findAll() {
         return userService.findAll();
     }
-//TODO: gera a partir de completar tarefas
-    //Dono de algum projeto em que o usuario esteja
-    @PatchMapping("/add-points/{username}")
-    public UserGetDTO updatePoints(@PathVariable String username, @RequestBody Integer points) {
-        return userService.addPoints(username, points);
 
-    }
-
-  //TODO: verificar o porque dessa requisição
+  //TODO: fazer isso no security
     //precisa ser o dono do grupo em que o usuario esta nesse projeto
-    @PatchMapping("{username}/update-permission")
+    @PatchMapping("{username}/update-permission/project/{projectId}")
     public PermissionGetDTO updatePermission(@PathVariable String username, @RequestBody Permission permission){
         return userService.updatePermission(username, permission);
     }

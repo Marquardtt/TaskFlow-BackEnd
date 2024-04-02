@@ -7,7 +7,6 @@ import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.service.NotificationService;
-import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -34,10 +33,12 @@ import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
-import br.demo.backend.repository.relations.TaskValueRepository;
+import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -56,7 +57,7 @@ public class TaskService {
 
     private TaskRepository taskRepository;
     private UserRepository userRepository;
-    private TaskValueRepository taskValueRepository;
+    private PropertyValueRepository taskValueRepository;
     private PageRepository pageRepositorry;
     private OrderedPageRepository orderedPageRepository;
     private ProjectRepository projectRepository;
@@ -188,7 +189,7 @@ public class TaskService {
             case CHECKBOX, TAG -> listString(((Collection<Option>)value.getValue().getValue())
                     .stream().map(Option::getName).toList())+"'";
             case USER -> listString(((Collection<User>)value.getValue().getValue())
-                    .stream().map(User::getUsername).toList())+"'";
+                    .stream().map(u -> u.getUserDetailsEntity().getUsername()).toList())+"'";
             case ARCHIVE -> ((Archive)value.getValue().getValue()).getName() +"."+
                     ((Archive)value.getValue().getValue()).getType()+"'";
             case TEXT, NUMBER -> value.getValue().getValue()+"'";
@@ -225,7 +226,8 @@ public class TaskService {
 
 
 
-    public void delete(Long id, String userId) {
+    public void delete(Long id) {
+        String userId = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(userId).get();
         Task task = taskRepository.findById(id).get();
         task.setDateDeleted(LocalDateTime.now());
@@ -259,7 +261,7 @@ public class TaskService {
     public Collection<TaskGetDTO> getTasksToday(String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
-        Collection<TaskValue> taskValues =
+        Collection<PropertyValue> taskValues =
                 values.stream().map(v -> taskValueRepository
                                 .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
                         .toList();
@@ -289,8 +291,9 @@ public class TaskService {
                 time.getDayOfMonth() == time.getDayOfMonth();
     }
 
-    public TaskGetDTO complete(Long id, String userId) {
-        User user = userRepository.findById(userId).get();
+    public TaskGetDTO complete(Long id) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Task task = taskRepository.findById(id).get();
         task.setCompleted(true);
         task.setDateCompleted(LocalDateTime.now());
