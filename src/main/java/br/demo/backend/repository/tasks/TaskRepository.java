@@ -11,8 +11,8 @@ import java.util.Collection;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    public Collection<Task> findTasksByNameContains(String name);
+     Collection<Task> findTasksByNameContains(String name);
 
-    public Collection<Task> findTasksByPropertiesContaining(TaskValue prop);
+     Task findByPropertiesContaining(TaskValue prop);
 
 }
