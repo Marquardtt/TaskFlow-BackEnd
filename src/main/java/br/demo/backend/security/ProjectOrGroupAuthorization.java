@@ -1,6 +1,8 @@
 package br.demo.backend.security;
 
 import br.demo.backend.model.Group;
+import br.demo.backend.model.Permission;
+import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
@@ -14,7 +16,6 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 @Component
@@ -35,17 +36,34 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
         User userFind = userRepository.findByUserDetailsEntity_Username(username).get();
         User user = userRepository.findByUserDetailsEntity_Username(
                 ((UserDatailEntity) supplier.get().getPrincipal()).getUsername()).get();
+
+        String projectId = object.getRequest().getParameter("projectId");
+
+        Project project = projectRepository.findById(Long.parseLong(projectId)).get();
+
         List<Group> groupList = groupRepository.findAll();
         boolean decision = false;
-        for (Group group : groupList) {
-            if (group.getUsers().containsAll(List.of(user,userFind))){
-                decision = true ;
-            } else if () {
-                
+
+        if (project.getOwner().equals(user) ) {
+            for (Permission permission : userFind.getPermissions()) {
+                if (permission.getProject().equals(project)) {
+                    decision = true;
+                }
+            }
+        } else if ( project.getOwner().equals(userFind)) {
+            for (Permission permission : user.getPermissions()) {
+                if (permission.getProject().equals(project)){
+                    decision = true;
+                }
+
+            }
+        }else {
+            for (Group group : groupList) {
+                if (group.getUsers().containsAll(List.of(user, userFind))) {
+                    decision = true;
+                }
             }
         }
-
-
-        return;
+        return new AuthorizationDecision(decision);
     }
 }

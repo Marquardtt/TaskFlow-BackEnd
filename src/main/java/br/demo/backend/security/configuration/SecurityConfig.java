@@ -3,6 +3,7 @@ package br.demo.backend.security.configuration;
 import br.demo.backend.security.AuthorizationRequestsRoutes;
 import br.demo.backend.security.IsOwnerAuthorization;
 import br.demo.backend.security.IsOwnerOrMemberAuthorization;
+import br.demo.backend.security.ProjectOrGroupAuthorization;
 import br.demo.backend.security.filter.FilterAuthentication;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ public class SecurityConfig {
     private final AuthorizationRequestsRoutes authorizationRequestsRoutes;
     private final IsOwnerAuthorization isOwnerAuthorization;
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
+    private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
 
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
@@ -50,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.GET, "/project").authenticated()
                 .requestMatchers(HttpMethod.GET, "/project/user/{userId}").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
 
@@ -59,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{userId}/{id}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/project/{projectId}/findAll").authenticated()
                 .requestMatchers(HttpMethod.GET, "/task/project/{projectId").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "task/project/{projectId}/{id}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId/{id}/{userId}").access(authorizationRequestsRoutes)
@@ -95,6 +99,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
+
+                //GROUP
+                .requestMatchers(HttpMethod.POST, "/group").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.GET, "/group").authenticated()
+                .requestMatchers(HttpMethod.GET, "/group/{groupId}/user/{userId}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/group/{groupId}/permissions/{projectId}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture/{id}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner/{projectId}").access(isOwnerAuthorization)
 
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha

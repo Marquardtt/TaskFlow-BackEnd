@@ -45,7 +45,7 @@ public class ProjectController {
         return projectService.findOne(id);
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping("")
     public Collection<ProjectGetDTO> findAll() {
         return projectService.findAll();
     }
@@ -60,7 +60,7 @@ public class ProjectController {
         projectService.delete(id);
     }
 
-    @PatchMapping("/{projectId}/change-owner/{projectId}")
+    @PatchMapping("/change-owner/{projectId}")
     public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
         projectService.updateOwner(newOwner, projectId);
     }

@@ -40,7 +40,7 @@ public class TaskController {
         return taskService.findByName(name);
     }
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/project/{projectId}/findAll")
     public Collection<TaskGetDTO> findAll(){
         return taskService.findAll();
     }

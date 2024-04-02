@@ -1,6 +1,8 @@
 package br.demo.backend.security;
 
+import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
+import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,8 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public class IsOwnerAuthorization implements AuthorizationManager<RequestAuthorizationContext> {
     private final ProjectRepository projectRepository;
+    private final GroupRepository groupRepository;
+
     @Override
     public void verify(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
         AuthorizationManager.super.verify(authentication, object);
@@ -24,14 +28,25 @@ public class IsOwnerAuthorization implements AuthorizationManager<RequestAuthori
     @Override
     public AuthorizationDecision check(Supplier<Authentication> suplier, RequestAuthorizationContext object) {
         UserDatailEntity userDatailEntity = (UserDatailEntity) suplier.get().getPrincipal();
-        String projectId = object.getRequest().getParameter("projectId");
-        return new AuthorizationDecision(isOwner(projectId,userDatailEntity));
+        boolean decision = false;
+
+        if (object.getRequest().getRequestURI().contains("/group")) {
+            Group group = groupRepository.findById(Long.parseLong(object.getRequest().getParameter("groupId"))).get();
+            if (group.getOwner().equals(userDatailEntity)){
+                decision = true;
+            }
+        } else {
+            String projectId = object.getRequest().getParameter("projectId");
+            decision = isOwner(projectId, userDatailEntity);
+
+        }
+        return new AuthorizationDecision(decision);
     }
 
-    public boolean isOwner(String projectId , UserDatailEntity userDatailEntity){
-        Project project  = projectRepository.findById(Long.parseLong(projectId)).get();
+    public boolean isOwner(String projectId, UserDatailEntity userDatailEntity) {
+        Project project = projectRepository.findById(Long.parseLong(projectId)).get();
         boolean decision = false;
-        if (project.getOwner().equals(userDatailEntity.getUser())){
+        if (project.getOwner().equals(userDatailEntity.getUser())) {
             decision = true;
         }
         return decision;
