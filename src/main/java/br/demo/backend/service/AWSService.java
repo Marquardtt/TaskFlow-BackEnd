@@ -59,15 +59,15 @@ public class AWSService {
 
 
     public void insertImage(Long id, MultipartFile file){
+        if (!doesBucketExist(getClient(), bucket)) {
+            return;
+        }
         Project project = projectRepository.findById(id).get();
         String awsKey = UUID.randomUUID().toString();
         Archive archive = new Archive(file);
         archive.setAwsKey(awsKey);
         project.setPicture(archive);
         projectRepository.save(project);
-        if (!doesBucketExist(getClient(), bucket)) {
-            return;
-        }
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(awsKey)
@@ -100,7 +100,7 @@ public class AWSService {
                     .key(keyName)
                     .build();
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(10))  // The URL will expire in 10 minutes.
+                    .signatureDuration(Duration.ofMinutes(10))
                     .getObjectRequest(objectRequest)
                     .build();
             PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
