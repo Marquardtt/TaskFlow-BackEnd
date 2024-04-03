@@ -41,11 +41,7 @@ public class GroupService {
     private UserRepository userRepository;
     private NotificationService notificationService;;
     private AutoMapper<Group> autoMapper;
-
-
-    public Collection<GroupGetDTO> findAll() {
-        return groupRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
+    private UserService userService;
 
 
     public GroupGetDTO findOne(Long id) {
@@ -60,14 +56,12 @@ public class GroupService {
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
         return ModelToGetDTO.tranform(groupRepository.save(group));
-
     }
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
-
     }
     public Collection<GroupGetDTO> findGroupsByUser() {
         UserDatailEntity userDatail = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -76,16 +70,16 @@ public class GroupService {
                 .stream().map(ModelToGetDTO::tranform).toList();
     }
 
-
-    public PermissionGetDTO findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
-        Group group = groupRepository.findById(groupId).get();
-        Permission permission = group.getPermissions().stream().filter(
-                p -> p.getProject().getId().equals(projectId)
-        ).findFirst().get();
-        return ModelToGetDTO.tranform(permission);
-    }
-
-
+//
+//    public PermissionGetDTO findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
+//        Group group = groupRepository.findById(groupId).get();
+//        Permission permission = group.getPermissions().stream().filter(
+//                p -> p.getProject().getId().equals(projectId)
+//        ).findFirst().get();
+//        return ModelToGetDTO.tranform(permission);
+//    }
+//
+//
 
 
     public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
@@ -99,73 +93,47 @@ public class GroupService {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
         Archive picture = oldGroup.getPicture();
 
-
         Group group = patching ? oldGroup : new Group();
-        User owner = oldGroup.getOwner();
         autoMapper.map(groupDTO, group, patching);
-        group.setOwner(owner);
 
-        //TODO: verificar se ao adicionar em membro se ele terá uma permission
+        //keep the old owner
+        group.setOwner(oldGroup.getOwner());
+
+        //this get the new permissions of the group and update the permission to the users
+        // and group, normally that will be just one
         Group groupOld = groupRepository.findById(group.getId()).get();
-        Collection<Permission> permissions = group.getPermissions().stream().filter(p ->
+        group.getPermissions().stream().filter(p ->
                 !groupOld.getPermissions().contains(p)
-        ).toList();
-        for(Permission permission : permissions) {
-            updatePermission(group, permission);
-        }
-        group.setPicture(picture);
+        ).forEach(p ->  updatePermission(group, p));
+
+//        this keep the picture
+        group.setPicture(oldGroup.getPicture());
+//        this gets the difference users in above lists, getting the added and removed users
         Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
                 !groupOld.getUsers().contains(u)
         ).toList());
         usersAddedAndRemoved.addAll(groupOld.getUsers().stream().filter(u ->
                 !group.getUsers().contains(u)
         ).toList());
+
+        GroupGetDTO groupGetDTO =  ModelToGetDTO.tranform(groupRepository.save(group));
+//       this generates the notification to add ou remove someone
         usersAddedAndRemoved.forEach(u -> {
             if(!u.equals(group.getOwner())){
-                //TODO: mudar para passar o id do user
-                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, 0L, group.getId());
+                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, u.getId(), group.getId());
             }
         });
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+        return groupGetDTO;
     }
-
-
-    private User updatePermissionInAUser(User userDTO, Permission permission){
-        User user = userRepository.findByUserDetailsEntity_Username(userDTO.getUserDetailsEntity().getUsername()).get();
-        Collection<Permission> permissions = user.getPermissions();
-        if(user.getPermissions() != null) {
-            Permission oldPermission = user.getPermissions().stream().filter(p ->
-                    p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
-            if(oldPermission != null ){
-                if(!oldPermission.equals(permission)){
-                    //TODO:mudar para passar o id do user
-                    notificationService.generateNotification(TypeOfNotification.CHANGEPERMISSION, 0L, permission.getProject().getId());
-                }
-                permissions.remove(oldPermission);
-            }
-        }else{
-            permissions = new HashSet<>();
-        }
-        permissions.add(permission);
-        user.setPermissions(permissions);
-        return user;
-    }
-
 
     private void updatePermission(Group group, Permission permission) {
-        Collection <User> users = group.getUsers().stream().map( u -> {
-//            User user = updatePermissionInAUser((userRepository.findById(u.getId()).get()), permission);
-//            System.out.println(user.getUserDetailsEntity().getPassword());
-            User user = updatePermissionInAUser(u, permission);
-            userRepository.save(user);
-            return user;
-        }).toList();
-        group.setUsers(users);
-//        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getId()).get(), permission);
-
-        User owner = updatePermissionInAUser(group.getOwner(), permission);
-        userRepository.save(owner);
-        group.setOwner(owner);
+//        here we update the permission on members of the group
+        group.getUsers().forEach( u -> {
+            userService.updatePermission(u.getUserDetailsEntity().getUsername(), permission);
+        });
+        //here we update the permission of the group owner
+        //TODO: qual é a permissão do owner do grupo (acho que deveria ser todas)
+        userService.updatePermission(group.getOwner().getUserDetailsEntity().getUsername(), permission);
     }
 
 

@@ -1,6 +1,5 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
@@ -31,7 +30,7 @@ public class PermissionController {
 
     @GetMapping("/project/{projectId}")
     public Collection<PermissionGetDTO> findAll(@PathVariable Long projectId){
-        return permissionService.findAll(projectId);
+        return permissionService.findByProject(projectId);
     }
 
     @DeleteMapping("/{id}/project/{projectId}")

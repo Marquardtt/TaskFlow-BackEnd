@@ -126,19 +126,18 @@ public class UserService {
         return userRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public UserGetDTO addPoints(String username, Integer points) {
+    public UserGetDTO addPoints(User user, Long points) {
         List<Long> targets = List.of(1000L, 5000L, 10000L, 15000L, 30000L, 50000L, 100000L, 200000L, 500000L, 1000000L);
 
-        User user = userRepository.findByUserDetailsEntity_Username(username).get();
 
+        user.setPoints(user.getPoints() + points);
+        UserGetDTO userGetDTO = ModelToGetDTO.tranform(userRepository.save(user));
         for (Long target : targets) {
             if (user.getPoints() < target && user.getPoints() + points >= target) {
                 notificationService.generateNotification(TypeOfNotification.POINTS, user.getId(), target);
             }
         }
-
-        user.setPoints(user.getPoints() + points);
-        return ModelToGetDTO.tranform(userRepository.save(user));
+        return userGetDTO;
     }
 
     public UserGetDTO findLogged() {
