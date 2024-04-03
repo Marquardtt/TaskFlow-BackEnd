@@ -1,9 +1,6 @@
     package br.demo.backend.service;
 
-    import br.demo.backend.model.Group;
-    import br.demo.backend.model.Notification;
-    import br.demo.backend.model.Project;
-    import br.demo.backend.model.User;
+    import br.demo.backend.model.*;
     import br.demo.backend.model.chat.Message;
     import br.demo.backend.model.enums.TypeOfNotification;
     import br.demo.backend.model.pages.Page;
@@ -58,14 +55,10 @@
             }
         }
         private void generateChangePermission(Long idUser, Long idProject, TypeOfNotification type ){
-    //      User user  = userRepository.findById(idUser);
-            //       Apagar
-
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-            User user = userRepository.findByUserDetailsEntity_Username(username).get();
-            //      /Apagar
+            User user  = userRepository.findById(idUser).get();
+            Configuration config = user.getConfiguration();
             //Verify if the user wants to recive a notification for this
-            if(!user.getConfiguration().getNotificWhenChangeMyPermission()) return;
+            if(!config.getNotificWhenChangeMyPermission() || !config.getNotifications()) return;
             Project project = projectRepository.findById(idProject).get();
             Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
             notificationRepository.save(new Notification(null, "Your permission was changed at project '"+project.getName()+"'",
@@ -73,14 +66,10 @@
         }
 
         private void generateAddInGroup(Long userId, Long groupId, TypeOfNotification type){
-            //      User user  = userRepository.findById(idUser);
-            //       Apagar
-
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-            User user = userRepository.findByUserDetailsEntity_Username(username).get();
-            //      /Apagar
+            User user  = userRepository.findById(userId).get();
+            Configuration config = user.getConfiguration();
             //Verify if the user wants to recive a notification for this
-            if(!user.getConfiguration().getNotificAtAddMeInAGroup()) return;
+            if(!config.getNotificAtAddMeInAGroup() || !config.getNotifications()) return;
             Group group = groupRepository.findById(groupId).get();
             if(group.getUsers().contains(user)){
                 notificationRepository.save(new Notification(null, "You was added at group '"+group.getName()+"'",
@@ -93,36 +82,44 @@
         }
 
         private void generateChangeTask(Long taskId, TypeOfNotification type){
+            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
             Task task = taskRepository.findById(taskId).get();
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
+
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
-            //TODO:mudar para pegar o id do user logado
-    //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
-            users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals("jonatas")).forEach(user -> {
+            users.add(project.getOwner());
+
+            users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
+                Configuration config = user.getConfiguration();
                 //Verify if the user wants to recive a notification for this
-                if(!user.getConfiguration().getNotificTasks()) return;
-                Log lastLog = new ArrayList<>(task.getLogs()).get(task.getLogs().size()-1);
-                //Specify what happend with de task.
-                String message =
-                switch (lastLog.getAction()){
-                    case UPDATE -> "The task '"+task.getName()+"' was modified";
-                    case REDO -> "The task '"+task.getName()+"' was redone";
-                    case CREATE -> "A task was created";
-                    case DELETE ->"The task '"+task.getName()+"' was deleted";
-                    case COMPLETE -> "The task '"+task.getName()+"' was completed";
-                };
-                //TODO: ver como abrir o  modal de edição de task;
+                if(!config.getNotificTasks() || !config.getNotifications()) return;
+                String message = getMessage(task);
                 notificationRepository.save(new Notification(null, message,
-                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false ));
+                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+taskId, user, false ));
             });
+        }
+
+        private static String getMessage(Task task) {
+            Log lastLog = new ArrayList<>(task.getLogs()).get(task.getLogs().size()-1);
+            //Specify what happend with de task.
+            String message =
+            switch (lastLog.getAction()){
+                case UPDATE -> "The task '"+ task.getName()+"' was modified";
+                case REDO -> "The task '"+ task.getName()+"' was redone";
+                case CREATE -> "A task was created";
+                case DELETE ->"The task '"+ task.getName()+"' was deleted";
+                case COMPLETE -> "The task '"+ task.getName()+"' was completed";
+            };
+            return message;
         }
 
         private void generateChat (Long messageId, Long chatId, TypeOfNotification type) {
             Message message = messageRepository.findById(messageId).get();
             message.getDestinations().forEach(destination -> {
                 //Verify if the user wants to recive a notification for this
-                if (!destination.getUser().getConfiguration().getNotificChats() || destination.getVisualized()) return;
+                Configuration config = destination.getUser().getConfiguration();
+                if (!config.getNotificChats() || !config.getNotifications() || destination.getVisualized()) return;
                 //Verify if the notification just have an annex
                 if (message.getValue().isEmpty()) {
                     notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " send a annex to you", type,
@@ -135,30 +132,29 @@
         }
 
         private void generateComment(Long idTask, Long idComment, TypeOfNotification type){
+            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
             Task task = taskRepository.findById(idTask).get();
             Message message = messageRepository.findById(idComment).get();
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
+
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
-            //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
-            users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals("jonatas")).forEach(user -> {
+            users.add(project.getOwner());
+            users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
+                Configuration config = user.getConfiguration();
                 //Verify if the user wants to recive a notification for this
-                if (!user.getConfiguration().getNotificComments()) return;
-                //TODO: ver como abrir o  modal de edição de task;
+                if (!config.getNotificComments() || !config.getNotifications()) return;
                 notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " comment in the task '"+task.getName()+"' '"+message.getValue()+"'" , type,
-                        "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false));
+                        "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+idTask, user, false));
             });
         }
 
         private void generatePoints(Long idUser, Long pointsTarget , TypeOfNotification type){
-            //      User user  = userRepository.findById(idUser);
-            //       Apagar
-
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-            User user = userRepository.findByUserDetailsEntity_Username(username).get();
-            //      /Apagar
+            User user  = userRepository.findById(idUser).get();
+            Configuration config = user.getConfiguration();
             //Verify if the user wants to recive a notification for this
-            if(!user.getConfiguration().getNotificMyPointsChange()) return;
+            if(!config.getNotificMyPointsChange() || !config.getNotifications()) return;
             notificationRepository.save(new Notification(null, "Congrats! You pass the target of "+pointsTarget+" points", type,
                     "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account", user, false));
         }
@@ -168,24 +164,27 @@
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
-            //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
-            users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals("jonatas")).forEach(user -> {
+            users.forEach(user -> {
+                Configuration config = user.getConfiguration();
                 //Verify if the user wants to recive a notification for this
-                if (TypeOfNotification.DEADLINE.equals(type) && !user.getConfiguration().getNotificDeadlines()) return;
-                if (TypeOfNotification.SCHEDULE.equals(type) && !user.getConfiguration().getNotificSchedules()) return;
+                if(!config.getNotifications()) return;
+                if (TypeOfNotification.DEADLINE.equals(type) && !config.getNotificDeadlines()) return;
+                if (TypeOfNotification.SCHEDULE.equals(type) && !config.getNotificSchedules()) return;
                 notificationRepository.save(new Notification(null, "The task '"+task.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
                         type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false ));
             });
         }
 
         public void generateDeadlineOrSchedulingInProjct(Long idProject, TypeOfNotification type){
+            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
             Project project = projectRepository.findById(idProject).get();
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
-            //        users = users.stream().filter(u -> !u.getId.equals(userId)).toList();
-            users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals("jonatas")).forEach(user -> {
+            users.forEach(user -> {
+                Configuration config = user.getConfiguration();
                 //Verify if the user wants to recive a notification for this
-                if (TypeOfNotification.DEADLINE.equals(type) && !user.getConfiguration().getNotificDeadlines()) return;
-                if (TypeOfNotification.SCHEDULE.equals(type) && !user.getConfiguration().getNotificSchedules()) return;
+                if(!config.getNotifications()) return;
+                if ( TypeOfNotification.DEADLINE.equals(type) && !config.getNotificDeadlines()) return;
+                if ( TypeOfNotification.SCHEDULE.equals(type) && !config.getNotificSchedules()) return;
                 notificationRepository.save(new Notification(null, "The project '"+project.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
                         type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false ));
             });
