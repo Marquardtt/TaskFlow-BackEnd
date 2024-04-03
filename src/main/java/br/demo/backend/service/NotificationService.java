@@ -189,4 +189,8 @@
                         type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false ));
             });
         }
+
+        public void updateNotification(Notification notification){
+            notificationRepository.save(notification);
+        }
     }

@@ -1,14 +1,10 @@
 package br.demo.backend.service.properties;
 
 
-import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Project;
-import br.demo.backend.model.dtos.properties.DateGetDTO;
-import br.demo.backend.model.dtos.properties.LimitedGetDTO;
-import br.demo.backend.model.dtos.properties.PropertyGetDTO;
-import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.interfaces.HasProperties;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
@@ -27,6 +23,7 @@ import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -49,15 +46,7 @@ public class PropertyService {
     private OrderedPageRepository orderedPageRepository;
     private PropertyValueRepository taskValueRepository;
 
-
-    public PropertyGetDTO findOne(Long id) {
-        return ModelToGetDTO.tranform(propertyRepository.findById(id).get());
-    }
-
-    public Collection<PropertyGetDTO> findAll() {
-        return propertyRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
-
+    //that method is used to add the new property to the tasks that already exists
     private Property setInTheTasksThatAlreadyExists(Property property) {
         if (property.getPages() != null) {
             return setRelationAtPage(property, property.getPages());
@@ -67,58 +56,13 @@ public class PropertyService {
         }
     }
 
-    public Limited saveLimited(Limited property) {
-        Limited limited = limitedRepository.save(property);
-        setInTheTasksThatAlreadyExists(property);
-        return limited;
-    }
-
-    public Date saveDate(Date property) {
-        Date date = dateRepository.save(property);
-        setInTheTasksThatAlreadyExists(property);
-        return date;
-    }
-
-    public Select saveSelect(Select property) {
-        Select select = selectRepository.save(property);
-        setInTheTasksThatAlreadyExists(property);
-        return select;
-    }
-
-    public void updateLimited(LimitedGetDTO propertyDTO, Boolean patching) {
-        Limited old = limitedRepository.findById(propertyDTO.getId()).get();
-        Limited property = patching ? old : new Limited();
-        autoMapperLimited.map(propertyDTO, property, patching, true);
-        property.setType(old.getType());
-        property.setPages(old.getPages());
-        property.setProject(old.getProject());
-        limitedRepository.save(property);
-    }
-
-    public void updateDate(DateGetDTO propertyDTO, Boolean patching) {
-        Date old = dateRepository.findById(propertyDTO.getId()).get();
-        Date property = patching ? old : new Date();
-        autoMapperDate.map(propertyDTO, property, patching, true);
-        property.setType(old.getType());
-        property.setPages(old.getPages());
-        property.setProject(old.getProject());
-        dateRepository.save(property);
-    }
-
-    public void updateSelect(SelectGetDTO propertyDTO, Boolean patching) {
-        Select old = selectRepository.findById(propertyDTO.getId()).get();
-        Select property = patching ? old : new Select();
-        autoMapperSelect.map(propertyDTO, property, patching, true);
-        property.setType(old.getType());
-        property.setPages(old.getPages());
-        property.setProject(old.getProject());
-        selectRepository.save(property);
-    }
-
     private Property setRelationAtPage(Property property, Collection<Page> pages) {
         pages.stream().forEach(p -> {
+            //get the page from the database
             Page page = pageRepository.findById(p.getId()).get();
+            //get the tasks from the page
             page.getTasks().stream().map(tP -> {
+                //add the property to the task
                 tP.getTask().getProperties().add(taskService.setTaskProperty(property));
                 taskService.update(tP.getTask(), true);
                 return tP;
@@ -127,34 +71,79 @@ public class PropertyService {
         return property;
     }
 
+    private <T extends Property> T saveGeneric(T property, JpaRepository<T, Long> repo) {
+        T prop = repo.save(property);
+        setInTheTasksThatAlreadyExists(property);
+        return prop;
+    }
+
+    public Limited save(Limited property) {
+        return saveGeneric(property, limitedRepository);
+    }
+
+    public Date save(Date property) {
+        return saveGeneric(property, dateRepository);
+    }
+
+    public Select save(Select property) {
+        return saveGeneric(property, selectRepository);
+    }
+
+    private <T extends Property> void  updateGeneric(T property, Boolean patching,
+                                                     AutoMapper<T> autoMapper,
+                                                     JpaRepository<T, Long> repo,
+                                                     T empty){
+        T old = repo.findById(property.getId()).get();
+        T prop = patching ? old : empty;
+        autoMapper.map(property, prop, patching, true);
+        prop.setType(old.getType());
+        prop.setPages(old.getPages());
+        prop.setProject(old.getProject());
+        repo.save(property);
+    }
+
+    public void update(Limited propertyDTO, Boolean patching) {
+        updateGeneric(propertyDTO, patching,
+                autoMapperLimited, limitedRepository,
+                new Limited());
+    }
+
+    public void update(Date propertyDTO, Boolean patching) {
+        updateGeneric(propertyDTO, patching,
+                autoMapperDate, dateRepository,
+                new Date());
+    }
+
+    public void update(Select propertyDTO, Boolean patching) {
+        updateGeneric(propertyDTO, patching,
+                autoMapperSelect, selectRepository,
+                new Select());
+    }
 
     public void delete(Long id) {
         Property property = propertyRepository.findById(id).get();
         if (validateCanBeDeleted(property)) {
-            orderedPageRepository.findAll().stream().filter(p ->
-                    p.getPropertyOrdering().equals(property)).forEach(p -> {
-                Property newPropOrd = null;
-                if (property.getType().equals(TypeOfProperty.DATE)) {
-                    newPropOrd = getOtherProp(p, property,
-                            new TypeOfProperty[]{TypeOfProperty.DATE});
-                    if (newPropOrd == null) {
-                        newPropOrd = getOtherProp(p.getProject(), property,
-                                new TypeOfProperty[]{TypeOfProperty.DATE});
-                    }
-                }else if (property.getType().equals(TypeOfProperty.TIME)) {
-                    newPropOrd = getOtherProp(p, property,
-                            new TypeOfProperty[]{TypeOfProperty.TIME});
-                    if (newPropOrd == null) {
-                        newPropOrd = getOtherProp(p.getProject(), property,
-                                new TypeOfProperty[]{TypeOfProperty.TIME});
-                    }
-                } else {
-                    newPropOrd = getOtherProp(p, property,
-                            new TypeOfProperty[]{TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG});
-                    if (newPropOrd == null) {
-                        newPropOrd = getOtherProp(p.getProject(), property,
-                                new TypeOfProperty[]{TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG});
-                    }
+            orderedPageRepository.findAllByPropertyOrdering_Id(property.getId())
+                    .forEach(p -> {
+                Property newPropOrd = switch (p.getType()) {
+                    case KANBAN -> getOtherProp(p, property,
+                            TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
+                    case CALENDAR -> getOtherProp(p, property,
+                            TypeOfProperty.DATE);
+                    case TIMELINE -> getOtherProp(p, property,
+                            TypeOfProperty.TIME);
+                    default -> null;
+                };
+                if (newPropOrd == null) {
+                    newPropOrd = switch (p.getType()) {
+                        case KANBAN ->    getOtherProp(p.getProject(), property,
+                                TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
+                        case CALENDAR -> getOtherProp(p.getProject(), property,
+                                TypeOfProperty.DATE);
+                        case TIMELINE -> getOtherProp(p.getProject(), property,
+                                TypeOfProperty.TIME);
+                        default -> null;
+                    };
                 }
                 p.setPropertyOrdering(newPropOrd);
                 orderedPageRepository.save(p);
@@ -175,72 +164,46 @@ public class PropertyService {
     }
 
     private Boolean validateCanBeDeleted(Property property) {
-        if (testIfIsSelectable(property)) {
-            if (property.getProject() != null) {
-                TypeOfProperty[] typesOfProperty = {TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG};
-                TypeOfPage[] typesOfPage = {TypeOfPage.KANBAN};
-                return testInProject(typesOfProperty, typesOfPage, property);
-            } else {
-                return testInPages(new TypeOfProperty[]{TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG}, new TypeOfPage[]{TypeOfPage.KANBAN}, property, property.getPages());
-            }
-        } else if (property.getType().equals(TypeOfProperty.DATE)) {
-            if (property.getProject() != null) {
-                TypeOfProperty[] typesOfProperty = {TypeOfProperty.DATE};
-                TypeOfPage[] typesOfPage = {TypeOfPage.CALENDAR};
-                return testInProject(typesOfProperty, typesOfPage, property);
-            } else {
-                return testInPages(new TypeOfProperty[]{TypeOfProperty.DATE}, new TypeOfPage[]{TypeOfPage.CALENDAR}, property, property.getPages());
-            }
+        if(property.getProject()!=null){
+            return switch (property.getType()){
+                case SELECT, RADIO, CHECKBOX, TAG ->  testInProject(TypeOfPage.KANBAN, property, TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
+                case DATE ->  testInProject(TypeOfPage.CALENDAR, property, TypeOfProperty.DATE);
+                case TIME ->  testInProject(TypeOfPage.TIMELINE, property, TypeOfProperty.TIME);
+                default ->  true;
+            };
+        }else{
+            return switch (property.getType()){
+                case SELECT, RADIO, CHECKBOX, TAG ->  testInPages(TypeOfPage.KANBAN, property, property.getPages(), TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
+                case DATE ->  testInPages(TypeOfPage.CALENDAR, property, property.getPages(), TypeOfProperty.DATE);
+                case TIME ->  testInPages(TypeOfPage.TIMELINE, property, property.getPages(), TypeOfProperty.TIME);
+                default ->  true;
+            };
+
         }
-        else if (property.getType().equals(TypeOfProperty.TIME)) {
-            if (property.getProject() != null) {
-                TypeOfProperty[] typesOfProperty = {TypeOfProperty.TIME};
-                TypeOfPage[] typesOfPage = {TypeOfPage.TIMELINE};
-                return testInProject(typesOfProperty, typesOfPage, property);
-            } else {
-                return testInPages(new TypeOfProperty[]{TypeOfProperty.DATE}, new TypeOfPage[]{TypeOfPage.TIMELINE}, property, property.getPages());
-            }
-        }
-        return true;
     }
 
-    private Boolean testInPages(TypeOfProperty[] typesOfProperty, TypeOfPage[] typesOfPage, Property property, Collection<Page> pages) {
+    private Boolean testInProject(TypeOfPage typeOfPage, Property property, TypeOfProperty ...typesOfProperty) {
+        Project project = projectRepository.findById(property.getProject().getId()).get();
+        if (project.getProperties().stream().anyMatch(p ->
+                !p.equals(property) &&
+                        List.of(typesOfProperty).contains(p.getType()))) {
+            return true;
+        } else return testInPages( typeOfPage, property, project.getPages(), typesOfProperty);
+    }
+
+    private Boolean testInPages(TypeOfPage typeOfPage, Property property, Collection<Page> pages,TypeOfProperty ...typesOfProperty) {
         return pages.stream().allMatch(p -> {
-            if (Arrays.stream(typesOfPage).toList().contains(p.getType())) {
+            if (typeOfPage.equals(p.getType())) {
                 return getOtherProp(p, property, typesOfProperty) != null;
             }
             return true;
         });
     }
 
-    private Property getOtherProp(Page p, Property property, TypeOfProperty[] typesOfProperty) {
+    private Property getOtherProp(HasProperties p, Property property, TypeOfProperty ...typesOfProperty) {
         return p.getProperties().stream().filter(prop ->
-                !prop.equals(property) && Arrays.stream(typesOfProperty).toList().contains(prop.getType())).findFirst().orElse(null);
+                        !prop.equals(property)
+                                && List.of(typesOfProperty).contains(prop.getType()))
+                .findFirst().orElse(null);
     }
-
-    private Property getOtherProp(Project p, Property property, TypeOfProperty[] typesOfProperty) {
-        return p.getProperties().stream().filter(prop ->
-                !prop.equals(property) && Arrays.stream(typesOfProperty).toList().contains(prop.getType())).findFirst().orElse(null);
-    }
-
-    private Boolean testInProject(TypeOfProperty[] typesOfProperty, TypeOfPage[] typesOfPage, Property property) {
-        Project project = projectRepository.findById(property.getProject().getId()).get();
-        if (project.getProperties().stream().anyMatch(p -> !p.equals(property) && Arrays.stream(typesOfProperty).toList().contains(p.getType()))) {
-            return true;
-        } else return testInPages(typesOfProperty, typesOfPage, property, project.getPages());
-    }
-
-    private Boolean testIfIsSelectable(Property property) {
-        return property.getType().equals(TypeOfProperty.SELECT) ||
-                property.getType().equals(TypeOfProperty.RADIO) ||
-                property.getType().equals(TypeOfProperty.CHECKBOX) ||
-                property.getType().equals(TypeOfProperty.TAG);
-    }
-
-
-    private Boolean testIfPageHasOtherProperty(Page page, Property property) {
-        return page.getProperties().stream().anyMatch(p -> !p.getId().equals(property.getId()) &&
-                testIfIsSelectable(p));
-    }
-
 }

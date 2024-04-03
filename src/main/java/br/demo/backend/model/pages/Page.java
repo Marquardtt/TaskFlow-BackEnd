@@ -2,6 +2,7 @@ package br.demo.backend.model.pages;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.interfaces.HasProperties;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.relations.TaskPage;
@@ -21,7 +22,7 @@ import java.util.Collection;
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
 //CALENDAR
-public class Page {
+public class Page implements HasProperties {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

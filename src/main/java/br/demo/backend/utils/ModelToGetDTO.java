@@ -41,6 +41,8 @@ import br.demo.backend.repository.GroupRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -87,9 +89,15 @@ public class ModelToGetDTO {
     }
     public static ChatGetDTO tranform(Chat obj){
         if(obj == null) return null;
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        Integer qttyUnvisualized = obj.getMessages().stream().filter(m ->
+                m.getDestinations().stream().anyMatch(d ->
+                        d.getUser().getUserDetailsEntity().getUsername().equals(username) && !d.getVisualized()
+                )).toList().size();
         ChatGetDTO chat = obj.getType().equals(TypeOfChat.GROUP)  ?
                 tranform((ChatGroup) obj): tranform((ChatPrivate) obj);
 
+        chat.setQuantityUnvisualized(qttyUnvisualized);
         try {
             chat.setMessages(obj.getMessages().stream().map(ModelToGetDTO::tranform).toList());
         }catch (NullPointerException ignore) {}
