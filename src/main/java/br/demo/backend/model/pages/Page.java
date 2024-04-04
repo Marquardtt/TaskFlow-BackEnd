@@ -2,7 +2,7 @@ package br.demo.backend.model.pages;
 
 
 import br.demo.backend.model.Project;
-import br.demo.backend.model.interfaces.HasProperties;
+import br.demo.backend.model.interfaces.IHasProperties;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.relations.TaskPage;
@@ -10,7 +10,6 @@ import br.demo.backend.model.relations.TaskPage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.GenerationTime;
 
 import java.util.Collection;
 
@@ -22,7 +21,7 @@ import java.util.Collection;
 @Table(name = "tb_page")
 @Inheritance(strategy = InheritanceType.JOINED)
 //CALENDAR
-public class Page implements HasProperties {
+public class Page implements IHasProperties {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

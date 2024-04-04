@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -49,6 +50,7 @@ public class UserService {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
+            user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
             return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
@@ -58,13 +60,13 @@ public class UserService {
         if(!oldUser.getUserDetailsEntity().getUsername().equals(username)){
             throw new AccessDeniedException("You can't update another user");
         };
-        System.out.println(userDTO);
         User user = patching ? oldUser : new User();
         autoMapper.map(userDTO, user, patching);
 
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
         user.getUserDetailsEntity().setPassword(oldUser.getUserDetailsEntity().getPassword());
+        user.getUserDetailsEntity().setLastPasswordEdition(oldUser.getUserDetailsEntity().getLastPasswordEdition());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
@@ -79,17 +81,10 @@ public class UserService {
             throw new HeHaveGroupsException();
         }
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        userRepository.deleteById(user.getId());
+        user.getUserDetailsEntity().setEnabled(false);
+        user.getUserDetailsEntity().setWhenHeTryDelete(LocalDateTime.now());
+        userRepository.save(user);
     }
-
-    public PermissionGetDTO getPermissionOfAUserInAProject(String userId, Long projectId){
-        User user = userRepository.findByUserDetailsEntity_Username(userId).get();
-        Permission permission = user.getPermissions().stream().filter(
-                p -> p.getProject().getId().equals(projectId)
-        ).findFirst().get();
-        return ModelToGetDTO.tranform(permission);
-    }
-
 
     public UserGetDTO updatePicture(MultipartFile picture) {
         String username = ((UserDatailEntity)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
@@ -102,24 +97,10 @@ public class UserService {
     public UserGetDTO updatePassword(String id, String password) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.getUserDetailsEntity().setPassword(password);
+        user.getUserDetailsEntity().setAccountNonExpired(true);
+        user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
-
-//    @Transactional
-//    public void putNewPermissionInAProject(String userId, Long permissionId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-//
-//        if (user.getPermissions() != null){
-//            user.getPermissions().clear();
-//        }
-//
-//        user.getPermissions().add(permissionRepository.findById(permissionId).get());
-//
-//        userRepository.save(user);
-//    }
-
-
 
 
     public Collection<UserGetDTO> findAll(){
@@ -153,7 +134,8 @@ public class UserService {
                     p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
             if(oldPermission != null ) {
                 if (!oldPermission.equals(permission)) {
-                    notificationService.generateNotification(TypeOfNotification.CHANGEPERMISSION,user.getId(), permission.getProject().getId());
+                    notificationService.generateNotification(TypeOfNotification
+                            .CHANGEPERMISSION,user.getId(), permission.getProject().getId());
                 }
                 permissions.remove(oldPermission);
             }

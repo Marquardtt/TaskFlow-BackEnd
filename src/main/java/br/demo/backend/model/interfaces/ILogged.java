@@ -5,10 +5,11 @@ import br.demo.backend.model.tasks.Log;
 
 import java.util.Collection;
 
-public interface Logged {
+public interface ILogged {
 
     Collection<Log> getLogs();
     void setLogs(Collection<Log> logs);
     Collection<PropertyValue> getPropertiesValues();
     String getName();
+    Long getId();
 }

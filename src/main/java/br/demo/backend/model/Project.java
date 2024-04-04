@@ -1,8 +1,8 @@
 package br.demo.backend.model;
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.interfaces.HasProperties;
-import br.demo.backend.model.interfaces.Logged;
+import br.demo.backend.model.interfaces.IHasProperties;
+import br.demo.backend.model.interfaces.ILogged;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Log;
@@ -13,9 +13,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import br.demo.backend.model.relations.PropertyValue;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,7 +24,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_project")
-public class Project implements Logged, HasProperties {
+public class Project implements ILogged, IHasProperties {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

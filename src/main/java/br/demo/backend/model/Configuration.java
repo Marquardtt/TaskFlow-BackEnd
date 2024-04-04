@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_configuration")
 public class Configuration {
 
-    //TODO: dar atributos padrão
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

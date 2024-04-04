@@ -40,32 +40,32 @@ public class PropertyController {
 
     //Precisa ter permissão de put no projeto
     @PutMapping("/limited")
-    public void update(@RequestBody LimitedGetDTO property){
+    public void update(@RequestBody Limited property){
         propertyService.update(property, false);
     }
     //Precisa ter permissão de put no projeto
     @PutMapping("/select")
-    public void update(@RequestBody SelectGetDTO property){
+    public void update(@RequestBody Select property){
         propertyService.update(property, false);
     }
     //Precisa ter permissão de put no projeto
     @PutMapping("/date")
-    public void update(@RequestBody DateGetDTO property){
+    public void update(@RequestBody Date property){
         propertyService.update(property, false);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping("/limited")
-    public void patch(@RequestBody LimitedGetDTO property){
+    public void patch(@RequestBody Limited property){
         propertyService.update(property, true);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping("/select")
-    public void patch(@RequestBody SelectGetDTO property){
+    public void patch(@RequestBody Select property){
         propertyService.update(property, true);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping("/date")
-    public void patch(@RequestBody DateGetDTO property){
+    public void patch(@RequestBody Date property){
         propertyService.update(property, true);
     }
 

@@ -28,13 +28,6 @@ public class UserController {
         return userService.save(user);
     }
 
-    //TODO: verificar com a heloisa se eu posso tirar isso
-    @GetMapping("/{username}/project/{projectId}")
-    //  FEITO => PORÉM PROVÁVEL QUE TERÁ ALTERAÇÕE
-    public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
-        return userService.getPermissionOfAUserInAProject(username, projectId);
-    }
-
     @PutMapping
     public UserGetDTO upDate(@RequestBody UserPutDTO user) throws AccessDeniedException {
         return userService.update(user, false);

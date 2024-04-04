@@ -1,5 +1,6 @@
 package br.demo.backend.controller;
 
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
@@ -15,17 +16,17 @@ import java.util.Collection;
 public class PermissionController {
     private PermissionService permissionService;
     @PostMapping("/project/{projectId}")
-    public void insert(@RequestBody PermissionPostDTO permission){
-        permissionService.save(permission);
+    public PermissionGetDTO insert(@RequestBody PermissionPostDTO permission){
+        return permissionService.save(permission);
     }
 
     @PutMapping("/project/{projectId}")
-    public void upDate(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, false);
+    public PermissionGetDTO upDate(@RequestBody PermissionPutDTO permission){
+        return permissionService.update(permission, false);
     }
     @PatchMapping("/project/{projectId}")
-    public void patch(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, true);
+    public PermissionGetDTO patch(@RequestBody PermissionPutDTO permission){
+        return permissionService.update(permission, true);
     }
 
     @GetMapping("/project/{projectId}")

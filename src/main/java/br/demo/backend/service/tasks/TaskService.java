@@ -130,17 +130,16 @@ public class TaskService {
 
     //this set the correctly type of value at the propertyvalue
     public PropertyValue setTaskProperty(Property p) {
-        Value value = null;
-        switch (p.getType()) {
-            case RADIO, SELECT -> value = new UniOptionValued();
-            case CHECKBOX, TAG -> value = new MultiOptionValued();
-            case TEXT -> value = new TextValued();
-            case DATE -> value = new DateValued();
-            case NUMBER, PROGRESS -> value = new NumberValued();
-            case TIME -> value = new TimeValued();
-            case ARCHIVE -> value = new ArchiveValued();
-            case USER -> value = new UserValued();
-        }
+        Value value= switch (p.getType()) {
+            case RADIO, SELECT -> new UniOptionValued();
+            case CHECKBOX, TAG -> new MultiOptionValued();
+            case TEXT -> new TextValued();
+            case DATE -> new DateValued();
+            case NUMBER, PROGRESS -> new NumberValued();
+            case TIME -> new TimeValued();
+            case ARCHIVE -> new ArchiveValued();
+            case USER -> new UserValued();
+        };
         return new PropertyValue(null, p, value);
     }
 

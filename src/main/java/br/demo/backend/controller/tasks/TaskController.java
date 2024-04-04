@@ -22,47 +22,47 @@ public class TaskController {
     }
 
     @PutMapping("/project/{projectId}")
-    public void upDate(@RequestBody Task task){
-        taskService.update(task, false);
+    public TaskGetDTO upDate(@RequestBody Task task){
+        return taskService.update(task, false);
     }
+
     @PatchMapping("/project/{projectId}")
-    public void patch(@RequestBody Task task){
-        taskService.update(task, true);
+    public TaskGetDTO patch(@RequestBody Task task){
+        return taskService.update(task, true);
     }
 
 
     //FEITO
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
-        return taskService.getTasksToday(id);
+        return  taskService.getTasksToday(id);
     }
 
 
     @DeleteMapping("/project/{projectId}/{id}")
     public void delete(@PathVariable Long id){
-        taskService.delete(id);
+         taskService.delete(id);
     }
 
     @DeleteMapping("/project/{projectId}/{id}/permanent")
     public void deletePermanent(@PathVariable Long id){
-        taskService.deletePermanent(id);
+         taskService.deletePermanent(id);
     }
 
     @PutMapping("/project/{projectId}/redo/{id}")
-    public void redo(@PathVariable Long id){
-        taskService.redo(id);
+    public TaskGetDTO redo(@PathVariable Long id){
+        return taskService.redo(id);
     }
 
     //FEITO
     @GetMapping("/project/{projectId}")
     public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
-        return taskService.getDeletedTasks(projectId);
+        return  taskService.getDeletedTasks(projectId);
     }
     //Só os donos do projeto podem completar
-    //TODO:Depois eu vou mudar para ser o usuario logado do context
     @PatchMapping("/{id}/project/{projectId}/complete")
     public TaskGetDTO complete(@PathVariable Long id){
-        return taskService.complete(id);
+        return  taskService.complete(id);
     }
 
 }

@@ -33,9 +33,15 @@ public class DefaultPropsService {
         pages.add(page);
         Select select = new Select(null, "Stats", true, false,
                 options, TypeOfProperty.SELECT, pages, project);
-        page.setProperties(new ArrayList<>());
-        select = selectRepository.save(select);
-        page.getProperties().add(select);
+        if(page == null){
+            project.setProperties(new ArrayList<>());
+            select = selectRepository.save(select);
+            project.getProperties().add(select);
+        }else{
+            page.setProperties(new ArrayList<>());
+            select = selectRepository.save(select);
+            page.getProperties().add(select);
+        }
         return select;
     }
 

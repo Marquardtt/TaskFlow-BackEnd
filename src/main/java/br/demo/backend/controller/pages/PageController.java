@@ -34,37 +34,37 @@ public class PageController {
     //}
 
     @PatchMapping("/{id}/project/{projectId}")
-    public void upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
-        pageService.updateName(name, id);
+    public PageGetDTO upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
+        return pageService.updateName(name, id);
     }
 
 //    @PatchMapping("/{taskId}/{index}/project/{projectId}")
 //    public PageGetDTO updateIndexes(@RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
-//        return pageService.updateIndex(page, taskId, index);
+//        return return pageService.updateIndex(page, taskId, index);
 //    }
 
     @PatchMapping("/x-and-y/project/{projectId}")
-    public void upDate(@RequestBody TaskCanvas taskPage) {
-        pageService.updateXAndY(taskPage);
+    public TaskCanvasGetDTO upDate(@RequestBody TaskCanvas taskPage) {
+        return pageService.updateXAndY(taskPage);
     }
 
     @PatchMapping("/draw/{id}/project/{projectId}")
-    public void upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
-        pageService.updateDraw(draw, id);
+    public PageGetDTO upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
+        return pageService.updateDraw(draw, id);
     }
 
     @PatchMapping("/prop-ordering/{id}/project/{projectId}")
-    public void updatePropertiesOrdering(@PathVariable Long projectId, @RequestBody Property property, @PathVariable Long id) {
-        pageService.updatePropertiesOrdering(property, id);
+    public PageGetDTO updatePropertiesOrdering(@PathVariable Long projectId, @RequestBody Property property, @PathVariable Long id) {
+        return pageService.updatePropertiesOrdering(property, id);
     }
 
     @DeleteMapping("/{id}/project/{projectId}")
     public void delete( @PathVariable Long id) {
-        pageService.delete(id);
+         pageService.delete(id);
     }
 
     @PatchMapping("/merge/{id}/project/{projectId}")
-    public void merge( @RequestBody Collection<Page> pages, @PathVariable Long id) {
-        pageService.merge(pages, id);
+    public Collection<PageGetDTO> merge( @RequestBody Collection<Page> pages, @PathVariable Long id) {
+        return pageService.merge(pages, id);
     }
 }

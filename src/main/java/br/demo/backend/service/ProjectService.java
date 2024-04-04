@@ -3,6 +3,7 @@ package br.demo.backend.service;
 
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.security.entity.UserDatailEntity;
+import br.demo.backend.service.properties.DefaultPropsService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
@@ -36,6 +37,7 @@ public class ProjectService {
     private SelectRepository selectRepository;
     private UserRepository userRepository;
     private LogService logService;
+    private DefaultPropsService defaultPropsService;
     private AutoMapper<Project> autoMapper;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
@@ -100,15 +102,7 @@ public class ProjectService {
         logService.generateLog(Action.CREATE, project);
 
 //        set a default property
-        ArrayList<Option> options = new ArrayList<>();
-        options.add(new Option(null, "To-do", "#FF7A00", 0));
-        options.add(new Option(null, "Doing", "#F7624B", 1));
-        options.add(new Option(null, "Done", "#F04A94", 2));
-        emptyProject.setProperties(new ArrayList<>());
-        Select select = new Select(null, "Stats", true, false,
-                options, TypeOfProperty.SELECT, null, emptyProject);
-        Select selectCreated = selectRepository.save(select);
-        emptyProject.getProperties().add(selectCreated);
+        defaultPropsService.select(project, null);
 
         emptyProject.setVisualizedAt(LocalDateTime.now());
         return ModelToGetDTO.tranformSimple(projectRepository.save(project));

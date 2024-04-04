@@ -4,14 +4,13 @@ import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
-import br.demo.backend.model.interfaces.Logged;
+import br.demo.backend.model.interfaces.ILogged;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.Intervals;
-import br.demo.backend.model.values.UserValued;
 import br.demo.backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,12 +31,12 @@ public class LogService {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         return userRepository.findByUserDetailsEntity_Username(username).get();
     }
-    public void generateLog(Action action, Logged obj, Logged aux){
+    public void generateLog(Action action, ILogged obj, ILogged aux){
         if (Objects.requireNonNull(action) == Action.UPDATE) {
             updateLogs(obj, aux);
         }
     }
-    public void generateLog(Action action, Logged obj){
+    public void generateLog(Action action, ILogged obj){
         switch (action){
             case CREATE -> createLog(obj);
             case DELETE -> deleteLog(obj);
@@ -46,30 +45,30 @@ public class LogService {
         }
     }
 
-    private void completeLog(Logged obj) {
+    private void completeLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
         obj.getLogs().add(new Log(null, typeObj+" completed", Action.COMPLETE, getUser(), LocalDateTime.now(), null));
 
     }
 
-    private void redoLog(Logged obj) {
+    private void redoLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
         obj.getLogs().add(new Log(null, typeObj + " redo", Action.REDO, getUser(), LocalDateTime.now(), null));
 
     }
 
-    private void deleteLog(Logged obj) {
+    private void deleteLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
         obj.getLogs().add(new Log(null, typeObj + " deleted", Action.DELETE, getUser(), LocalDateTime.now(), null));
     }
 
-    private void createLog(Logged obj){
+    private void createLog(ILogged obj){
         String typeObj = obj.getClass().getSimpleName();
         obj.setLogs(new HashSet<>());
         obj.getLogs().add(new Log(null, typeObj + " created", Action.CREATE, getUser(), LocalDateTime.now(), null) );
     }
 
-    private void updateLogs(Logged obj, Logged old){
+    private void updateLogs(ILogged obj, ILogged old){
         String typeObj = obj instanceof Task ? "task" : "project";
         if(!obj.getName().equals(old.getName())){
             obj.getLogs().add(new Log(null, "The "+typeObj+"'s name was changed to '"+

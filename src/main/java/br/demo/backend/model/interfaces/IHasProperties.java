@@ -4,7 +4,7 @@ import br.demo.backend.model.properties.Property;
 
 import java.util.Collection;
 
-public interface HasProperties {
+public interface IHasProperties {
 
     Collection<Property> getProperties();
 }

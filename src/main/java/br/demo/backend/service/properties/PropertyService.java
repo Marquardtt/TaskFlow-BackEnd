@@ -4,7 +4,7 @@ package br.demo.backend.service.properties;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.interfaces.HasProperties;
+import br.demo.backend.model.interfaces.IHasProperties;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
@@ -193,7 +193,7 @@ public class PropertyService {
     }
 
     //this find sme other property in a page or project
-    private Property getOtherProp(HasProperties p, Property property, List<TypeOfProperty> typesOfProperty) {
+    private Property getOtherProp(IHasProperties p, Property property, List<TypeOfProperty> typesOfProperty) {
         return p.getProperties().stream().filter(prop ->
                         !prop.equals(property)
                                 && typesOfProperty.contains(prop.getType()))

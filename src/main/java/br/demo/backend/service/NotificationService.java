@@ -10,7 +10,6 @@
     import br.demo.backend.repository.NotificationRepository;
     import br.demo.backend.repository.ProjectRepository;
     import br.demo.backend.repository.UserRepository;
-    import br.demo.backend.repository.chat.ChatRepository;
     import br.demo.backend.repository.chat.MessageRepository;
     import br.demo.backend.repository.pages.PageRepository;
     import br.demo.backend.repository.tasks.TaskRepository;
@@ -47,29 +46,28 @@
 //                When someone comment in a task
                 case COMMENTS -> generateComment(idPrincipal, auxiliary, type);
 //                When some deadline is in 24 hours
-                case DEADLINE -> generateDeadlineOrScheduling(idPrincipal, type);
+                case DEADLINE -> generateDeadlineOrScheduling(idPrincipal, auxiliary, type);
 //                When some schedule is in 24 hours
-                case SCHEDULE -> generateDeadlineOrScheduling(idPrincipal, type);
+                case SCHEDULE -> generateDeadlineOrScheduling(idPrincipal, auxiliary, type);
 //                When someone pass the target of points
                 case POINTS -> generatePoints(idPrincipal, auxiliary, type);
             }
         }
         private void generateChangePermission(Long idUser, Long idProject, TypeOfNotification type ){
             User user  = userRepository.findById(idUser).get();
-            Configuration config = user.getConfiguration();
-            //Verify if the user wants to recive a notification for this
-            if(!config.getNotificWhenChangeMyPermission() || !config.getNotifications()) return;
+            if (!verifyIfHeWantsThisNotification(type, user)) return;
+
             Project project = projectRepository.findById(idProject).get();
             Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
-            notificationRepository.save(new Notification(null, "Your permission was changed at project '"+project.getName()+"'",
-                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId()+"/group/"+group.getId(), user, false ));
+            notificationRepository.save(new Notification(null, "Your permission was changed at project '"+
+                    project.getName()+"'", type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
+                    project.getId()+"/group/"+group.getId(), user, false ));
         }
 
         private void generateAddInGroup(Long userId, Long groupId, TypeOfNotification type){
             User user  = userRepository.findById(userId).get();
-            Configuration config = user.getConfiguration();
-            //Verify if the user wants to recive a notification for this
-            if(!config.getNotificAtAddMeInAGroup() || !config.getNotifications()) return;
+            if (!verifyIfHeWantsThisNotification(type, user)) return;
+
             Group group = groupRepository.findById(groupId).get();
             if(group.getUsers().contains(user)){
                 notificationRepository.save(new Notification(null, "You was added at group '"+group.getName()+"'",
@@ -83,6 +81,7 @@
 
         private void generateChangeTask(Long taskId, TypeOfNotification type){
             String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
             Task task = taskRepository.findById(taskId).get();
             Page page = pageRepository.findByTasks_Task(task);
             Project project = page.getProject();
@@ -91,16 +90,15 @@
             users.add(project.getOwner());
 
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
-                Configuration config = user.getConfiguration();
-                //Verify if the user wants to recive a notification for this
-                if(!config.getNotificTasks() || !config.getNotifications()) return;
-                String message = getMessage(task);
+                if (!verifyIfHeWantsThisNotification(type, user)) return;
+                String message = getMessageTask(task);
                 notificationRepository.save(new Notification(null, message,
-                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+taskId, user, false ));
+                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +
+                        "/"+page.getId()+"/"+taskId, user, false ));
             });
         }
 
-        private static String getMessage(Task task) {
+        private static String getMessageTask(Task task) {
             Log lastLog = new ArrayList<>(task.getLogs()).get(task.getLogs().size()-1);
             //Specify what happend with de task.
             String message =
@@ -117,9 +115,7 @@
         private void generateChat (Long messageId, Long chatId, TypeOfNotification type) {
             Message message = messageRepository.findById(messageId).get();
             message.getDestinations().forEach(destination -> {
-                //Verify if the user wants to recive a notification for this
-                Configuration config = destination.getUser().getConfiguration();
-                if (!config.getNotificChats() || !config.getNotifications() || destination.getVisualized()) return;
+                if (!verifyIfHeWantsThisNotification(type,destination.getUser())) return;
                 //Verify if the notification just have an annex
                 if (message.getValue().isEmpty()) {
                     notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " send a annex to you", type,
@@ -142,9 +138,7 @@
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
             users.add(project.getOwner());
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
-                Configuration config = user.getConfiguration();
-                //Verify if the user wants to recive a notification for this
-                if (!config.getNotificComments() || !config.getNotifications()) return;
+                if (!verifyIfHeWantsThisNotification(type, user)) return;
                 notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " comment in the task '"+task.getName()+"' '"+message.getValue()+"'" , type,
                         "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+idTask, user, false));
             });
@@ -152,42 +146,59 @@
 
         private void generatePoints(Long idUser, Long pointsTarget , TypeOfNotification type){
             User user  = userRepository.findById(idUser).get();
-            Configuration config = user.getConfiguration();
-            //Verify if the user wants to recive a notification for this
-            if(!config.getNotificMyPointsChange() || !config.getNotifications()) return;
+            if (!verifyIfHeWantsThisNotification(type, user)) return;
             notificationRepository.save(new Notification(null, "Congrats! You pass the target of "+pointsTarget+" points", type,
                     "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account", user, false));
         }
 
-        private void generateDeadlineOrScheduling(Long idTask, TypeOfNotification type){
-            Task task = taskRepository.findById(idTask).get();
-            Page page = pageRepository.findByTasks_Task(task);
-            Project project = page.getProject();
+        //typeObj: 0 = task; 1 = project
+        private void generateDeadlineOrScheduling(Long idObj, Long typeObj ,TypeOfNotification type){
+            Task task;
+            Page page;
+            Project project;
+            if(typeObj == 0){
+                task = taskRepository.findById(idObj).get();
+                page = pageRepository.findByTasks_Task(task);
+                project = page.getProject();
+            }else{
+                page = null;
+                task = null;
+                project = projectRepository.findById(idObj).get();
+            }
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
             users.forEach(user -> {
-                Configuration config = user.getConfiguration();
-                //Verify if the user wants to recive a notification for this
-                if(!config.getNotifications()) return;
-                if (TypeOfNotification.DEADLINE.equals(type) && !config.getNotificDeadlines()) return;
-                if (TypeOfNotification.SCHEDULE.equals(type) && !config.getNotificSchedules()) return;
-                notificationRepository.save(new Notification(null, "The task '"+task.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
-                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false ));
+                if (!verifyIfHeWantsThisNotification(type, user)) return;
+                if(typeObj == 0){
+                    generateInTaskNotification(user, type, project,task, page);
+                }else{
+                    generateInProjectNotification(project,type,user);
+                }
             });
         }
 
-        public void generateDeadlineOrSchedulingInProjct(Long idProject, TypeOfNotification type){
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-            Project project = projectRepository.findById(idProject).get();
-            Collection<User> users = userRepository.findAllByPermissions_Project(project);
-            users.forEach(user -> {
-                Configuration config = user.getConfiguration();
-                //Verify if the user wants to recive a notification for this
-                if(!config.getNotifications()) return;
-                if ( TypeOfNotification.DEADLINE.equals(type) && !config.getNotificDeadlines()) return;
-                if ( TypeOfNotification.SCHEDULE.equals(type) && !config.getNotificSchedules()) return;
-                notificationRepository.save(new Notification(null, "The project '"+project.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
-                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false ));
-            });
+        public  void generateInProjectNotification(Project project, TypeOfNotification type, User user){
+            notificationRepository.save(new Notification(null, "The project '"+project.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
+                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false ));
+        }
+        public void generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page){
+            notificationRepository.save(new Notification(null, "The task '"+task.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
+                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false ));
+        }
+
+
+        private Boolean verifyIfHeWantsThisNotification(TypeOfNotification type, User user){
+            Configuration config  = user.getConfiguration();
+            if(!config.getNotifications()) return false;
+            return switch (type){
+                case ADDORREMOVEINGROUP ->  config.getNotificAtAddMeInAGroup();
+                case CHANGEPERMISSION ->  config.getNotificWhenChangeMyPermission();
+                case CHANGETASK ->  config.getNotificTasks();
+                case CHAT ->  config.getNotificChats();
+                case POINTS ->  config.getNotificMyPointsChange();
+                case DEADLINE ->  config.getNotificDeadlines();
+                case SCHEDULE ->  config.getNotificSchedules();
+                case COMMENTS ->  config.getNotificComments();
+            };
         }
 
         public void updateNotification(Notification notification){

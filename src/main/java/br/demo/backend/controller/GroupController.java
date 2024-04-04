@@ -26,12 +26,12 @@ public class GroupController {
     }
 
     @PutMapping("/{groupId}")
-    public void upDate(@RequestBody GroupPutDTO group) {
-        groupService.update(group, false);
+    public GroupGetDTO upDate(@RequestBody GroupPutDTO group) {
+        return groupService.update(group, false);
     }
     @PatchMapping("/{groupId}")
-    public void patch(@RequestBody GroupPutDTO group) {
-        groupService.update(group, true);
+    public GroupGetDTO patch(@RequestBody GroupPutDTO group) {
+        return groupService.update(group, true);
     }
 
     @GetMapping("/{groupId}")
@@ -43,26 +43,18 @@ public class GroupController {
         return groupService.findGroupsByUser();
     }
 
-    //Precisa ser o owner do group ou ser um membro
-    //TODO: Verficar se precisa mesmo dessa requisição
-    @GetMapping("/{groupId}/permissions/{projectId}")
-    public ResponseEntity<Collection<Permission>> findAllPermissionsOfAGroupInAProject(@PathVariable Long groupId, @PathVariable Long projectId) {
-        Collection<Permission> permissions = groupService.findAllPermissionsOfAGroupInAProject(groupId, projectId);
-        return ResponseEntity.ok(permissions);
-    }
-
     @DeleteMapping("/{groupId}")
     public void delete(@PathVariable Long groupId) {
         groupService.delete(groupId);
     }
     @PatchMapping("/{groupId}/picture")
-    public void updatePicture(@RequestParam MultipartFile picture, @PathVariable Long groupId) {
-        groupService.updatePicture(picture, groupId);
+    public GroupGetDTO updatePicture(@RequestParam MultipartFile picture, @PathVariable Long groupId) {
+        return groupService.updatePicture(picture, groupId);
     }
 
     @PatchMapping("/{groupId}/change-owner")
-    public void updateOwner(@RequestBody User newOwner, @PathVariable Long groupId) {
-        groupService.updateOwner(newOwner, groupId);
+    public GroupGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long groupId) {
+        return groupService.updateOwner(newOwner, groupId);
 
     }
 }

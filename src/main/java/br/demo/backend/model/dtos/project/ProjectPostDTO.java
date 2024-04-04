@@ -17,8 +17,6 @@ import java.util.Collection;
 public class ProjectPostDTO {
     private String name;
     private String description;
-    //TODO: Se mudar para project ter taskvalues tirar isso
-    private LocalDate deadline;
     @NonNull
     private User owner;
 }
