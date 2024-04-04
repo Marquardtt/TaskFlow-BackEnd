@@ -88,7 +88,6 @@
 
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
             users.add(project.getOwner());
-            users.add(project.getOwner());
 
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
@@ -137,7 +136,6 @@
             Project project = page.getProject();
 
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
-            users.add(project.getOwner());
             users.add(project.getOwner());
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
