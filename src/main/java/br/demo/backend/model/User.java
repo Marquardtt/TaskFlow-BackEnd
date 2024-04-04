@@ -47,7 +47,7 @@ public class User {
     private Collection<Permission> permissions;
     @OneToOne(cascade = CascadeType.ALL)
     private UserDatailEntity userDetailsEntity;
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private Collection<Notification> notifications;
     public User (String username){
         this.userDetailsEntity.setUsername(username);

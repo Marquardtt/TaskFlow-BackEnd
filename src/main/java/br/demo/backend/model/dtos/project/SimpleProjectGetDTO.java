@@ -3,6 +3,7 @@ package br.demo.backend.model.dtos.project;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.chat.Message;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
 import br.demo.backend.model.relations.PropertyValue;
 import jakarta.persistence.CascadeType;
@@ -23,6 +24,6 @@ public class SimpleProjectGetDTO {
     private String description;
     private Archive picture;
     private Integer progress;
-    private Collection<Group> groups;
+    private Collection<SimpleGroupGetDTO> groups;
     private SimpleUserGetDTO owner;
 }

@@ -5,9 +5,11 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,8 +41,13 @@ public class GroupController {
         return groupService.findOne(id);
     }
     @GetMapping
-    public Collection<GroupGetDTO> findGroupsByAUser() {
+    public Collection<SimpleGroupGetDTO> findGroupsByAUser() {
         return groupService.findGroupsByUser();
+    }
+
+    @GetMapping("/project/{projectId}")
+    public Collection<SimpleGroupGetDTO> findGroupsByAProject(@PathVariable Long projectId) {
+        return groupService.findGroupsByAProject(projectId);
     }
 
     @DeleteMapping("/{groupId}")

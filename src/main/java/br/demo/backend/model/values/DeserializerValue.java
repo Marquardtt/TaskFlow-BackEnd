@@ -57,7 +57,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             System.out.println("Deu erro no id da propValue");
                         }
                         Property property = new Property(idProp, TypeOfProperty.valueOf(type));
-                        System.out.println(property);
                         if (type.equals("TEXT")) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }

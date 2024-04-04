@@ -7,6 +7,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.chat.*;
 import br.demo.backend.model.dtos.chat.get.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
@@ -125,7 +126,9 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         PermissionGetDTO permission = new PermissionGetDTO();
         BeanUtils.copyProperties(obj, permission);
+        System.out.println(permission);
         permission.setProject(tranformSimple(obj.getProject()));
+        System.out.println(permission.getProject());
         return permission;
     }
     public static ProjectGetDTO tranform(Project obj){
@@ -267,13 +270,11 @@ public class ModelToGetDTO {
         SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
         BeanUtils.copyProperties(obj, simpleUser);
         simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
-
         return simpleUser;
     }
 
     public static SimpleProjectGetDTO tranformSimple(Project obj){
 
-        //TODO: testar se isso vai de fato funcionar e depois criar um dto com nome, foto e id
         Collection <Group> groups = groupRepository.findGroupsByPermissions_Project(obj);
 
         Integer progress = 0;
@@ -287,9 +288,17 @@ public class ModelToGetDTO {
         }
         SimpleUserGetDTO user = tranformSimple(obj.getOwner());
         return new SimpleProjectGetDTO(
-                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups, user
+                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(),
+                progress,groups.stream().map(ModelToGetDTO::tranformSimple).toList(), user
         );
 
+    }
+
+    public static SimpleGroupGetDTO tranformSimple(Group obj){
+        if(obj == null) return null;
+        SimpleGroupGetDTO group = new SimpleGroupGetDTO();
+        BeanUtils.copyProperties(obj, group);
+        return group;
     }
 
 }

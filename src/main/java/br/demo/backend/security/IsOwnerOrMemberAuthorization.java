@@ -30,6 +30,7 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
 
         UserDatailEntity userDatailEntity = (UserDatailEntity) suplier.get().getPrincipal();
         boolean decision = false;
+        //TODO: fazer para consguir pegar o grupo no projeto apenas quem é membro ou owner do projeto
         if(object.getRequest().getRequestURI().contains("/group")){
             String groupId = object.getRequest().getParameter("grouId");
             Group group = groupRepository.findById(Long.parseLong(groupId)).get();

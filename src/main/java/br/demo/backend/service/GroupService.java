@@ -3,10 +3,8 @@ package br.demo.backend.service;
 
 
 
-import br.demo.backend.model.Archive;
-import br.demo.backend.model.Group;
-import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
+import br.demo.backend.model.*;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
@@ -44,8 +42,11 @@ public class GroupService {
 
 
     public GroupGetDTO save(GroupPostDTO groupDto) {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
+        group.setOwner(user);
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
@@ -57,12 +58,18 @@ public class GroupService {
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
-    public Collection<GroupGetDTO> findGroupsByUser() {
+    public Collection<SimpleGroupGetDTO> findGroupsByUser() {
         UserDatailEntity userDatail = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUserDetailsEntity_Username(userDatail.getUsername()).get();
         return groupRepository.findGroupsByOwnerOrUsersContaining(user, user)
-                .stream().map(ModelToGetDTO::tranform).toList();
+                .stream().map(ModelToGetDTO::tranformSimple).toList();
     }
+
+    public Collection<SimpleGroupGetDTO> findGroupsByAProject(Long projectId) {
+        return groupRepository.findGroupsByPermissions_Project(new Project(projectId))
+                .stream().map(ModelToGetDTO::tranformSimple).toList();
+    }
+
 
     public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();

@@ -46,7 +46,6 @@ public class UserDatailEntity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         List<SimpleGrantedAuthority> list = new ArrayList<>();
-        System.out.println(this.user.getPermissions());
         if (!this.user.getPermissions().isEmpty()) {
             for (Permission permission : this.user.getPermissions()) {
                 list.add(new SimpleGrantedAuthority("Project_" + permission.getProject().getId() + "_" + permission.getPermission().getMethod()));

@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}").access(authorizationRequestsRoutes)
 
                 //PROPERTY
                 .requestMatchers(HttpMethod.POST, "/property/project/{projectId}/limited").access(authorizationRequestsRoutes)
@@ -104,6 +104,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group").authenticated()
+                .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}/permissions/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
@@ -117,14 +118,14 @@ public class SecurityConfig {
 
         // Manter a sessão do usuário na requisição ativa
         http.securityContext((context) -> context.securityContextRepository(repo));
-
-        http.formLogin(AbstractHttpConfigurer::disable); // este metodo habilita o formulario de login do spring security
-        http.logout(Customizer.withDefaults()); // este metodo habilita o logout do spring security
-
         http.sessionManagement(config -> {
             config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         });
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
+
+        http.formLogin(AbstractHttpConfigurer::disable); // este metodo desabilita o formulario de login do spring security
+        http.logout(AbstractHttpConfigurer::disable); // este metodo desabilita o logout do spring security
+
 
         return http.build();
     }
