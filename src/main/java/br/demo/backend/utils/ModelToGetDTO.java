@@ -20,6 +20,7 @@ import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.dtos.relations.*;
 import br.demo.backend.model.dtos.tasks.LogGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.enums.TypeOfChat;
@@ -291,5 +292,11 @@ public class ModelToGetDTO {
         );
 
     }
+
+    public static OtherUsersDTO transformOther(User user){
+        return new OtherUsersDTO();
+    }
+
+
 
 }
