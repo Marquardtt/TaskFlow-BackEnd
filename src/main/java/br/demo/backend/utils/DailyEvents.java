@@ -32,7 +32,29 @@ public class DailyEvents {
     @Scheduled(cron = "0 0 0 * * *")
 //    Check every UTC 00:00 properties like scheduling and deadlines
     public void checkDaily() {
+        usersRules();
+        tasksRules();
+        projectsRules();
+    }
 
+    private void projectsRules() {
+        //generate the notifications of deadlines e schedulings on a project
+        projectRepository.findAll().forEach(this::generateNotificationsDates);
+    }
+
+    private void tasksRules() {
+        //generate the notifications of deadlines e schedulings on a task
+        //and test if the task was deleted
+        taskRepository.findAll().forEach(task -> {
+            if (task.getDeleted()) {
+                deleteTask(task);
+                return;
+            } else if (task.getCompleted()) return;
+            generateNotificationsDates(task);
+        });
+    }
+
+    private void usersRules() {
         Collection<User> users = userRepository.findAll();
         //that delete the user that don't try to log before 30 days of his deletion
         users.stream().filter(u -> !u.getUserDetailsEntity().isEnabled() &&
@@ -46,19 +68,6 @@ public class DailyEvents {
                     userRepository.save(u);
                 }
         );
-        //generate the notifications of deadlines e schedulings on a task
-        //and test if the task was deleted
-        taskRepository.findAll().forEach(task -> {
-            if (task.getDeleted()) {
-                deleteTask(task);
-                return;
-            } else if (task.getCompleted()) return;
-            generateNotificationsDates(task);
-        });
-
-        //generate the notifications of deadlines e schedulings on a project
-        projectRepository.findAll().forEach(this::generateNotificationsDates);
-
     }
 
     private Boolean checkIfIsIn24Hours(LocalDateTime date) {
@@ -98,14 +107,14 @@ public class DailyEvents {
 
     private void generateNotificationsDates(ILogged obj) {
         obj.getPropertiesValues().forEach(property -> {
-            if (checkIfIsSchedulingDate(property.getProperty())) {
-                if (checkIfIsIn24Hours((LocalDateTime) property.getValue().getValue())) {
-                    notificationService.generateNotification(TypeOfNotification.SCHEDULE, obj.getId(), property.getId());
+            if(checkIfIsIn24Hours((LocalDateTime)property.getValue().getValue() )){
+                if (checkIfIsSchedulingDate(property.getProperty())) {
+                    notificationService.generateNotification(TypeOfNotification.SCHEDULE,
+                            obj.getId(), property.getId());
                 }
-            }
-            if (checkIfIsDeadlineDate(property.getProperty())) {
-                if (checkIfIsIn24Hours((LocalDateTime) property.getValue().getValue())) {
-                    notificationService.generateNotification(TypeOfNotification.DEADLINE, obj.getId(), property.getId());
+                if (checkIfIsDeadlineDate(property.getProperty())) {
+                    notificationService.generateNotification(TypeOfNotification.DEADLINE,
+                            obj.getId(), property.getId());
                 }
             }
         });

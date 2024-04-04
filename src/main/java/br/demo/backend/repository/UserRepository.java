@@ -1,5 +1,6 @@
 package br.demo.backend.repository;
 
+import br.demo.backend.model.Permission;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;

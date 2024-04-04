@@ -57,12 +57,11 @@ public class ProjectService {
     }
 
     public Collection<SimpleProjectGetDTO> finAllOfAUser() {
-
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
-//        get the projects that the user is owner
+        //get the projects that the user is owner
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
-//        get the projects that the user is member
+        //get the projects that the user is member
         projects.addAll(user.getPermissions().stream().map(Permission::getProject).toList());
         return projects.stream().map(ModelToGetDTO::tranformSimple).toList();
     }
@@ -75,15 +74,14 @@ public class ProjectService {
         Project oldProject = projectRepository.findById(projectDTO.getId()).get();
         Project project = patching ? oldProject : new Project();
         autoMapper.map(projectDTO, project, patching);
-//        keep the owner, pages, properties and picture of the project
+        //keep the owner, pages, properties and picture of the project
         project.setOwner(oldProject.getOwner());
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
 
-//        generate the logs
+        //generate the logs
         logService.generateLog(Action.UPDATE, project, oldProject);
-
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
@@ -91,24 +89,23 @@ public class ProjectService {
 
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 
+        //create the project and set the owner
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
-
-//        set logged user that owner
         project.setOwner(userRepository.findByUserDetailsEntity_Username(username).get());
-
         Project emptyProject = projectRepository.save(project);
-//        generate logs
+
+        //generate logs
         logService.generateLog(Action.CREATE, project);
 
-//        set a default property
+        //set a default property
         defaultPropsService.select(project, null);
-
         emptyProject.setVisualizedAt(LocalDateTime.now());
+
         return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
 
-//    set that the project was visualized by an user, to sort by this on the projects page
+   //set that the project was visualized by a user, to sort by this on the projects page
     public ProjectGetDTO setVisualizedNow(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         project.setVisualizedAt(LocalDateTime.now());

@@ -15,6 +15,6 @@ public class PermissionPutDTO {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
-    private TypePermission permission;
+    private TypePermission permission = TypePermission.READ;
 
 }

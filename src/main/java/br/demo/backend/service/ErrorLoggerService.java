@@ -1,6 +1,6 @@
 package br.demo.backend.service;
 
-import br.demo.backend.model.ids.ErrorLog;
+import br.demo.backend.model.ErrorLog;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;

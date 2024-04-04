@@ -47,8 +47,8 @@ public class SecurityConfig {
 
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId/set-now}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/{picture}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
@@ -60,10 +60,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PUT, "/task/project/{projectId").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectid}/complete").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId/{id}").access(authorizationRequestsRoutes)
 

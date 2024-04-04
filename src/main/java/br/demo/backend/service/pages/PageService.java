@@ -45,11 +45,8 @@ public class PageService {
     private OrderedPageRepository orderedPageRepository;
     private CanvasPageRepository canvasPageRepository;
     private PageRepository pageRepository;
-    private LimitedRepository limitedRepository;
     private PropertyRepository propertyRepository;
     private TaskCanvasRepository taskCanvasRepository;
-    private SelectRepository selectRepository;
-    private DateRepository dateRepository;
     private ProjectRepository projectRepository;
     private TaskService taskService;
     private TaskOrderedRepository taskOrderedRepository;
@@ -84,36 +81,37 @@ public class PageService {
 
     public PageGetDTO save(PagePostDTO page, Long projectId) {
         page.setProject(projectRepository.findById(projectId).get());
-        switch (page.getType()) {
+        return switch (page.getType()) {
             //pages that have a draw
-            case CANVAS -> {
-                CanvasPage canvasModel = new CanvasPage();
-                autoMapperCanvas.map(page, canvasModel, false);
-                return ModelToGetDTO.tranform(canvasPageRepository.save(canvasModel));
-            }
+            case CANVAS -> ModelToGetDTO.tranform(saveSpecific(autoMapperCanvas, page, new CanvasPage()));
             //pages that don't have a specific attribute
-            case TABLE, LIST -> {
-                Page canvasModel = new Page();
-                autoMapperOther.map(page, canvasModel, false);
-                return ModelToGetDTO.tranform(pageRepository.save(canvasModel));
-            }
+            case TABLE, LIST -> ModelToGetDTO.tranform(saveSpecific(autoMapperOther, page, new Page()));
+
             //pages that have a property ordering
             default -> {
-                OrderedPage canvasModel = new OrderedPage();
-                autoMapperOrdered.map(page, canvasModel, false);
-                OrderedPage pageServed = orderedPageRepository.save(canvasModel);
+                OrderedPage saved = (OrderedPage) saveSpecific(autoMapperOrdered, page, new OrderedPage());
                 //setting the property ordering
-                Property propOrdering = null;
-                switch (page.getType()) {
-                    case KANBAN -> propOrdering = propOrdSelect(pageServed);
-                    case TIMELINE -> propOrdering = propOrdTime(pageServed);
-                    default -> propOrdering = propOrdDate(pageServed);
-                }
-                canvasModel.setPropertyOrdering(propOrdering);
-                return ModelToGetDTO.tranform(orderedPageRepository.save(canvasModel));
+                generatePropertyOrdering(saved);
+                yield  ModelToGetDTO.tranform(orderedPageRepository.save(saved));
             }
-        }
+        };
     }
+
+    private void generatePropertyOrdering(OrderedPage saved) {
+        Property propOrdering = null;
+        switch (saved.getType()) {
+            case KANBAN -> propOrdering = propOrdSelect(saved);
+            case TIMELINE -> propOrdering = propOrdTime(saved);
+            default -> propOrdering = propOrdDate(saved);
+        }
+        saved.setPropertyOrdering(propOrdering);
+    }
+
+    private <T> Page saveSpecific(AutoMapper<T> autoMapper, PagePostDTO page, T emptyModel){
+        autoMapper.map(page, emptyModel, false);
+        return pageRepository.save((Page) emptyModel);
+    }
+
     private Property propOrdSelect(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Select select = (Select) testType(project, TypeOfProperty.SELECT, TypeOfProperty.TAG,

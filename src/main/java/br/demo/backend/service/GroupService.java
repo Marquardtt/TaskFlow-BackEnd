@@ -3,7 +3,6 @@ package br.demo.backend.service;
 
 
 
-import br.demo.backend.exception.GroupNotFoundException;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Permission;
@@ -12,13 +11,9 @@ import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
-import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.utils.ModelToGetDTO;
-import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
-import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -30,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 @Service
 @AllArgsConstructor
@@ -70,70 +64,52 @@ public class GroupService {
                 .stream().map(ModelToGetDTO::tranform).toList();
     }
 
-//
-//    public PermissionGetDTO findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
-//        Group group = groupRepository.findById(groupId).get();
-//        Permission permission = group.getPermissions().stream().filter(
-//                p -> p.getProject().getId().equals(projectId)
-//        ).findFirst().get();
-//        return ModelToGetDTO.tranform(permission);
-//    }
-//
-//
-
-
-    public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        return group.getPermissions().stream()
-                .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
-    }
-
-
     public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
-        Archive picture = oldGroup.getPicture();
-
+        //this is to keep the old group, to keep the owner and the picture and use patch our put
         Group group = patching ? oldGroup : new Group();
         autoMapper.map(groupDTO, group, patching);
-
-        //keep the old owner
-        group.setOwner(oldGroup.getOwner());
+        keepFields(group, oldGroup);
 
         //this get the new permissions of the group and update the permission to the users
-        // and group, normally that will be just one
-        Group groupOld = groupRepository.findById(group.getId()).get();
         group.getPermissions().stream().filter(p ->
-                !groupOld.getPermissions().contains(p)
+                !oldGroup.getPermissions().contains(p)
         ).forEach(p ->  updatePermission(group, p));
 
-//        this keep the picture
-        group.setPicture(oldGroup.getPicture());
-//        this gets the difference users in above lists, getting the added and removed users
+        //saving and generating notifications
+        GroupGetDTO groupGetDTO =  ModelToGetDTO.tranform(groupRepository.save(group));
+        notificationsAddOrRemove(group, oldGroup);
+        return groupGetDTO;
+    }
+
+    private void notificationsAddOrRemove(Group group, Group groupOld){
+        // this gets the difference users in above lists, getting the added and removed users
         Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
                 !groupOld.getUsers().contains(u)
         ).toList());
         usersAddedAndRemoved.addAll(groupOld.getUsers().stream().filter(u ->
                 !group.getUsers().contains(u)
         ).toList());
-
-        GroupGetDTO groupGetDTO =  ModelToGetDTO.tranform(groupRepository.save(group));
-//       this generates the notification to add ou remove someone
+        //this generates the notification to add ou remove someone
         usersAddedAndRemoved.forEach(u -> {
             if(!u.equals(group.getOwner())){
                 notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, u.getId(), group.getId());
             }
         });
-        return groupGetDTO;
+    }
+
+    private void keepFields(Group group, Group oldGroup){
+        group.setOwner(oldGroup.getOwner());
+        group.setPicture(oldGroup.getPicture());
     }
 
     private void updatePermission(Group group, Permission permission) {
-//        here we update the permission on members of the group
+        //here we update the permission on members of the group
         group.getUsers().forEach( u -> {
-            userService.updatePermission(u.getUserDetailsEntity().getUsername(), permission);
+            userService.updatePermissionOfAUser(u.getUserDetailsEntity().getUsername(), permission);
         });
         //here we update the permission of the group owner
-        //TODO: qual é a permissão do owner do grupo (acho que deveria ser todas)
-        userService.updatePermission(group.getOwner().getUserDetailsEntity().getUsername(), permission);
+        userService.updatePermissionOfAUser(group.getOwner().getUserDetailsEntity().getUsername(), permission);
     }
 
 

@@ -4,18 +4,25 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
-@Data
+import java.time.LocalDateTime;
+
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "tb_error_log")
+@Data
 public class ErrorLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String value;
+
+    private String exceptionMessage;
+    private LocalDateTime timestamp;
+
+    public ErrorLog(Exception e) {
+        this.exceptionMessage = e.getMessage();
+        this.timestamp = LocalDateTime.now();
+    }
 
 }

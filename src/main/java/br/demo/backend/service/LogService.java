@@ -70,26 +70,31 @@ public class LogService {
 
     private void updateLogs(ILogged obj, ILogged old){
         String typeObj = obj instanceof Task ? "task" : "project";
+        updateName(obj, old, typeObj);
+        Collection<Log> logs = obj.getPropertiesValues().stream()
+                .map(prop ->  updateProperty(obj, old, prop))
+                .filter(Objects::nonNull).toList();
+        obj.getLogs().addAll(logs);
+    }
+
+    private Log updateProperty(ILogged obj, ILogged old, PropertyValue prop) {
+        PropertyValue first = old.getPropertiesValues().stream()
+                .filter(p-> p.getValue().getId().equals(prop.getValue().getId()))
+                .findFirst()
+                .orElse(null);
+        if (first != null && !prop.getValue().getValue().equals(first.getValue().getValue())) {
+            PropertyValue propertyValue = new PropertyValue(first);
+            return new Log(null, descriptionUpdate(prop), Action.UPDATE,getUser(), LocalDateTime.now(), propertyValue);
+        }
+        return null; // Se não há alteração, retorna null
+    }
+
+    private void updateName(ILogged obj, ILogged old, String typeObj) {
         if(!obj.getName().equals(old.getName())){
             obj.getLogs().add(new Log(null, "The "+typeObj+"'s name was changed to '"+
                     obj.getName()+"'", Action.UPDATE, getUser(),
                     LocalDateTime.now(), null));
         }
-        Collection<Log> logs = obj.getPropertiesValues().stream()
-                .map(prop -> {
-                    PropertyValue first = old.getPropertiesValues().stream()
-                            .filter(p-> p.getValue().getId().equals(prop.getValue().getId()))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (first != null && !prop.getValue().getValue().equals(first.getValue().getValue())) {
-                        PropertyValue propertyValue = new PropertyValue(first);
-                        return new Log(null, descriptionUpdate(prop), Action.UPDATE,getUser(), LocalDateTime.now(), propertyValue);
-                    }
-                    return null; // Se não há alteração, retorna null
-                })
-                .filter(Objects::nonNull).toList();
-        obj.getLogs().addAll(logs);
     }
 
     private String descriptionUpdate(PropertyValue value){
@@ -112,6 +117,9 @@ public class LogService {
 
 
     private String listString(Collection<String> strs){
+        if(strs == null || strs.isEmpty()){
+            return "";
+        }
         StringJoiner base = new StringJoiner(", ", "", " and ");
         for(String str : strs){
             base.add(str);

@@ -78,7 +78,7 @@ public class UserController {
     //precisa ser o dono do grupo em que o usuario esta nesse projeto
     @PatchMapping("{username}/update-permission/project/{projectId}")
     public PermissionGetDTO updatePermission(@PathVariable String username, @RequestBody Permission permission){
-        return userService.updatePermission(username, permission);
+        return userService.updatePermissionOfAUser(username, permission);
     }
 
 }

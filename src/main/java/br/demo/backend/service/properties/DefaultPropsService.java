@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -25,24 +27,28 @@ public class DefaultPropsService {
     private LimitedRepository limitedRepository;
 
     public Select select(Project project, Page page){
-        ArrayList<Option> options = new ArrayList<>();
-        options.add(new Option(null, "To-do", "#FF7A00", 0));
-        options.add(new Option(null, "Doing", "#F7624B", 1));
-        options.add(new Option(null, "Done", "#F04A94", 2));
         ArrayList<Page> pages = new ArrayList<>();
-        pages.add(page);
         Select select = new Select(null, "Stats", true, false,
-                options, TypeOfProperty.SELECT, pages, project);
+                createOptions(), TypeOfProperty.SELECT, pages, project);
         if(page == null){
             project.setProperties(new ArrayList<>());
             select = selectRepository.save(select);
             project.getProperties().add(select);
         }else{
+            pages.add(page);
             page.setProperties(new ArrayList<>());
             select = selectRepository.save(select);
             page.getProperties().add(select);
         }
         return select;
+    }
+
+    private Collection<Option> createOptions(){
+        return List.of(
+            new Option(null, "To-do", "#FF7A00", 0),
+            new Option(null, "Doing", "#F7624B", 1),
+            new Option(null, "Done", "#F04A94", 2)
+        );
     }
 
     public Date date(Project project, Page page){

@@ -2,6 +2,7 @@ package br.demo.backend.service.tasks;
 
 
 
+import br.demo.backend.model.tasks.Log;
 import br.demo.backend.repository.values.UserValuedRepository;
 import br.demo.backend.service.LogService;
 import br.demo.backend.service.UserService;
@@ -9,7 +10,6 @@ import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.service.NotificationService;
-import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
@@ -20,13 +20,11 @@ import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
-import br.demo.backend.model.properties.Option;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.relations.PropertyValue;
-import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
@@ -43,15 +41,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -73,39 +67,38 @@ public class TaskService {
 
 
     public TaskGetDTO save(Long idpage) {
-
         Page page = pageRepositorry.findById(idpage).get();
-//      pre save the task to generate it's id and relations
         Task taskEmpty = taskRepository.save(new Task());
 
-//        get the task's page's properties
-        Collection<Property> propertiesPage = page.getProperties();
-
-//        get the task's project's properties
-        Project project = projectRepository.findByPagesContaining(page);
-        Collection<Property> propertiesProject = project.getProperties();
-
-//        generate created log
+        //add the properties at the task
+        addPropertiesAtANewTask(page, taskEmpty);
+        //generate the log of create a task
         logService.generateLog(Action.CREATE, taskEmpty);
 
-//        set the propertyvalues at the task
-        taskEmpty.setProperties(new HashSet<>());
-        setTaskProperties(propertiesPage, taskEmpty);
-        setTaskProperties(propertiesProject, taskEmpty);
-
-        //save again
         Task task = taskRepository.save(taskEmpty);
-//       add task to the page setting it's type (canvas or ordered)
+        //add task to the page setting its type (canvas or ordered)
         addTaskToPage(task, page.getId());
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(task);
-//        generate the notifications
+        //generate the notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return taskGetDTO;
     }
 
+    private void addPropertiesAtANewTask(Page page, Task taskEmpty){
+        //get the task's page's and task's project's properties
+        Collection<Property> propertiesPage = page.getProperties();
+        Project project = projectRepository.findByPagesContaining(page);
+        Collection<Property> propertiesProject = project.getProperties();
+
+        //set the property values at the task
+        taskEmpty.setProperties(new HashSet<>());
+        setTaskProperties(propertiesPage, taskEmpty);
+        setTaskProperties(propertiesProject, taskEmpty);
+    }
+
     public void addTaskToPage(Task task, Long pageId) {
         Page page = pageRepositorry.findById(pageId).get();
-//        this if separate tasks ata tasks at canvas or tasks at other pages
+        //this if separate tasks ata tasks at canvas or tasks at other pages
         if(page.getType().equals(TypeOfPage.CANVAS)) {
             page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
             canvasPageRepository.save((CanvasPage) page);
@@ -147,12 +140,8 @@ public class TaskService {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
         Task task = patching ? oldTask : new Task();
         autoMapper.map(taskDTO, task, patching);
-        //keep the logs
-        task.setLogs(oldTask.getLogs());
-        //keep the values of completed and deleted at task
-        task.setCompleted(false);
-        task.setDeleted(false);
 
+        keepFields(task, oldTask);
         //generate logs
         logService.generateLog(Action.UPDATE, task, oldTask);
 
@@ -166,6 +155,13 @@ public class TaskService {
         return taskGetDTO;
     }
 
+    //this keep the fields that can't be changed
+    private void keepFields(Task task, Task oldTask){
+        task.setLogs(oldTask.getLogs());
+        task.setCompleted(false);
+        task.setDeleted(false);
+    }
+
     public void delete(Long id) {
         Task task = taskRepository.findById(id).get();
 
@@ -176,7 +172,7 @@ public class TaskService {
         // generate logs
         logService.generateLog(Action.DELETE, task);
         taskRepository.save(task);
-//        generate notifications
+        //generate notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
     }
 
@@ -187,10 +183,10 @@ public class TaskService {
 
     public TaskGetDTO redo(Long id) {
         Task task = taskRepository.findById(id).get();
-        //setting the attibutes to delete the task
+        //setting the attributes to delete the task
         task.setDeleted(false);
         task.setDateDeleted(null);
-//        generate  logs
+        //generate  logs
         logService.generateLog(Action.REDO, task);
 
         TaskGetDTO tranform = ModelToGetDTO.tranform(taskRepository.save(task));
@@ -211,34 +207,32 @@ public class TaskService {
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
-//        get the values that contains the logged user
+        //get the values that contains the logged user
         Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
-//        get the property values that contains the values
+        //get the property values that contains the values
         Collection<PropertyValue> taskValues =
                 values.stream().map(v -> taskValueRepository
                                 .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
                         .toList();
-//        get the tasks that contains the propertyvalues
+        //get the tasks that contains the propertyvalues
         Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).toList();
-
         return tasks.stream().filter(t ->
                         t.getProperties().stream().anyMatch(p ->
-//                                filter properties per type date
-                                p.getProperty().getType().equals(TypeOfProperty.DATE)
-                                        &&
-//                                        filter per attribute scheduling case user set this
-                                        ((((Date) p.getProperty()).getScheduling()
-                                                &&
-                                                !user.getConfiguration().getInitialPageTasksPerDeadline())
-                                        ||
-//                                        filter per attribute deadline case user set this
-                                                (((Date) p.getProperty()).getDeadline()
-                                                &&
-                                                user.getConfiguration().getInitialPageTasksPerDeadline()))
-                                        &&
-//                                        compare date to know if is today
-                                        compareToThisDay((LocalDateTime) p.getValue().getValue())))
+                            testIfIsTodayBasesInConfigs(p, user)))
                 .map(ModelToGetDTO::tranform).toList();
+    }
+
+    private Boolean testIfIsTodayBasesInConfigs(PropertyValue p, User user) {
+        if (p.getProperty() instanceof Date property) {
+            Boolean deadlineOrScheduling;
+            if (user.getConfiguration().getInitialPageTasksPerDeadline()) {
+                deadlineOrScheduling = property.getDeadline();
+            } else {
+                deadlineOrScheduling = property.getScheduling();
+            }
+            return deadlineOrScheduling && compareToThisDay((LocalDateTime) p.getValue().getValue());
+        }
+        return false;
     }
 
     private Boolean compareToThisDay(LocalDateTime time){
@@ -252,13 +246,7 @@ public class TaskService {
     }
 
     public TaskGetDTO complete(Long id) {
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Task task = taskRepository.findById(id).get();
-
-        // Generate the user's points based on alteration at the task
-        Long qttyLogs = task.getLogs().stream().filter(l -> l.getAction().equals(Action.COMPLETE)).count();
-        userService.addPoints(user, qttyLogs * 3);
 
         //setting attributes to complete the task
         task.setDateCompleted(LocalDateTime.now());
@@ -269,8 +257,19 @@ public class TaskService {
 
         TaskGetDTO tranform = ModelToGetDTO.tranform(taskRepository.save(task));
 
+        generatePointsOfComplete(task.getLogs());
+
         // generate notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return tranform;
+    }
+
+    public void generatePointsOfComplete(Collection<Log> logs){
+        // Generate the user's points based on alteration at the task
+        Collection<User> users = logs.stream().map(Log::getUser).distinct().toList();
+        users.forEach(u -> {
+            Long qttyLogs = logs.stream().filter(l -> l.getUser().equals(u)).count();
+            userService.addPoints(u, qttyLogs * 3);
+        });
     }
 }

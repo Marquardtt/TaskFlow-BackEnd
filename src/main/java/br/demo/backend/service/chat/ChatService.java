@@ -59,7 +59,7 @@ public class ChatService {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         Collection<ChatGroup> chatGroups = chatGroupRepository
                 .findChatsByGroup_Users_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
-        return chatGroups.stream().map(c -> groupToGetDTO(c, username)).toList();
+        return chatGroups.stream().map(this::groupToGetDTO).toList();
     }
 
     private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
@@ -72,19 +72,11 @@ public class ChatService {
         return chatGetDTO;
     }
 
-    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat, String userId) {
+    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat) {
         ChatGroupGetDTO chatGetDTO = (ChatGroupGetDTO) ModelToGetDTO.tranform(chat);
         chatGetDTO.setPicture(chat.getGroup().getPicture());
         chatGetDTO.setName(chat.getGroup().getName());
         return chatGetDTO;
-    }
-
-    //that method return the quantity of unvisualized messages of a chat
-    private Integer setQuantityUnvisualized(Chat chat, String userId) {
-        return chat.getMessages().stream().filter(m ->
-                m.getDestinations().stream().anyMatch(d ->
-                        d.getUser().getUserDetailsEntity().getUsername().equals(userId) && !d.getVisualized()
-                )).toList().size();
     }
 
     public ChatGetDTO updateMessagesToVisualized(Long chatId) {
@@ -92,17 +84,7 @@ public class ChatService {
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
 
         Chat chat = chatRepository.findById(chatId).get();
-        //set all messages to visualized
-        Collection<Message> messages = chat.getMessages().stream().peek(m -> {
-            m.setDestinations(m.getDestinations().stream().peek(d -> {
-                //if the user is the destination of the message, set the message to visualized
-                if (d.getUser().getUserDetailsEntity().getUsername().equals(username)) {
-                    d.setVisualized(true);
-                }
-            }).toList());
-            messageRepository.save(m);
-        }).toList();
-        chat.setMessages(messages);
+        setAllMessagesToVisualized(chat, user);
         //set all notifications to visualized
         user.getNotifications().stream().filter(n -> n.getType().equals(TypeOfNotification.CHAT)
                 && n.getLink().contains("chat/" + chatId)).forEach(n -> {
@@ -110,6 +92,20 @@ public class ChatService {
             notificationService.updateNotification(n);
         });
         return ModelToGetDTO.tranform(chat);
+    }
+
+    private void setAllMessagesToVisualized(Chat chat, User user) {
+        //set all messages to visualized
+        Collection<Message> messages = chat.getMessages().stream().peek(m -> {
+            m.setDestinations(m.getDestinations().stream().peek(d -> {
+                //if the user is the destination of the message, set the message to visualized
+                if (d.getUser().equals(user)) {
+                    d.setVisualized(true);
+                }
+            }).toList());
+            messageRepository.save(m);
+        }).toList();
+        chat.setMessages(messages);
     }
 
     public ChatGroupGetDTO save(ChatGroupPostDTO chatGroup) {
@@ -161,6 +157,28 @@ public class ChatService {
     }
 
     private MessageGetDTO saveTheUpdatableMessage(Chat chat, Message message) {
+        createDestinations(chat, message);
+        //saving the chat with the new message
+        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
+            chat = chatPrivateRepository.save((ChatPrivate) chat);
+        } else {
+            chat = chatGroupRepository.save((ChatGroup) chat);
+        }
+        Message messageWithId = getmessageWithId(chat, message);
+        //generating the notification for each user of the chat
+        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(messageWithId);
+        notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
+        return messageGetDTO;
+    }
+
+    private Message getmessageWithId(Chat chat, Message message) {
+        if (message.getId() == null) {
+            return new ArrayList<>(chat.getMessages()).get(chat.getMessages().size() - 1);
+        }
+        return message;
+    }
+
+    private void createDestinations(Chat chat, Message message) {
         //getting the users of a chat
         Collection<User> users = null;
         if (chat.getType().equals(TypeOfChat.PRIVATE)) {
@@ -172,24 +190,6 @@ public class ChatService {
         message.setDestinations(users.stream().filter(u -> !u.equals(message.getSender())).map(u -> new Destination(
                 new DestinationId(u.getId(), message.getId()), u, message, false)
         ).toList());
-
-        //saving the chat with the new message
-        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
-            chat = chatPrivateRepository.save((ChatPrivate) chat);
-        } else {
-            chat = chatGroupRepository.save((ChatGroup) chat);
-        }
-
-        //getting the final message
-        Message finalMessage = message;
-        if (message.getId() == null) {
-            finalMessage = new ArrayList<>(chat.getMessages()).get(chat.getMessages().size() - 1);
-        }
-
-        //generating the notification for each user of the chat
-        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(finalMessage);
-        notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
-        return messageGetDTO;
     }
 
 

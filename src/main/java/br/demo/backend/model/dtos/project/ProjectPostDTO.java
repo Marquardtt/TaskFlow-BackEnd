@@ -17,6 +17,4 @@ import java.util.Collection;
 public class ProjectPostDTO {
     private String name;
     private String description;
-    @NonNull
-    private User owner;
 }

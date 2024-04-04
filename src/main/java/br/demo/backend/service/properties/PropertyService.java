@@ -1,6 +1,7 @@
 package br.demo.backend.service.properties;
 
 
+import br.demo.backend.exception.PropertyCantBeDeletedException;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
@@ -120,60 +121,67 @@ public class PropertyService {
         if (validateCanBeDeleted(property)) {
             orderedPageRepository.findAllByPropertyOrdering_Id(property.getId())
                     .forEach(p -> {
-                List<TypeOfProperty> types = switch (p.getType()) {
-                    case KANBAN ->  List.of(TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
-                    case CALENDAR -> List.of(TypeOfProperty.DATE);
-                    case TIMELINE -> List.of(TypeOfProperty.TIME);
-                    default -> null;
-                };
+                List<TypeOfProperty> types = getPossibleSubstitutesTypes(p.getType());
                 Property newPropOrd = getOtherProp(p, property, types);
                 if(newPropOrd == null) newPropOrd = getOtherProp(p.getProject(), property, types);
                 p.setPropertyOrdering(newPropOrd);
                 orderedPageRepository.save(p);
             });
-            //this search for all tasks
-            taskRepository.findAll().stream().forEach(t -> {
-                //here we filter to find the value to this prop
-                PropertyValue propertyValue = t.getProperties().stream().filter(p ->
-                        p.getProperty().getId().equals(id)).findFirst().orElse(null);
-                if(propertyValue != null){
-                    //and here we delete the propvalue and save the task without it
-                    t.getProperties().remove(propertyValue);
-                    taskService.update(t, true);
-                    taskValueRepository.deleteById(propertyValue.getId());
-                }
-            });
+            //this disassociate the property from the tasks
+            disassociatePropertyFromTasks(property);
             propertyRepository.delete(property);
         } else {
-            throw  new RuntimeException("Property can't be deleted");
+            throw  new PropertyCantBeDeletedException();
         }
+    }
+
+    private void disassociatePropertyFromTasks(Property property) {
+        taskRepository.findAll().stream().forEach(t -> {
+            //here we filter to find the value to this prop
+            PropertyValue propertyValue = t.getProperties().stream().filter(p ->
+                    p.getProperty().equals(property)).findFirst().orElse(null);
+            if(propertyValue != null){
+                //and here we delete the propvalue and save the task without it
+                t.getProperties().remove(propertyValue);
+                taskService.update(t, true);
+                taskValueRepository.deleteById(propertyValue.getId());
+            }
+        });
     }
 
     private Boolean validateCanBeDeleted(Property property) {
+        TypeOfPage typeOfPage = getTypeOfDependetPage(property);
+        List <TypeOfProperty> typesOfProperty = getPossibleSubstitutesTypes(typeOfPage);
         if(property.getProject()!=null){
-            //here we seach if exists a property in the project to substitute this prop
-            return switch (property.getType()){
-                case SELECT, RADIO, CHECKBOX, TAG ->  testInProject(TypeOfPage.KANBAN, property, List.of(TypeOfProperty.SELECT,
-                        TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG));
-                case DATE ->  testInProject(TypeOfPage.CALENDAR, property, List.of(TypeOfProperty.DATE));
-                case TIME ->  testInProject(TypeOfPage.TIMELINE, property, List.of(TypeOfProperty.TIME));
-                default ->  true;
-            };
+            return testInProject(typeOfPage, property, typesOfProperty);
         }else{
-            //here we seach if exists a property in the page to replace this prop
-            return switch (property.getType()){
-                case SELECT, RADIO, CHECKBOX, TAG ->  testInPages(TypeOfPage.KANBAN, property, property.getPages(), List.of(
-                        TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG));
-                case DATE ->  testInPages(TypeOfPage.CALENDAR, property, property.getPages(), List.of(TypeOfProperty.DATE));
-                case TIME ->  testInPages(TypeOfPage.TIMELINE, property, property.getPages(), List.of(TypeOfProperty.TIME));
-                default ->  true;
-            };
-
+            return testInPages(typeOfPage, property, property.getPages(), typesOfProperty);
         }
     }
 
+    private List<TypeOfProperty> getPossibleSubstitutesTypes(TypeOfPage type) {
+        return switch (type) {
+            case KANBAN -> List.of(TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
+            case CALENDAR -> List.of(TypeOfProperty.DATE);
+            case TIMELINE -> List.of(TypeOfProperty.TIME);
+            default -> null;
+        };
+    }
+
+    private TypeOfPage getTypeOfDependetPage(Property property) {
+        return switch (property.getType()) {
+            case SELECT, RADIO, CHECKBOX, TAG -> TypeOfPage.KANBAN;
+            case DATE -> TypeOfPage.CALENDAR;
+            case TIME -> TypeOfPage.TIMELINE;
+            default -> null;
+        };
+    }
+
+
+
     //thats the method test if exists some property of some types at the project
-    private Boolean testInProject(TypeOfPage typeOfPage, Property property, List<TypeOfProperty> typesOfProperty) {
+    private Boolean testInProject(TypeOfPage typeOfPage, Property property,
+                                  List<TypeOfProperty> typesOfProperty) {
         Project project = projectRepository.findById(property.getProject().getId()).get();
         if (project.getProperties().stream().anyMatch(p ->
                 !p.equals(property) &&
@@ -183,7 +191,8 @@ public class PropertyService {
     }
 
     //thats the method test if exists some property of some types at the pages
-    private Boolean testInPages(TypeOfPage typeOfPage, Property property, Collection<Page> pages,List<TypeOfProperty> typesOfProperty) {
+    private Boolean testInPages(TypeOfPage typeOfPage, Property property,
+                                Collection<Page> pages,List<TypeOfProperty> typesOfProperty) {
         return pages.stream().allMatch(p -> {
             if (typeOfPage.equals(p.getType())) {
                 return getOtherProp(p, property, typesOfProperty) != null;
@@ -193,7 +202,8 @@ public class PropertyService {
     }
 
     //this find sme other property in a page or project
-    private Property getOtherProp(IHasProperties p, Property property, List<TypeOfProperty> typesOfProperty) {
+    private Property getOtherProp(IHasProperties p, Property property,
+                                  List<TypeOfProperty> typesOfProperty) {
         return p.getProperties().stream().filter(prop ->
                         !prop.equals(property)
                                 && typesOfProperty.contains(prop.getType()))

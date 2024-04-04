@@ -8,6 +8,7 @@ import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
+import br.demo.backend.security.exception.ForbiddenException;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,16 +39,19 @@ public class UserService {
     private ProjectRepository projectRepository;
     private AutoMapper<User> autoMapper;
     private NotificationService notificationService;
+
+    //find one, normally used to find a user in the same group or project
     public UserGetDTO findOne(String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         return ModelToGetDTO.tranform(user);
     }
 
+    //save, normally used to create a new user with a unique username
     public UserGetDTO save(UserPostDTO userDto) {
-        try{
+        try {
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
             throw new IllegalArgumentException("Username is already been using by other user0");
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
@@ -54,44 +59,56 @@ public class UserService {
             return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
+
     public UserGetDTO update(UserPutDTO userDTO, Boolean patching) throws AccessDeniedException {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User oldUser = userRepository.findById(userDTO.getId()).get();
-        String username = ((UserDatailEntity)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        if(!oldUser.getUserDetailsEntity().getUsername().equals(username)){
-            throw new AccessDeniedException("You can't update another user");
-        };
+        //if the user is trying to change another user
+        if (!oldUser.getUserDetailsEntity().getUsername().equals(username)) {
+            throw new ForbiddenException();
+        }
         User user = patching ? oldUser : new User();
         autoMapper.map(userDTO, user, patching);
+        keepFields(user, oldUser);
 
+        return ModelToGetDTO.tranform(userRepository.save(user));
+    }
+
+    private void keepFields(User user, User oldUser){
+        //keep some fields that can't be changed
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
         user.getUserDetailsEntity().setPassword(oldUser.getUserDetailsEntity().getPassword());
         user.getUserDetailsEntity().setLastPasswordEdition(oldUser.getUserDetailsEntity().getLastPasswordEdition());
-        return ModelToGetDTO.tranform(userRepository.save(user));
+
     }
 
-    public void delete()  {
-        String username = ((UserDatailEntity)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
-        if(!projects.isEmpty()){
-            throw new HeHaveProjectsException();
-        }
-        Collection<Group> groups = groupRepository.findGroupsByOwner_UserDetailsEntity_Username(username);
-        if(!groups.isEmpty()){
-            throw new HeHaveGroupsException();
-        }
+    public void delete() {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        validateDelete(username);
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
+      // thats not a real delete, just a disable for a time
         user.getUserDetailsEntity().setEnabled(false);
         user.getUserDetailsEntity().setWhenHeTryDelete(LocalDateTime.now());
         userRepository.save(user);
     }
 
+    private void validateDelete(String username) {
+        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
+        if (!projects.isEmpty()) {
+            throw new HeHaveProjectsException();
+        }
+        Collection<Group> groups = groupRepository.findGroupsByOwner_UserDetailsEntity_Username(username);
+        if (!groups.isEmpty()) {
+            throw new HeHaveGroupsException();
+        }
+    }
+
     public UserGetDTO updatePicture(MultipartFile picture) {
-        String username = ((UserDatailEntity)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         user.setPicture(new Archive(picture));
         return ModelToGetDTO.tranform(userRepository.save(user));
-
     }
 
     public UserGetDTO updatePassword(String id, String password) {
@@ -103,16 +120,15 @@ public class UserService {
     }
 
 
-    public Collection<UserGetDTO> findAll(){
+    public Collection<UserGetDTO> findAll() {
         return userRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
     }
 
     public UserGetDTO addPoints(User user, Long points) {
         List<Long> targets = List.of(1000L, 5000L, 10000L, 15000L, 30000L, 50000L, 100000L, 200000L, 500000L, 1000000L);
-
-
         user.setPoints(user.getPoints() + points);
         UserGetDTO userGetDTO = ModelToGetDTO.tranform(userRepository.save(user));
+        //check if the user reached a target
         for (Long target : targets) {
             if (user.getPoints() < target && user.getPoints() + points >= target) {
                 notificationService.generateNotification(TypeOfNotification.POINTS, user.getId(), target);
@@ -122,29 +138,40 @@ public class UserService {
     }
 
     public UserGetDTO findLogged() {
-        String username = ((UserDatailEntity)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         return ModelToGetDTO.tranform(userRepository.findByUserDetailsEntity_Username(username).get());
     }
 
-    public PermissionGetDTO updatePermission(String username, Permission permission) {
+    public PermissionGetDTO updatePermissionOfAUser(String username, Permission permission) {
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        Collection<Permission> permissions = user.getPermissions();
-        if(user.getPermissions() != null) {
-            Permission oldPermission = user.getPermissions().stream().filter(p ->
-                    p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
-            if(oldPermission != null ) {
-                if (!oldPermission.equals(permission)) {
-                    notificationService.generateNotification(TypeOfNotification
-                            .CHANGEPERMISSION,user.getId(), permission.getProject().getId());
-                }
-                permissions.remove(oldPermission);
-            }
-        } else {
-            permissions = List.of();
-        }
+        Collection<Permission> permissions = getNewPermissions(user, permission);
         permissions.add(permission);
         user.setPermissions(permissions);
         return ModelToGetDTO.tranform(permission);
     }
+
+    private Collection<Permission> getNewPermissions(User user, Permission permission) {
+        Collection<Permission> permissions = user.getPermissions();
+        try {
+            //if the user already have a permission in the project
+            Permission oldPermission = getOldPermission(user, permission);
+            if (oldPermission == null || !oldPermission.equals(permission)) {
+                notificationService.generateNotification(TypeOfNotification
+                        .CHANGEPERMISSION, user.getId(), permission.getProject().getId());
+            }
+            //remove the old permission
+            if(oldPermission != null) permissions.remove(oldPermission);
+        } catch (NullPointerException e) {
+            return new ArrayList<>();
+        }
+        return permissions;
+    }
+
+    private Permission getOldPermission(User user, Permission permission) {
+        return user.getPermissions()
+                .stream().filter(p -> p.getProject().equals(permission.getProject()))
+                .findFirst().orElse(null);
+    }
 }
+
 

@@ -153,18 +153,20 @@
 
         //typeObj: 0 = task; 1 = project
         private void generateDeadlineOrScheduling(Long idObj, Long typeObj ,TypeOfNotification type){
-            Task task;
-            Page page;
-            Project project;
+
             if(typeObj == 0){
-                task = taskRepository.findById(idObj).get();
-                page = pageRepository.findByTasks_Task(task);
-                project = page.getProject();
+                Task task = taskRepository.findById(idObj).get();
+                Page page = pageRepository.findByTasks_Task(task);
+                Project project = page.getProject();
+                generateForEachUserDeadlineAndSchedule(type, typeObj, project, task, page);
             }else{
-                page = null;
-                task = null;
-                project = projectRepository.findById(idObj).get();
+                Project project = projectRepository.findById(idObj).get();
+                generateForEachUserDeadlineAndSchedule(type, typeObj, project, null, null);
             }
+        }
+
+        private void generateForEachUserDeadlineAndSchedule(TypeOfNotification type, Long typeObj,
+                                                            Project project, Task task, Page page){
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
             users.forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;

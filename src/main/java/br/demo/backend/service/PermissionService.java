@@ -26,30 +26,21 @@ public class PermissionService {
     private ProjectRepository projectRepository;
 
     public PermissionGetDTO save(PermissionPostDTO permissionDto) {
-        if(permissionDto.getPermission() == null){
-//            set null permissions like READ
-            permissionDto.setPermission(TypePermission.READ);
-        }
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
     }
 
     public PermissionGetDTO update(PermissionPutDTO permissionDto, Boolean patching) {
-        if(permissionDto.getPermission() == null){
-//            set null permissions like READ
-            permissionDto.setPermission(TypePermission.READ);
-        }
         Permission oldPermission = permissionRepository.findById(permissionDto.getId()).get();
         Permission permission = patching ? oldPermission : new Permission();
         autoMapper.map(permissionDto, permission, patching);
-//        keep the project of the permission
+        //keep the project of the permission
         permission.setProject(oldPermission.getProject());
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
-
     }
 
-//    find the permissions of a project
+    //find the permissions of a project
     public Collection<PermissionGetDTO> findByProject(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         return permissionRepository.findByProject(project).stream().map(ModelToGetDTO::tranform).toList();

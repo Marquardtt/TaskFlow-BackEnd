@@ -38,7 +38,7 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
             }
 
         } else  {
-            String projectId = object.getRequest().getParameter("projectId");
+            String projectId =  object.getVariables().get("projectId");
 
             Project project = projectRepository.findById(Long.parseLong(projectId)).get();
 
