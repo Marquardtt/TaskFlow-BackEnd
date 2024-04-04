@@ -12,6 +12,7 @@ import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.Intervals;
 import br.demo.backend.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.time.format.FormatStyle;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class LogService {
 
     private UserRepository userRepository;
@@ -90,7 +92,10 @@ public class LogService {
     }
 
     private void updateName(ILogged obj, ILogged old, String typeObj) {
-        if(!obj.getName().equals(old.getName())){
+        if(obj.getName() == null && old.getName() == null)return;
+        if(obj.getName() == null && old.getName() != null ||
+                obj.getName() != null && old.getName() == null ||
+                !obj.getName().equals(old.getName())){
             obj.getLogs().add(new Log(null, "The "+typeObj+"'s name was changed to '"+
                     obj.getName()+"'", Action.UPDATE, getUser(),
                     LocalDateTime.now(), null));

@@ -126,7 +126,6 @@ public class UserService {
 
     public UserGetDTO addPoints(User user, Long points) {
         List<Long> targets = List.of(1000L, 5000L, 10000L, 15000L, 30000L, 50000L, 100000L, 200000L, 500000L, 1000000L);
-        user.setPoints(user.getPoints() + points);
         UserGetDTO userGetDTO = ModelToGetDTO.tranform(userRepository.save(user));
         //check if the user reached a target
         for (Long target : targets) {
@@ -134,6 +133,7 @@ public class UserService {
                 notificationService.generateNotification(TypeOfNotification.POINTS, user.getId(), target);
             }
         }
+        user.setPoints(user.getPoints() + points);
         return userGetDTO;
     }
 

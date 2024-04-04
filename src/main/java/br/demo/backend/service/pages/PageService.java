@@ -30,6 +30,7 @@ import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.TaskCanvasRepository;
 import br.demo.backend.repository.relations.TaskOrderedRepository;
 import br.demo.backend.service.tasks.TaskService;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -183,7 +184,7 @@ public class PageService {
             p.getProperties().addAll(page.getProperties());
             //saving the pages
             page.getTasks().forEach(t -> {
-                taskService.addTaskToPage(t.getTask(), p.getId());
+                taskService.addTaskToPage(t.getTask(), pageRepository.findById(p.getId()).get());
             });
         });
         return  pages.stream().map(p -> ModelToGetDTO.tranform(pageRepository.findById(p.getId()).get())).toList();

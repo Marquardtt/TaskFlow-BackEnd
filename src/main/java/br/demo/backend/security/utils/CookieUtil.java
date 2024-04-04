@@ -13,7 +13,7 @@ public class CookieUtil {
         String token = new JwtUtil().gerarToken(userDetails);
         Cookie cookie = new Cookie("JWT", token);
         cookie.setPath("/");
-        cookie.setMaxAge(300);
+        cookie.setMaxAge(1800);
         return cookie;
     }
 

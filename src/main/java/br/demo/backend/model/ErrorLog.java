@@ -19,6 +19,7 @@ public class ErrorLog {
 
     private String exceptionMessage;
     private LocalDateTime timestamp;
+    private String stackTrace;
 
     public ErrorLog(Exception e) {
         this.exceptionMessage = e.getMessage();

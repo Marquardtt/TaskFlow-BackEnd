@@ -77,7 +77,7 @@ public class TaskService {
 
         Task task = taskRepository.save(taskEmpty);
         //add task to the page setting its type (canvas or ordered)
-        addTaskToPage(task, page.getId());
+        addTaskToPage(task, page);
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(task);
         //generate the notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
@@ -96,8 +96,7 @@ public class TaskService {
         setTaskProperties(propertiesProject, taskEmpty);
     }
 
-    public void addTaskToPage(Task task, Long pageId) {
-        Page page = pageRepositorry.findById(pageId).get();
+    public void addTaskToPage(Task task, Page page) {
         //this if separate tasks ata tasks at canvas or tasks at other pages
         if(page.getType().equals(TypeOfPage.CANVAS)) {
             page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));

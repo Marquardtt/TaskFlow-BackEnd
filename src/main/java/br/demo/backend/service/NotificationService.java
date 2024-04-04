@@ -88,6 +88,7 @@
 
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
             users.add(project.getOwner());
+            users.add(project.getOwner());
 
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
@@ -137,6 +138,7 @@
 
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
             users.add(project.getOwner());
+            users.add(project.getOwner());
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
                 notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " comment in the task '"+task.getName()+"' '"+message.getValue()+"'" , type,
@@ -168,6 +170,7 @@
         private void generateForEachUserDeadlineAndSchedule(TypeOfNotification type, Long typeObj,
                                                             Project project, Task task, Page page){
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
+            users.add(project.getOwner());
             users.forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
                 if(typeObj == 0){
