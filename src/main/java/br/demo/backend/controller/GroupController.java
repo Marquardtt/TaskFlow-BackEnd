@@ -39,11 +39,6 @@ public class GroupController {
         return groupService.findOne(id);
     }
 
-    @GetMapping
-    public Collection<GroupGetDTO> findAll() {
-        return groupService.findAll();
-    }
-
     @GetMapping("/user/{userId}")
     public Collection<GroupGetDTO> findGroupsByAUser(@PathVariable String userId) {
         return groupService.findGroupsByUser(userId);
