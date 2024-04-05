@@ -69,4 +69,6 @@ public class GroupController {
     public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
         groupService.updateOwner(newOwner, projectId);
     }
+
+
 }

@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -98,5 +100,16 @@ public class ProjectService {
 
     public void delete(Long id) {
         projectRepository.deleteById(id);
+    }
+
+    public Collection<GroupGetDTO> findAllGroupsOfAProject(Long id) {
+        ProjectGetDTO projectGet = findOne(id);
+        Project project = new Project();
+        BeanUtils.copyProperties(projectGet, project);
+        List<GroupGetDTO> groups = new ArrayList<>();
+        for (Group group : groupRepository.findGroupsByPermissions_Project(project)) {
+            groups.add(ModelToGetDTO.tranform(group));
+        }
+        return groups;
     }
 }
