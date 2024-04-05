@@ -52,8 +52,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/project/my").authenticated()
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.GET, "/project/me-owner").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
 
                 //TASK

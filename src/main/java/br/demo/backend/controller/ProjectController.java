@@ -47,7 +47,7 @@ public class ProjectController {
         return projectService.findOne(id);
     }
 
-    @GetMapping("/me-owner")
+    @GetMapping("/my")
     public Collection<SimpleProjectGetDTO> findAllOfAUser() {
         return projectService.finAllOfAUser();
     }
