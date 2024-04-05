@@ -19,6 +19,7 @@ import java.util.Collection;
 public class UserGetDTO {
 
     @EqualsAndHashCode.Include
+    private Long id;
     private String username;
     private String name;
     private String surname;
@@ -32,8 +33,5 @@ public class UserGetDTO {
     private Collection<PermissionGetDTO> permissions;
     private Collection<Notification> notifications;
 
-    public void setAddress(String address) {
-        //TODO: that decode the address
-        this.address = address;
-    }
+
 }

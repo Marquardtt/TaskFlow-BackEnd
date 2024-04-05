@@ -84,7 +84,7 @@ public class SecurityConfig {
 //                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/{columnChanged}project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
 //                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/x-and-y/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/task-page/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/draw/{id}/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/project/{projectId}/prop-ordering/{id}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(isOwnerAuthorization)
@@ -123,8 +123,8 @@ public class SecurityConfig {
         });
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
 
-        http.formLogin(AbstractHttpConfigurer::disable); // este metodo desabilita o formulario de login do spring security
-        http.logout(AbstractHttpConfigurer::disable); // este metodo desabilita o logout do spring security
+        http.formLogin(AbstractHttpConfigurer::disable);
+        http.logout(AbstractHttpConfigurer::disable);
 
 
         return http.build();

@@ -2,8 +2,7 @@ package br.demo.backend.model.dtos.group;
 
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,7 +21,7 @@ public class GroupGetDTO {
     private Archive picture;
     private String description;
     private Collection<PermissionGetDTO> permissions;
-    private SimpleUserGetDTO owner;
-    private Collection<SimpleUserGetDTO> users;
+    private OtherUsersDTO owner;
+    private Collection<OtherUsersDTO> users;
 
 }

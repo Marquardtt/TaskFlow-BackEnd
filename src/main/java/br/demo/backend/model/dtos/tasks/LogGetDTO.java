@@ -1,8 +1,6 @@
 package br.demo.backend.model.dtos.tasks;
 
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +18,6 @@ public class LogGetDTO {
     private Long id;
     private String description;
     private Action action;
-    private SimpleUserGetDTO user;
+    private OtherUsersDTO user;
     private LocalDateTime datetime;
 }

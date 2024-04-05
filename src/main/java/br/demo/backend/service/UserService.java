@@ -16,7 +16,6 @@ import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.model.dtos.user.UserPutDTO;
-import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;

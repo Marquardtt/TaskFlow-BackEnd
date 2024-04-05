@@ -1,7 +1,10 @@
 package br.demo.backend.service.pages;
 
 import br.demo.backend.model.dtos.relations.TaskOrderedGetDTO;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.relations.TaskOrdered;
+import br.demo.backend.model.relations.TaskPage;
+import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.service.properties.DefaultPropsService;
 import br.demo.backend.utils.ModelToGetDTO;
@@ -12,7 +15,6 @@ import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
 import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
-import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
@@ -23,19 +25,14 @@ import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
-import br.demo.backend.repository.properties.DateRepository;
-import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
-import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.TaskCanvasRepository;
 import br.demo.backend.repository.relations.TaskOrderedRepository;
 import br.demo.backend.service.tasks.TaskService;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +48,7 @@ public class PageService {
     private ProjectRepository projectRepository;
     private TaskService taskService;
     private TaskOrderedRepository taskOrderedRepository;
+    private TaskPageRepository taskPageRepository;
     private DefaultPropsService defaultPropsService;
 
     private AutoMapper<OrderedPage> autoMapperOrdered;
@@ -158,10 +156,19 @@ public class PageService {
     }
 
 
-    public TaskCanvasGetDTO updateXAndY(TaskCanvas taskCanvas) {
-        TaskCanvas oldTaskCanvas = taskCanvasRepository.findById(taskCanvas.getId()).get();
-        autoMapperTaskCanvas.map(taskCanvas, oldTaskCanvas, true);
-        return (TaskCanvasGetDTO) ModelToGetDTO.tranform(taskCanvasRepository.save(oldTaskCanvas));
+    public TaskPageGetDTO updateTaskPage(TaskPage taskPage) {
+        TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
+        TaskPageGetDTO taskPageGetDTO = null;
+        if(oldTaskPage instanceof TaskCanvas taskCanvas){
+            autoMapperTaskCanvas.map(taskPage, taskCanvas, true);
+            taskPageGetDTO = ModelToGetDTO.tranform(taskCanvasRepository.save(taskCanvas));
+        }
+        else {
+            autoMapperTaskOrdered.map( taskPage,
+                    (TaskOrdered) oldTaskPage, true);
+            taskPageGetDTO = ModelToGetDTO.tranform(taskOrderedRepository.save((TaskOrdered) oldTaskPage));
+        }
+        return taskPageGetDTO;
     }
     public TaskOrderedGetDTO updateIndex(TaskOrdered taskOrdered) {
         TaskOrdered oldTaskOrdered = taskOrderedRepository.findById(taskOrdered.getId()).get();

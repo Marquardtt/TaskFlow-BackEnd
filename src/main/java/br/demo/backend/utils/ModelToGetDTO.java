@@ -22,7 +22,6 @@ import br.demo.backend.model.dtos.relations.*;
 import br.demo.backend.model.dtos.tasks.LogGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.enums.TypeOfChat;
 import br.demo.backend.model.pages.CanvasPage;
@@ -40,7 +39,6 @@ import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
 import br.demo.backend.repository.GroupRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -266,9 +264,9 @@ public class ModelToGetDTO {
         return log;
     }
 
-    private static SimpleUserGetDTO tranformSimple(User obj){
+    private static OtherUsersDTO tranformSimple(User obj){
         if(obj == null) return null;
-        SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
+        OtherUsersDTO simpleUser = new OtherUsersDTO();
         BeanUtils.copyProperties(obj, simpleUser);
         simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
         return simpleUser;
@@ -287,7 +285,7 @@ public class ModelToGetDTO {
         } catch (ArithmeticException | NullPointerException ignore) {
             progress = 100;
         }
-        SimpleUserGetDTO user = tranformSimple(obj.getOwner());
+        OtherUsersDTO user = tranformSimple(obj.getOwner());
         return new SimpleProjectGetDTO(
                 obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(),
                 progress,groups.stream().map(ModelToGetDTO::tranformSimple).toList(), user

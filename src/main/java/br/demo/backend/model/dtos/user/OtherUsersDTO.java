@@ -1,14 +1,10 @@
 package br.demo.backend.model.dtos.user;
 
 import br.demo.backend.model.Archive;
-import br.demo.backend.model.Configuration;
-import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.util.Collection;
 
 @Data
 @AllArgsConstructor
@@ -24,4 +20,5 @@ public class OtherUsersDTO {
     private String mail;
     private Integer points;
     private String description;
+    private Archive picture;
 }

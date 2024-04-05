@@ -5,9 +5,11 @@ import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
 import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -43,9 +45,9 @@ public class PageController {
 //        return return pageService.updateIndex(page, taskId, index);
 //    }
 
-    @PatchMapping("/x-and-y/project/{projectId}")
-    public TaskCanvasGetDTO upDate(@RequestBody TaskCanvas taskPage) {
-        return pageService.updateXAndY(taskPage);
+    @PatchMapping("/task-page/project/{projectId}")
+    public TaskPageGetDTO upDateTaskPage(@RequestBody TaskPage taskPage) {
+        return pageService.updateTaskPage(taskPage);
     }
 
     @PatchMapping("/draw/{id}/project/{projectId}")
