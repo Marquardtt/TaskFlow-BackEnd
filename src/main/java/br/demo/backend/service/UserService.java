@@ -4,6 +4,7 @@ package br.demo.backend.service;
 import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
 import br.demo.backend.model.*;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
@@ -25,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -41,9 +39,9 @@ public class UserService {
     private NotificationService notificationService;
 
     //find one, normally used to find a user in the same group or project
-    public UserGetDTO findOne(String id) {
+    public OtherUsersDTO findOne(String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
-        return ModelToGetDTO.tranform(user);
+        return ModelToGetDTO.transformOther(user);
     }
 
     //save, normally used to create a new user with a unique username
@@ -120,13 +118,15 @@ public class UserService {
     }
 
 
-    public Collection<UserGetDTO> findAll() {
-        return userRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
+    public Collection<OtherUsersDTO> findAll() {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+
+        return userRepository.findAll().stream().map(ModelToGetDTO::transformOther).toList();
     }
 
-    public UserGetDTO addPoints(User user, Long points) {
+    public void addPoints(User user, Long points) {
         List<Long> targets = List.of(1000L, 5000L, 10000L, 15000L, 30000L, 50000L, 100000L, 200000L, 500000L, 1000000L);
-        UserGetDTO userGetDTO = ModelToGetDTO.tranform(userRepository.save(user));
         //check if the user reached a target
         for (Long target : targets) {
             if (user.getPoints() < target && user.getPoints() + points >= target) {
@@ -134,7 +134,7 @@ public class UserService {
             }
         }
         user.setPoints(user.getPoints() + points);
-        return userGetDTO;
+        userRepository.save(user);
     }
 
     public UserGetDTO findLogged() {

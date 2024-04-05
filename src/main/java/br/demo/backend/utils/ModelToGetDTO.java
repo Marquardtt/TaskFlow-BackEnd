@@ -303,7 +303,10 @@ public class ModelToGetDTO {
     }
 
     public static OtherUsersDTO transformOther(User user){
-        return new OtherUsersDTO();
+        OtherUsersDTO other = new OtherUsersDTO();
+        BeanUtils.copyProperties(user, other);
+        other.setUsername(user.getUserDetailsEntity().getUsername());
+        return other;
     }
 
 }

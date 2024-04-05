@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
 
@@ -30,4 +31,9 @@ public class UserGetDTO {
     private Configuration configuration;
     private Collection<PermissionGetDTO> permissions;
     private Collection<Notification> notifications;
+
+    public void setAddress(String address) {
+        //TODO: that decode the address
+        this.address = address;
+    }
 }
