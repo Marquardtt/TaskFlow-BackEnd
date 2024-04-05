@@ -49,5 +49,9 @@ public class Configuration {
     private Boolean notificChats = true;
     //when ia task than i am responsible receive a comment
     private Boolean notificComments = true;
+
     private Boolean initialPageTasksPerDeadline = true;
+    private Boolean googleCalendar = false;
+    private Boolean isTutorialMade = false;
+    private Boolean showPropertiesName = true;
 }

@@ -21,7 +21,7 @@ public class Destination {
     @EmbeddedId
     private DestinationId id;
     @ManyToOne
-    @MapsId("userUsername")
+    @MapsId("userId")
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     private User user;

@@ -12,6 +12,6 @@ import java.io.Serializable;
 @Embeddable
 @Data
 public class DestinationId implements Serializable {
-    private Long userUsername;
+    private Long userId;
     private Long messageId;
 }

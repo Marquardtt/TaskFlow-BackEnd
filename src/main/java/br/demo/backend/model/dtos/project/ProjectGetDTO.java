@@ -25,7 +25,6 @@ public class ProjectGetDTO {
     private String name;
     private String description;
     private Archive picture;
-    private LocalDate deadline;
     private LocalDateTime visualizedAt;
     private OtherUsersDTO owner;
     private Collection<PageGetDTO> pages;
