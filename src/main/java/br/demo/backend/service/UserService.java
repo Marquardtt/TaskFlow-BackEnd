@@ -64,9 +64,11 @@ public class UserService {
         if (!oldUser.getUserDetailsEntity().getUsername().equals(username)) {
             throw new ForbiddenException();
         }
+
         User user = patching ? oldUser : new User();
         autoMapper.map(userDTO, user, patching);
         keepFields(user, oldUser);
+
 
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
@@ -75,9 +77,7 @@ public class UserService {
         //keep some fields that can't be changed
         user.setPicture(oldUser.getPicture());
         user.setPoints(oldUser.getPoints());
-        user.getUserDetailsEntity().setPassword(oldUser.getUserDetailsEntity().getPassword());
-        user.getUserDetailsEntity().setLastPasswordEdition(oldUser.getUserDetailsEntity().getLastPasswordEdition());
-
+        user.setUserDetailsEntity(oldUser.getUserDetailsEntity());
     }
 
     public void delete() {
@@ -170,6 +170,16 @@ public class UserService {
         return user.getPermissions()
                 .stream().filter(p -> p.getProject().equals(permission.getProject()))
                 .findFirst().orElse(null);
+    }
+
+    public UserGetDTO visualizedNotifications() {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        user.getNotifications().stream().filter(n -> !n.getVisualized()).forEach(n -> {
+            n.setVisualized(true);
+            notificationService.updateNotification(n);
+        });
+        return ModelToGetDTO.tranform(user);
     }
 }
 

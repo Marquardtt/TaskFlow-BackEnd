@@ -75,4 +75,9 @@ public class UserController {
         return userService.updatePermissionOfAUser(username, permission);
     }
 
+    @PatchMapping("/visualize-notifications")
+    public UserGetDTO visualizeNotification(){
+        return userService.visualizedNotifications();
+    }
+
 }

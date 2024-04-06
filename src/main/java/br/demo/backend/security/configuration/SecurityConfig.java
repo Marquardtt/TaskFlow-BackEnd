@@ -34,7 +34,7 @@ public class SecurityConfig {
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
         http.csrf(AbstractHttpConfigurer::disable);
-        //isso seta o cors, provavel atualização do spring porque nao precisava disso
+        //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
 
@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/user/visualize-notifications").authenticated()
 //                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").authenticated()
 //                  esse de cima ele precisa ser o dono do grupo do usuario naquele projeto
                 //PROJECT
