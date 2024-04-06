@@ -32,7 +32,6 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
     @Override
     public AuthorizationDecision check(Supplier<Authentication> suplier, RequestAuthorizationContext object) {
 
-        List<String> uriMemberWithoutPermission = List.of("/project/{projectId}/set-now");
 
         UserDatailEntity userDatailEntity = (UserDatailEntity) suplier.get().getPrincipal();
         boolean decision = false;
@@ -47,6 +46,7 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
         } else  {
             String projectId =  object.getVariables().get("projectId");
             System.out.println("Owner?");
+            List<String> uriMemberWithoutPermission = List.of("/project/"+projectId+"/set-now");
 
             Project project = projectRepository.findById(Long.parseLong(projectId)).get();
 
@@ -54,17 +54,14 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
                 System.out.println("!Owner");
                 for (GrantedAuthority simple :
                         userDatailEntity.getAuthorities()) {
-                    if (("Project_" + projectId + "_").contains(simple.getAuthority())) {
+                    if(simple.getAuthority().contains("Project_"+projectId+"_") &&
+                            simple.getAuthority().contains(object.getRequest().getMethod())
+                    || uriMemberWithoutPermission.contains(object.getRequest().getRequestURI())){
+                        System.out.println("Decision");
                         decision = true;
                         break;
                     }
                 }
-//                if(uriMemberWithoutPermission.contains(object.getRequest().getRequestURI())){
-//                    User user = userRepository.findByUserDetailsEntity_Username(object.getRequest().getUserPrincipal().getName()).get();
-//                    if(user.getPermissions().stream().anyMatch(permission -> permission.getProject().getId().equals(project.getId()))){
-//                        decision = true;
-//                    }
-//                }
             } else {
                 System.out.println("Owner");
                 decision = true;
