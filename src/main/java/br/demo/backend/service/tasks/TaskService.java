@@ -205,7 +205,8 @@ public class TaskService {
     }
 
     public Collection<TaskGetDTO> getTasksToday(String id) {
-        User user = userRepository.findByUserDetailsEntity_Username(id).get();
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         //get the values that contains the logged user
         Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
         //get the property values that contains the values

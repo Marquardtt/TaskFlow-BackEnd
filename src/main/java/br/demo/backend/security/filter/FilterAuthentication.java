@@ -35,14 +35,12 @@ public class FilterAuthentication extends OncePerRequestFilter {
             try {
                 cookie= cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
             }catch (Exception e ){
-                System.out.println("e: "+e.getMessage());
                 response.sendError(401);
                 return;
             }
             String token = cookie.getValue();// Get the token from the cookie
             String username = jwtUtil.getUsername(token);// Validate the token
 
-            System.out.println("ELE LOGOU");
             // Create the authentication object
             UserDetails user = userDatailsService.loadUserByUsername(username);// Load the user from the token
             Authentication authentication =
@@ -57,8 +55,11 @@ public class FilterAuthentication extends OncePerRequestFilter {
             securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
 
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
+
+
             response.addCookie(newCookie); // Add the cookie to the response
         }
+
         filterChain.doFilter(request, response); // Call the next filter
 
     }
