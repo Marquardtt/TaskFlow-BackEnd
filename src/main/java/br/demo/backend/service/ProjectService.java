@@ -63,7 +63,7 @@ public class ProjectService {
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
         //get the projects that the user is member
         projects.addAll(user.getPermissions().stream().map(Permission::getProject).toList());
-        return projects.stream().map(ModelToGetDTO::tranformSimple).toList();
+        return projects.stream().distinct().map(ModelToGetDTO::tranformSimple).toList();
     }
 
     public ProjectGetDTO findOne(Long id) {
