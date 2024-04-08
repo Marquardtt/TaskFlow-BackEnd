@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @AllArgsConstructor
@@ -27,11 +28,14 @@ public class SecurityConfig {
     private final IsOwnerAuthorization isOwnerAuthorization;
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
+    private final CorsConfigurationSource corsConfig;
 
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
         http.csrf(AbstractHttpConfigurer::disable);
+        //isso seta o cors, provavel atualização do spring porque nao pres
+        http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
 
                 //USER
@@ -40,32 +44,33 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
-                .requestMatchers(HttpMethod.GET, "/user/name/{name}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
-                .requestMatchers(HttpMethod.GET,"/user/{username}/project/{projectId}").access(isOwnerOrMemberAuthorization)
-
+                .requestMatchers(HttpMethod.PATCH, "/user/visualize-notifications").authenticated()
+//                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").authenticated()
+//                  esse de cima ele precisa ser o dono do grupo do usuario naquele projeto
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId/set-now}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/project/my").authenticated()
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.GET, "/project/me-owner").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
 
                 //TASK
                 .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "/task/project/{projectId").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectid}/complete").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}").access(authorizationRequestsRoutes)
 
                 //PROPERTY
                 .requestMatchers(HttpMethod.POST, "/property/project/{projectId}/limited").access(authorizationRequestsRoutes)
@@ -84,9 +89,9 @@ public class SecurityConfig {
 //                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/{columnChanged}project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
 //                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/x-and-y/project/{projectId}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/task-page/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/draw/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/project/{projectId}/prop-ordering/{id}").access(authorizationRequestsRoutes)
+                .requestMatchers(HttpMethod.PATCH, "/page/prop-ordering/{id}/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/page/merge/{id}/project/{projectId}").access(authorizationRequestsRoutes)
 
@@ -94,7 +99,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
 
@@ -104,8 +108,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group").authenticated()
-                .requestMatchers(HttpMethod.GET, "/group/{groupId}").authenticated()
-                .requestMatchers(HttpMethod.GET, "/group/{groupId}/permissions/{projectId}").access(isOwnerOrMemberAuthorization)
+                .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
@@ -117,14 +120,14 @@ public class SecurityConfig {
 
         // Manter a sessão do usuário na requisição ativa
         http.securityContext((context) -> context.securityContextRepository(repo));
-
-        http.formLogin(AbstractHttpConfigurer::disable); // este metodo habilita o formulario de login do spring security
-        http.logout(Customizer.withDefaults()); // este metodo habilita o logout do spring security
-
         http.sessionManagement(config -> {
             config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         });
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
+
+        http.formLogin(AbstractHttpConfigurer::disable);
+        http.logout(AbstractHttpConfigurer::disable);
+
 
         return http.build();
     }

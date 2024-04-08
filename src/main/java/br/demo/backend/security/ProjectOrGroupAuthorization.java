@@ -32,12 +32,12 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext object) {
-        String username = object.getRequest().getParameter("username");
+        String username = object.getVariables().get("username");
         User userFind = userRepository.findByUserDetailsEntity_Username(username).get();
         User user = userRepository.findByUserDetailsEntity_Username(
                 ((UserDatailEntity) supplier.get().getPrincipal()).getUsername()).get();
 
-        String projectId = object.getRequest().getParameter("projectId");
+        String projectId = object.getVariables().get("projectId");
 
         Project project = projectRepository.findById(Long.parseLong(projectId)).get();
 

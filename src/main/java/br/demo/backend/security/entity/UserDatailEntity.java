@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,13 +38,14 @@ public class UserDatailEntity implements UserDetails {
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
+    private LocalDateTime lastPasswordEdition;
+    private LocalDateTime whenHeTryDelete;
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         List<SimpleGrantedAuthority> list = new ArrayList<>();
-        System.out.println(this.user.getPermissions());
         if (!this.user.getPermissions().isEmpty()) {
             for (Permission permission : this.user.getPermissions()) {
                 list.add(new SimpleGrantedAuthority("Project_" + permission.getProject().getId() + "_" + permission.getPermission().getMethod()));

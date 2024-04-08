@@ -18,8 +18,7 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    @NotNull
-    @Column(nullable = false)
+    @Column()
     private String name;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)

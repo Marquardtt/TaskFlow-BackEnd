@@ -8,7 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.geo.Point;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Data
@@ -46,11 +51,10 @@ public class User {
     private Collection<Permission> permissions;
     @OneToOne(cascade = CascadeType.ALL)
     private UserDatailEntity userDetailsEntity;
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private Collection<Notification> notifications;
     public User (String username){
         this.userDetailsEntity.setUsername(username);
     }
-
 
 }

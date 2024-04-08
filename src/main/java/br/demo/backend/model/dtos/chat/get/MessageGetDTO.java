@@ -1,8 +1,7 @@
 package br.demo.backend.model.dtos.chat.get;
 
 import br.demo.backend.model.Archive;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,7 +20,7 @@ public class MessageGetDTO {
 
     private Long id;
     private String value;
-    private SimpleUserGetDTO sender;
+    private OtherUsersDTO sender;
     private LocalDateTime dateCreate;
     private LocalDateTime dateUpdate;
     private Collection<DestinationGetDTO> destinations;

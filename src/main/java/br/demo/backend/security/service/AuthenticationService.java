@@ -20,6 +20,7 @@ public class AuthenticationService implements UserDetailsService {
 
         Optional<User> userOptional = userRepository.findByUserDetailsEntity_Username(username);
         if (userOptional.isPresent()){
+            userOptional.get().getUserDetailsEntity().setEnabled(true);
             return userOptional.get().getUserDetailsEntity();
         }
         throw new UsernameNotFoundException("User not found");

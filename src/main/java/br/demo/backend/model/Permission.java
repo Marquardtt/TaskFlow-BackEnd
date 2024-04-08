@@ -25,7 +25,7 @@ public class Permission {
     @NotNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TypePermission permission;
+    private TypePermission permission = TypePermission.READ;
     @ManyToOne()
     @JoinColumn(nullable = false)
     @NotNull

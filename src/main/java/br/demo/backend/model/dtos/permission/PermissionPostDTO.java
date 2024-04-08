@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class PermissionPostDTO {
 
     private String name;
-    private TypePermission permission;
+    private TypePermission permission = TypePermission.READ;
     private Project project;
 
 }

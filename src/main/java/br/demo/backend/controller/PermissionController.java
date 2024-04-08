@@ -16,22 +16,22 @@ import java.util.Collection;
 public class PermissionController {
     private PermissionService permissionService;
     @PostMapping("/project/{projectId}")
-    public void insert(@RequestBody PermissionPostDTO permission){
-        permissionService.save(permission);
+    public PermissionGetDTO insert(@RequestBody PermissionPostDTO permission){
+        return permissionService.save(permission);
     }
 
     @PutMapping("/project/{projectId}")
-    public void upDate(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, false);
+    public PermissionGetDTO upDate(@RequestBody PermissionPutDTO permission){
+        return permissionService.update(permission, false);
     }
     @PatchMapping("/project/{projectId}")
-    public void patch(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, true);
+    public PermissionGetDTO patch(@RequestBody PermissionPutDTO permission){
+        return permissionService.update(permission, true);
     }
 
     @GetMapping("/project/{projectId}")
     public Collection<PermissionGetDTO> findAll(@PathVariable Long projectId){
-        return permissionService.findAll(projectId);
+        return permissionService.findByProject(projectId);
     }
 
     @DeleteMapping("/{id}/project/{projectId}")

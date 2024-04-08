@@ -5,9 +5,11 @@ import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
 import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,37 +36,37 @@ public class PageController {
     //}
 
     @PatchMapping("/{id}/project/{projectId}")
-    public void upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
-        pageService.updateName(name, id);
+    public PageGetDTO upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
+        return pageService.updateName(name, id);
     }
 
 //    @PatchMapping("/{taskId}/{index}/project/{projectId}")
 //    public PageGetDTO updateIndexes(@RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
-//        return pageService.updateIndex(page, taskId, index);
+//        return return pageService.updateIndex(page, taskId, index);
 //    }
 
-    @PatchMapping("/x-and-y/project/{projectId}")
-    public void upDate(@RequestBody TaskCanvas taskPage) {
-        pageService.updateXAndY(taskPage);
+    @PatchMapping("/task-page/project/{projectId}")
+    public TaskPageGetDTO upDateTaskPage(@RequestBody TaskPage taskPage) {
+        return pageService.updateTaskPage(taskPage);
     }
 
     @PatchMapping("/draw/{id}/project/{projectId}")
-    public void upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
-        pageService.updateDraw(draw, id);
+    public PageGetDTO upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
+        return pageService.updateDraw(draw, id);
     }
 
     @PatchMapping("/prop-ordering/{id}/project/{projectId}")
-    public void updatePropertiesOrdering(@PathVariable Long projectId, @RequestBody Property property, @PathVariable Long id) {
-        pageService.updatePropertiesOrdering(property, id);
+    public PageGetDTO updatePropertiesOrdering(@PathVariable Long projectId, @RequestBody Property property, @PathVariable Long id) {
+        return pageService.updatePropertiesOrdering(property, id);
     }
 
     @DeleteMapping("/{id}/project/{projectId}")
     public void delete( @PathVariable Long id) {
-        pageService.delete(id);
+         pageService.delete(id);
     }
 
     @PatchMapping("/merge/{id}/project/{projectId}")
-    public void merge( @RequestBody Collection<Page> pages, @PathVariable Long id) {
-        pageService.merge(pages, id);
+    public Collection<PageGetDTO> merge( @RequestBody Collection<Page> pages, @PathVariable Long id) {
+        return pageService.merge(pages, id);
     }
 }

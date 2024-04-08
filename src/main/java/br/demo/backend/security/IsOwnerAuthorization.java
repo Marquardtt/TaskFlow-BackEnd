@@ -31,12 +31,13 @@ public class IsOwnerAuthorization implements AuthorizationManager<RequestAuthori
         boolean decision = false;
 
         if (object.getRequest().getRequestURI().contains("/group")) {
-            Group group = groupRepository.findById(Long.parseLong(object.getRequest().getParameter("groupId"))).get();
+            Group group = groupRepository.findById(Long.parseLong(object.getVariables().get("groupId"))).get();
             if (group.getOwner().equals(userDatailEntity)){
                 decision = true;
             }
         } else {
-            String projectId = object.getRequest().getParameter("projectId");
+            String projectId =  object.getVariables().get("projectId");
+
             decision = isOwner(projectId, userDatailEntity);
 
         }

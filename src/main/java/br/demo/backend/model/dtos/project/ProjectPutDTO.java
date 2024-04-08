@@ -27,8 +27,6 @@ public class ProjectPutDTO {
     private Long id;
     private String name;
     private String description;
-    //TODO: Se mudar para project ter taskvalues tirar isso
-    private LocalDate deadline;
     private Collection<Message> comments;
     private Collection<PropertyValue> values;
 }

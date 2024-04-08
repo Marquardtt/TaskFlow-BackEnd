@@ -3,22 +3,15 @@ package br.demo.backend.service;
 
 
 
-import br.demo.backend.exception.GroupNotFoundException;
-import br.demo.backend.model.Archive;
-import br.demo.backend.model.Group;
-import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
+import br.demo.backend.model.*;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
-import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.utils.ModelToGetDTO;
-import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
-import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -30,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 @Service
 @AllArgsConstructor
@@ -41,11 +33,7 @@ public class GroupService {
     private UserRepository userRepository;
     private NotificationService notificationService;;
     private AutoMapper<Group> autoMapper;
-
-
-    public Collection<GroupGetDTO> findAll() {
-        return groupRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
+    private UserService userService;
 
 
     public GroupGetDTO findOne(Long id) {
@@ -54,118 +42,81 @@ public class GroupService {
 
 
     public GroupGetDTO save(GroupPostDTO groupDto) {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
+        group.setOwner(user);
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
         return ModelToGetDTO.tranform(groupRepository.save(group));
-
     }
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
-
     }
-    public Collection<GroupGetDTO> findGroupsByUser() {
+    public Collection<SimpleGroupGetDTO> findGroupsByUser() {
         UserDatailEntity userDatail = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUserDetailsEntity_Username(userDatail.getUsername()).get();
         return groupRepository.findGroupsByOwnerOrUsersContaining(user, user)
-                .stream().map(ModelToGetDTO::tranform).toList();
+                .stream().map(ModelToGetDTO::tranformSimple).toList();
     }
 
-
-    public PermissionGetDTO findPermissionOfAGroupInAProject(Long groupId, Long projectId) {
-        Group group = groupRepository.findById(groupId).get();
-        Permission permission = group.getPermissions().stream().filter(
-                p -> p.getProject().getId().equals(projectId)
-        ).findFirst().get();
-        return ModelToGetDTO.tranform(permission);
-    }
-
-
-
-
-    public Collection<Permission> findAllPermissionsOfAGroupInAProject(Long groupId, Long projectId) {
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        return group.getPermissions().stream()
-                .filter(permission -> permission.getProject().getId().equals(projectId)).toList();
+    public Collection<SimpleGroupGetDTO> findGroupsByAProject(Long projectId) {
+        return groupRepository.findGroupsByPermissions_Project(new Project(projectId))
+                .stream().map(ModelToGetDTO::tranformSimple).toList();
     }
 
 
     public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
-        Archive picture = oldGroup.getPicture();
-
-
+        //this is to keep the old group, to keep the owner and the picture and use patch our put
         Group group = patching ? oldGroup : new Group();
-        User owner = oldGroup.getOwner();
         autoMapper.map(groupDTO, group, patching);
-        group.setOwner(owner);
+        keepFields(group, oldGroup);
 
-        //TODO: verificar se ao adicionar em membro se ele terá uma permission
-        Group groupOld = groupRepository.findById(group.getId()).get();
-        Collection<Permission> permissions = group.getPermissions().stream().filter(p ->
-                !groupOld.getPermissions().contains(p)
-        ).toList();
-        for(Permission permission : permissions) {
-            updatePermission(group, permission);
-        }
-        group.setPicture(picture);
+        //this get the new permissions of the group and update the permission to the users
+        group.getPermissions().stream().filter(p ->
+                !oldGroup.getPermissions().contains(p)
+        ).forEach(p ->  updatePermission(group, p));
+
+        //saving and generating notifications
+        GroupGetDTO groupGetDTO =  ModelToGetDTO.tranform(groupRepository.save(group));
+        notificationsAddOrRemove(group, oldGroup);
+        return groupGetDTO;
+    }
+
+    private void notificationsAddOrRemove(Group group, Group groupOld){
+        // this gets the difference users in above lists, getting the added and removed users
         Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
                 !groupOld.getUsers().contains(u)
         ).toList());
         usersAddedAndRemoved.addAll(groupOld.getUsers().stream().filter(u ->
                 !group.getUsers().contains(u)
         ).toList());
+        //this generates the notification to add ou remove someone
         usersAddedAndRemoved.forEach(u -> {
             if(!u.equals(group.getOwner())){
-                //TODO: mudar para passar o id do user
-                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, 0L, group.getId());
+                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, u.getId(), group.getId());
             }
         });
-        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
-
-    private User updatePermissionInAUser(User userDTO, Permission permission){
-        User user = userRepository.findByUserDetailsEntity_Username(userDTO.getUserDetailsEntity().getUsername()).get();
-        Collection<Permission> permissions = user.getPermissions();
-        if(user.getPermissions() != null) {
-            Permission oldPermission = user.getPermissions().stream().filter(p ->
-                    p.getProject().getId().equals(permission.getProject().getId())).findFirst().orElse(null);
-            if(oldPermission != null ){
-                if(!oldPermission.equals(permission)){
-                    //TODO:mudar para passar o id do user
-                    notificationService.generateNotification(TypeOfNotification.CHANGEPERMISSION, 0L, permission.getProject().getId());
-                }
-                permissions.remove(oldPermission);
-            }
-        }else{
-            permissions = new HashSet<>();
-        }
-        permissions.add(permission);
-        user.setPermissions(permissions);
-        return user;
+    private void keepFields(Group group, Group oldGroup){
+        group.setOwner(oldGroup.getOwner());
+        group.setPicture(oldGroup.getPicture());
     }
-
 
     private void updatePermission(Group group, Permission permission) {
-        Collection <User> users = group.getUsers().stream().map( u -> {
-//            User user = updatePermissionInAUser((userRepository.findById(u.getId()).get()), permission);
-//            System.out.println(user.getUserDetailsEntity().getPassword());
-            User user = updatePermissionInAUser(u, permission);
-            userRepository.save(user);
-            return user;
-        }).toList();
-        group.setUsers(users);
-//        User owner = updatePermissionInAUser(userRepository.findById(group.getOwner().getId()).get(), permission);
-
-        User owner = updatePermissionInAUser(group.getOwner(), permission);
-        userRepository.save(owner);
-        group.setOwner(owner);
+        //here we update the permission on members of the group
+        group.getUsers().forEach( u -> {
+            userService.updatePermissionOfAUser(u.getUserDetailsEntity().getUsername(), permission);
+        });
+        //here we update the permission of the group owner
+        userService.updatePermissionOfAUser(group.getOwner().getUserDetailsEntity().getUsername(), permission);
     }
 
 

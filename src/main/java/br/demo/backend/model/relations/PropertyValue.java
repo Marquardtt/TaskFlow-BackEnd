@@ -25,8 +25,6 @@ import java.util.List;
 @Table(name = "tb_task_value")
 @JsonDeserialize(using = DeserializerValue.class)
 public class PropertyValue {
-    // TODO: 13/02/2024 Id Composto SE não for usado em project tambem
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

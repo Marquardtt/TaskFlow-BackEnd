@@ -7,6 +7,7 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.chat.*;
 import br.demo.backend.model.dtos.chat.get.*;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
@@ -20,7 +21,7 @@ import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.dtos.relations.*;
 import br.demo.backend.model.dtos.tasks.LogGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.enums.TypeOfChat;
 import br.demo.backend.model.pages.CanvasPage;
@@ -38,9 +39,10 @@ import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.UserValued;
 import br.demo.backend.repository.GroupRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -87,9 +89,15 @@ public class ModelToGetDTO {
     }
     public static ChatGetDTO tranform(Chat obj){
         if(obj == null) return null;
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        Integer qttyUnvisualized = obj.getMessages().stream().filter(m ->
+                m.getDestinations().stream().anyMatch(d ->
+                        d.getUser().getUserDetailsEntity().getUsername().equals(username) && !d.getVisualized()
+                )).toList().size();
         ChatGetDTO chat = obj.getType().equals(TypeOfChat.GROUP)  ?
                 tranform((ChatGroup) obj): tranform((ChatPrivate) obj);
 
+        chat.setQuantityUnvisualized(qttyUnvisualized);
         try {
             chat.setMessages(obj.getMessages().stream().map(ModelToGetDTO::tranform).toList());
         }catch (NullPointerException ignore) {}
@@ -117,7 +125,9 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         PermissionGetDTO permission = new PermissionGetDTO();
         BeanUtils.copyProperties(obj, permission);
+        System.out.println(permission);
         permission.setProject(tranformSimple(obj.getProject()));
+        System.out.println(permission.getProject());
         return permission;
     }
     public static ProjectGetDTO tranform(Project obj){
@@ -254,18 +264,16 @@ public class ModelToGetDTO {
         return log;
     }
 
-    private static SimpleUserGetDTO tranformSimple(User obj){
+    private static OtherUsersDTO tranformSimple(User obj){
         if(obj == null) return null;
-        SimpleUserGetDTO simpleUser = new SimpleUserGetDTO();
+        OtherUsersDTO simpleUser = new OtherUsersDTO();
         BeanUtils.copyProperties(obj, simpleUser);
         simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
-
         return simpleUser;
     }
 
     public static SimpleProjectGetDTO tranformSimple(Project obj){
 
-        //TODO: testar se isso vai de fato funcionar e depois criar um dto com nome, foto e id
         Collection <Group> groups = groupRepository.findGroupsByPermissions_Project(obj);
 
         Integer progress = 0;
@@ -277,11 +285,29 @@ public class ModelToGetDTO {
         } catch (ArithmeticException | NullPointerException ignore) {
             progress = 100;
         }
-        SimpleUserGetDTO user = tranformSimple(obj.getOwner());
+        Integer qttyPages = obj.getPages().size();
+        Integer qttyProperties = obj.getProperties().size();
+        OtherUsersDTO user = tranformSimple(obj.getOwner());
         return new SimpleProjectGetDTO(
-                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(), progress,groups, user
+                obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(),
+                progress,groups.stream().map(ModelToGetDTO::tranformSimple).toList(),
+                user, qttyPages, qttyProperties
         );
 
+    }
+
+    public static SimpleGroupGetDTO tranformSimple(Group obj){
+        if(obj == null) return null;
+        SimpleGroupGetDTO group = new SimpleGroupGetDTO();
+        BeanUtils.copyProperties(obj, group);
+        return group;
+    }
+
+    public static OtherUsersDTO transformOther(User user){
+        OtherUsersDTO other = new OtherUsersDTO();
+        BeanUtils.copyProperties(user, other);
+        other.setUsername(user.getUserDetailsEntity().getUsername());
+        return other;
     }
 
 }

@@ -57,7 +57,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             System.out.println("Deu erro no id da propValue");
                         }
                         Property property = new Property(idProp, TypeOfProperty.valueOf(type));
-                        System.out.println(property);
                         if (type.equals("TEXT")) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }
@@ -110,12 +109,12 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             }
                             return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, Duration.parse(time.asText()), starts, ends, color)));
                         }
-                        //TODO: username virara id de novo e username devera ser pego de userdetailsentity
+
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "username")){
-                                    users.add(new User(valueF.get("username").asText()));
+                                    users.add(new User(valueF.get("id").asText()));
                                 }
                             }
                             return new PropertyValue(id, new Property(idProp), new UserValued(idTaskVl, users));

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
 
@@ -18,6 +19,7 @@ import java.util.Collection;
 public class UserGetDTO {
 
     @EqualsAndHashCode.Include
+    private Long id;
     private String username;
     private String name;
     private String surname;
@@ -26,8 +28,10 @@ public class UserGetDTO {
     private String mail;
     private String phone;
     private String description;
-    private Integer points;
+    private Long points;
     private Configuration configuration;
     private Collection<PermissionGetDTO> permissions;
     private Collection<Notification> notifications;
+
+
 }

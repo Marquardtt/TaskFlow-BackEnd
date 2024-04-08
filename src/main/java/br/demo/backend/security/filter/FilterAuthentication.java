@@ -34,8 +34,6 @@ public class FilterAuthentication extends OncePerRequestFilter {
             Cookie cookie ;
             try {
                 cookie= cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
-                System.out.println(cookie.getValue());
-                System.out.println(cookieUtil.getCookieValue(request,"JWT"));
             }catch (Exception e ){
                 response.sendError(401);
                 return;
@@ -55,7 +53,13 @@ public class FilterAuthentication extends OncePerRequestFilter {
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext(); // Create a new context
             securityContext.setAuthentication(authentication); // Set the authentication in the context because the session strategy will use it
             securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
+
+            Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
+
+
+            response.addCookie(newCookie); // Add the cookie to the response
         }
+
         filterChain.doFilter(request, response); // Call the next filter
 
     }

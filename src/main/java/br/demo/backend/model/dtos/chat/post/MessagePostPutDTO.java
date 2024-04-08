@@ -1,14 +1,12 @@
 package br.demo.backend.model.dtos.chat.post;
 
-import br.demo.backend.model.Archive;
 import br.demo.backend.model.dtos.chat.get.DestinationGetDTO;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 
@@ -21,7 +19,7 @@ public class MessagePostPutDTO {
 
     private Long id;
     private String value;
-    private SimpleUserGetDTO sender;
+    private OtherUsersDTO sender;
     private Collection<DestinationGetDTO> destinations;
 
 }

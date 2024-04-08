@@ -1,8 +1,6 @@
 package br.demo.backend.model.dtos.chat.get;
 
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,5 +13,5 @@ import java.util.Collection;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ChatPrivateGetDTO extends ChatGetDTO {
-    private Collection<SimpleUserGetDTO> users;
+    private Collection<OtherUsersDTO> users;
 }

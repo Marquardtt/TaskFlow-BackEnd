@@ -28,7 +28,7 @@ public class BeansConfig  {
     public CorsConfigurationSource corsConfig(){
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowedOrigins(List.of("http://localhost:3000")); // all aplications that are allowed
-        corsConfig.setAllowedMethods(List.of("POST","")); // all requests that are allowed
+        corsConfig.setAllowedMethods(List.of("POST","GET", "PUT", "PATCH", "DELETE")); // all requests that are allowed
         corsConfig.setAllowCredentials(true);
         corsConfig.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource corsConfigurationSource =

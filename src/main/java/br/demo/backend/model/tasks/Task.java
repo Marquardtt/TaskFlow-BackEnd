@@ -2,6 +2,7 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
+import br.demo.backend.model.interfaces.ILogged;
 import br.demo.backend.model.relations.PropertyValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
-public class Task {
+public class Task implements ILogged {
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,4 +53,8 @@ public class Task {
         this.id= id;
     }
 
+    @Override
+    public Collection<PropertyValue> getPropertiesValues() {
+        return this.properties;
+    }
 }

@@ -2,6 +2,7 @@ package br.demo.backend.controller;
 
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.model.dtos.user.UserPutDTO;
@@ -19,20 +20,9 @@ import java.util.Collection;
 public class UserController {
     private UserService userService;
 
-    //TODO: Verificar com os outros quais informações que o
-    // usuario pode ver de outro usuario (mudar na getDTO) e
-    // tambem tem que ver as informações que seram encriptadas
-
     @PostMapping
     public UserGetDTO insert(@RequestBody UserPostDTO user){
         return userService.save(user);
-    }
-
-    //TODO: verificar com a heloisa se eu posso tirar isso
-    @GetMapping("/{username}/project/{projectId}")
-    //  FEITO => PORÉM PROVÁVEL QUE TERÁ ALTERAÇÕE
-    public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
-        return userService.getPermissionOfAUserInAProject(username, projectId);
     }
 
     @PutMapping
@@ -44,11 +34,9 @@ public class UserController {
         return userService.update(user, true);
     }
 
-    //    precisa estar num mesmo projeto ou group que o outro user   IMPLEMENTAR O ACCESS => BECKER
-
-    //TODO: Precisa fazer uma dto que esconda certa infos, alem disso teria que ver se o usuario pode fazer isso
+    //TODO: teria que ver se o usuario pode fazer isso
     @GetMapping("/{username}")
-    public UserGetDTO findOne(@PathVariable String username){
+    public OtherUsersDTO findOne(@PathVariable String username){
         return userService.findOne(username);
     }
 
@@ -75,9 +63,8 @@ public class UserController {
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 
-    //TODO: precisa fausa a dto mencionada acima
     @GetMapping
-    public Collection<UserGetDTO> findAll() {
+    public Collection<OtherUsersDTO> findAll() {
         return userService.findAll();
     }
 
@@ -85,7 +72,12 @@ public class UserController {
     //precisa ser o dono do grupo em que o usuario esta nesse projeto
     @PatchMapping("{username}/update-permission/project/{projectId}")
     public PermissionGetDTO updatePermission(@PathVariable String username, @RequestBody Permission permission){
-        return userService.updatePermission(username, permission);
+        return userService.updatePermissionOfAUser(username, permission);
+    }
+
+    @PatchMapping("/visualize-notifications")
+    public UserGetDTO visualizeNotification(){
+        return userService.visualizedNotifications();
     }
 
 }
