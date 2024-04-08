@@ -20,4 +20,6 @@ public class SimpleProjectGetDTO {
     private Integer progress;
     private Collection<SimpleGroupGetDTO> groups;
     private OtherUsersDTO owner;
+    private Integer qttyPages;
+    private Integer qttyProperties;
 }

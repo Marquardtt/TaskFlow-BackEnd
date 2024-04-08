@@ -285,10 +285,13 @@ public class ModelToGetDTO {
         } catch (ArithmeticException | NullPointerException ignore) {
             progress = 100;
         }
+        Integer qttyPages = obj.getPages().size();
+        Integer qttyProperties = obj.getProperties().size();
         OtherUsersDTO user = tranformSimple(obj.getOwner());
         return new SimpleProjectGetDTO(
                 obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(),
-                progress,groups.stream().map(ModelToGetDTO::tranformSimple).toList(), user
+                progress,groups.stream().map(ModelToGetDTO::tranformSimple).toList(),
+                user, qttyPages, qttyProperties
         );
 
     }
