@@ -125,9 +125,7 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         PermissionGetDTO permission = new PermissionGetDTO();
         BeanUtils.copyProperties(obj, permission);
-        System.out.println(permission);
         permission.setProject(tranformSimple(obj.getProject()));
-        System.out.println(permission.getProject());
         return permission;
     }
     public static ProjectGetDTO tranform(Project obj){
@@ -307,6 +305,7 @@ public class ModelToGetDTO {
         OtherUsersDTO other = new OtherUsersDTO();
         BeanUtils.copyProperties(user, other);
         other.setUsername(user.getUserDetailsEntity().getUsername());
+        other.setPermissions(user.getPermissions().stream().map(ModelToGetDTO::tranform).toList());
         return other;
     }
 
