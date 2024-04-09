@@ -284,8 +284,8 @@ public class ModelToGetDTO {
         } catch (ArithmeticException | NullPointerException ignore) {
             progress = 100;
         }
-        Integer qttyPages = obj.getPages().size();
-        Integer qttyProperties = obj.getProperties().size();
+        Integer qttyPages = obj.getPages() == null ? 0: obj.getPages().size();
+        Integer qttyProperties = obj.getProperties() == null ? 0 : obj.getProperties().size();
         OtherUsersDTO user = tranformSimple(obj.getOwner());
         return new SimpleProjectGetDTO(
                 obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(),
