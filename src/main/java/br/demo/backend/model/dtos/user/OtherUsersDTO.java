@@ -16,7 +16,7 @@ import java.util.Collection;
 public class OtherUsersDTO {
 
     @EqualsAndHashCode.Include
-    private String id;
+    private Long id;
     private String username;
     private String name;
     private String surname;

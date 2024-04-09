@@ -39,12 +39,6 @@ public class PageController {
     public PageGetDTO upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
         return pageService.updateName(name, id);
     }
-
-//    @PatchMapping("/{taskId}/{index}/project/{projectId}")
-//    public PageGetDTO updateIndexes(@RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
-//        return return pageService.updateIndex(page, taskId, index);
-//    }
-
     @PatchMapping("/task-page/project/{projectId}")
     public TaskPageGetDTO upDateTaskPage(@RequestBody TaskPage taskPage) {
         return pageService.updateTaskPage(taskPage);
