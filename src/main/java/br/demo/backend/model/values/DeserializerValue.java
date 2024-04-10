@@ -86,12 +86,15 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             ArrayList<Option> options = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
-                                    String name = value.get("name").asText();
-                                    Long idOpt = value.get("id").asLong();
+                                    System.out.println("executou");
+                                    String name = valueF.get("name").asText();
+                                    Long idOpt = valueF.get("id").asLong();
                                     options.add(new Option(idOpt, name));
+
                                 }
                             }
-                            return new PropertyValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
+
+                            return new PropertyValue(id, new Property(idProp, TypeOfProperty.valueOf(type)), new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
