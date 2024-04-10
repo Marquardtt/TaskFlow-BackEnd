@@ -19,6 +19,7 @@ import br.demo.backend.repository.properties.DateRepository;
 import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
+import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
@@ -46,6 +47,7 @@ public class PropertyService {
     private AutoMapper<Date> autoMapperDate;
     private OrderedPageRepository orderedPageRepository;
     private PropertyValueRepository taskValueRepository;
+    private PropertyValueService propertyValueService;
 
     //that method is used to add the new property to the tasks that already exists
     private Property setInTheTasksThatAlreadyExists(Property property) {
@@ -64,7 +66,7 @@ public class PropertyService {
             //get the tasks from the page
             page.getTasks().stream().map(tP -> {
                 //add the property to the task
-                tP.getTask().getProperties().add(taskService.setTaskProperty(property));
+                tP.getTask().getProperties().add(propertyValueService.setTaskProperty(property));
                 taskService.update(tP.getTask(), true);
                 return tP;
             }).toList();
@@ -74,7 +76,7 @@ public class PropertyService {
 
     private <T extends Property> T saveGeneric(T property, JpaRepository<T, Long> repo) {
         T prop = repo.save(property);
-        setInTheTasksThatAlreadyExists(property);
+        setInTheTasksThatAlreadyExists(prop);
         return prop;
     }
 
@@ -151,6 +153,9 @@ public class PropertyService {
 
     private Boolean validateCanBeDeleted(Property property) {
         TypeOfPage typeOfPage = getTypeOfDependetPage(property);
+        if(typeOfPage == null){
+            return true;
+        }
         List <TypeOfProperty> typesOfProperty = getPossibleSubstitutesTypes(typeOfPage);
         if(property.getProject()!=null){
             return testInProject(typeOfPage, property, typesOfProperty);

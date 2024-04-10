@@ -5,6 +5,7 @@ package br.demo.backend.service.tasks;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.repository.values.UserValuedRepository;
 import br.demo.backend.service.LogService;
+import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.service.UserService;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.chat.Message;
@@ -37,6 +38,7 @@ import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -52,8 +54,6 @@ import java.util.HashSet;
 public class TaskService {
 
     private TaskRepository taskRepository;
-    private UserRepository userRepository;
-    private PropertyValueRepository taskValueRepository;
     private PageRepository pageRepositorry;
     private OrderedPageRepository orderedPageRepository;
     private ProjectRepository projectRepository;
@@ -61,9 +61,9 @@ public class TaskService {
     private AutoMapper<Task> autoMapper;
     private NotificationService notificationService;
     private TaskPageRepository taskPageRepository;
-    private UserValuedRepository userValuedRepository;
     private LogService logService;
     private UserService userService;
+    private PropertyValueService propertyValueService;
 
 
     public TaskGetDTO save(Long idpage) {
@@ -92,8 +92,8 @@ public class TaskService {
 
         //set the property values at the task
         taskEmpty.setProperties(new HashSet<>());
-        setTaskProperties(propertiesPage, taskEmpty);
-        setTaskProperties(propertiesProject, taskEmpty);
+        propertyValueService.setTaskProperties(propertiesPage, taskEmpty);
+        propertyValueService.setTaskProperties(propertiesProject, taskEmpty);
     }
 
     public void addTaskToPage(Task task, Page page) {
@@ -112,39 +112,23 @@ public class TaskService {
     }
 
 
-    //this pass for all the properties to set correctly them at the task
-    public void setTaskProperties(Collection<Property> properties, Task taskEmpty) {
-        Collection<PropertyValue> propertyValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
-        propertyValues.addAll(taskEmpty.getProperties());
-        taskEmpty.setProperties(propertyValues);
-        System.out.println(ModelToGetDTO.tranform(taskEmpty));
-    }
+    //this pass for all the properties to set correctly them at the tas
 
     //this set the correctly type of value at the propertyvalue
-    public PropertyValue setTaskProperty(Property p) {
-        Value value= switch (p.getType()) {
-            case RADIO, SELECT -> new UniOptionValued();
-            case CHECKBOX, TAG -> new MultiOptionValued();
-            case TEXT -> new TextValued();
-            case DATE -> new DateValued();
-            case NUMBER, PROGRESS -> new NumberValued();
-            case TIME -> new TimeValued();
-            case ARCHIVE -> new ArchiveValued();
-            case USER -> new UserValued();
-        };
-        return new PropertyValue(null, p, value);
-    }
 
     public TaskGetDTO update(Task taskDTO, Boolean patching) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
-        Task task = patching ? oldTask : new Task();
+        //TODO: aplicar esse beanutils em todos os puts
+        Task task = new Task();
+        if(patching) BeanUtils.copyProperties(oldTask, task);
         autoMapper.map(taskDTO, task, patching);
 
         keepFields(task, oldTask);
         //generate logs
-        logService.generateLog(Action.UPDATE, task, oldTask);
 
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
+
+        logService.generateLog(Action.UPDATE, task, oldTask);
 
         //generate the notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
@@ -159,7 +143,9 @@ public class TaskService {
         task.setLogs(oldTask.getLogs());
         task.setCompleted(false);
         task.setDeleted(false);
+        task.setProperties(propertyValueService.keepPropertyValues(task, oldTask) );
     }
+
 
     public void delete(Long id) {
         Task task = taskRepository.findById(id).get();
@@ -204,46 +190,8 @@ public class TaskService {
                 .distinct().toList();
     }
 
-    public Collection<TaskGetDTO> getTasksToday(String id) {
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        //get the values that contains the logged user
-        Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
-        //get the property values that contains the values
-        Collection<PropertyValue> taskValues =
-                values.stream().map(v -> taskValueRepository
-                                .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
-                        .toList();
-        //get the tasks that contains the propertyvalues
-        Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).toList();
-        return tasks.stream().filter(t ->
-                        t.getProperties().stream().anyMatch(p ->
-                            testIfIsTodayBasesInConfigs(p, user)))
-                .map(ModelToGetDTO::tranform).toList();
-    }
 
-    private Boolean testIfIsTodayBasesInConfigs(PropertyValue p, User user) {
-        if (p.getProperty() instanceof Date property) {
-            Boolean deadlineOrScheduling;
-            if (user.getConfiguration().getInitialPageTasksPerDeadline()) {
-                deadlineOrScheduling = property.getDeadline();
-            } else {
-                deadlineOrScheduling = property.getScheduling();
-            }
-            return deadlineOrScheduling && compareToThisDay((LocalDateTime) p.getValue().getValue());
-        }
-        return false;
-    }
 
-    private Boolean compareToThisDay(LocalDateTime time){
-        try {
-            return time.getMonthValue() == LocalDate.now().getMonthValue() &&
-                    time.getYear() == time.getYear() &&
-                    time.getDayOfMonth() == time.getDayOfMonth();
-        }catch (NullPointerException e){
-            return false;
-        }
-    }
 
     public TaskGetDTO complete(Long id) {
         Task task = taskRepository.findById(id).get();

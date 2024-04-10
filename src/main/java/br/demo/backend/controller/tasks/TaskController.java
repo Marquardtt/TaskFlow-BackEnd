@@ -3,6 +3,7 @@ package br.demo.backend.controller.tasks;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.service.tasks.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.Collection;
 @RequestMapping("/task")
 public class TaskController {
     private TaskService taskService;
+    private PropertyValueService propertyValueService;
 
 
     @PostMapping("/{projectId}/{pageId}")
@@ -32,10 +34,9 @@ public class TaskController {
     }
 
 
-    //FEITO
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
-        return  taskService.getTasksToday(id);
+        return  propertyValueService.getTasksToday(id);
     }
 
 

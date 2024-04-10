@@ -37,9 +37,7 @@ public class IsOwnerAuthorization implements AuthorizationManager<RequestAuthori
             }
         } else {
             String projectId =  object.getVariables().get("projectId");
-
             decision = isOwner(projectId, userDatailEntity);
-
         }
         return new AuthorizationDecision(decision);
     }

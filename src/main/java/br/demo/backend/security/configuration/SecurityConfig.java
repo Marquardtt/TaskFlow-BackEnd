@@ -60,8 +60,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/project/my").authenticated()
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
-
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/property-value/{id}").access(isOwnerAuthorization)
+                //ProjectAndTask
                 //TASK
+                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/task/property-value/{id}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)

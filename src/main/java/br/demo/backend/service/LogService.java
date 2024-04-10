@@ -29,17 +29,19 @@ public class LogService {
 
     private UserRepository userRepository;
 
-    private User getUser(){
+    private User getUser() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         return userRepository.findByUserDetailsEntity_Username(username).get();
     }
-    public void generateLog(Action action, ILogged obj, ILogged aux){
+
+    public void generateLog(Action action, ILogged obj, ILogged aux) {
         if (Objects.requireNonNull(action) == Action.UPDATE) {
             updateLogs(obj, aux);
         }
     }
-    public void generateLog(Action action, ILogged obj){
-        switch (action){
+
+    public void generateLog(Action action, ILogged obj) {
+        switch (action) {
             case CREATE -> createLog(obj);
             case DELETE -> deleteLog(obj);
             case REDO -> redoLog(obj);
@@ -49,7 +51,7 @@ public class LogService {
 
     private void completeLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
-        obj.getLogs().add(new Log(null, typeObj+" completed", Action.COMPLETE, getUser(), LocalDateTime.now(), null));
+        obj.getLogs().add(new Log(null, typeObj + " completed", Action.COMPLETE, getUser(), LocalDateTime.now(), null));
 
     }
 
@@ -64,101 +66,113 @@ public class LogService {
         obj.getLogs().add(new Log(null, typeObj + " deleted", Action.DELETE, getUser(), LocalDateTime.now(), null));
     }
 
-    private void createLog(ILogged obj){
+    private void createLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
         obj.setLogs(new HashSet<>());
-        obj.getLogs().add(new Log(null, typeObj + " created", Action.CREATE, getUser(), LocalDateTime.now(), null) );
+        obj.getLogs().add(new Log(null, typeObj + " created", Action.CREATE, getUser(), LocalDateTime.now(), null));
     }
 
-    private void updateLogs(ILogged obj, ILogged old){
+    private void updateLogs(ILogged obj, ILogged old) {
         String typeObj = obj instanceof Task ? "task" : "project";
         updateName(obj, old, typeObj);
         Collection<Log> logs = obj.getPropertiesValues().stream()
-                .map(prop ->  updateProperty(obj, old, prop))
+                .map(prop -> updateProperty(obj, old, prop))
                 .filter(Objects::nonNull).toList();
         obj.getLogs().addAll(logs);
     }
 
     private Log updateProperty(ILogged obj, ILogged old, PropertyValue prop) {
+        System.out.println(old.getPropertiesValues().stream().map(PropertyValue::getId).toList());
         PropertyValue first = old.getPropertiesValues().stream()
-                .filter(p-> p.getValue().getId().equals(prop.getValue().getId()))
+                .filter(p -> p.getValue().getId().equals(prop.getValue().getId()))
                 .findFirst()
                 .orElse(null);
-        if (first != null && !prop.getValue().getValue().equals(first.getValue().getValue())) {
+
+        if (testIfIsDiferent(prop, first)) {
             PropertyValue propertyValue = new PropertyValue(first);
-            return new Log(null, descriptionUpdate(prop), Action.UPDATE,getUser(), LocalDateTime.now(), propertyValue);
+            return new Log(null, descriptionUpdate(prop), Action.UPDATE, getUser(), LocalDateTime.now(), propertyValue);
         }
         return null; // Se não há alteração, retorna null
     }
 
+    private boolean testIfIsDiferent(PropertyValue prop, PropertyValue first) {
+        return first != null  && !(prop.getValue().getValue() == null && first.getValue().getValue() == null) &&
+                ((first.getValue().getValue() == null && prop.getValue().getValue() != null) ||
+                        (prop.getValue().getValue() == null && first.getValue().getValue() != null) ||
+                        (!prop.getValue().getValue().equals(first.getValue().getValue()))
+                );
+    }
+
+
     private void updateName(ILogged obj, ILogged old, String typeObj) {
-        if(obj.getName() == null && old.getName() == null)return;
-        if(obj.getName() == null && old.getName() != null ||
+        if (obj.getName() == null && old.getName() == null) return;
+        if (obj.getName() == null && old.getName() != null ||
                 obj.getName() != null && old.getName() == null ||
-                !obj.getName().equals(old.getName())){
-            obj.getLogs().add(new Log(null, "The "+typeObj+"'s name was changed to '"+
-                    obj.getName()+"'", Action.UPDATE, getUser(),
+                !obj.getName().equals(old.getName())) {
+            obj.getLogs().add(new Log(null, "The " + typeObj + "'s name was changed to '" +
+                    obj.getName() + "'", Action.UPDATE, getUser(),
                     LocalDateTime.now(), null));
         }
     }
 
-    private String descriptionUpdate(PropertyValue value){
-        String base = "The property '"+value.getProperty().getName()+"' was changed to '";
-        base += switch (value.getProperty().getType()){
-            case DATE -> formatDate(value)+"'";
-            case SELECT, RADIO -> ((Option)value.getValue().getValue()).getName()+"'";
-            case TIME -> (formateDuration(((Intervals)value.getValue().getValue()).getTime()))+"'";
-            case CHECKBOX, TAG -> listString(((Collection<Option>)value.getValue().getValue())
-                    .stream().map(Option::getName).toList())+"'";
-            case USER -> listString(((Collection<User>)value.getValue().getValue())
-                    .stream().map(u -> u.getUserDetailsEntity().getUsername()).toList())+"'";
-            case ARCHIVE -> ((Archive)value.getValue().getValue()).getName() +"."+
-                    ((Archive)value.getValue().getValue()).getType()+"'";
-            case TEXT, NUMBER -> value.getValue().getValue()+"'";
-            case PROGRESS -> value.getValue().getValue()+"%'";
+    private String descriptionUpdate(PropertyValue value) {
+        String base = "The property '" + value.getProperty().getName() + "' was changed to '";
+        base += switch (value.getProperty().getType()) {
+            case DATE -> formatDate(value) + "'";
+            case SELECT, RADIO -> ((Option) value.getValue().getValue()).getName() + "'";
+            case TIME -> (formateDuration(((Intervals) value.getValue().getValue()).getTime())) + "'";
+            case CHECKBOX, TAG -> listString(((Collection<Option>) value.getValue().getValue())
+                    .stream().map(Option::getName).toList()) + "'";
+            case USER -> listString(((Collection<User>) value.getValue().getValue())
+                    .stream().map(u -> u.getUserDetailsEntity().getUsername()).toList()) + "'";
+            case ARCHIVE -> ((Archive) value.getValue().getValue()).getName() + "." +
+                    ((Archive) value.getValue().getValue()).getType() + "'";
+            case TEXT, NUMBER -> value.getValue().getValue() + "'";
+            case PROGRESS -> value.getValue().getValue() + "%'";
         };
         return base;
     }
 
 
-    private String listString(Collection<String> strs){
-        if(strs == null || strs.isEmpty()){
+    private String listString(Collection<String> strs) {
+        if (strs == null || strs.isEmpty()) {
             return "";
         }
         StringJoiner base = new StringJoiner(", ", "", " and ");
-        for(String str : strs){
+        for (String str : strs) {
             base.add(str);
         }
         return base.toString();
     }
 
-    private String formateDuration (Duration value){
+    private String formateDuration(Duration value) {
         long hours = value.toHours();
         long minutes = value.minusHours(hours).toMinutes();
         long seconds = value.minusHours(hours).minusMinutes(minutes).getSeconds();
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    private String formatDate (PropertyValue value){
+    private String formatDate(PropertyValue value) {
         DateTimeFormatter formatter = null;
-        if(((Date)value.getProperty()).getIncludesHours()){
+        if (((Date) value.getProperty()).getIncludesHours()) {
             formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).localizedBy(Locale.getDefault());
-        }else{
-            formatter =  DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).localizedBy(Locale.getDefault());
+        } else {
+            formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).localizedBy(Locale.getDefault());
         }
-        return ((LocalDateTime)value.getValue().getValue()).format(formatter);
+        return ((LocalDateTime) value.getValue().getValue()).format(formatter);
     }
 
-    public void updatePicture(Project project){
+    public void updatePicture(Project project) {
         project.getLogs().add(
                 new Log(null, "The project's picture was changed",
                         Action.UPDATE, getUser(), LocalDateTime.now(), null)
         );
     }
-    public void updateOwner(Project project){
+
+    public void updateOwner(Project project) {
         project.getLogs().add(
-                new Log(null, "The project's owner was changed, now he is '"+
-                        project.getOwner().getUserDetailsEntity().getUsername()+"'",
+                new Log(null, "The project's owner was changed, now he is '" +
+                        project.getOwner().getUserDetailsEntity().getUsername() + "'",
                         Action.UPDATE, getUser(), LocalDateTime.now(), null)
         );
     }
