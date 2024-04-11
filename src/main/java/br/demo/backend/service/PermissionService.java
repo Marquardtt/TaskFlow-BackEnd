@@ -25,9 +25,11 @@ public class PermissionService {
     private AutoMapper<Permission> autoMapper;
     private ProjectRepository projectRepository;
 
-    public PermissionGetDTO save(PermissionPostDTO permissionDto) {
+    public PermissionGetDTO save(PermissionPostDTO permissionDto, Long projectId) {
+        Project project = projectRepository.findById(projectId).get();
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
+        permission.setProject(project);
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
     }
 

@@ -29,6 +29,8 @@ public class LogService {
 
     private UserRepository userRepository;
 
+
+
     private User getUser() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         return userRepository.findByUserDetailsEntity_Username(username).get();
