@@ -45,25 +45,21 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
 
         } else  {
             String projectId =  object.getVariables().get("projectId");
-            System.out.println("Owner?");
             List<String> uriMemberWithoutPermission = List.of("/project/"+projectId+"/set-now");
 
             Project project = projectRepository.findById(Long.parseLong(projectId)).get();
 
             if (!project.getOwner().equals(userDatailEntity.getUser())) {
-                System.out.println("!Owner");
                 for (GrantedAuthority simple :
                         userDatailEntity.getAuthorities()) {
                     if(simple.getAuthority().contains("Project_"+projectId+"_") &&
                             simple.getAuthority().contains(object.getRequest().getMethod())
                     || uriMemberWithoutPermission.contains(object.getRequest().getRequestURI())){
-                        System.out.println("Decision");
                         decision = true;
                         break;
                     }
                 }
             } else {
-                System.out.println("Owner");
                 decision = true;
             }
         }

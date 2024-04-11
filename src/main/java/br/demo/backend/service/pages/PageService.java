@@ -160,12 +160,12 @@ public class PageService {
         TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
         TaskPageGetDTO taskPageGetDTO = null;
         if(oldTaskPage instanceof TaskCanvas taskCanvas){
-            autoMapperTaskCanvas.map(taskPage, taskCanvas, true);
+            ((TaskCanvas) oldTaskPage).setX(taskCanvas.getX());
+            ((TaskCanvas) oldTaskPage).setY(taskCanvas.getY());
             taskPageGetDTO = ModelToGetDTO.tranform(taskCanvasRepository.save(taskCanvas));
         }
         else {
-            autoMapperTaskOrdered.map( taskPage,
-                    (TaskOrdered) oldTaskPage, true);
+            ((TaskOrdered) oldTaskPage).setIndexAtColumn(((TaskOrdered)taskPage).getIndexAtColumn());
             taskPageGetDTO = ModelToGetDTO.tranform(taskOrderedRepository.save((TaskOrdered) oldTaskPage));
         }
         return taskPageGetDTO;

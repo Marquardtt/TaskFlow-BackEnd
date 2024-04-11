@@ -33,9 +33,7 @@ public class AuthenticateController {
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(userLogin.getUsername(),userLogin.getPassword());
 
-            System.out.println(token);
             Authentication authentication = authenticationManager.authenticate(token);
-            System.out.println("Passou");
             UserDetails user = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
             Cookie cookie = cookieUtil.gerarCookieJwt(user);// Create a cookie with the JWT
             response.addCookie(cookie);// Add the cookie to the response

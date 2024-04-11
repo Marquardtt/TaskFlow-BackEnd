@@ -82,7 +82,6 @@ public class LogService {
     }
 
     private Log updateProperty(ILogged obj, ILogged old, PropertyValue prop) {
-        System.out.println(old.getPropertiesValues().stream().map(PropertyValue::getId).toList());
         PropertyValue first = old.getPropertiesValues().stream()
                 .filter(p -> p.getValue().getId().equals(prop.getValue().getId()))
                 .findFirst()

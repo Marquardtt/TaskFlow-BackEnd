@@ -51,7 +51,6 @@ public class AuthorizationRequestsRoutes implements AuthorizationManager<Request
                 }
             }
         } else {
-            System.out.println("OWNER");
             decision = true;
         }
         return new AuthorizationDecision(decision);

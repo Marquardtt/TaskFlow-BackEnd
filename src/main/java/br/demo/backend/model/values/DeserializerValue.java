@@ -86,7 +86,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             ArrayList<Option> options = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
-                                    System.out.println("executou");
                                     String name = valueF.get("name").asText();
                                     Long idOpt = valueF.get("id").asLong();
                                     options.add(new Option(idOpt, name));
