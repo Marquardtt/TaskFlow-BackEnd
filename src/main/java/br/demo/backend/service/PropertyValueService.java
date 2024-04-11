@@ -15,7 +15,7 @@ import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.values.ArchiveValuedRepository;
 import br.demo.backend.repository.values.UserValuedRepository;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.Implementacoes;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,7 +54,7 @@ public class PropertyValueService {
         Collection<PropertyValue> propertyValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
         propertyValues.addAll(taskEmpty.getProperties());
         taskEmpty.setProperties(propertyValues);
-        System.out.println(ModelToGetDTO.tranform(taskEmpty));
+        System.out.println(Implementacoes.tranform(taskEmpty));
     }
 
     public PropertyValue setTaskProperty(Property p) {
@@ -86,7 +86,7 @@ public class PropertyValueService {
         return tasks.stream().filter(t ->
                         t.getProperties().stream().anyMatch(p ->
                                 testIfIsTodayBasesInConfigs(p, user)))
-                .map(ModelToGetDTO::tranform).toList();
+                .map(Implementacoes::tranform).toList();
     }
 
 

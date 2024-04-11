@@ -5,28 +5,22 @@ import br.demo.backend.model.enums.Action;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
 import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.Implementacoes;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
 import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
-import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.properties.Option;
-import br.demo.backend.model.properties.Select;
-import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
@@ -45,7 +39,7 @@ public class ProjectService {
         project.setPicture(new Archive(picture));
         //generate logs
         logService.updatePicture(project);
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        return Implementacoes.tranform(projectRepository.save(project));
     }
 
     public ProjectGetDTO updateOwner(User user, Long projectId) {
@@ -53,7 +47,7 @@ public class ProjectService {
         project.setOwner(user);
         //generate logs
         logService.updateOwner(project);
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        return Implementacoes.tranform(projectRepository.save(project));
     }
 
     public Collection<SimpleProjectGetDTO> finAllOfAUser() {
@@ -63,11 +57,11 @@ public class ProjectService {
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
         //get the projects that the user is member
         projects.addAll(user.getPermissions().stream().map(Permission::getProject).toList());
-        return projects.stream().distinct().map(ModelToGetDTO::tranformSimple).toList();
+        return projects.stream().distinct().map(Implementacoes::tranformSimple).toList();
     }
 
     public ProjectGetDTO findOne(Long id) {
-        return ModelToGetDTO.tranform(projectRepository.findById(id).get());
+        return Implementacoes.tranform(projectRepository.findById(id).get());
     }
 
     public ProjectGetDTO update(ProjectPutDTO projectDTO, Boolean patching) {
@@ -82,7 +76,7 @@ public class ProjectService {
 
         //generate the logs
         logService.generateLog(Action.UPDATE, project, oldProject);
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        return Implementacoes.tranform(projectRepository.save(project));
     }
 
     public SimpleProjectGetDTO save(ProjectPostDTO projectDto) {
@@ -102,14 +96,14 @@ public class ProjectService {
         defaultPropsService.select(project, null);
         emptyProject.setVisualizedAt(LocalDateTime.now());
 
-        return ModelToGetDTO.tranformSimple(projectRepository.save(project));
+        return Implementacoes.tranformSimple(projectRepository.save(project));
     }
 
    //set that the project was visualized by a user, to sort by this on the projects page
     public ProjectGetDTO setVisualizedNow(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         project.setVisualizedAt(LocalDateTime.now());
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        return Implementacoes.tranform(projectRepository.save(project));
     }
 
     public void delete(Long id) {

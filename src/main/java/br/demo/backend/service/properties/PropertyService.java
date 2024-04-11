@@ -24,7 +24,6 @@ import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
-import br.demo.backend.utils.ModelToGetDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;

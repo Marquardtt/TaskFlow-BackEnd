@@ -7,7 +7,7 @@ import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.Implementacoes;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
@@ -37,7 +37,7 @@ public class GroupService {
 
 
     public GroupGetDTO findOne(Long id) {
-        return ModelToGetDTO.tranform(groupRepository.findById(id).get());
+        return Implementacoes.tranform(groupRepository.findById(id).get());
     }
 
 
@@ -50,24 +50,24 @@ public class GroupService {
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+        return Implementacoes.tranform(groupRepository.save(group));
     }
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+        return Implementacoes.tranform(groupRepository.save(group));
     }
     public Collection<SimpleGroupGetDTO> findGroupsByUser() {
         UserDatailEntity userDatail = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUserDetailsEntity_Username(userDatail.getUsername()).get();
         return groupRepository.findGroupsByOwnerOrUsersContaining(user, user)
-                .stream().map(ModelToGetDTO::tranformSimple).toList();
+                .stream().map(Implementacoes::tranformSimple).toList();
     }
 
     public Collection<SimpleGroupGetDTO> findGroupsByAProject(Long projectId) {
         return groupRepository.findGroupsByPermissions_Project(new Project(projectId))
-                .stream().map(ModelToGetDTO::tranformSimple).toList();
+                .stream().map(Implementacoes::tranformSimple).toList();
     }
 
 
@@ -84,7 +84,7 @@ public class GroupService {
         ).forEach(p ->  updatePermission(group, p));
 
         //saving and generating notifications
-        GroupGetDTO groupGetDTO =  ModelToGetDTO.tranform(groupRepository.save(group));
+        GroupGetDTO groupGetDTO =  Implementacoes.tranform(groupRepository.save(group));
         notificationsAddOrRemove(group, oldGroup);
         return groupGetDTO;
     }
@@ -128,7 +128,7 @@ public class GroupService {
     public GroupGetDTO updatePicture(MultipartFile picture, Long id) {
         Group group = groupRepository.findById(id).get();
         group.setPicture(new Archive(picture));
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+        return Implementacoes.tranform(groupRepository.save(group));
     }
 
 

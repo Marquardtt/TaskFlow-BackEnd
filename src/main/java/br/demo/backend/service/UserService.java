@@ -11,7 +11,7 @@ import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.exception.ForbiddenException;
 import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.Implementacoes;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
@@ -40,7 +40,7 @@ public class UserService {
     //find one, normally used to find a user in the same group or project
     public OtherUsersDTO findOne(String id) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
-        return ModelToGetDTO.transformOther(user);
+        return Implementacoes.transformOther(user);
     }
 
     //save, normally used to create a new user with a unique username
@@ -53,7 +53,7 @@ public class UserService {
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
             user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
-            return ModelToGetDTO.tranform(userRepository.save(user));
+            return Implementacoes.tranform(userRepository.save(user));
         }
     }
 
@@ -70,7 +70,7 @@ public class UserService {
         keepFields(user, oldUser);
 
 
-        return ModelToGetDTO.tranform(userRepository.save(user));
+        return Implementacoes.tranform(userRepository.save(user));
     }
 
     private void keepFields(User user, User oldUser){
@@ -105,7 +105,7 @@ public class UserService {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         user.setPicture(new Archive(picture));
-        return ModelToGetDTO.tranform(userRepository.save(user));
+        return Implementacoes.tranform(userRepository.save(user));
     }
 
     public UserGetDTO updatePassword(String id, String password) {
@@ -113,7 +113,7 @@ public class UserService {
         user.getUserDetailsEntity().setPassword(password);
         user.getUserDetailsEntity().setAccountNonExpired(true);
         user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
-        return ModelToGetDTO.tranform(userRepository.save(user));
+        return Implementacoes.tranform(userRepository.save(user));
     }
 
 
@@ -121,7 +121,7 @@ public class UserService {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
 
-        return userRepository.findAll().stream().map(ModelToGetDTO::transformOther).toList();
+        return userRepository.findAll().stream().map(Implementacoes::transformOther).toList();
     }
 
     public void addPoints(User user, Long points) {
@@ -138,7 +138,7 @@ public class UserService {
 
     public UserGetDTO findLogged() {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        return ModelToGetDTO.tranform(userRepository.findByUserDetailsEntity_Username(username).get());
+        return Implementacoes.tranform(userRepository.findByUserDetailsEntity_Username(username).get());
     }
 
     public PermissionGetDTO updatePermissionOfAUser(String username, Permission permission) {
@@ -146,7 +146,7 @@ public class UserService {
         Collection<Permission> permissions = getNewPermissions(user, permission);
         permissions.add(permission);
         user.setPermissions(permissions);
-        return ModelToGetDTO.tranform(permission);
+        return Implementacoes.tranform(permission);
     }
 
     private Collection<Permission> getNewPermissions(User user, Permission permission) {
@@ -179,7 +179,7 @@ public class UserService {
             n.setVisualized(true);
             notificationService.updateNotification(n);
         });
-        return ModelToGetDTO.tranform(user);
+        return Implementacoes.tranform(user);
     }
 }
 

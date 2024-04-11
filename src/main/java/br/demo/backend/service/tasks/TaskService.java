@@ -3,11 +3,10 @@ package br.demo.backend.service.tasks;
 
 
 import br.demo.backend.model.tasks.Log;
-import br.demo.backend.repository.values.UserValuedRepository;
 import br.demo.backend.service.LogService;
 import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.service.UserService;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.Implementacoes;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.service.NotificationService;
@@ -16,36 +15,26 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfPage;
-import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskOrdered;
 import br.demo.backend.model.relations.TaskPage;
-import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
-import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.CanvasPageRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.relations.TaskPageRepository;
-import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -78,7 +67,7 @@ public class TaskService {
         Task task = taskRepository.save(taskEmpty);
         //add task to the page setting its type (canvas or ordered)
         addTaskToPage(task, page);
-        TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(task);
+        TaskGetDTO taskGetDTO = Implementacoes.tranform(task);
         //generate the notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return taskGetDTO;
@@ -126,7 +115,7 @@ public class TaskService {
         keepFields(task, oldTask);
         //generate logs
 
-        TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
+        TaskGetDTO taskGetDTO = Implementacoes.tranform(taskRepository.save(task));
 
         logService.generateLog(Action.UPDATE, task, oldTask);
 
@@ -174,7 +163,7 @@ public class TaskService {
         //generate  logs
         logService.generateLog(Action.REDO, task);
 
-        TaskGetDTO tranform = ModelToGetDTO.tranform(taskRepository.save(task));
+        TaskGetDTO tranform = Implementacoes.tranform(taskRepository.save(task));
 
         //generate notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
@@ -186,7 +175,7 @@ public class TaskService {
         Collection<Page> pages = project.getPages();
         //this get all page's tasks of the project and filter by "deleted" attribute
         return pages.stream().map(Page::getTasks).flatMap(Collection::stream)
-                .filter(t -> t.getTask().getDeleted()).map(TaskPage::getTask).map(ModelToGetDTO::tranform)
+                .filter(t -> t.getTask().getDeleted()).map(TaskPage::getTask).map(Implementacoes::tranform)
                 .distinct().toList();
     }
 
@@ -203,7 +192,7 @@ public class TaskService {
         //generate the logs and notifications
         logService.generateLog(Action.COMPLETE, task);
 
-        TaskGetDTO tranform = ModelToGetDTO.tranform(taskRepository.save(task));
+        TaskGetDTO tranform = Implementacoes.tranform(taskRepository.save(task));
 
         generatePointsOfComplete(task.getLogs());
 

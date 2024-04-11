@@ -20,7 +20,7 @@ import br.demo.backend.repository.chat.ChatPrivateRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.service.NotificationService;
 import br.demo.backend.utils.AutoMapper;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.Implementacoes;
 import br.demo.backend.repository.chat.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +63,7 @@ public class ChatService {
     }
 
     private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
-        ChatPrivateGetDTO chatGetDTO = (ChatPrivateGetDTO) ModelToGetDTO.tranform(chat);
+        ChatPrivateGetDTO chatGetDTO = (ChatPrivateGetDTO) Implementacoes.tranform(chat);
         //getting the user that is not the user that is logged
         User destination = chat.getUsers().stream().filter(u ->
                 !u.getUserDetailsEntity().getUsername().equals(userId)).findFirst().get();
@@ -73,7 +73,7 @@ public class ChatService {
     }
 
     private ChatGroupGetDTO groupToGetDTO(ChatGroup chat) {
-        ChatGroupGetDTO chatGetDTO = (ChatGroupGetDTO) ModelToGetDTO.tranform(chat);
+        ChatGroupGetDTO chatGetDTO = (ChatGroupGetDTO) Implementacoes.tranform(chat);
         chatGetDTO.setPicture(chat.getGroup().getPicture());
         chatGetDTO.setName(chat.getGroup().getName());
         return chatGetDTO;
@@ -91,7 +91,7 @@ public class ChatService {
             n.setVisualized(true);
             notificationService.updateNotification(n);
         });
-        return ModelToGetDTO.tranform(chat);
+        return Implementacoes.tranform(chat);
     }
 
     private void setAllMessagesToVisualized(Chat chat, User user) {
@@ -112,14 +112,14 @@ public class ChatService {
         ChatGroup chat = new ChatGroup();
         BeanUtils.copyProperties(chatGroup, chat);
         chat.setType(TypeOfChat.GROUP);
-        return (ChatGroupGetDTO) ModelToGetDTO.tranform(chatGroupRepository.save(chat));
+        return (ChatGroupGetDTO) Implementacoes.tranform(chatGroupRepository.save(chat));
     }
 
     public ChatPrivateGetDTO save(ChatPrivatePostDTO chatPrivate) {
         ChatPrivate chat = new ChatPrivate();
         BeanUtils.copyProperties(chatPrivate, chat);
         chat.setType(TypeOfChat.PRIVATE);
-        return (ChatPrivateGetDTO) ModelToGetDTO.tranform(chatPrivateRepository.save(chat));
+        return (ChatPrivateGetDTO) Implementacoes.tranform(chatPrivateRepository.save(chat));
     }
 
     //that method update the last message of a chat
@@ -166,7 +166,7 @@ public class ChatService {
         }
         Message messageWithId = getmessageWithId(chat, message);
         //generating the notification for each user of the chat
-        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(messageWithId);
+        MessageGetDTO messageGetDTO = Implementacoes.tranform(messageWithId);
         notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
         return messageGetDTO;
     }
