@@ -3,10 +3,8 @@ package br.demo.backend.utils.GetDTO;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.relations.PropertyValueGetDTO;
 import br.demo.backend.model.dtos.relations.UserValuedGetDTO;
-import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.values.UserValued;
-import br.demo.backend.utils.TransformSimple;
 import br.demo.backend.utils.ModelToGetDTO;
 import org.springframework.beans.BeanUtils;
 

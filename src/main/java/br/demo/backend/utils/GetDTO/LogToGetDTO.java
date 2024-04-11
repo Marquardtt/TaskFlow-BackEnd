@@ -1,10 +1,8 @@
 package br.demo.backend.utils.GetDTO;
 
 import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.LogGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
-import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.utils.ModelToGetDTO;
 import org.springframework.beans.BeanUtils;

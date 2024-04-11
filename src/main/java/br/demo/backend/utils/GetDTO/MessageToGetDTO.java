@@ -11,8 +11,12 @@ public class MessageToGetDTO implements ModelToGetDTO<Message, MessageGetDTO> {
 
     private final DestinationToGetDTO destinationToGetDTO;
 
-    public MessageToGetDTO(DestinationToGetDTO destinationToGetDTO) {
+    private final OtherUsersToDTO otherUsersToDTO;
+
+    public MessageToGetDTO(DestinationToGetDTO destinationToGetDTO,
+                           OtherUsersToDTO otherUsersToDTO) {
         this.destinationToGetDTO = destinationToGetDTO;
+        this.otherUsersToDTO = otherUsersToDTO;
     }
 
     @Override
@@ -20,19 +24,11 @@ public class MessageToGetDTO implements ModelToGetDTO<Message, MessageGetDTO> {
         if(message == null) return null;
         MessageGetDTO messageGet = new MessageGetDTO();
         BeanUtils.copyProperties(message, messageGet);
-        messageGet.setSender(tranformSimple(message.getSender()));
+        messageGet.setSender(otherUsersToDTO.tranform(message.getSender()));
         try {
             messageGet.setDestinations(message.getDestinations().stream().map(destinationToGetDTO::tranform).toList());
         }catch (NullPointerException ignore) {}
         return messageGet;
     }
 
-    private static OtherUsersDTO tranformSimple(User obj){
-        if(obj == null) return null;
-        OtherUsersDTO simpleUser = new OtherUsersDTO();
-        BeanUtils.copyProperties(obj, simpleUser);
-//        System.out.println(simpleUser);
-        simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
-        return simpleUser;
-    }
 }

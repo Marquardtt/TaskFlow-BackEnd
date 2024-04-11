@@ -1,9 +1,7 @@
 package br.demo.backend.utils.GetDTO;
 
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
-import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.pages.OrderedPage;
-import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.utils.ModelToGetDTO;
 import org.springframework.beans.BeanUtils;
 

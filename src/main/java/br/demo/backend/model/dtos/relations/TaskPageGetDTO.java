@@ -2,7 +2,6 @@ package br.demo.backend.model.dtos.relations;
 
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.relations.DeserializerTaskPage;
-import br.demo.backend.model.tasks.Task;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -22,7 +22,6 @@ import br.demo.backend.model.dtos.relations.*;
 import br.demo.backend.model.dtos.tasks.LogGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.enums.TypeOfChat;
 import br.demo.backend.model.pages.CanvasPage;
 import br.demo.backend.model.pages.OrderedPage;

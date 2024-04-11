@@ -1,14 +1,10 @@
 package br.demo.backend.controller.pages;
 
-import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;
-import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
-import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
-import br.demo.backend.model.relations.TaskCanvas;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.PageService;
 import lombok.AllArgsConstructor;

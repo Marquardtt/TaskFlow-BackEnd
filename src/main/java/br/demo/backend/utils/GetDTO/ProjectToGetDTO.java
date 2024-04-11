@@ -9,7 +9,6 @@ import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
-import br.demo.backend.utils.TransformSimple;
 import br.demo.backend.utils.ModelToGetDTO;
 import org.springframework.beans.BeanUtils;
 
@@ -24,12 +23,18 @@ public class ProjectToGetDTO implements ModelToGetDTO<Project, ProjectGetDTO> {
     private final PropertyToGetDTO propertyToGetDTO;
 
     private final PropertyValueToGetDTO propertyValueToGetDTO;
+    private final SimpleGroupToGetDTO simpleGroupToGetDTO;
 
-    public ProjectToGetDTO(MessageToGetDTO messageToGetDTO, PageToGetDTO pageToGetDTO, PropertyToGetDTO propertyToGetDTO, PropertyValueToGetDTO propertyValueToGetDTO) {
+    public ProjectToGetDTO(MessageToGetDTO messageToGetDTO,
+                           PageToGetDTO pageToGetDTO,
+                           PropertyToGetDTO propertyToGetDTO,
+                           PropertyValueToGetDTO propertyValueToGetDTO,
+                           SimpleGroupToGetDTO simpleGroupToGetDTO ) {
         this.messageToGetDTO = messageToGetDTO;
         this.pageToGetDTO = pageToGetDTO;
         this.propertyToGetDTO = propertyToGetDTO;
         this.propertyValueToGetDTO = propertyValueToGetDTO;
+        this.simpleGroupToGetDTO = simpleGroupToGetDTO;
     }
 
     @Override
@@ -73,7 +78,7 @@ public class ProjectToGetDTO implements ModelToGetDTO<Project, ProjectGetDTO> {
         OtherUsersDTO user = tranformSimple(project.getOwner());
         return new SimpleProjectGetDTO(
                 project.getId(), project.getName(), project.getDescription(), project.getPicture(),
-                progress,groups.stream().map(SimpleProjectGetDTO::tranformSimple).toList(),
+                progress,groups.stream().map(simpleGroupToGetDTO::tranform).toList(),
                 user, qttyPages, qttyProperties
         );
     }

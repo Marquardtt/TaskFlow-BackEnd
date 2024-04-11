@@ -1,6 +1,5 @@
 package br.demo.backend.controller.tasks;
 
-import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.service.PropertyValueService;

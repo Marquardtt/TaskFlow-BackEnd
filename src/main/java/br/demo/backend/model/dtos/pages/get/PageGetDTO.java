@@ -1,7 +1,6 @@
 package br.demo.backend.model.dtos.pages.get;
 
 
-import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.properties.PropertyGetDTO;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.enums.TypeOfPage;

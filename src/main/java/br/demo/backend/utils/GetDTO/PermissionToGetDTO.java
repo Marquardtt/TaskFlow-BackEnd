@@ -21,6 +21,4 @@ public class PermissionToGetDTO implements ModelToGetDTO<Permission, PermissionG
         permissionGet.setProject(projectToGetDTO.tranformSimple(permission.getProject()));
         return permissionGet;
     }
-
-
 }

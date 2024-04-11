@@ -10,6 +10,12 @@ import br.demo.backend.utils.ModelToGetDTO;
 import org.springframework.beans.BeanUtils;
 
 public class TaskPageToGetDTO implements ModelToGetDTO<TaskPage, TaskPageGetDTO> {
+    private final TaskToGetDTO taskToGetDTO;
+
+    public TaskPageToGetDTO(TaskToGetDTO taskToGetDTO) {
+        this.taskToGetDTO = taskToGetDTO;
+    }
+
     @Override
     public TaskPageGetDTO tranform(TaskPage taskPage) {
         if(taskPage == null) return null;
@@ -22,7 +28,7 @@ public class TaskPageToGetDTO implements ModelToGetDTO<TaskPage, TaskPageGetDTO>
             taskPageGet = new TaskPageGetDTO();
         }
         BeanUtils.copyProperties(taskPage, taskPageGet);
-//        taskPageGet.setTask(tranform(taskPage.getTask()));
+        taskPageGet.setTask(taskToGetDTO.tranform(taskPage.getTask()));
         return taskPageGet;
     }
 }
