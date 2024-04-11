@@ -36,9 +36,9 @@ public class PermissionController {
         return permissionService.findByProject(projectId);
     }
 
-    @DeleteMapping("/{id}/project/{projectId}")
-    public void delete(@PathVariable Long id){
-        permissionService.delete(id);
+    @DeleteMapping("/{id}/other/{substituteId}/project/{projectId}")
+    public void delete(@PathVariable Long id, @PathVariable Long substituteId){
+        permissionService.delete(id, substituteId);
     }
 
 }

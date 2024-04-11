@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     public Optional<User>findByUserDetailsEntity_UsernameContainingOrNameContaining(String username, String name);
     Collection<User> findAllByPermissions_Project(Project project);
 
+    Collection<User> findByPermissionsContaining(Permission permission);
+
 }
