@@ -71,8 +71,6 @@ public class PermissionService {
         Collection<User> users = useRepository.findByPermissionsContaining(permission);
         users.forEach(
                 u -> {
-                    u.getPermissions().remove(permission);
-                    u.getPermissions().add(otherPermission);
                     userService.updatePermissionOfAUser(u.getUserDetailsEntity().getUsername(), otherPermission);
                 }
         );
