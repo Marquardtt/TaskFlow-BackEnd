@@ -60,7 +60,7 @@ public class ProjectToGetDTO implements ModelToGetDTO<Project, ProjectGetDTO> {
         return projectGet;
     }
 
-    public static SimpleProjectGetDTO tranformSimple(Project project){
+    public SimpleProjectGetDTO tranformSimple(Project project){
 
         Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(project);
 
