@@ -22,19 +22,16 @@ public class PropertyController {
  //Precisa ter permissão de post no projeto
     @PostMapping("/limited")
     public ResponseEntity<Limited> save(@RequestBody Limited property){
-        System.out.println(property);
         return new ResponseEntity<>(propertyService.save(property), HttpStatus.CREATED);
     }
     //Precisa ter permissão de post no projeto
     @PostMapping("/select")
     public ResponseEntity<Select> save(@RequestBody Select property){
-        System.out.println(property);
         return new ResponseEntity<>(propertyService.save(property), HttpStatus.CREATED);
     }
     //Precisa ter permissão de post no projeto
     @PostMapping("/date")
     public ResponseEntity<Date> save(@RequestBody Date property){
-        System.out.println(property);
         return new ResponseEntity<>(propertyService.save(property),HttpStatus.CREATED);
     }
 

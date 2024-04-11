@@ -54,7 +54,6 @@ public class PropertyValueService {
         Collection<PropertyValue> propertyValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
         propertyValues.addAll(taskEmpty.getProperties());
         taskEmpty.setProperties(propertyValues);
-        System.out.println(ModelToGetDTO.tranform(taskEmpty));
     }
 
     public PropertyValue setTaskProperty(Property p) {
