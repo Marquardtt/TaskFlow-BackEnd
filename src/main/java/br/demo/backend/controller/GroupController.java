@@ -37,8 +37,8 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}")
-    public GroupGetDTO findOne(@PathVariable Long id) {
-        return groupService.findOne(id);
+    public GroupGetDTO findOne(@PathVariable Long groupId) {
+        return groupService.findOne(groupId);
     }
     @GetMapping
     public Collection<SimpleGroupGetDTO> findGroupsByAUser() {
