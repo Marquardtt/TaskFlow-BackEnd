@@ -116,7 +116,7 @@ public class PageService {
         Select select = (Select) testType(project, TypeOfProperty.SELECT, TypeOfProperty.TAG,
                 TypeOfProperty.CHECKBOX, TypeOfProperty.RADIO);
         if (select == null) {
-            select = defaultPropsService.select(project, page);
+            select = defaultPropsService.select(null, page);
         }
         return select;
     }
@@ -124,7 +124,7 @@ public class PageService {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Date date = (Date) testType(project, TypeOfProperty.DATE);
         if (date == null) {
-            date = defaultPropsService.date(project, page);
+            date = defaultPropsService.date(null, page);
         }
         return date;
     }
@@ -132,7 +132,7 @@ public class PageService {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Limited limited = (Limited) testType(project, TypeOfProperty.TIME);
         if (limited == null) {
-            limited = defaultPropsService.limited(project, page);
+            limited = defaultPropsService.limited(null, page);
         }
         return limited;
     }
