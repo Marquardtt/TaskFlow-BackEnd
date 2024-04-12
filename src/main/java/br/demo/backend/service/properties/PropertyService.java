@@ -52,7 +52,7 @@ public class PropertyService {
 
     //that method is used to add the new property to the tasks that already exists
     private Property setInTheTasksThatAlreadyExists(Property property) {
-        if (property.getPages() != null) {
+        if (property.getPages() != null && !property.getPages().isEmpty()) {
             return setRelationAtPage(property, property.getPages());
         } else {
             Project project = projectRepository.findById(property.getProject().getId()).get();
