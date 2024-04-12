@@ -5,6 +5,7 @@ package br.demo.backend.service;
 
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.interfaces.WithMembers;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
@@ -46,11 +47,19 @@ public class GroupService {
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Group group = new Group();
         BeanUtils.copyProperties(groupDto, group);
+        setTheMembers(group, groupDto);
         group.setOwner(user);
         if(group.getPermissions() != null){
             updatePermission(group, group.getPermissions().stream().findFirst().get());
         }
         return ModelToGetDTO.tranform(groupRepository.save(group));
+    }
+
+    private void setTheMembers(Group group, WithMembers groupDTO){
+        group.setUsers(groupDTO.getMembersDTO().stream().map(u -> {
+            User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
+            return user;
+        }).toList());
     }
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
@@ -76,6 +85,8 @@ public class GroupService {
         //this is to keep the old group, to keep the owner and the picture and use patch our put
         Group group = patching ? oldGroup : new Group();
         autoMapper.map(groupDTO, group, patching);
+        setTheMembers(group, groupDTO);
+
         keepFields(group, oldGroup);
 
         //this get the new permissions of the group and update the permission to the users
@@ -115,8 +126,11 @@ public class GroupService {
         group.getUsers().forEach( u -> {
             userService.updatePermissionOfAUser(u.getUserDetailsEntity().getUsername(), permission);
         });
-        //here we update the permission of the group owner
-        userService.updatePermissionOfAUser(group.getOwner().getUserDetailsEntity().getUsername(), permission);
+        if(group.getOwner() != null ){
+            //here we update the permission of the group owner
+
+            userService.updatePermissionOfAUser(group.getOwner().getUserDetailsEntity().getUsername(), permission);
+        }
     }
 
 
