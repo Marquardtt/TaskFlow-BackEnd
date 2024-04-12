@@ -3,15 +3,13 @@ package br.demo.backend.model;
 import br.demo.backend.model.enums.TypeOfNotification;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "tb_notification")
 public class Notification {
     @Id

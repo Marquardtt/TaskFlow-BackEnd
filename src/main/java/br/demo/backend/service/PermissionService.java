@@ -1,8 +1,13 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
+import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.group.GroupPutDTO;
+import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Permission;
@@ -24,10 +29,16 @@ public class PermissionService {
     private PermissionRepository permissionRepository;
     private AutoMapper<Permission> autoMapper;
     private ProjectRepository projectRepository;
+    private UserRepository useRepository;
+    private GroupRepository groupRepository;
+    private GroupService groupService;
+    private UserService userService;
 
-    public PermissionGetDTO save(PermissionPostDTO permissionDto) {
+    public PermissionGetDTO save(PermissionPostDTO permissionDto, Long projectId) {
+        Project project = projectRepository.findById(projectId).get();
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
+        permission.setProject(project);
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
     }
 
@@ -46,7 +57,35 @@ public class PermissionService {
         return permissionRepository.findByProject(project).stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long substituteId) {
+        Permission otherPermission = permissionRepository.findById(substituteId).get();
+        Permission permission = permissionRepository.findById(id).get();
+
+        changeInTheGroup(permission, otherPermission);
+        changeInTheUser(permission, otherPermission);
+
         permissionRepository.deleteById(id);
+    }
+
+    private void changeInTheUser(Permission permission, Permission otherPermission){
+        Collection<User> users = useRepository.findByPermissionsContaining(permission);
+        users.forEach(
+                u -> {
+                    userService.updatePermissionOfAUser(u.getUserDetailsEntity().getUsername(), otherPermission);
+                }
+        );
+    }
+
+    private void changeInTheGroup(Permission permission, Permission otherPermission){
+        Collection<Group> groups = groupRepository.findByPermissionsContaining(permission);
+        groups.forEach(
+                g -> {
+                    g.getPermissions().remove(permission);
+                    g.getPermissions().add(otherPermission);
+                    GroupPutDTO groupPutDTO = new GroupPutDTO();
+                    BeanUtils.copyProperties(g, groupPutDTO);
+                    groupService.update(groupPutDTO, false);
+                }
+        );
     }
 }

@@ -56,9 +56,9 @@
         private void generateChangePermission(Long idUser, Long idProject, TypeOfNotification type ){
             User user  = userRepository.findById(idUser).get();
             if (!verifyIfHeWantsThisNotification(type, user)) return;
-
             Project project = projectRepository.findById(idProject).get();
             Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
+
             notificationRepository.save(new Notification(null, "Your permission was changed at project '"+
                     project.getName()+"'", type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
                     project.getId()+"/group/"+group.getId(), user, false ));

@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
@@ -102,7 +103,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/permission/{id}/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/{id}/other/{substituteId}/project/{projectId}").access(isOwnerAuthorization)
 
                 //GROUP
                 .requestMatchers(HttpMethod.POST, "/group").authenticated()
