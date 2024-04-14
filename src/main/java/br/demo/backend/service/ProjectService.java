@@ -80,6 +80,10 @@ public class ProjectService {
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
 
+        if(!oldProject.getDescription().equals(project.getDescription())){
+            logService.updateDescription(project);
+        }
+
         //generate the logs
         logService.generateLog(Action.UPDATE, project, oldProject);
         return ModelToGetDTO.tranform(projectRepository.save(project));
