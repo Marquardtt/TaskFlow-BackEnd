@@ -72,7 +72,8 @@ public class ProjectService {
 
     public ProjectGetDTO update(ProjectPutDTO projectDTO, Boolean patching) {
         Project oldProject = projectRepository.findById(projectDTO.getId()).get();
-        Project project = patching ? oldProject : new Project();
+        Project project = new Project();
+        if(patching) BeanUtils.copyProperties(oldProject, project);
         autoMapper.map(projectDTO, project, patching);
         //keep the owner, pages, properties and picture of the project
         project.setOwner(oldProject.getOwner());
@@ -80,13 +81,19 @@ public class ProjectService {
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
 
-        if(!oldProject.getDescription().equals(project.getDescription())){
+        if(changeDescription(oldProject, project)){
             logService.updateDescription(project);
         }
 
         //generate the logs
         logService.generateLog(Action.UPDATE, project, oldProject);
         return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+    private Boolean changeDescription(Project oldProject, Project project){
+        return oldProject.getDescription() == null && project.getDescription() != null ||
+                project.getDescription() == null && oldProject.getDescription() != null ||
+                oldProject.getDescription() != null &&
+                        !oldProject.getDescription().equals(project.getDescription());
     }
 
     public SimpleProjectGetDTO save(ProjectPostDTO projectDto) {
