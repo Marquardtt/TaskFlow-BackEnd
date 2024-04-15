@@ -120,7 +120,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                                     users.add(new User(valueF.get("id").asText()));
                                 }
                             }
-                            return new PropertyValue(id, new Property(idProp), new UserValued(idTaskVl, users));
+                            return new PropertyValue(id, property, new UserValued(idTaskVl, users));
                         }
                         throw new RuntimeException("Property have a unknown type");
                     }
