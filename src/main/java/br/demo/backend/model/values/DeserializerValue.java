@@ -93,7 +93,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                                 }
                             }
 
-                            return new PropertyValue(id, new Property(idProp, TypeOfProperty.valueOf(type)), new MultiOptionValued(idTaskVl, options));
+                            return new PropertyValue(id, property, new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
