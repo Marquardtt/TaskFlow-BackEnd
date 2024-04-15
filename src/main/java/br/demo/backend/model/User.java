@@ -57,4 +57,6 @@ public class User {
         this.userDetailsEntity.setUsername(username);
     }
 
+    public User(Long id) {this.id = id;}
+
 }
