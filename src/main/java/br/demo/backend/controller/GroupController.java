@@ -26,7 +26,6 @@ public class GroupController {
     public GroupGetDTO insert(@RequestBody GroupPostDTO group) {
         return groupService.save(group);
     }
-
     @PutMapping("/{groupId}")
     public GroupGetDTO upDate(@RequestBody GroupPutDTO group) {
         return groupService.update(group, false);

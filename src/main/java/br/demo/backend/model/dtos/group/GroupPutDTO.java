@@ -25,7 +25,6 @@ public class GroupPutDTO  implements WithMembers {
     private Collection<Permission> permissions;
     private Collection<UserGetDTO> users;
 
-
     @Override
     public Collection<UserGetDTO> getMembersDTO() {
         return users;

@@ -6,5 +6,5 @@ import java.util.Collection;
 
 public interface WithMembers {
 
-    public Collection<UserGetDTO> getMembersDTO();
+     Collection<UserGetDTO> getMembersDTO();
 }
