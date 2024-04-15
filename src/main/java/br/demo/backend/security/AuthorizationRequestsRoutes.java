@@ -40,7 +40,7 @@ public class AuthorizationRequestsRoutes implements AuthorizationManager<Request
                     for (GrantedAuthority simple :
                             userDatailEntity.getAuthorities()) {
                         if (!(object.getRequest().getRequestURI().contains("redo") && simple.getAuthority().contains("Project_" + projectId + "_DELETE"))) {  // verifica se for uma task e se for o método redo, pois o mesmo precisa da permissão DELETE para realizar o redo
-                            if ((("Project_" + projectId + "_").contains(simple.getAuthority()) && (object.getRequest().getMethod()).contains(simple.getAuthority()))) {
+                            if ((simple.getAuthority().contains(("Project_" + projectId + "_")) && (simple.getAuthority()).contains(object.getRequest().getMethod()))) {
                                 decision = true;
                                 break;
                             }
