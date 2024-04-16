@@ -102,7 +102,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/{id}/other/{substituteId}/project/{projectId}").access(isOwnerAuthorization)
 
                 //GROUP
