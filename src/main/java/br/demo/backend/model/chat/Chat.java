@@ -1,5 +1,6 @@
 package br.demo.backend.model.chat;
 
+import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfChat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -36,4 +37,6 @@ public abstract class Chat {
     @OneToOne
     //Patch
     private Message lastMessage;
+
+    public abstract  Collection<User> finUsers();
 }
