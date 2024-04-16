@@ -120,7 +120,7 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
-                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notification").permitAll()
+                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
                 .anyRequest().authenticated());
 
         // Manter a sessão do usuário na requisição ativa

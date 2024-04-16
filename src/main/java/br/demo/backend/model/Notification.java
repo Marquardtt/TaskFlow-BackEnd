@@ -7,13 +7,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "tb_notification")
-public class Notification {
+
+public class Notification  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,4 +27,8 @@ public class Notification {
     @JsonIgnore
     private User user;
     private Boolean visualized;
+
+
+
+
 }
