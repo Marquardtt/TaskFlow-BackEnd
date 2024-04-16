@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -50,8 +51,12 @@ public class GroupService {
                setTheMembers(group, groupDto);
            }
                group.setOwner(user);
-               if (group.getPermissions() != null && group.getUsers() != null) {
-                   updatePermission(group, group.getPermissions().stream().findFirst().get());
+               if (group.getPermissions() != null ) {
+                   if(group.getUsers() != null){
+                       updatePermission(group, group.getPermissions().stream().findFirst().get());
+                   }
+                   group.setPermissions(groupDto.getPermissions());
+
                }
                return ModelToGetDTO.tranform(groupRepository.save(group));
     }
