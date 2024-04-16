@@ -15,7 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
@@ -32,38 +34,42 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext object) {
-        String username = object.getVariables().get("username");
-        User userFind = userRepository.findByUserDetailsEntity_Username(username).get();
-        User user = userRepository.findByUserDetailsEntity_Username(
-                ((UserDatailEntity) supplier.get().getPrincipal()).getUsername()).get();
+        User user = userRepository.findByUserDetailsEntity_Username(((UserDatailEntity)supplier.get().getPrincipal()).getUsername()).get();
+        Map<String, String> variables = object.getVariables();
+        Long otherUserId = Long.parseLong(variables.get("userId"));
+        User otherUser = userRepository.findById(otherUserId).get();
 
-        String projectId = object.getVariables().get("projectId");
 
-        Project project = projectRepository.findById(Long.parseLong(projectId)).get();
+        Collection<Project> projects =  user.getPermissions().stream().map(Permission::getProject).toList();
+        Collection<Group> groups = groupRepository.findGroupsByOwnerOrUsersContaining(user, user);
 
-        List<Group> groupList = groupRepository.findAll();
-        boolean decision = false;
 
-        if (project.getOwner().equals(user) ) {
-            for (Permission permission : userFind.getPermissions()) {
-                if (permission.getProject().equals(project)) {
-                    decision = true;
+        //se ambos estao num mesmo grupo
+        boolean decision = groups.stream().anyMatch(group -> groupTest(otherUser, group));
+
+        if (!decision){
+            //se o logado esta no projeto do outro
+                decision = user.getPermissions().stream().anyMatch(permission -> permission.getProject().getOwner().equals(otherUser));
+                if(!decision){
+                    //se o outro esta no projeto do logado
+                    decision = otherUser.getPermissions().stream().anyMatch(permission -> permission.getProject().getOwner().equals(user));
+                    if(!decision){
+                        //se ambos estao em um projeto de terceiros
+                        Collection<Group> otherGroups = groupRepository.findGroupsByOwnerOrUsersContaining(otherUser, otherUser);
+                        decision = groups.stream().anyMatch(group ->
+                                group.getPermissions().stream().anyMatch(permission ->
+                                        otherGroups.stream().anyMatch(otherGroup ->
+                                                otherGroup.getPermissions().stream().anyMatch(otherPermission ->
+                                                        otherPermission.getProject().equals(permission.getProject())))));
+                    }
                 }
-            }
-        } else if ( project.getOwner().equals(userFind)) {
-            for (Permission permission : user.getPermissions()) {
-                if (permission.getProject().equals(project)){
-                    decision = true;
-                }
-
-            }
-        }else {
-            for (Group group : groupList) {
-                if (group.getUsers().containsAll(List.of(user, userFind))) {
-                    decision = true;
-                }
-            }
         }
+
+
         return new AuthorizationDecision(decision);
+    }
+
+    private boolean groupTest(User user, Group group) {
+        return group.getOwner().equals(user) || group.getUsers().contains(user);
     }
 }

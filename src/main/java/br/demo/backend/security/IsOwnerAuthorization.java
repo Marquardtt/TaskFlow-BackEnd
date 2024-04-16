@@ -45,7 +45,7 @@ public class IsOwnerAuthorization implements AuthorizationManager<RequestAuthori
     public boolean isOwner(String projectId, UserDatailEntity userDatailEntity) {
         Project project = projectRepository.findById(Long.parseLong(projectId)).get();
         boolean decision = false;
-        if (project.getOwner().equals(userDatailEntity.getUser())) {
+        if (project.getOwner().getUserDetailsEntity().getUsername().equals(userDatailEntity.getUsername())) {
             decision = true;
         }
         return decision;
