@@ -112,7 +112,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
 
                 //CHAT
-                .requestMatchers(HttpMethod.POST, "/chat/group").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
                 .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
