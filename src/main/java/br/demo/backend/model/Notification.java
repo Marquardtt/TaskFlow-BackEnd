@@ -15,9 +15,10 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String message;
+    private String aux;
     private TypeOfNotification type;
     private String link;
+
     @ManyToOne
     @JsonIgnore
     private User user;

@@ -50,15 +50,17 @@ public class ChatService {
 
     public Collection<ChatPrivateGetDTO> findAllPrivate() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<ChatPrivate> chats = chatPrivateRepository
-                .findChatsByUsers_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
+                .findAllByUsersContainingOrderByLastMessage_DateCreateDesc(user);
         return chats.stream().map(c -> privateToGetDTO(c, username)).toList();
     }
 
     public Collection<ChatGroupGetDTO> findAllGroup() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<ChatGroup> chatGroups = chatGroupRepository
-                .findChatsByGroup_Users_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
+                .findAllByGroup_OwnerOrGroup_UsersContainingOrderByLastMessage_DateCreateDesc(user, user);
         return chatGroups.stream().map(this::groupToGetDTO).toList();
     }
 

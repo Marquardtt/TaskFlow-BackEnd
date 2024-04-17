@@ -30,7 +30,7 @@ public class Project implements ILogged, IHasProperties {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
-    private String description;
+    private String description = "";
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
     private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);

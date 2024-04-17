@@ -20,7 +20,7 @@ public class GroupPostDTO implements WithMembers {
     private String description;
     private Collection<Permission> permissions;
     private Collection<UserGetDTO> users;
-
+  
     @Override
     public Collection<UserGetDTO> getMembersDTO() {
         return users;

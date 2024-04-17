@@ -93,7 +93,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                                 }
                             }
 
-                            return new PropertyValue(id, new Property(idProp, TypeOfProperty.valueOf(type)), new MultiOptionValued(idTaskVl, options));
+                            return new PropertyValue(id, property, new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
@@ -116,11 +116,12 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
-                                if(isPresent(valueF, "username")){
-                                    users.add(new User(valueF.get("id").asText()));
+                                if(isPresent(valueF, "id")){
+                                    Long idUser = valueF.get("id").asLong();
+                                    users.add(new User(idUser));
                                 }
                             }
-                            return new PropertyValue(id, new Property(idProp), new UserValued(idTaskVl, users));
+                            return new PropertyValue(id, property, new UserValued(idTaskVl, users));
                         }
                         throw new RuntimeException("Property have a unknown type");
                     }

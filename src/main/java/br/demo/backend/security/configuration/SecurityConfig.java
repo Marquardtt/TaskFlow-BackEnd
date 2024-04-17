@@ -1,9 +1,6 @@
 package br.demo.backend.security.configuration;
 
-import br.demo.backend.security.AuthorizationRequestsRoutes;
-import br.demo.backend.security.IsOwnerAuthorization;
-import br.demo.backend.security.IsOwnerOrMemberAuthorization;
-import br.demo.backend.security.ProjectOrGroupAuthorization;
+import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +27,7 @@ public class SecurityConfig {
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
     private final CorsConfigurationSource corsConfig;
-
+    private final IsChatUser isChatUser;
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
@@ -89,9 +86,7 @@ public class SecurityConfig {
 
                 //PAGE
                 .requestMatchers(HttpMethod.POST, "/page/project/{projectId}").access(authorizationRequestsRoutes)
-//                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/{columnChanged}project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-//                .requestMatchers(HttpMethod.PATCH, "/page/{taskId}/{index}/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/task-page/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/draw/{id}/project/{projectId}").access(authorizationRequestsRoutes)
                 .requestMatchers(HttpMethod.PATCH, "/page/prop-ordering/{id}/project/{projectId}").access(authorizationRequestsRoutes)
@@ -102,7 +97,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PUT, "/permission/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/{id}/other/{substituteId}/project/{projectId}").access(isOwnerAuthorization)
 
                 //GROUP
@@ -116,6 +111,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
 
+                //CHAT
+                .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
+                .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
+                .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)
+                .requestMatchers(HttpMethod.PATCH, "/chat/{chatId}").access(isChatUser)
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()

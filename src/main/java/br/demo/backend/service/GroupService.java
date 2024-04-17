@@ -3,7 +3,9 @@ package br.demo.backend.service;
 
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+
 import br.demo.backend.model.dtos.user.UserGetDTO;
+
 import br.demo.backend.model.interfaces.WithMembers;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
@@ -64,6 +66,14 @@ public class GroupService {
             User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
             return user;
         }).toList());
+
+    }
+
+    private void setTheMembers(Group group, WithMembers groupDTO){
+        group.setUsers(groupDTO.getMembersDTO().stream().map(u -> {
+            User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
+            return user;
+        }).toList());
     }
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
@@ -117,6 +127,7 @@ public class GroupService {
            System.out.println("entrei");
             setTheMembers(group, groupDTO);
         }
+
 
         keepFields(group, oldGroup);
 

@@ -7,4 +7,5 @@ import java.util.Collection;
 public interface WithMembers {
 
      Collection<UserGetDTO> getMembersDTO();
+
 }

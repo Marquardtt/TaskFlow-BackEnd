@@ -59,8 +59,7 @@
             Project project = projectRepository.findById(idProject).get();
             Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
 
-            notificationRepository.save(new Notification(null, "Your permission was changed at project '"+
-                    project.getName()+"'", type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
+            notificationRepository.save(new Notification(null, project.getName(), type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
                     project.getId()+"/group/"+group.getId(), user, false ));
         }
 
@@ -70,16 +69,16 @@
 
             Group group = groupRepository.findById(groupId).get();
             if(group.getUsers().contains(user)){
-                notificationRepository.save(new Notification(null, "You was added at group '"+group.getName()+"'",
+                notificationRepository.save(new Notification(null, group.getName(),
                         type, "/"+user.getUserDetailsEntity().getUsername()+"/group/"+groupId, user, false ));
             }else{
-                notificationRepository.save(new Notification(null, "You was removed at group '"+group.getName()+"'",
+                notificationRepository.save(new Notification(null, group.getName(),
                         type, "", user, false ));
             }
 
         }
 
-        private void generateChangeTask(Long taskId, TypeOfNotification type){
+        private void generateChangeTask(Long taskId, TypeOfNotification type) {
             String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 
             Task task = taskRepository.findById(taskId).get();
@@ -91,25 +90,10 @@
 
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
-                String message = getMessageTask(task);
-                notificationRepository.save(new Notification(null, message,
-                        type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +
-                        "/"+page.getId()+"/"+taskId, user, false ));
+                notificationRepository.save(new Notification(null, task.getName(),
+                        type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() +
+                        "/" + page.getId() + "/" + taskId, user, false));
             });
-        }
-
-        private static String getMessageTask(Task task) {
-            Log lastLog = new ArrayList<>(task.getLogs()).get(task.getLogs().size()-1);
-            //Specify what happend with de task.
-            String message =
-            switch (lastLog.getAction()){
-                case UPDATE -> "The task '"+ task.getName()+"' was modified";
-                case REDO -> "The task '"+ task.getName()+"' was redone";
-                case CREATE -> "A task was created";
-                case DELETE ->"The task '"+ task.getName()+"' was deleted";
-                case COMPLETE -> "The task '"+ task.getName()+"' was completed";
-            };
-            return message;
         }
 
         private void generateChat (Long messageId, Long chatId, TypeOfNotification type) {
@@ -118,10 +102,10 @@
                 if (!verifyIfHeWantsThisNotification(type,destination.getUser())) return;
                 //Verify if the notification just have an annex
                 if (message.getValue().isEmpty()) {
-                    notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " send a annex to you", type,
+                    notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
                             "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false));
                 } else {
-                    notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " send '" + message.getValue() + "' to you", type,
+                    notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
                             "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false));
                 }
             });
@@ -139,7 +123,7 @@
             users.add(project.getOwner());
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
-                notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " comment in the task '"+task.getName()+"' '"+message.getValue()+"'" , type,
+                notificationRepository.save(new Notification(null, task.getName() , type,
                         "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+idTask, user, false));
             });
         }
@@ -147,7 +131,7 @@
         private void generatePoints(Long idUser, Long pointsTarget , TypeOfNotification type){
             User user  = userRepository.findById(idUser).get();
             if (!verifyIfHeWantsThisNotification(type, user)) return;
-            notificationRepository.save(new Notification(null, "Congrats! You pass the target of "+pointsTarget+" points", type,
+            notificationRepository.save(new Notification(null, pointsTarget.toString(), type,
                     "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account", user, false));
         }
 
@@ -180,11 +164,11 @@
         }
 
         public  void generateInProjectNotification(Project project, TypeOfNotification type, User user){
-            notificationRepository.save(new Notification(null, "The project '"+project.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
+            notificationRepository.save(new Notification(null, project.getName(),
                     type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false ));
         }
         public void generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page){
-            notificationRepository.save(new Notification(null, "The task '"+task.getName()+"' has a "+(TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline")+" in 24 hours",
+            notificationRepository.save(new Notification(null, task.getName(),
                     type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false ));
         }
 
