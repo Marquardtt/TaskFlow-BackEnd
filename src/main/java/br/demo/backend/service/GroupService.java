@@ -69,12 +69,6 @@ public class GroupService {
 
     }
 
-    private void setTheMembers(Group group, WithMembers groupDTO){
-        group.setUsers(groupDTO.getMembersDTO().stream().map(u -> {
-            User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
-            return user;
-        }).toList());
-    }
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
