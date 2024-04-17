@@ -3,6 +3,7 @@ package br.demo.backend.service;
 
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.interfaces.WithMembers;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
@@ -22,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -47,9 +47,7 @@ public class GroupService {
            User user = userRepository.findByUserDetailsEntity_Username(username).get();
            Group group = new Group();
            BeanUtils.copyProperties(groupDto, group);
-           if (group.getUsers() != null) {
-               setTheMembers(group, groupDto);
-           }
+
                group.setOwner(user);
                if (group.getPermissions() != null ) {
                    if(group.getUsers() != null){
@@ -92,7 +90,31 @@ public class GroupService {
         //this is to keep the old group, to keep the owner and the picture and use patch our put
         Group group = patching ? oldGroup : new Group();
         autoMapper.map(groupDTO, group, patching);
+
+        if (group.getUsers() == null) {
+            System.out.println(1);
+            System.out.println("tô aqui");
+            if (groupDTO.getUsers() != null){
+
+                Collection<User> users = new ArrayList<>();
+                for (UserGetDTO userGetDTO : groupDTO.getUsers()) {
+                    System.out.println(2);
+                    System.out.println("agora aqui");
+                    User user = new User();
+                    BeanUtils.copyProperties(userGetDTO, user);
+                    users.add(user);
+                }
+                group.setUsers(users);
+            } else{
+                System.out.println(3);
+                System.out.println("vazio, doideira");
+            }
+
+        }
+
         if (group.getUsers() != null){
+           System.out.println(4);
+           System.out.println("entrei");
             setTheMembers(group, groupDTO);
         }
 
@@ -131,9 +153,12 @@ public class GroupService {
         group.setOwner(oldGroup.getOwner());
         group.setPicture(oldGroup.getPicture());
         if(group.getUsers() == null){
+            System.out.println(5);
+            System.out.println("vaziooooooooooooooo");
             group.setUsers(new ArrayList<>());
         }
         if (oldGroup.getUsers() == null){
+            System.out.println("doideiraaaaaaaaaaaaaaaaaaaa");
             oldGroup.setUsers(new ArrayList<>());
         }
     }
