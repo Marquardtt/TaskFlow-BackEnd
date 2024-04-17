@@ -7,6 +7,7 @@ import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
 import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +60,7 @@ public class ProjectController {
 
     //    FEITO
     @PatchMapping("/{projectId}/change-owner")
-    public ProjectGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
+    public ProjectGetDTO updateOwner(@RequestBody OtherUsersDTO newOwner, @PathVariable Long projectId) {
         return projectService.updateOwner(newOwner, projectId);
     }
 }

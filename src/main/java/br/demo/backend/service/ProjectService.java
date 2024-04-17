@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
@@ -48,8 +49,9 @@ public class ProjectService {
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
-    public ProjectGetDTO updateOwner(User user, Long projectId) {
+    public ProjectGetDTO updateOwner(OtherUsersDTO userDto, Long projectId) {
         Project project = projectRepository.findById(projectId).get();
+        User user = userRepository.findById(userDto.getId()).get();
         project.setOwner(user);
         //generate logs
         logService.updateOwner(project);

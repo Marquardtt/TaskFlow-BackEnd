@@ -7,6 +7,7 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -15,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
+import java.beans.Transient;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -30,6 +32,7 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
     }
 
     @Override
+    @Transactional
     public AuthorizationDecision check(Supplier<Authentication> suplier, RequestAuthorizationContext object) {
 
 
@@ -39,7 +42,7 @@ public class IsOwnerOrMemberAuthorization implements AuthorizationManager<Reques
         if(object.getRequest().getRequestURI().contains("/group") && !object.getRequest().getRequestURI().contains("/project")){
             String groupId = object.getVariables().get("groupId");
             Group group = groupRepository.findById(Long.parseLong(groupId)).get();
-            if (group.getOwner().equals(userDatailEntity.getUser()) || group.getUsers().contains(userDatailEntity.getUser())){
+            if (group.getOwner().equals(userDatailEntity.getUser()) || group.getUsers().stream().anyMatch(u -> userDatailEntity.getUsername().equals(userDatailEntity.getUsername()))){
                 decision = true;
             }
 

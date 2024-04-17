@@ -62,6 +62,5 @@ public class GroupController {
     @PatchMapping("/{groupId}/change-owner")
     public GroupGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long groupId) {
         return groupService.updateOwner(newOwner, groupId);
-
     }
 }
