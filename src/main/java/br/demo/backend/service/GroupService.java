@@ -1,10 +1,11 @@
 package br.demo.backend.service;
 
 
-
-
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+
+import br.demo.backend.model.dtos.user.UserGetDTO;
+
 import br.demo.backend.model.interfaces.WithMembers;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
@@ -32,7 +33,8 @@ public class GroupService {
 
     private GroupRepository groupRepository;
     private UserRepository userRepository;
-    private NotificationService notificationService;;
+    private NotificationService notificationService;
+    ;
     private AutoMapper<Group> autoMapper;
     private UserService userService;
 
@@ -42,31 +44,38 @@ public class GroupService {
     }
 
 
-    public GroupGetDTO save(GroupPostDTO groupDTO) {
-        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        Group group = new Group();
-        BeanUtils.copyProperties(groupDTO, group);
-        setTheMembers(group, groupDTO);
-        group.setOwner(user);
-        if(group.getPermissions() != null){
-            updatePermission(group, group.getPermissions().stream().findFirst().get());
-        }
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+    public GroupGetDTO save(GroupPostDTO groupDto) {
+           String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+           User user = userRepository.findByUserDetailsEntity_Username(username).get();
+           Group group = new Group();
+           BeanUtils.copyProperties(groupDto, group);
+
+               group.setOwner(user);
+               if (group.getPermissions() != null ) {
+                   if(group.getUsers() != null){
+                       updatePermission(group, group.getPermissions().stream().findFirst().get());
+                   }
+                   group.setPermissions(groupDto.getPermissions());
+
+               }
+               return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
-    private void setTheMembers(Group group, WithMembers groupDTO){
+    private void setTheMembers(Group group, WithMembers groupDTO) {
         group.setUsers(groupDTO.getMembersDTO().stream().map(u -> {
             User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
             return user;
         }).toList());
+
     }
+
 
     public GroupGetDTO updateOwner(User user, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
+
     public Collection<SimpleGroupGetDTO> findGroupsByUser() {
         UserDatailEntity userDatail = (UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUserDetailsEntity_Username(userDatail.getUsername()).get();
@@ -85,21 +94,51 @@ public class GroupService {
         //this is to keep the old group, to keep the owner and the picture and use patch our put
         Group group = patching ? oldGroup : new Group();
         autoMapper.map(groupDTO, group, patching);
-        setTheMembers(group, groupDTO);
+
+        if (group.getUsers() == null) {
+            System.out.println(1);
+            System.out.println("tô aqui");
+            if (groupDTO.getUsers() != null){
+
+                Collection<User> users = new ArrayList<>();
+                for (UserGetDTO userGetDTO : groupDTO.getUsers()) {
+                    System.out.println(2);
+                    System.out.println("agora aqui");
+                    User user = new User();
+                    BeanUtils.copyProperties(userGetDTO, user);
+                    users.add(user);
+                }
+                group.setUsers(users);
+            } else{
+                System.out.println(3);
+                System.out.println("vazio, doideira");
+            }
+
+        }
+
+        if (group.getUsers() != null){
+           System.out.println(4);
+           System.out.println("entrei");
+            setTheMembers(group, groupDTO);
+        }
+
+
         keepFields(group, oldGroup);
 
         //this get the new permissions of the group and update the permission to the users
-        group.getPermissions().stream().filter(p ->
-                !oldGroup.getPermissions().contains(p)
-        ).forEach(p ->  updatePermission(group, p));
+        if (group.getPermissions() != null){
+            group.getPermissions().stream().filter(p ->
+                    !oldGroup.getPermissions().contains(p)
+            ).forEach(p -> updatePermission(group, p));
+        }
 
         //saving and generating notifications
-        GroupGetDTO groupGetDTO =  ModelToGetDTO.tranform(groupRepository.save(group));
+        GroupGetDTO groupGetDTO = ModelToGetDTO.tranform(groupRepository.save(group));
         notificationsAddOrRemove(group, oldGroup);
         return groupGetDTO;
     }
 
-    private void notificationsAddOrRemove(Group group, Group groupOld){
+    private void notificationsAddOrRemove(Group group, Group groupOld) {
         // this gets the difference users in above lists, getting the added and removed users
         Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
                 !groupOld.getUsers().contains(u)
@@ -109,24 +148,36 @@ public class GroupService {
         ).toList());
         //this generates the notification to add ou remove someone
         usersAddedAndRemoved.forEach(u -> {
-            if(!u.equals(group.getOwner())){
+            if (!u.equals(group.getOwner())) {
                 notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, u.getId(), group.getId());
             }
         });
     }
 
-    private void keepFields(Group group, Group oldGroup){
+    private void keepFields(Group group, Group oldGroup) {
         group.setOwner(oldGroup.getOwner());
         group.setPicture(oldGroup.getPicture());
+        if(group.getUsers() == null){
+            System.out.println(5);
+            System.out.println("vaziooooooooooooooo");
+            group.setUsers(new ArrayList<>());
+        }
+        if (oldGroup.getUsers() == null){
+            System.out.println("doideiraaaaaaaaaaaaaaaaaaaa");
+            oldGroup.setUsers(new ArrayList<>());
+        }
     }
 
     private void updatePermission(Group group, Permission permission) {
         //here we update the permission on members of the group
-        group.getUsers().forEach( u -> {
+        group.getUsers().forEach(u -> {
             userService.updatePermissionOfAUser(u.getUserDetailsEntity().getUsername(), permission);
         });
-        //here we update the permission of the group owner
-        userService.updatePermissionOfAUser(group.getOwner().getUserDetailsEntity().getUsername(), permission);
+        if (group.getOwner() != null) {
+            //here we update the permission of the group owner
+
+            userService.updatePermissionOfAUser(group.getOwner().getUserDetailsEntity().getUsername(), permission);
+        }
     }
 
 
