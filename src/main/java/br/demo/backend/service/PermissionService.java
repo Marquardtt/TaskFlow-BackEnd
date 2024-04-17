@@ -84,6 +84,7 @@ public class PermissionService {
                     g.getPermissions().add(otherPermission);
                     GroupPutDTO groupPutDTO = new GroupPutDTO();
                     BeanUtils.copyProperties(g, groupPutDTO);
+                    groupPutDTO.setUsers(g.getUsers().stream().map(ModelToGetDTO::tranform).toList());
                     groupService.update(groupPutDTO, false);
                 }
         );

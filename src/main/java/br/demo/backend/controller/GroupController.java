@@ -6,6 +6,7 @@ import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +60,7 @@ public class GroupController {
     }
 
     @PatchMapping("/{groupId}/change-owner")
-    public GroupGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long groupId) {
+    public GroupGetDTO updateOwner(@RequestBody OtherUsersDTO newOwner, @PathVariable Long groupId) {
         return groupService.updateOwner(newOwner, groupId);
     }
 }

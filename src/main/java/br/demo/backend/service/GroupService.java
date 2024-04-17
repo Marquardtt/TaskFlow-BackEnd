@@ -4,6 +4,7 @@ package br.demo.backend.service;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 
 import br.demo.backend.model.interfaces.WithMembers;
@@ -70,8 +71,9 @@ public class GroupService {
     }
 
 
-    public GroupGetDTO updateOwner(User user, Long groupId) {
+    public GroupGetDTO updateOwner(OtherUsersDTO userDto, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
+        User user = userRepository.findById(userDto.getId()).get();
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
