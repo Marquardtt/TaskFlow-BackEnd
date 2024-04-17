@@ -17,7 +17,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class GroupPutDTO implements WithMembers {
+public class GroupPutDTO  implements WithMembers {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
