@@ -65,7 +65,7 @@ public class GroupController {
     }
 
     @PostMapping("/{groupId}/add-user/{userId}")
-    public void addUser(@RequestBody Long userId, @PathVariable Long groupId) {
+    public void addUser(@PathVariable Long userId, @PathVariable Long groupId) {
          groupService.inviteUser( groupId, userId);
     }
 }
