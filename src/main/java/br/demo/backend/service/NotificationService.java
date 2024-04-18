@@ -28,6 +28,7 @@
     @AllArgsConstructor
     public class NotificationService {
 
+
         private TaskRepository taskRepository;
         private UserRepository userRepository;
         private NotificationRepository notificationRepository;
@@ -215,5 +216,9 @@
                 groupService.update(groupPutDTO, true);
             }
             return notificationRepository.save(notification);
+        }
+
+        public void updateNotification(Notification notification){
+            notificationRepository.save(notification);
         }
     }

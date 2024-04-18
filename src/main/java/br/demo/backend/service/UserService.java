@@ -176,15 +176,7 @@ public class UserService {
                 .findFirst().orElse(null);
     }
 
-    public UserGetDTO visualizedNotifications() {
-        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        user.getNotifications().stream().filter(n -> !n.getVisualized()).forEach(n -> {
-            n.setVisualized(true);
-            notificationService.updateNotification(n);
-        });
-        return ModelToGetDTO.tranform(user);
-    }
+
 }
 
 
