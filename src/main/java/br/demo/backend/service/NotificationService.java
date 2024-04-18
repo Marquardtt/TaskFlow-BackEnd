@@ -36,7 +36,6 @@
         private PageRepository pageRepository;
         private GroupRepository groupRepository;
         private MessageRepository messageRepository;
-        private GroupService groupService;
 
         public void generateNotification(TypeOfNotification type, Long idPrincipal, Long auxiliary){
             switch (type){
@@ -210,10 +209,9 @@
                 Group group = groupRepository.findById(notification.getObjId()).get();
                 User user = notification.getUser();
                 group.getUsers().add(user);
-                GroupPutDTO groupPutDTO = GroupPutDTO.builder()
-                        .users(group.getUsers().stream().map(ModelToGetDTO::tranform).toList())
-                        .build();
-                groupService.update(groupPutDTO, true);
+                user.getPermissions().addAll(group.getPermissions());
+                groupRepository.save(group);
+                userRepository.save(user);
             }
             return notificationRepository.save(notification);
         }

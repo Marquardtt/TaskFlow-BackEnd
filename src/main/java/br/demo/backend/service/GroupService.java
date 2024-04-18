@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.exception.UserCantBeAddedInThisGroupException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 
@@ -192,6 +193,11 @@ public class GroupService {
     }
 
     public void inviteUser(Long groupId, Long userId) {
+        User user = userRepository.findById(userId).get();
+        Group group = groupRepository.findById(groupId).get();
+        if(group.getPermissions().stream().anyMatch(p -> user.getPermissions().stream().anyMatch(p2 -> p.getProject().equals(p2.getProject())))){
+            throw new UserCantBeAddedInThisGroupException();
+        }
         notificationService.generateNotification(TypeOfNotification.ADDINGROUP, userId, groupId);
     }
 }
