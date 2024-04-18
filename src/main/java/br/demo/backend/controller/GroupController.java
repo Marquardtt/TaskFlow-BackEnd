@@ -63,4 +63,9 @@ public class GroupController {
     public GroupGetDTO updateOwner(@RequestBody OtherUsersDTO newOwner, @PathVariable Long groupId) {
         return groupService.updateOwner(newOwner, groupId);
     }
+
+    @PostMapping("/{groupId}/add-user/{userId}")
+    public void addUser(@RequestBody Long userId, @PathVariable Long groupId) {
+         groupService.inviteUser( groupId, userId);
+    }
 }

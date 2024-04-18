@@ -74,10 +74,4 @@ public class UserController {
     public PermissionGetDTO updatePermission(@PathVariable String username, @RequestBody Permission permission){
         return userService.updatePermissionOfAUser(username, permission);
     }
-
-    @PatchMapping("/visualize-notifications")
-    public UserGetDTO visualizeNotification(){
-        return userService.visualizedNotifications();
-    }
-
 }

@@ -23,4 +23,6 @@ public class Notification {
     @JsonIgnore
     private User user;
     private Boolean visualized;
+    private Boolean clicked;
+    private Long objId;
 }

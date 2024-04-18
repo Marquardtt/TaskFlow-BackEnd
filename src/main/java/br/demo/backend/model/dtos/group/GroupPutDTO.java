@@ -6,16 +6,14 @@ import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.interfaces.WithMembers;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Collection;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class GroupPutDTO  implements WithMembers {
     @EqualsAndHashCode.Include

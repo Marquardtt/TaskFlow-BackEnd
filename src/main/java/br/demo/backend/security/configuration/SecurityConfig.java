@@ -28,6 +28,7 @@ public class SecurityConfig {
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
     private final CorsConfigurationSource corsConfig;
     private final IsChatUser isChatUser;
+    private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
@@ -45,7 +46,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/user/visualize-notifications").authenticated()
 //                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").authenticated()
 //                  esse de cima ele precisa ser o dono do grupo do usuario naquele projeto
                 //PROJECT
@@ -110,7 +110,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
-
+                .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
                 //CHAT
                 .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
@@ -118,6 +118,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)
                 .requestMatchers(HttpMethod.PATCH, "/chat/{chatId}").access(isChatUser)
+
+                //NOTIFICATIONS
+                .requestMatchers(HttpMethod.PATCH, "/notification/visualize").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/notification/click/{id}").access(notificationsOwnerAuthorization)
+                .requestMatchers(HttpMethod.DELETE, "/notification/{id}").access(notificationsOwnerAuthorization)
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()

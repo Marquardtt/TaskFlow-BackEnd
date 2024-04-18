@@ -94,7 +94,8 @@ public class GroupService {
     public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
         //this is to keep the old group, to keep the owner and the picture and use patch our put
-        Group group = patching ? oldGroup : new Group();
+        Group group = new Group();
+        if(patching) BeanUtils.copyProperties(oldGroup, group);
         autoMapper.map(groupDTO, group, patching);
 
         if (group.getUsers() == null) {
@@ -141,17 +142,13 @@ public class GroupService {
     }
 
     private void notificationsAddOrRemove(Group group, Group groupOld) {
-        // this gets the difference users in above lists, getting the added and removed users
-        Collection<User> usersAddedAndRemoved = new ArrayList<>(group.getUsers().stream().filter(u ->
-                !groupOld.getUsers().contains(u)
-        ).toList());
-        usersAddedAndRemoved.addAll(groupOld.getUsers().stream().filter(u ->
+        Collection <User> removed = groupOld.getUsers().stream().filter(u ->
                 !group.getUsers().contains(u)
-        ).toList());
+        ).toList();
         //this generates the notification to add ou remove someone
-        usersAddedAndRemoved.forEach(u -> {
+        removed.forEach(u -> {
             if (!u.equals(group.getOwner())) {
-                notificationService.generateNotification(TypeOfNotification.ADDORREMOVEINGROUP, u.getId(), group.getId());
+                notificationService.generateNotification(TypeOfNotification.REMOVEINGROUP, u.getId(), group.getId());
             }
         });
     }
@@ -194,6 +191,8 @@ public class GroupService {
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
-
+    public void inviteUser(Long groupId, Long userId) {
+        notificationService.generateNotification(TypeOfNotification.ADDINGROUP, userId, groupId);
+    }
 }
 
