@@ -5,22 +5,25 @@ import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
 import br.demo.backend.service.PermissionService;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/permission")
 public class PermissionController {
+    @NonNull
     private PermissionService permissionService;
+
     @PostMapping("/project/{projectId}")
     public PermissionGetDTO insert(@RequestBody PermissionPostDTO permissionDTO, @PathVariable Long projectId){
-
         return permissionService.save(permissionDTO, projectId);
     }
+
+
 
     @PutMapping("/project/{projectId}")
     public PermissionGetDTO upDate(@RequestBody PermissionPutDTO permission){
