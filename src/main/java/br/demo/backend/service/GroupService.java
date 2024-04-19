@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+
 import br.demo.backend.exception.AlreadyInGroupException;
 import br.demo.backend.exception.UserCantBeAddedInThisGroupException;
 import br.demo.backend.model.*;
@@ -48,20 +49,20 @@ public class GroupService {
 
 
     public GroupGetDTO save(GroupPostDTO groupDto) {
-           String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-           User user = userRepository.findByUserDetailsEntity_Username(username).get();
-           Group group = new Group();
-           BeanUtils.copyProperties(groupDto, group);
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        Group group = new Group();
+        BeanUtils.copyProperties(groupDto, group);
 
-               group.setOwner(user);
-               if (group.getPermissions() != null ) {
-                   if(group.getUsers() != null){
-                       updatePermission(group, group.getPermissions().stream().findFirst().get());
-                   }
-                   group.setPermissions(groupDto.getPermissions());
+        group.setOwner(user);
+        if (group.getPermissions() != null ) {
+            if(group.getUsers() != null){
+                updatePermission(group, group.getPermissions().stream().findFirst().get());
+            }
+            group.setPermissions(groupDto.getPermissions());
 
-               }
-               return ModelToGetDTO.tranform(groupRepository.save(group));
+        }
+        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
     private void setTheMembers(Group group, IWithMembers groupDTO) {
@@ -100,30 +101,8 @@ public class GroupService {
         if(patching) BeanUtils.copyProperties(oldGroup, group);
         autoMapper.map(groupDTO, group, patching);
 
-        if (group.getUsers() == null) {
-            System.out.println(1);
-            System.out.println("tô aqui");
-            if (groupDTO.getUsers() != null){
-
-                Collection<User> users = new ArrayList<>();
-                for (UserGetDTO userGetDTO : groupDTO.getUsers()) {
-                    System.out.println(2);
-                    System.out.println("agora aqui");
-                    User user = new User();
-                    BeanUtils.copyProperties(userGetDTO, user);
-                    users.add(user);
-                }
-                group.setUsers(users);
-            } else{
-                System.out.println(3);
-                System.out.println("vazio, doideira");
-            }
-
-        }
 
         if (group.getUsers() != null){
-           System.out.println(4);
-           System.out.println("entrei");
             setTheMembers(group, groupDTO);
         }
 
@@ -159,12 +138,9 @@ public class GroupService {
         group.setOwner(oldGroup.getOwner());
         group.setPicture(oldGroup.getPicture());
         if(group.getUsers() == null){
-            System.out.println(5);
-            System.out.println("vaziooooooooooooooo");
             group.setUsers(new ArrayList<>());
         }
         if (oldGroup.getUsers() == null){
-            System.out.println("doideiraaaaaaaaaaaaaaaaaaaa");
             oldGroup.setUsers(new ArrayList<>());
         }
     }
@@ -206,4 +182,3 @@ public class GroupService {
         notificationService.generateNotification(TypeOfNotification.ADDINGROUP, userId, groupId);
     }
 }
-
