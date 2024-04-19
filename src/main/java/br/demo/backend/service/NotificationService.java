@@ -82,7 +82,7 @@
             String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 
             Task task = taskRepository.findById(taskId).get();
-            Page page = pageRepository.findByTasks_Task(task);
+            Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
             Project project = page.getProject();
 
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
@@ -116,7 +116,7 @@
 
             Task task = taskRepository.findById(idTask).get();
             Message message = messageRepository.findById(idComment).get();
-            Page page = pageRepository.findByTasks_Task(task);
+            Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
             Project project = page.getProject();
 
             Collection<User> users = userRepository.findAllByPermissions_Project(project);
@@ -140,7 +140,7 @@
 
             if(typeObj == 0){
                 Task task = taskRepository.findById(idObj).get();
-                Page page = pageRepository.findByTasks_Task(task);
+                Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
                 Project project = page.getProject();
                 generateForEachUserDeadlineAndSchedule(type, typeObj, project, task, page);
             }else{

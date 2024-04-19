@@ -1,8 +1,8 @@
 package br.demo.backend.model;
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.interfaces.IHasProperties;
-import br.demo.backend.model.interfaces.ILogged;
+import br.demo.backend.interfaces.IHasProperties;
+import br.demo.backend.interfaces.ILogged;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Log;

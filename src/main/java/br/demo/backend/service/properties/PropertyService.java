@@ -5,7 +5,7 @@ import br.demo.backend.exception.PropertyCantBeDeletedException;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.interfaces.IHasProperties;
+import br.demo.backend.interfaces.IHasProperties;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
@@ -24,7 +24,7 @@ import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
-import br.demo.backend.utils.ModelToGetDTO;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -44,6 +44,7 @@ public class PropertyService {
     private SelectRepository selectRepository;
     private DateRepository dateRepository;
     private AutoMapper<Limited> autoMapperLimited;
+    private IdProjectValidation validation;
     private AutoMapper<Select> autoMapperSelect;
     private AutoMapper<Date> autoMapperDate;
     private OrderedPageRepository orderedPageRepository;
@@ -68,7 +69,7 @@ public class PropertyService {
             page.getTasks().stream().map(tP -> {
                 //add the property to the task
                 tP.getTask().getProperties().add(propertyValueService.setTaskProperty(property));
-                taskService.update(tP.getTask(), true);
+                taskService.update(tP.getTask(), true, page.getProject().getId());
                 return tP;
             }).toList();
         });
@@ -96,8 +97,13 @@ public class PropertyService {
     private <T extends Property> void  updateGeneric(T property, Boolean patching,
                                                      AutoMapper<T> autoMapper,
                                                      JpaRepository<T, Long> repo,
-                                                     T empty){
+                                                     T empty, Long projectId){
         T old = repo.findById(property.getId()).get();
+        try {
+            validation.ofObject(projectId, property.getProject());
+        }catch (NullPointerException e){
+            validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
+        }
         T prop = patching ? old : empty;
         autoMapper.map(property, prop, patching, true);
         //this keep the type, pages and project of the property
@@ -107,20 +113,21 @@ public class PropertyService {
         repo.save(prop);
     }
 
-    public void update(Limited propertyDTO, Boolean patching) {
-        updateGeneric(propertyDTO, patching, autoMapperLimited, limitedRepository, new Limited());
+    public void update(Limited propertyDTO, Boolean patching, Long projectId) {
+        updateGeneric(propertyDTO, patching, autoMapperLimited, limitedRepository, new Limited(), projectId);
     }
 
-    public void update(Date propertyDTO, Boolean patching) {
-        updateGeneric(propertyDTO, patching, autoMapperDate, dateRepository, new Date());
+    public void update(Date propertyDTO, Boolean patching, Long projectId) {
+        updateGeneric(propertyDTO, patching, autoMapperDate, dateRepository, new Date(), projectId);
     }
 
-    public void update(Select propertyDTO, Boolean patching) {
-        updateGeneric(propertyDTO, patching, autoMapperSelect, selectRepository, new Select());
+    public void update(Select propertyDTO, Boolean patching, Long projectId) {
+        updateGeneric(propertyDTO, patching, autoMapperSelect, selectRepository, new Select(), projectId);
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long projectId) {
         Property property = propertyRepository.findById(id).get();
+        validation.ofObject(projectId, property.getProject());
         if (validateCanBeDeleted(property)) {
             orderedPageRepository.findAllByPropertyOrdering_Id(property.getId())
                     .forEach(p -> {
@@ -146,7 +153,9 @@ public class PropertyService {
             if(propertyValue != null){
                 //and here we delete the propvalue and save the task without it
                 t.getProperties().remove(propertyValue);
-                taskService.update(t, true);
+                taskService.update(t, true, property.getProject() == null ?
+                        property.getPages().stream().findFirst().get().getProject().getId() :
+                        property.getProject().getId());
                 taskValueRepository.deleteById(propertyValue.getId());
             }
         });

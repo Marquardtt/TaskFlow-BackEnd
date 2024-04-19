@@ -9,6 +9,7 @@ import br.demo.backend.model.dtos.project.ProjectPutDTO;
 import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.ProjectService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,7 @@ import java.util.Collection;
 @RequestMapping("/project")
 public class ProjectController {
     private ProjectService projectService;
+    private IdProjectValidation validation;
 
     @PostMapping
     public SimpleProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
@@ -35,11 +37,13 @@ public class ProjectController {
         return projectService.setVisualizedNow(projectId);
     }
     @PutMapping("/{projectId}")
-    public ProjectGetDTO upDate(@RequestBody ProjectPutDTO project) {
+    public ProjectGetDTO upDate(@RequestBody ProjectPutDTO project, @PathVariable Long projectId) {
+        validation.of(projectId, project.getId());
         return projectService.update(project, false);
     }
     @PatchMapping("/{projectId}")
-    public ProjectGetDTO patch(@RequestBody ProjectPutDTO project) {
+    public ProjectGetDTO patch(@RequestBody ProjectPutDTO project, @PathVariable Long projectId) {
+        validation.of(projectId, project.getId());
         return projectService.update(project, true);
     }
 

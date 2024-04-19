@@ -1,10 +1,9 @@
 package br.demo.backend.utils;
 
-import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.interfaces.ILogged;
+import br.demo.backend.interfaces.ILogged;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
@@ -13,7 +12,6 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.NotificationService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

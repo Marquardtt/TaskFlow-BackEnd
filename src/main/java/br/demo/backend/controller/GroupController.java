@@ -8,6 +8,7 @@ import br.demo.backend.model.dtos.group.GroupPutDTO;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.GroupService;
+import br.demo.backend.utils.IdGroupValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
@@ -21,6 +22,7 @@ import java.util.Collection;
 @RequestMapping("/group")
 public class GroupController {
     private GroupService groupService;
+    private IdGroupValidation validation;
 
     //Precisa estar logado
     @PostMapping
@@ -28,11 +30,13 @@ public class GroupController {
         return groupService.save(group);
     }
     @PutMapping("/{groupId}")
-    public GroupGetDTO upDate(@RequestBody GroupPutDTO group) {
+    public GroupGetDTO upDate(@RequestBody GroupPutDTO group, @PathVariable Long groupId) {
+        validation.of(groupId, group.getId());
         return groupService.update(group, false);
     }
     @PatchMapping("/{groupId}")
-    public GroupGetDTO patch(@RequestBody GroupPutDTO group) {
+    public GroupGetDTO patch(@RequestBody GroupPutDTO group, @PathVariable Long groupId) {
+        validation.of(groupId, group.getId());
         return groupService.update(group, true);
     }
 
