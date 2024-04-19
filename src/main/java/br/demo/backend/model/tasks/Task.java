@@ -2,7 +2,7 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.interfaces.ILogged;
+import br.demo.backend.interfaces.ILogged;
 import br.demo.backend.model.relations.PropertyValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,26 +1,19 @@
 package br.demo.backend.service;
 
-import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
-import br.demo.backend.model.interfaces.ILogged;
-import br.demo.backend.model.properties.Date;
-import br.demo.backend.model.properties.Option;
+import br.demo.backend.interfaces.ILogged;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.model.values.Intervals;
 import br.demo.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.*;
 
 @Service

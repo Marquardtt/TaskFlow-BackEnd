@@ -8,6 +8,9 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
+import br.demo.backend.security.utils.GetHisProjects;
+import br.demo.backend.service.ProjectService;
+import br.demo.backend.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -26,6 +29,7 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
 
     @Override
     public void verify(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
@@ -39,30 +43,14 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
         Long otherUserId = Long.parseLong(variables.get("userId"));
         User otherUser = userRepository.findById(otherUserId).get();
 
-
-        Collection<Project> projects =  user.getPermissions().stream().map(Permission::getProject).toList();
         Collection<Group> groups = groupRepository.findGroupsByOwnerOrUsersContaining(user, user);
-
-
         //se ambos estao num mesmo grupo
         boolean decision = groups.stream().anyMatch(group -> groupTest(otherUser, group));
 
         if (!decision){
-            //se o logado esta no projeto do outro
-                decision = user.getPermissions().stream().anyMatch(permission -> permission.getProject().getOwner().equals(otherUser));
-                if(!decision){
-                    //se o outro esta no projeto do logado
-                    decision = otherUser.getPermissions().stream().anyMatch(permission -> permission.getProject().getOwner().equals(user));
-                    if(!decision){
-                        //se ambos estao em um projeto de terceiros
-                        Collection<Group> otherGroups = groupRepository.findGroupsByOwnerOrUsersContaining(otherUser, otherUser);
-                        decision = groups.stream().anyMatch(group ->
-                                group.getPermissions().stream().anyMatch(permission ->
-                                        otherGroups.stream().anyMatch(otherGroup ->
-                                                otherGroup.getPermissions().stream().anyMatch(otherPermission ->
-                                                        otherPermission.getProject().equals(permission.getProject())))));
-                    }
-                }
+            Collection<Project> projects =  GetHisProjects.getHisProjects(user);
+            Collection<Project> otherProjects = GetHisProjects.getHisProjects(otherUser);
+            decision = projects.stream().anyMatch(otherProjects::contains);
         }
 
 

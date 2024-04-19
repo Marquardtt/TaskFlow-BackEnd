@@ -3,6 +3,7 @@ package br.demo.backend.service;
 
 import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
+import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
@@ -49,7 +50,7 @@ public class UserService {
     public UserGetDTO save(UserPostDTO userDto) {
         try {
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
-            throw new IllegalArgumentException("Username is already been using by other user0");
+            throw new UsernameAlreadyUsedException();
         } catch (NoSuchElementException e) {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
@@ -94,11 +95,17 @@ public class UserService {
 
     private void validateDelete(String username) {
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
+
         if (!projects.isEmpty()) {
-            throw new HeHaveProjectsException();
+            projects.forEach(p -> {
+                Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(p);
+                if (!groups.isEmpty()) {
+                    throw new HeHaveProjectsException();
+                }
+            });
         }
         Collection<Group> groups = groupRepository.findGroupsByOwner_UserDetailsEntity_Username(username);
-        if (!groups.isEmpty()) {
+        if (!groups.isEmpty() && groups.stream().anyMatch(g -> !g.getUsers().isEmpty())) {
             throw new HeHaveGroupsException();
         }
     }

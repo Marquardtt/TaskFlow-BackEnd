@@ -12,22 +12,17 @@ import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
 import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
-import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.properties.Option;
-import br.demo.backend.model.properties.Select;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
@@ -38,6 +33,7 @@ public class ProjectService {
     private SelectRepository selectRepository;
     private UserRepository userRepository;
     private LogService logService;
+    private GroupRepository groupRepository;
     private DefaultPropsService defaultPropsService;
     private AutoMapper<Project> autoMapper;
 
@@ -61,11 +57,17 @@ public class ProjectService {
     public Collection<SimpleProjectGetDTO> finAllOfAUser() {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        //get the projects that the user is owner
-        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
+        return findProjectsByUser(user).stream().map(ModelToGetDTO::tranformSimple).toList();
+    }
+
+    public Collection<Project> findProjectsByUser(User user){
+        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(user.getUserDetailsEntity().getUsername());
         //get the projects that the user is member
         projects.addAll(user.getPermissions().stream().map(Permission::getProject).toList());
-        return projects.stream().distinct().map(ModelToGetDTO::tranformSimple).toList();
+        //get the projects that the user is owner of some group
+        Collection<Group> groups = groupRepository.findGroupsByOwner_UserDetailsEntity_Username(user.getUserDetailsEntity().getUsername());
+        groups.forEach(group -> projects.addAll(group.getPermissions().stream().map(Permission::getProject).toList()));
+        return projects.stream().distinct().toList();
     }
 
     public ProjectGetDTO findOne(Long id) {

@@ -9,7 +9,7 @@ import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 
-import br.demo.backend.model.interfaces.WithMembers;
+import br.demo.backend.interfaces.IWithMembers;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
@@ -37,7 +37,7 @@ public class GroupService {
     private GroupRepository groupRepository;
     private UserRepository userRepository;
     private NotificationService notificationService;
-    ;
+    private ProjectService projectService;
     private AutoMapper<Group> autoMapper;
     private UserService userService;
 
@@ -64,7 +64,7 @@ public class GroupService {
                return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
-    private void setTheMembers(Group group, WithMembers groupDTO) {
+    private void setTheMembers(Group group, IWithMembers groupDTO) {
         group.setUsers(groupDTO.getMembersDTO().stream().map(u -> {
             User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
             return user;
@@ -196,7 +196,8 @@ public class GroupService {
     public void inviteUser(Long groupId, Long userId) {
         User user = userRepository.findById(userId).get();
         Group group = groupRepository.findById(groupId).get();
-        if(group.getPermissions().stream().anyMatch(p -> user.getPermissions().stream().anyMatch(p2 -> p.getProject().equals(p2.getProject())))){
+        if(projectService.findProjectsByUser(user).stream().anyMatch(
+                p -> group.getPermissions().stream().anyMatch(pe -> pe.getProject().equals(p)))){
             throw new UserCantBeAddedInThisGroupException();
         }
         if(group.getUsers().contains(user)){
