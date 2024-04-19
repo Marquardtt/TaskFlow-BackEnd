@@ -77,6 +77,12 @@ public class GroupService {
     public GroupGetDTO updateOwner(OtherUsersDTO userDto, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         User user = userRepository.findById(userDto.getId()).get();
+        Collection<Permission> permissions = user.getPermissions().stream()
+                .filter(p -> group.getPermissions().stream().anyMatch(pg -> pg.getProject().equals(p.getProject()))).toList();
+        group.getOwner().getPermissions().addAll(permissions);
+        user.getPermissions().removeAll(permissions);
+        userRepository.save(user);
+        userRepository.save(group.getOwner());
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
@@ -180,5 +186,9 @@ public class GroupService {
             throw new AlreadyInGroupException();
         }
         notificationService.generateNotification(TypeOfNotification.ADDINGROUP, userId, groupId);
+    }
+
+    public Collection<SimpleGroupGetDTO> findAll() {
+        return groupRepository.findAll().stream().map(ModelToGetDTO::tranformSimple).toList();
     }
 }

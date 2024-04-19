@@ -21,8 +21,6 @@ public class PermissionController {
     private IdProjectValidation validation;
     @PostMapping("/project/{projectId}")
     public PermissionGetDTO insert(@RequestBody PermissionPostDTO permissionDTO, @PathVariable Long projectId){
-        validation.of(projectId, permissionDTO.getProject().getId());
-
         return permissionService.save(permissionDTO, projectId);
     }
 

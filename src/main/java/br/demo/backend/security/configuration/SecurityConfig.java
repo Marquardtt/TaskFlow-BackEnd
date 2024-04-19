@@ -28,6 +28,7 @@ public class SecurityConfig {
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
     private final CorsConfigurationSource corsConfig;
     private final IsChatUser isChatUser;
+    private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
@@ -46,8 +47,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
-//                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").authenticated()
-//                  esse de cima ele precisa ser o dono do grupo do usuario naquele projeto
+                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").access(isOwnerInThisProject)
+
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
@@ -105,7 +106,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.GET, "/group").authenticated()
+                .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
                 .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)

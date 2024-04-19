@@ -44,7 +44,7 @@ public class GroupController {
     public GroupGetDTO findOne(@PathVariable Long groupId) {
         return groupService.findOne(groupId);
     }
-    @GetMapping
+    @GetMapping("/my")
     public Collection<SimpleGroupGetDTO> findGroupsByAUser() {
         return groupService.findGroupsByUser();
     }
@@ -72,4 +72,8 @@ public class GroupController {
     public void addUser(@PathVariable Long userId, @PathVariable Long groupId) {
          groupService.inviteUser( groupId, userId);
     }
+
+    //TODO: new
+    @GetMapping
+    public Collection<SimpleGroupGetDTO> getAllGroups(){return groupService.findAll();}
 }

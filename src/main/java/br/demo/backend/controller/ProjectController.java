@@ -3,6 +3,7 @@ package br.demo.backend.controller;
 
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
@@ -66,5 +67,11 @@ public class ProjectController {
     @PatchMapping("/{projectId}/change-owner")
     public ProjectGetDTO updateOwner(@RequestBody OtherUsersDTO newOwner, @PathVariable Long projectId) {
         return projectService.updateOwner(newOwner, projectId);
+    }
+
+    //TODO: new
+    @PatchMapping("/{projectId}/invite-group")
+    public void inviteGroup(@PathVariable Long projectId, @RequestBody SimpleGroupGetDTO group){
+         projectService.inviteAGroup(projectId, group);
     }
 }

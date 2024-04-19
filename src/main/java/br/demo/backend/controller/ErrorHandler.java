@@ -11,7 +11,7 @@ public class ErrorHandler {
 
     private final ErrorLoggerService exceptionLogger;
 
-    @ExceptionHandler(Exception.class)
+//    @ExceptionHandler(Exception.class)
     public void handleException(Exception exception) {
         exceptionLogger.logException(exception);
     }

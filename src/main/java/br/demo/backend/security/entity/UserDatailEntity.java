@@ -51,6 +51,7 @@ public class UserDatailEntity implements UserDetails {
         List<SimpleGrantedAuthority> list = new ArrayList<>();
         Collection<Project> projects = GetHisProjects.getHisProjects(this.user);
         if (!this.user.getPermissions().isEmpty()) {
+
             projects.removeAll(this.user.getPermissions().stream().map(Permission::getProject).toList());
             for (Permission permission : this.user.getPermissions()) {
                 list.add(new SimpleGrantedAuthority("Project_" + permission.getProject().getId() + "_" + permission.getPermission().getMethod()));

@@ -23,6 +23,7 @@
 
     import java.util.ArrayList;
     import java.util.Collection;
+    import java.util.List;
 
     @Service
     @AllArgsConstructor
@@ -55,8 +56,17 @@
                 case SCHEDULE -> generateDeadlineOrScheduling(idPrincipal, auxiliary, type);
 //                When someone pass the target of points
                 case POINTS -> generatePoints(idPrincipal, auxiliary, type);
+                case INVITETOPROJECT -> generateInviteProject(idPrincipal, auxiliary, type);
             }
         }
+
+        private void generateInviteProject(Long idProject, Long idGroup, TypeOfNotification type) {
+            Project project = projectRepository.findById(idProject).get();
+            User user = groupRepository.findById(idGroup).get().getOwner();
+            notificationRepository.save(new Notification(null, project.getName(), type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
+                    project.getId(), user, false, false, project.getId()));
+        }
+
         private void generateChangePermission(Long idUser, Long idProject, TypeOfNotification type ){
             User user  = userRepository.findById(idUser).get();
             if (!verifyIfHeWantsThisNotification(type, user)) return;
@@ -175,9 +185,12 @@
 
         private Boolean verifyIfHeWantsThisNotification(TypeOfNotification type, User user){
             Configuration config  = user.getConfiguration();
-            if(!config.getNotifications()) return false;
+            if(!config.getNotifications() &&
+                    !List.of(TypeOfNotification.ADDINGROUP, TypeOfNotification.INVITETOPROJECT).contains(type)) return false;
             return switch (type){
-                case ADDINGROUP, REMOVEINGROUP ->  config.getNotificAtAddMeInAGroup();
+                case INVITETOPROJECT -> true;
+                case ADDINGROUP -> true;
+                case REMOVEINGROUP ->  config.getNotificAtAddMeInAGroup();
                 case CHANGEPERMISSION ->  config.getNotificWhenChangeMyPermission();
                 case CHANGETASK ->  config.getNotificTasks();
                 case CHAT ->  config.getNotificChats();
@@ -205,6 +218,8 @@
         public Notification click(Long id) {
             Notification notification = notificationRepository.findById(id).get();
             notification.setClicked(true);
+            //TODO:logica de aceitar adicionar grupo no projeto
+
             if(notification.getType().equals(TypeOfNotification.ADDINGROUP)){
                 Group group = groupRepository.findById(notification.getObjId()).get();
                 User user = notification.getUser();

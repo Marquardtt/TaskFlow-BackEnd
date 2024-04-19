@@ -1,8 +1,10 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
 import br.demo.backend.utils.AutoMapper;
@@ -16,6 +18,7 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +39,7 @@ public class ProjectService {
     private GroupRepository groupRepository;
     private DefaultPropsService defaultPropsService;
     private AutoMapper<Project> autoMapper;
+    private NotificationService notificationService;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
         Project project = projectRepository.findById(id).get();
@@ -48,6 +52,9 @@ public class ProjectService {
     public ProjectGetDTO updateOwner(OtherUsersDTO userDto, Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         User user = userRepository.findById(userDto.getId()).get();
+        Permission permissionOther = user.getPermissions().stream().filter(p -> p.getProject().equals(project)).findFirst().get();
+        user.getPermissions().remove(permissionOther);
+        userRepository.save(user);
         project.setOwner(user);
         //generate logs
         logService.updateOwner(project);
@@ -60,6 +67,7 @@ public class ProjectService {
         return findProjectsByUser(user).stream().map(ModelToGetDTO::tranformSimple).toList();
     }
 
+    @Transactional
     public Collection<Project> findProjectsByUser(User user){
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(user.getUserDetailsEntity().getUsername());
         //get the projects that the user is member
@@ -129,5 +137,9 @@ public class ProjectService {
 
     public void delete(Long id) {
         projectRepository.deleteById(id);
+    }
+
+    public void inviteAGroup(Long projectId, SimpleGroupGetDTO group) {
+        notificationService.generateNotification(TypeOfNotification.INVITETOPROJECT, projectId, group.getId());
     }
 }
