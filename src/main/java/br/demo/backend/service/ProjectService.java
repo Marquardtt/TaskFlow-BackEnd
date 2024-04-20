@@ -6,6 +6,7 @@ import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
 import br.demo.backend.utils.AutoMapper;
@@ -40,6 +41,7 @@ public class ProjectService {
     private GroupRepository groupRepository;
     private DefaultPropsService defaultPropsService;
     private AutoMapper<Project> autoMapper;
+    private PermissionRepository permissionRepositoru;
     private NotificationService notificationService;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
@@ -53,15 +55,16 @@ public class ProjectService {
     public ProjectGetDTO updateOwner(OtherUsersDTO userDto, Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         User user = userRepository.findById(userDto.getId()).get();
-        Permission permissionOther = user.getPermissions().stream().filter(p -> p.getProject().equals(project)).findFirst().get();
-        user.getPermissions().remove(permissionOther);
-        userRepository.save(user);
+        Permission defaultPermission = permissionRepositoru.findByProjectAndIsDefault(project, true);
+        project.getOwner().getPermissions().add(defaultPermission);
+        userRepository.save(project.getOwner());
         project.setOwner(user);
         //generate logs
         logService.updateOwner(project);
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
+    @Transactional
     public Collection<SimpleProjectGetDTO> finAllOfAUser() {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
@@ -139,7 +142,7 @@ public class ProjectService {
     public void delete(Long id) {
         projectRepository.deleteById(id);
     }
-///
+
     public void inviteAGroup(Long projectId, SimpleGroupGetDTO groupdto) {
         Group group = groupRepository.findById(groupdto.getId()).get();
         for(User user : group.getUsers()){

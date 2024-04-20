@@ -15,5 +15,6 @@ public class PermissionPostDTO {
     private String name;
     private TypePermission permission = TypePermission.READ;
     private Project project;
+    private Boolean isDefault;
 
 }
