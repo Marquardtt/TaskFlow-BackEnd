@@ -8,10 +8,7 @@
     import br.demo.backend.model.pages.Page;
     import br.demo.backend.model.tasks.Log;
     import br.demo.backend.model.tasks.Task;
-    import br.demo.backend.repository.GroupRepository;
-    import br.demo.backend.repository.NotificationRepository;
-    import br.demo.backend.repository.ProjectRepository;
-    import br.demo.backend.repository.UserRepository;
+    import br.demo.backend.repository.*;
     import br.demo.backend.repository.chat.MessageRepository;
     import br.demo.backend.repository.pages.PageRepository;
     import br.demo.backend.repository.tasks.TaskRepository;
@@ -37,6 +34,7 @@
         private PageRepository pageRepository;
         private GroupRepository groupRepository;
         private MessageRepository messageRepository;
+        private PermissionRepository permissionRepository;
 
         public void generateNotification(TypeOfNotification type, Long idPrincipal, Long auxiliary){
             switch (type){
@@ -62,9 +60,9 @@
 
         private void generateInviteProject(Long idProject, Long idGroup, TypeOfNotification type) {
             Project project = projectRepository.findById(idProject).get();
-            User user = groupRepository.findById(idGroup).get().getOwner();
-            notificationRepository.save(new Notification(null, project.getName(), type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
-                    project.getId(), user, false, false, project.getId()));
+            Group group = groupRepository.findById(idGroup).get();
+            notificationRepository.save(new Notification(null, project.getName(), type, "/"+group.getOwner().getUserDetailsEntity().getUsername()+"/"+
+                    project.getId(), group.getOwner(), false, group.getId(), project.getId()));
         }
 
         private void generateChangePermission(Long idUser, Long idProject, TypeOfNotification type ){
@@ -74,7 +72,7 @@
             Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
 
             notificationRepository.save(new Notification(null, project.getName(), type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
-                    project.getId()+"/group/"+group.getId(), user, false, false, project.getId()));
+                    project.getId()+"/group/"+group.getId(), user, false, project.getId(), group.getId()));
         }
 
         private void generateAddInGroup(Long userId, Long groupId, TypeOfNotification type){
@@ -83,7 +81,9 @@
 
             Group group = groupRepository.findById(groupId).get();
                 notificationRepository.save(new Notification(null, group.getName(),
-                        type, type == TypeOfNotification.ADDINGROUP ? "/"+user.getUserDetailsEntity().getUsername()+"/group/"+groupId : "", user, false, false, group.getId()));
+                        type, type == TypeOfNotification.ADDINGROUP ? "/"+
+                        user.getUserDetailsEntity().getUsername()+"/group/"+groupId : "",
+                        user, false, group.getId(), null));
 
         }
 
@@ -102,7 +102,7 @@
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
                 notificationRepository.save(new Notification(null, task.getName(),
                         type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() +
-                        "/" + page.getId(), user, false, false, taskId));
+                        "/" + page.getId(), user, false, taskId, null));
             });
         }
 
@@ -113,10 +113,10 @@
                 //Verify if the notification just have an annex
                 if (message.getValue().isEmpty()) {
                     notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
-                            "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false, false, chatId));
+                            "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false, chatId, message.getSender().getId()));
                 } else {
                     notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
-                            "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false, false, chatId));
+                            "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false, chatId, message.getSender().getId()));
                 }
             });
         }
@@ -134,7 +134,7 @@
             users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
                 if (!verifyIfHeWantsThisNotification(type, user)) return;
                 notificationRepository.save(new Notification(null, task.getName() , type,
-                        "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, false, idTask));
+                        "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, idTask, message.getId()));
             });
         }
 
@@ -142,7 +142,8 @@
             User user  = userRepository.findById(idUser).get();
             if (!verifyIfHeWantsThisNotification(type, user)) return;
             notificationRepository.save(new Notification(null, pointsTarget.toString(), type,
-                    "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account", user, false, false, user.getId()));
+                    "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account",
+                    user, false, user.getId(), user.getPoints()));
         }
 
         //typeObj: 0 = task; 1 = project
@@ -175,11 +176,11 @@
 
         public  void generateInProjectNotification(Project project, TypeOfNotification type, User user){
             notificationRepository.save(new Notification(null, project.getName(),
-                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false, false, project.getId() ));
+                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false, project.getId(), null ));
         }
         public void generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page){
             notificationRepository.save(new Notification(null, task.getName(),
-                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false, false, task.getId() ));
+                    type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false, task.getId(), null ));
         }
 
 
@@ -215,11 +216,8 @@
             notificationRepository.deleteById(id);
         }
 
-        public Notification click(Long id) {
+        public void click(Long id) {
             Notification notification = notificationRepository.findById(id).get();
-            notification.setClicked(true);
-            //TODO:logica de aceitar adicionar grupo no projeto
-
             if(notification.getType().equals(TypeOfNotification.ADDINGROUP)){
                 Group group = groupRepository.findById(notification.getObjId()).get();
                 User user = notification.getUser();
@@ -227,8 +225,18 @@
                 user.getPermissions().addAll(group.getPermissions());
                 groupRepository.save(group);
                 userRepository.save(user);
+            } else if(notification.getType().equals(TypeOfNotification.INVITETOPROJECT)){
+                Group group = groupRepository.findById(notification.getObjId()).get();
+                Project project = projectRepository.findById(notification.getAuxObjId()).get();
+                Permission permission = permissionRepository.findByProjectAndIsDefault(project, true);
+                group.getPermissions().add(permission);
+                Collection<User> users = groupRepository.save(group).getUsers();
+                users.forEach(u -> {
+                    u.getPermissions().add(permission);
+                    userRepository.save(u);
+                });
             }
-            return notificationRepository.save(notification);
+            notificationRepository.deleteById(notification.getId());
         }
 
         public void updateNotification(Notification notification){

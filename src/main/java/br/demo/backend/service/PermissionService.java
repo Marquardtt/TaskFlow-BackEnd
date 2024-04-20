@@ -39,6 +39,7 @@ public class PermissionService {
     public PermissionGetDTO save(PermissionPostDTO permissionDto, Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         Permission permission = new Permission();
+
         BeanUtils.copyProperties(permissionDto, permission);
         permission.setProject(project);
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
@@ -50,6 +51,13 @@ public class PermissionService {
         Permission permission =  new Permission();
         if(patching) BeanUtils.copyProperties(oldPermission, permission);
         autoMapper.map(permissionDto, permission, patching);
+
+        if(!oldPermission.getIsDefault() && permission.getIsDefault()){
+            Permission permissionOther = permissionRepository.findByProjectAndIsDefault(oldPermission.getProject(), true);
+            permissionOther.setIsDefault(false);
+            permissionRepository.save(permissionOther);
+        }
+
         //keep the project of the permission
         permission.setProject(oldPermission.getProject());
         return ModelToGetDTO.tranform(permissionRepository.save(permission));

@@ -1,6 +1,7 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.exception.SomeUserAlreadyIsInProjectException;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
@@ -138,8 +139,16 @@ public class ProjectService {
     public void delete(Long id) {
         projectRepository.deleteById(id);
     }
-
-    public void inviteAGroup(Long projectId, SimpleGroupGetDTO group) {
+///
+    public void inviteAGroup(Long projectId, SimpleGroupGetDTO groupdto) {
+        Group group = groupRepository.findById(groupdto.getId()).get();
+        for(User user : group.getUsers()){
+            if(user.getPermissions().stream().anyMatch(p -> p.getProject().getId().equals(projectId))){
+                throw new SomeUserAlreadyIsInProjectException();
+            }else if(projectRepository.findById(projectId).get().getOwner().equals(user)){
+                throw new SomeUserAlreadyIsInProjectException();
+            }
+        }
         notificationService.generateNotification(TypeOfNotification.INVITETOPROJECT, projectId, group.getId());
     }
 }

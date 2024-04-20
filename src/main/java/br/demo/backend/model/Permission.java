@@ -28,6 +28,7 @@ public class Permission {
     @ManyToOne()
     @JoinColumn(nullable = false)
     private Project project;
+    private Boolean isDefault;
 
     public Permission(Long id) {
         this.id = id;
