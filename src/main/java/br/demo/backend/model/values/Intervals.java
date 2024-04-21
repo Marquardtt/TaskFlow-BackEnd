@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.internal.IgnoreForbiddenApisErrors;
 import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -22,6 +21,7 @@ public class Intervals {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @OneToOne(cascade = CascadeType.ALL)
     private Duration time;
 
     private Collection<LocalDateTime> starts;

@@ -79,6 +79,10 @@ public class PermissionService {
 
         changeInTheGroup(permission, otherPermission);
         changeInTheUser(permission, otherPermission);
+        if(permission.getIsDefault()) {
+            otherPermission.setIsDefault(true);
+            permissionRepository.save(otherPermission);
+        }
 
         permissionRepository.deleteById(id);
     }

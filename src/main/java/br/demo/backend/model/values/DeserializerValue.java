@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -110,7 +109,12 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             if(time.isNull()){
                                 return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
                             }
-                            return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, Duration.parse(time.asText()), starts, ends, color)));
+                            Long idTime = time.get("id").asLong();
+                            Integer seconds = time.get("seconds").asInt();
+                            Integer minutes = time.get("minutes").asInt();
+                            Integer hours = time.get("hours").asInt();
+                            return new PropertyValue(id, property, new TimeValued(idTaskVl,
+                                    new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
                         }
 
                         else if(type.equals("USER")){
