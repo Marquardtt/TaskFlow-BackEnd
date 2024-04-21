@@ -30,8 +30,7 @@ public class Archive {
         this.type = file.getContentType();
         try {
             this.data = file.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ignore) {
         }
     }
 }

@@ -1,5 +1,6 @@
 package br.demo.backend.model.values;
 
+import br.demo.backend.exception.DeserializerException;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
@@ -127,15 +128,15 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             }
                             return new PropertyValue(id, property, new UserValued(idTaskVl, users));
                         }
-                        throw new RuntimeException("Property have a unknown type");
+                        throw new DeserializerException("Property have a unknown type");
                     }
-                    throw new RuntimeException("Value object dont have a value or Id!");
+                    throw new DeserializerException("Value object dont have a value or Id!");
                 }
-                throw new RuntimeException("TaskValue don't have a value");
+                throw new DeserializerException("TaskValue don't have a value");
             }
-                throw new RuntimeException("Property don't have type attribute or id");
+                throw new DeserializerException("Property don't have type attribute or id");
         }
-            throw new RuntimeException("TaskValue don't have a property");
+            throw new DeserializerException("TaskValue don't have a property");
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {
