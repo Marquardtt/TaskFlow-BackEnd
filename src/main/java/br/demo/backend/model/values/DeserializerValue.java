@@ -110,7 +110,10 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             if(time.isNull()){
                                 return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
                             }
-                            Long idTime = time.get("id").asLong();
+                            Long idTime = null;
+                            if (!time.get("id").isNull()){
+                                idTime = time.get("id").asLong();
+                            }
                             Integer seconds = time.get("seconds").asInt();
                             Integer minutes = time.get("minutes").asInt();
                             Integer hours = time.get("hours").asInt();
