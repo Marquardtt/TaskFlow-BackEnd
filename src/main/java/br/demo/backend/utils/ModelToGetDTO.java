@@ -243,6 +243,8 @@ public class ModelToGetDTO {
             property = new SelectGetDTO();
         }
         BeanUtils.copyProperties(obj, property);
+        System.out.println(obj.getId());
+
         return property;
     }
 

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class ChatService {
     private NotificationService notificationService;
     private ObjectMapper objectMapper;
     private AutoMapper<Message> mapperMessage;
-
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     public Collection<ChatPrivateGetDTO> findAllPrivate() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
@@ -170,6 +171,7 @@ public class ChatService {
         //generating the notification for each user of the chat
         MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(messageWithId);
         notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
+        simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageGetDTO);
         return messageGetDTO;
     }
 
@@ -193,7 +195,6 @@ public class ChatService {
                 new DestinationId(u.getId(), message.getId()), u, message, false)
         ).toList());
     }
-
 
     //this method recognize if is a new message or a update message
     private Message getMessage(Chat chat, MessagePostPutDTO messageDto) {

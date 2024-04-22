@@ -68,7 +68,10 @@ public class ChatController {
     @PatchMapping("/{chatId}")
     public MessageGetDTO updateMessages(@RequestBody(required = false) MultipartFile annex, @RequestParam String message,
                                         @PathVariable Long chatId) throws JsonProcessingException {
+
         return chatService.updateMessages(annex, message, chatId);
+
+
     }
 
 }
