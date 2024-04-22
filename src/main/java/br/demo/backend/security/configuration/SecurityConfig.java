@@ -2,11 +2,11 @@ package br.demo.backend.security.configuration;
 
 import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
+import br.demo.backend.websocket.WebSocketConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 
 @Configuration
 @AllArgsConstructor
@@ -37,6 +38,7 @@ public class SecurityConfig {
         //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
+
 
                 //USER
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
@@ -105,8 +107,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/group").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
+                .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
+
                 .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
@@ -127,6 +130,7 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
+                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
                 .anyRequest().authenticated());
 
         // Manter a sessão do usuário na requisição ativa

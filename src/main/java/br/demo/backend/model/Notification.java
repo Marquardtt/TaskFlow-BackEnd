@@ -3,6 +3,9 @@ package br.demo.backend.model;
 import br.demo.backend.model.enums.TypeOfNotification;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.*;
 
 @Data
@@ -11,7 +14,8 @@ import lombok.*;
 @Entity
 @Builder
 @Table(name = "tb_notification")
-public class Notification {
+
+public class Notification  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
