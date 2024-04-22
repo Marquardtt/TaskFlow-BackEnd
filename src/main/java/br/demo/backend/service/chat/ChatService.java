@@ -47,7 +47,7 @@ public class ChatService {
     private NotificationService notificationService;
     private ObjectMapper objectMapper;
     private AutoMapper<Message> mapperMessage;
-    private SimpMessagingTemplate simpMessagingTemplate
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     public Collection<ChatPrivateGetDTO> findAllPrivate() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
