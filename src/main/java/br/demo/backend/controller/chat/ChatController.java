@@ -15,6 +15,7 @@ import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.service.chat.ChatService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,7 +28,8 @@ public class ChatController {
     private ChatService chatService;
 
     //precisa ser o owner do grupo
-    @PostMapping("/group")
+    @PostMapping("/group/{groupId}")
+
     public ChatGroupGetDTO saveGroup(@RequestBody ChatGroupPostDTO chat){
         return chatService.save(chat);
     }

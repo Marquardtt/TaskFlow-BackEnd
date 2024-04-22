@@ -25,4 +25,9 @@ public class ChatPrivate extends Chat  {
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     private Collection<User> users;
+
+    @Override
+    public Collection<User> finUsers() {
+        return users;
+    }
 }

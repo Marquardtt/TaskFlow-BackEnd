@@ -1,5 +1,6 @@
 package br.demo.backend.model.values;
 
+import br.demo.backend.exception.DeserializerException;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
@@ -13,7 +14,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -86,12 +86,14 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             ArrayList<Option> options = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
-                                    String name = value.get("name").asText();
-                                    Long idOpt = value.get("id").asLong();
+                                    String name = valueF.get("name").asText();
+                                    Long idOpt = valueF.get("id").asLong();
                                     options.add(new Option(idOpt, name));
+
                                 }
                             }
-                            return new PropertyValue(id, new Property(idProp), new MultiOptionValued(idTaskVl, options));
+
+                            return new PropertyValue(id, property, new MultiOptionValued(idTaskVl, options));
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
@@ -108,27 +110,33 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             if(time.isNull()){
                                 return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
                             }
-                            return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, Duration.parse(time.asText()), starts, ends, color)));
+                            Long idTime = time.get("id").asLong();
+                            Integer seconds = time.get("seconds").asInt();
+                            Integer minutes = time.get("minutes").asInt();
+                            Integer hours = time.get("hours").asInt();
+                            return new PropertyValue(id, property, new TimeValued(idTaskVl,
+                                    new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
                         }
 
                         else if(type.equals("USER")){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
-                                if(isPresent(valueF, "username")){
-                                    users.add(new User(valueF.get("id").asText()));
+                                if(isPresent(valueF, "id")){
+                                    Long idUser = valueF.get("id").asLong();
+                                    users.add(new User(idUser));
                                 }
                             }
-                            return new PropertyValue(id, new Property(idProp), new UserValued(idTaskVl, users));
+                            return new PropertyValue(id, property, new UserValued(idTaskVl, users));
                         }
-                        throw new RuntimeException("Property have a unknown type");
+                        throw new DeserializerException("Property have a unknown type");
                     }
-                    throw new RuntimeException("Value object dont have a value or Id!");
+                    throw new DeserializerException("Value object dont have a value or Id!");
                 }
-                throw new RuntimeException("TaskValue don't have a value");
+                throw new DeserializerException("TaskValue don't have a value");
             }
-                throw new RuntimeException("Property don't have type attribute or id");
+                throw new DeserializerException("Property don't have type attribute or id");
         }
-            throw new RuntimeException("TaskValue don't have a property");
+            throw new DeserializerException("TaskValue don't have a property");
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {

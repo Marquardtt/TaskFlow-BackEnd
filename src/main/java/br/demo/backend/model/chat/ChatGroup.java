@@ -23,4 +23,9 @@ public class ChatGroup extends Chat {
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     private Group group;
+
+    @Override
+    public Collection<User> finUsers() {
+        return group.getUsers();
+    }
 }

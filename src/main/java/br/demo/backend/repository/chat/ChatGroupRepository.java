@@ -9,7 +9,7 @@ import java.util.Collection;
 @Repository
 public interface ChatGroupRepository extends JpaRepository<ChatGroup, Long> {
 
-    public Collection<ChatGroup> findChatsByGroup_Users_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(String username);
+    public Collection<ChatGroup> findAllByGroup_OwnerOrGroup_UsersContainingOrderByLastMessage_DateCreateDesc(User user, User user2);
     public Collection<ChatGroup> findAllByGroup_UsersContaining( User user);
 
 

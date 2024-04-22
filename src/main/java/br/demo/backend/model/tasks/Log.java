@@ -24,7 +24,6 @@ public class Log {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    private String description;
     @NotNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

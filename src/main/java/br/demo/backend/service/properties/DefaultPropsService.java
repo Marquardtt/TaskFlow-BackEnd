@@ -40,7 +40,6 @@ public class DefaultPropsService {
             select = selectRepository.save(select);
             page.getProperties().add(select);
         }
-        System.out.println(select);
         return select;
     }
 
