@@ -18,7 +18,7 @@ import java.util.Collection;
 @Table(name = "tb_valued_time")
 public class TimeValued extends Value {
     @OneToOne(cascade = CascadeType.ALL)
-    private Intervals value;
+    private Intervals value = new Intervals();
     public TimeValued(Long id, Intervals interval) {
         super(id);
         this.value = interval;

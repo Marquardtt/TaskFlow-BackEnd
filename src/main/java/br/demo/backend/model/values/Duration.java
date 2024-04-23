@@ -16,7 +16,7 @@ public class Duration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer seconds;
-    private Integer minutes;
-    private Integer hours;
+    private Integer seconds = 0;
+    private Integer minutes = 0;
+    private Integer hours = 0;
 }
