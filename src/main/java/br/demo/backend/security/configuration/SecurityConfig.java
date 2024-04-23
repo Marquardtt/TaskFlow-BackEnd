@@ -53,6 +53,7 @@ public class SecurityConfig {
 
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
+                .requestMatchers(HttpMethod.POST, "/project/{projectId}/invite-group").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)

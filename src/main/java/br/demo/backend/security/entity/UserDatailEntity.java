@@ -7,6 +7,7 @@ import br.demo.backend.security.utils.GetHisProjects;
 import br.demo.backend.service.UserService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
@@ -52,7 +53,10 @@ public class UserDatailEntity implements UserDetails {
         Collection<Project> projects = GetHisProjects.getHisProjects(this.user);
         if (!this.user.getPermissions().isEmpty()) {
 
-            projects.removeAll(this.user.getPermissions().stream().map(Permission::getProject).toList());
+            try {
+                projects.removeAll(this.user.getPermissions().stream().map(Permission::getProject).toList());
+            } catch (UnsupportedOperationException ignore) {
+            }
             for (Permission permission : this.user.getPermissions()) {
                 list.add(new SimpleGrantedAuthority("Project_" + permission.getProject().getId() + "_" + permission.getPermission().getMethod()));
             }

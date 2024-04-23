@@ -73,7 +73,6 @@ public class GroupController {
          groupService.inviteUser( groupId, userId);
     }
 
-    //TODO: new
     @GetMapping
     public Collection<SimpleGroupGetDTO> getAllGroups(){return groupService.findAll();}
 }

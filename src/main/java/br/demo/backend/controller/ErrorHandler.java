@@ -125,5 +125,9 @@ public class ErrorHandler {
         exceptionLogger.logException(exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
+    @ExceptionHandler(AlreadyAceptException.class)
+    public ResponseEntity<String> handleException(AlreadyAceptException exception) {
+        exceptionLogger.logException(exception);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
+    }
 }
