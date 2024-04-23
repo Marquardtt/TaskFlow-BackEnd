@@ -2,24 +2,18 @@ package br.demo.backend.service;
 
 import br.demo.backend.model.*;
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.dtos.group.GroupPutDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.*;
 import br.demo.backend.repository.chat.MessageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
-import br.demo.backend.utils.ModelToGetDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -87,7 +81,7 @@ public class NotificationService {
         Notification notify = notificationRepository.save(new Notification(null, group.getName(),
                 type, type == TypeOfNotification.ADDINGROUP ? "/"+
                 user.getUserDetailsEntity().getUsername()+"/group/"+groupId : "",
-                user, false, group.getId(), null));
+                user, false,  null, group.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
 
     }
@@ -231,11 +225,17 @@ public class NotificationService {
     public void click(Long id) {
         Notification notification = notificationRepository.findById(id).get();
         if(notification.getType().equals(TypeOfNotification.ADDINGROUP)){
+            System.out.println(1);
             Group group = groupRepository.findById(notification.getObjId()).get();
+            System.out.println(2);
             User user = notification.getUser();
+            System.out.println(3);
             group.getUsers().add(user);
+            System.out.println(4);
             user.getPermissions().addAll(group.getPermissions());
+            System.out.println(5);
             groupRepository.save(group);
+            System.out.println(6);
             userRepository.save(user);
         } else if(notification.getType().equals(TypeOfNotification.INVITETOPROJECT)){
             Group group = groupRepository.findById(notification.getObjId()).get();
