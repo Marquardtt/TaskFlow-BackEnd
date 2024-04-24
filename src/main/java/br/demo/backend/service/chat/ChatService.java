@@ -119,9 +119,12 @@ public class ChatService {
     }
 
     public ChatPrivateGetDTO save(ChatPrivatePostDTO chatPrivate) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         ChatPrivate chat = new ChatPrivate();
         BeanUtils.copyProperties(chatPrivate, chat);
         chat.setType(TypeOfChat.PRIVATE);
+        chat.getUsers().add(user);
         return (ChatPrivateGetDTO) ModelToGetDTO.tranform(chatPrivateRepository.save(chat));
     }
 
@@ -147,7 +150,7 @@ public class ChatService {
 //    }
 
     //that method update the messages list, so it update a message or insert a new one
-    public MessageGetDTO updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
+    public void updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
         Chat chat = chatRepository.findById(chatId).get();
         //map the string to a message
         MessagePostPutDTO messageDto = objectMapper.readValue(messageString, MessagePostPutDTO.class);
@@ -156,10 +159,10 @@ public class ChatService {
         if (annex != null) {
             message.setAnnex(new Archive(annex));
         }
-        return saveTheUpdatableMessage(chat, message);
+         saveTheUpdatableMessage(chat, message);
     }
 
-    private MessageGetDTO saveTheUpdatableMessage(Chat chat, Message message) {
+    private void saveTheUpdatableMessage(Chat chat, Message message) {
         createDestinations(chat, message);
         //saving the chat with the new message
         if (chat.getType().equals(TypeOfChat.PRIVATE)) {
@@ -169,10 +172,8 @@ public class ChatService {
         }
         Message messageWithId = getmessageWithId(chat, message);
         //generating the notification for each user of the chat
-        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(messageWithId);
-        notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
-        simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageGetDTO);
-        return messageGetDTO;
+        notificationService.generateNotification(TypeOfNotification.CHAT, messageWithId.getId(), chat.getId());
+        simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageWithId);
     }
 
     private Message getmessageWithId(Chat chat, Message message) {

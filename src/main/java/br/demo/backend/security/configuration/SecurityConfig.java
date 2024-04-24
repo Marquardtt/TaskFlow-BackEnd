@@ -118,7 +118,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
                 //CHAT
                 .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/private/{userId}").access(projectOrGroupAuthorization)
                 .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)

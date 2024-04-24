@@ -9,7 +9,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -26,6 +28,8 @@ public class ChatGroup extends Chat {
 
     @Override
     public Collection<User> finUsers() {
-        return group.getUsers();
+        ArrayList<User> users =  new ArrayList<>(group.getUsers());
+        users.add(this.group.getOwner());
+        return users;
     }
 }

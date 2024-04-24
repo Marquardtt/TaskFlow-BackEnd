@@ -11,6 +11,7 @@ import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.utils.GetHisProjects;
 import br.demo.backend.service.ProjectService;
 import br.demo.backend.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -37,15 +38,22 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
     }
 
     @Override
+    @Transactional
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext object) {
         User user = userRepository.findByUserDetailsEntity_Username(((UserDatailEntity)supplier.get().getPrincipal()).getUsername()).get();
         Map<String, String> variables = object.getVariables();
+
         Long otherUserId = Long.parseLong(variables.get("userId"));
+
         User otherUser = userRepository.findById(otherUserId).get();
 
         Collection<Group> groups = groupRepository.findGroupsByOwnerOrUsersContaining(user, user);
+
+
+
         //se ambos estao num mesmo grupo
         boolean decision = groups.stream().anyMatch(group -> groupTest(otherUser, group));
+
 
         if (!decision){
             Collection<Project> projects =  GetHisProjects.getHisProjects(user);

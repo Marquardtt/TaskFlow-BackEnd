@@ -12,6 +12,7 @@ import java.util.Collection;
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "tb_group")
+
 public class Group {
 
     @Id
@@ -25,13 +26,13 @@ public class Group {
     private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
     @ManyToOne
     @NotNull
     @JoinColumn(nullable = false)
     private User owner;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Collection<User> users;
 
 }
