@@ -40,6 +40,7 @@ public class SecurityConfig {
                 //USER
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
+                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
@@ -124,9 +125,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/notification/click/{id}").access(notificationsOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/notification/{id}").access(notificationsOwnerAuthorization)
 
-                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
+
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
                 .anyRequest().authenticated());
+
 
         // Manter a sessão do usuário na requisição ativa
         http.securityContext((context) -> context.securityContextRepository(repo));
