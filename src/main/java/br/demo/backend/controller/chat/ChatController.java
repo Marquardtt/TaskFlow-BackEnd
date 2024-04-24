@@ -66,10 +66,10 @@ public class ChatController {
 
     //precisa ser um usuario do chat
     @PatchMapping("/{chatId}")
-    public MessageGetDTO updateMessages(@RequestBody(required = false) MultipartFile annex, @RequestParam String message,
+    public void updateMessages(@RequestBody(required = false) MultipartFile annex, @RequestParam String message,
                                         @PathVariable Long chatId) throws JsonProcessingException {
 
-        return chatService.updateMessages(annex, message, chatId);
+         chatService.updateMessages(annex, message, chatId);
 
 
     }

@@ -26,7 +26,7 @@ public class Group {
     private Archive picture = new Archive(null, "picture", "jpg", new byte[0]);
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
     @ManyToOne
     @NotNull
