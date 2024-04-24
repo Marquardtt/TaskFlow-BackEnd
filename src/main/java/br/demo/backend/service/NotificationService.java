@@ -1,5 +1,6 @@
 package br.demo.backend.service;
 
+import br.demo.backend.exception.AlreadyAceptException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfNotification;
@@ -58,7 +59,7 @@ public class NotificationService {
         Project project = projectRepository.findById(idProject).get();
         Group group = groupRepository.findById(idGroup).get();
         Notification notify = notificationRepository.save(new Notification(null, project.getName(), type, "/"+group.getOwner().getUserDetailsEntity().getUsername()+"/"+
-                project.getId(), group.getOwner(), false, group.getId(), project.getId()));
+                project.getId(), group.getOwner(), false,  project.getId(), group.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+group.getOwner().getId(), notify);
     }
 
@@ -69,7 +70,7 @@ public class NotificationService {
         Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
 
         Notification notify = notificationRepository.save(new Notification(null, project.getName(), type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
-                project.getId()+"/group/"+group.getId(), user, false, project.getId(), group.getId()));
+                project.getId()+"/group/"+group.getId(), user, false, group.getId(), project.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 
@@ -81,7 +82,7 @@ public class NotificationService {
         Notification notify = notificationRepository.save(new Notification(null, group.getName(),
                 type, type == TypeOfNotification.ADDINGROUP ? "/"+
                 user.getUserDetailsEntity().getUsername()+"/group/"+groupId : "",
-                user, false,  null, group.getId()));
+                user, false, null, group.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
 
     }
@@ -101,7 +102,7 @@ public class NotificationService {
             if (!verifyIfHeWantsThisNotification(type, user)) return;
             Notification notify = notificationRepository.save(new Notification(null, task.getName(),
                     type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() +
-                    "/" + page.getId(), user, false, taskId, null));
+                    "/" + page.getId(), user, false, null,taskId));
             simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
         });
     }
@@ -113,11 +114,11 @@ public class NotificationService {
             //Verify if the notification just have an annex
             if (message.getValue().isEmpty()) {
                 Notification notify = notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
-                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false, chatId, message.getSender().getId()));
+                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false,  message.getSender().getId(), chatId));
                 simpMessagingTemplate.convertAndSend("/notifications/"+destination.getUser().getId(), notify);
             } else {
                 Notification notify = notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
-                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false, chatId, message.getSender().getId()));
+                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false,  message.getSender().getId(), chatId));
                 simpMessagingTemplate.convertAndSend("/notifications/"+destination.getUser().getId(), notify);
             }
         });
@@ -136,7 +137,7 @@ public class NotificationService {
         users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
             if (!verifyIfHeWantsThisNotification(type, user)) return;
             Notification notify = notificationRepository.save(new Notification(null, task.getName() , type,
-                    "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, idTask, message.getId()));
+                    "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, message.getId(), idTask));
             simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
         });
     }
@@ -146,7 +147,7 @@ public class NotificationService {
         if (!verifyIfHeWantsThisNotification(type, user)) return;
         Notification notify = notificationRepository.save(new Notification(null, pointsTarget.toString(), type,
                 "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account",
-                user, false, user.getId(), user.getPoints()));
+                user, false, user.getPoints(), user.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 
@@ -180,12 +181,12 @@ public class NotificationService {
 
     public  void generateInProjectNotification(Project project, TypeOfNotification type, User user){
         Notification notify = notificationRepository.save(new Notification(null, project.getName(),
-                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false, project.getId(), null ));
+                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false, null, project.getId() ));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
     public void generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page){
         Notification notify = notificationRepository.save(new Notification(null, task.getName(),
-                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false, task.getId(), null ));
+                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false, null, task.getId() ));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 
@@ -224,22 +225,19 @@ public class NotificationService {
 
     public void click(Long id) {
         Notification notification = notificationRepository.findById(id).get();
+        notificationRepository.deleteById(id);
         if(notification.getType().equals(TypeOfNotification.ADDINGROUP)){
-            System.out.println(1);
             Group group = groupRepository.findById(notification.getObjId()).get();
-            System.out.println(2);
             User user = notification.getUser();
-            System.out.println(3);
+            testAlreadyAceptToGroup(group, user);
             group.getUsers().add(user);
-            System.out.println(4);
             user.getPermissions().addAll(group.getPermissions());
-            System.out.println(5);
             groupRepository.save(group);
-            System.out.println(6);
             userRepository.save(user);
         } else if(notification.getType().equals(TypeOfNotification.INVITETOPROJECT)){
             Group group = groupRepository.findById(notification.getObjId()).get();
             Project project = projectRepository.findById(notification.getAuxObjId()).get();
+            testAlreadyAceptToProject(group, project);
             Permission permission = permissionRepository.findByProjectAndIsDefault(project, true);
             group.getPermissions().add(permission);
             Collection<User> users = groupRepository.save(group).getUsers();
@@ -248,8 +246,15 @@ public class NotificationService {
                 userRepository.save(u);
             });
         }
-        notificationRepository.deleteById(notification.getId());
     }
+
+    private void testAlreadyAceptToGroup(Group group, User user){
+        if(group.getUsers().contains(user)) throw new AlreadyAceptException();
+    }
+    private void testAlreadyAceptToProject(Group group, Project project){
+        if(group.getPermissions().stream().anyMatch(p -> p.getProject().equals(project))) throw new AlreadyAceptException();
+    }
+
 
     public void updateNotification(Notification notification){
         notificationRepository.save(notification);

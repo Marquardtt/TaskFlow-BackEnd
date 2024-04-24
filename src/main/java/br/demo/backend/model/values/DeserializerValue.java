@@ -98,19 +98,23 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
                             ArrayList<LocalDateTime> starts = new ArrayList<>();
+                            // I have merda here
                             Long idIntervals = value.get("id").asLong();
-                            for(JsonNode valueF : value.get("starts")){
-                                starts.add(LocalDateTime.parse(valueF.asText()));
-                            }
+                                for(JsonNode valueF : value.get("starts")){
+                                    starts.add(LocalDateTime.parse(valueF.asText()));
+                                }
                             ArrayList<LocalDateTime> ends = new ArrayList<>();
-                            for(JsonNode valueF : value.get("ends")){
-                                ends.add(LocalDateTime.parse(valueF.asText()));
-                            }
+                                for(JsonNode valueF : value.get("ends")){
+                                    ends.add(LocalDateTime.parse(valueF.asText()));
+                                }
                             JsonNode time = value.get("time");
                             if(time.isNull()){
                                 return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
                             }
-                            Long idTime = time.get("id").asLong();
+                            Long idTime = null;
+                            if (!time.get("id").isNull()){
+                                idTime = time.get("id").asLong();
+                            }
                             Integer seconds = time.get("seconds").asInt();
                             Integer minutes = time.get("minutes").asInt();
                             Integer hours = time.get("hours").asInt();

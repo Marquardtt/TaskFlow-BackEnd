@@ -70,7 +70,7 @@ public class ProjectController {
     }
 
     //TODO: new
-    @PatchMapping("/{projectId}/invite-group")
+    @PostMapping("/{projectId}/invite-group")
     public void inviteGroup(@PathVariable Long projectId, @RequestBody SimpleGroupGetDTO group){
          projectService.inviteAGroup(projectId, group);
     }
