@@ -4,13 +4,13 @@ import br.demo.backend.model.Code;
 import br.demo.backend.model.dtos.email.SendEmailDTO;
 import br.demo.backend.repository.CodeRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -57,5 +57,9 @@ public class EmailService {
         code.setCode(otp.toString());
         codeRepository.save(code);
         return otp.toString();
+    }
+
+    public List<Code> getCode() {
+        return codeRepository.findAll();
     }
 }

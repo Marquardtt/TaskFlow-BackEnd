@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()
+                .requestMatchers(HttpMethod.GET, "/forgotPassword/code").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
