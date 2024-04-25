@@ -16,5 +16,6 @@ public enum TypeOfNotification {
     //when i receive a message
     CHAT,
     //when ia task than i am responsible receive a comment
-    COMMENTS
+    COMMENTS,
+    INVITETOPROJECT
 }

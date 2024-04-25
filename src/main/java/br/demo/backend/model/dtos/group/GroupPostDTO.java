@@ -1,13 +1,10 @@
 package br.demo.backend.model.dtos.group;
 
-import br.demo.backend.model.Archive;
 import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.interfaces.WithMembers;
+import br.demo.backend.interfaces.IWithMembers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
@@ -15,7 +12,7 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupPostDTO implements WithMembers {
+public class GroupPostDTO implements IWithMembers {
     private String name;
     private String description;
     private Collection<Permission> permissions;

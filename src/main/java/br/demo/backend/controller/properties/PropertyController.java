@@ -5,8 +5,10 @@ import br.demo.backend.model.dtos.properties.LimitedGetDTO;
 import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
+import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.service.properties.PropertyService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,58 +20,73 @@ import org.springframework.web.bind.annotation.*;
 public class PropertyController {
 
     private PropertyService propertyService;
+    private IdProjectValidation validation;
 
  //Precisa ter permissão de post no projeto
     @PostMapping("/limited")
-    public ResponseEntity<Limited> save(@RequestBody Limited property){
+    public ResponseEntity<Limited> save(@RequestBody Limited property, @PathVariable Long projectId){
+        validatePost(property, projectId);
         return new ResponseEntity<>(propertyService.save(property), HttpStatus.CREATED);
     }
     //Precisa ter permissão de post no projeto
     @PostMapping("/select")
-    public ResponseEntity<Select> save(@RequestBody Select property){
+    public ResponseEntity<Select> save(@RequestBody Select property, @PathVariable Long projectId){
+        validatePost(property, projectId);
         return new ResponseEntity<>(propertyService.save(property), HttpStatus.CREATED);
     }
     //Precisa ter permissão de post no projeto
     @PostMapping("/date")
-    public ResponseEntity<Date> save(@RequestBody Date property){
+    public ResponseEntity<Date> save(@RequestBody Date property, @PathVariable Long projectId){
+        validatePost(property, projectId);
         return new ResponseEntity<>(propertyService.save(property),HttpStatus.CREATED);
     }
 
+    private void validatePost (Property property, Long projectId){
+        if(!property.getPages().isEmpty() || property.getProject() != null){
+            try {
+                validation.ofObject(projectId, property.getProject());
+            }catch (NullPointerException e){
+                validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
+            }
+        }
+    }
+
+
     //Precisa ter permissão de put no projeto
     @PutMapping("/limited")
-    public void update(@RequestBody Limited property){
-        propertyService.update(property, false);
+    public ResponseEntity<Limited> update(@RequestBody Limited property, @PathVariable Long projectId){
+        return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
     //Precisa ter permissão de put no projeto
     @PutMapping("/select")
-    public void update(@RequestBody Select property){
-        propertyService.update(property, false);
+    public ResponseEntity<Select> update(@RequestBody Select property, @PathVariable Long projectId){
+        return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
     //Precisa ter permissão de put no projeto
     @PutMapping("/date")
-    public void update(@RequestBody Date property){
-        propertyService.update(property, false);
+    public ResponseEntity<Date> update(@RequestBody Date property, @PathVariable Long projectId){
+        return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping("/limited")
-    public void patch(@RequestBody Limited property){
-        propertyService.update(property, true);
+    public void patch(@RequestBody Limited property, @PathVariable Long projectId){
+        propertyService.update(property, true, projectId);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping("/select")
-    public void patch(@RequestBody Select property){
-        propertyService.update(property, true);
+    public void patch(@RequestBody Select property, @PathVariable Long projectId){
+        propertyService.update(property, true, projectId);
     }
     //Precisa ter permissão de put no projeto
     @PatchMapping("/date")
-    public void patch(@RequestBody Date property){
-        propertyService.update(property, true);
+    public void patch(@RequestBody Date property, @PathVariable Long projectId){
+        propertyService.update(property, true, projectId);
     }
 
     //Precisa ter permissão de delete no projeto
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        propertyService.delete(id);
+    public void delete(@PathVariable Long id, @PathVariable Long projectId){
+        propertyService.delete(id, projectId);
     }
 
 

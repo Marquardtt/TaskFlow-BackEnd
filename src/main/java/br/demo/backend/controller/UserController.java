@@ -7,6 +7,7 @@ import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.service.UserService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ import java.util.Collection;
 @RequestMapping("/user")
 public class UserController {
     private UserService userService;
+    private IdProjectValidation validation;
 
     @PostMapping
     public UserGetDTO insert(@RequestBody UserPostDTO user){
@@ -34,7 +36,6 @@ public class UserController {
         return userService.update(user, true);
     }
 
-    //TODO: teria que ver se o usuario pode fazer isso
     @GetMapping("/{username}")
     public OtherUsersDTO findOne(@PathVariable String username){
         return userService.findOne(username);
@@ -71,7 +72,8 @@ public class UserController {
   //TODO: fazer isso no security
     //precisa ser o dono do grupo em que o usuario esta nesse projeto
     @PatchMapping("{username}/update-permission/project/{projectId}")
-    public PermissionGetDTO updatePermission(@PathVariable String username, @RequestBody Permission permission){
+    public PermissionGetDTO updatePermission(@PathVariable String username, @PathVariable Long projectId, @RequestBody Permission permission){
+        validation.ofObject(projectId, permission.getProject());
         return userService.updatePermissionOfAUser(username, permission);
     }
 }

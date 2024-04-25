@@ -1,11 +1,8 @@
 package br.demo.backend.model.dtos.group;
 
-import br.demo.backend.model.Archive;
 import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.interfaces.WithMembers;
-import jakarta.persistence.*;
+import br.demo.backend.interfaces.IWithMembers;
 import lombok.*;
 
 import java.util.Collection;
@@ -15,7 +12,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class GroupPutDTO  implements WithMembers {
+public class GroupPutDTO  implements IWithMembers {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;

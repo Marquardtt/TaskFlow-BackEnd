@@ -35,7 +35,7 @@ public class ChatController {
     }
 
     //precisa estar em um grupo com essa pessoa ou trabalhar em um mesmo projeto
-    @PostMapping("/private")
+    @PostMapping("/private/{userId}")
     public ChatPrivateGetDTO savePrivate(@RequestBody ChatPrivatePostDTO chat){
         return chatService.save(chat);
     }
@@ -66,9 +66,12 @@ public class ChatController {
 
     //precisa ser um usuario do chat
     @PatchMapping("/{chatId}")
-    public MessageGetDTO updateMessages(@RequestBody(required = false) MultipartFile annex, @RequestParam String message,
+    public void updateMessages(@RequestBody(required = false) MultipartFile annex, @RequestParam String message,
                                         @PathVariable Long chatId) throws JsonProcessingException {
-        return chatService.updateMessages(annex, message, chatId);
+
+         chatService.updateMessages(annex, message, chatId);
+
+
     }
 
 }

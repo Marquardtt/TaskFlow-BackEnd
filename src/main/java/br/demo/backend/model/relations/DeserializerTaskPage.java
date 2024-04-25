@@ -1,5 +1,6 @@
 package br.demo.backend.model.relations;
 
+import br.demo.backend.exception.DeserializerException;
 import br.demo.backend.model.User;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Option;
@@ -49,11 +50,11 @@ public class DeserializerTaskPage extends StdDeserializer<TaskPage> {
                     Integer index = jsonNode.findValue("indexAtColumn").asInt();
                     return new TaskOrdered(id, new Task(taskId), index);
                 }
-                throw new RuntimeException("The subtype of TaskPage isn't clearly defined");
+                throw new DeserializerException("The subtype of TaskPage isn't clearly defined");
             }
-            throw new RuntimeException("Task id not found");
+            throw new DeserializerException("Task id not found");
         }
-        throw new RuntimeException("Task not found");
+        throw new DeserializerException("Task not found");
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {

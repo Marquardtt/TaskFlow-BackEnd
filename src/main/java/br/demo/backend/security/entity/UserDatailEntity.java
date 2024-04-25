@@ -1,9 +1,13 @@
 package br.demo.backend.security.entity;
 
 import br.demo.backend.model.Permission;
+import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
+import br.demo.backend.security.utils.GetHisProjects;
+import br.demo.backend.service.UserService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,6 +36,7 @@ public class UserDatailEntity implements UserDetails {
     private String password;
     @OneToOne(mappedBy = "userDetailsEntity")
     @JsonIgnore
+    @ToString.Exclude
     private User user;
     private boolean enabled = true;
     private boolean accountNonExpired = true;
@@ -44,13 +49,22 @@ public class UserDatailEntity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         List<SimpleGrantedAuthority> list = new ArrayList<>();
+        Collection<Project> projects = GetHisProjects.getHisProjects(this.user);
         if (!this.user.getPermissions().isEmpty()) {
+
+            try {
+                projects.removeAll(this.user.getPermissions().stream().map(Permission::getProject).toList());
+            } catch (UnsupportedOperationException ignore) {
+            }
             for (Permission permission : this.user.getPermissions()) {
                 list.add(new SimpleGrantedAuthority("Project_" + permission.getProject().getId() + "_" + permission.getPermission().getMethod()));
             }
-            return list;
         }
-        return null;
+        for (Project project : projects) {
+            list.add(new SimpleGrantedAuthority("Project_" + project.getId() + "_GET_POST_PUT_DELETE_PATCH"));
+        }
+
+        return list;
     }
 
     public void setPassword(String password) {

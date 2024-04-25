@@ -1,5 +1,6 @@
 package br.demo.backend.model.values;
 
+import br.demo.backend.exception.DeserializerException;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.properties.Option;
@@ -13,7 +14,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -47,7 +47,9 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                 } catch (Exception e) {
                     System.out.println("Deu erro no id da prop");
                 }
+                Property property = new Property(idProp, TypeOfProperty.valueOf(type));
                 if (isPresent(jsonNode, "value")) {
+                    System.out.println(jsonNode);
                     JsonNode jsonValue = jsonNode.get("value");
                     if (isPresent(jsonValue, "value")) {
                         JsonNode value = jsonValue.get("value");
@@ -57,7 +59,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         } catch (Exception e) {
                             System.out.println("Deu erro no id da propValue");
                         }
-                        Property property = new Property(idProp, TypeOfProperty.valueOf(type));
+
                         if (type.equals("TEXT")) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }
@@ -97,20 +99,42 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
-                            ArrayList<LocalDateTime> starts = new ArrayList<>();
+                            ArrayList<DateTimelines> starts = new ArrayList<>();
+                            // I have merda here
                             Long idIntervals = value.get("id").asLong();
-                            for(JsonNode valueF : value.get("starts")){
-                                starts.add(LocalDateTime.parse(valueF.asText()));
-                            }
-                            ArrayList<LocalDateTime> ends = new ArrayList<>();
-                            for(JsonNode valueF : value.get("ends")){
-                                ends.add(LocalDateTime.parse(valueF.asText()));
-                            }
+                                for(JsonNode valueF : value.get("starts")){
+                                       DateTimelines date = new DateTimelines();
+                                    if (isPresent(valueF, "id")){
+                                        date.setId(valueF.get("id").asLong());
+                                    }
+                                    System.out.println(valueF.get("date").asText());
+                                       date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+                                    System.out.println(date);
+//                                    LocalDateTime.parse(valueF.asText())
+                                    starts.add(date);
+                                }
+                            ArrayList<DateTimelines> ends = new ArrayList<>();
+                                for(JsonNode valueF : value.get("ends")){
+                                    DateTimelines date = new DateTimelines();
+                                    if (isPresent(valueF, "id")){
+                                        date.setId(valueF.get("id").asLong());
+                                    }
+                                    date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+                                    ends.add(date);
+                                }
                             JsonNode time = value.get("time");
                             if(time.isNull()){
                                 return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
                             }
-                            return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, Duration.parse(time.asText()), starts, ends, color)));
+                            Long idTime = null;
+                            if (!time.get("id").isNull()){
+                                idTime = time.get("id").asLong();
+                            }
+                            Integer seconds = time.get("seconds").asInt();
+                            Integer minutes = time.get("minutes").asInt();
+                            Integer hours = time.get("hours").asInt();
+                            return new PropertyValue(id, property, new TimeValued(idTaskVl,
+                                    new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
                         }
 
                         else if(type.equals("USER")){
@@ -123,15 +147,15 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             }
                             return new PropertyValue(id, property, new UserValued(idTaskVl, users));
                         }
-                        throw new RuntimeException("Property have a unknown type");
+                        throw new DeserializerException("Property have a unknown type");
                     }
-                    throw new RuntimeException("Value object dont have a value or Id!");
+                    throw new DeserializerException("Value object dont have a value or Id!");
                 }
-                throw new RuntimeException("TaskValue don't have a value");
+                throw new DeserializerException("TaskValue don't have a value");
             }
-                throw new RuntimeException("Property don't have type attribute or id");
+                throw new DeserializerException("Property don't have type attribute or id");
         }
-            throw new RuntimeException("TaskValue don't have a property");
+            throw new DeserializerException("TaskValue don't have a property");
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {

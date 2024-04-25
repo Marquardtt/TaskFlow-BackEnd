@@ -10,7 +10,7 @@ import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 
-import br.demo.backend.model.interfaces.WithMembers;
+import br.demo.backend.interfaces.IWithMembers;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
@@ -38,7 +38,7 @@ public class GroupService {
     private GroupRepository groupRepository;
     private UserRepository userRepository;
     private NotificationService notificationService;
-    ;
+    private ProjectService projectService;
     private AutoMapper<Group> autoMapper;
     private UserService userService;
 
@@ -61,12 +61,11 @@ public class GroupService {
             }
 
             group.setPermissions(groupDto.getPermissions());
-
         }
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
-    private void setTheMembers(Group group, WithMembers groupDTO) {
+    private void setTheMembers(Group group, IWithMembers groupDTO) {
         group.setUsers(groupDTO.getMembersDTO().stream().map(u -> {
             User user = userRepository.findByUserDetailsEntity_Username(u.getUsername()).get();
             return user;
@@ -78,6 +77,12 @@ public class GroupService {
     public GroupGetDTO updateOwner(OtherUsersDTO userDto, Long groupId) {
         Group group = groupRepository.findById(groupId).get();
         User user = userRepository.findById(userDto.getId()).get();
+        Collection<Permission> permissions = user.getPermissions().stream()
+                .filter(p -> group.getPermissions().stream().anyMatch(pg -> pg.getProject().equals(p.getProject()))).toList();
+        group.getOwner().getPermissions().addAll(permissions);
+        user.getPermissions().removeAll(permissions);
+        userRepository.save(user);
+        userRepository.save(group.getOwner());
         group.setOwner(user);
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
@@ -173,12 +178,17 @@ public class GroupService {
     public void inviteUser(Long groupId, Long userId) {
         User user = userRepository.findById(userId).get();
         Group group = groupRepository.findById(groupId).get();
-        if(group.getPermissions().stream().anyMatch(p -> user.getPermissions().stream().anyMatch(p2 -> p.getProject().equals(p2.getProject())))){
+        if(projectService.findProjectsByUser(user).stream().anyMatch(
+                p -> group.getPermissions().stream().anyMatch(pe -> pe.getProject().equals(p)))){
             throw new UserCantBeAddedInThisGroupException();
         }
         if(group.getUsers().contains(user)){
             throw new AlreadyInGroupException();
         }
         notificationService.generateNotification(TypeOfNotification.ADDINGROUP, userId, groupId);
+    }
+
+    public Collection<SimpleGroupGetDTO> findAll() {
+        return groupRepository.findAll().stream().map(ModelToGetDTO::tranformSimple).toList();
     }
 }

@@ -11,4 +11,5 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
 
 
     Collection<Permission> findByProject(Project project);
+    Permission findByProjectAndIsDefault(Project project, Boolean isDefault);
 }

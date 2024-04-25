@@ -20,8 +20,8 @@ public class NotificationController {
     }
 
     @PatchMapping("/click/{id}")
-    public Notification clickNotification(@PathVariable Long id){
-        return notificationService.click(id);
+    public void clickNotification(@PathVariable Long id){
+         notificationService.click(id);
     }
 
     @DeleteMapping("/{id}")

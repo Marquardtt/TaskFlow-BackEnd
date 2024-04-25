@@ -2,7 +2,7 @@ package br.demo.backend.model.pages;
 
 
 import br.demo.backend.model.Project;
-import br.demo.backend.model.interfaces.IHasProperties;
+import br.demo.backend.interfaces.IHasProperties;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.relations.TaskPage;

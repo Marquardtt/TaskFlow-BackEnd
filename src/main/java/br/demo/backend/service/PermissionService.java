@@ -9,6 +9,7 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.AutoMapper;
+import br.demo.backend.utils.IdProjectValidation;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
@@ -30,22 +31,35 @@ public class PermissionService {
     private AutoMapper<Permission> autoMapper;
     private ProjectRepository projectRepository;
     private UserRepository useRepository;
+    private IdProjectValidation validation;
     private GroupRepository groupRepository;
     private GroupService groupService;
     private UserService userService;
 
     public PermissionGetDTO save(PermissionPostDTO permissionDto, Long projectId) {
+        System.out.println(permissionDto.getIsDefault());
         Project project = projectRepository.findById(projectId).get();
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
+        System.out.println(permission.getIsDefault());
+        permission.setIsDefault(permissionDto.getIsDefault());
         permission.setProject(project);
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
     }
 
-    public PermissionGetDTO update(PermissionPutDTO permissionDto, Boolean patching) {
+    public PermissionGetDTO update(PermissionPutDTO permissionDto, Boolean patching, Long projectid) {
         Permission oldPermission = permissionRepository.findById(permissionDto.getId()).get();
-        Permission permission = patching ? oldPermission : new Permission();
+        validation.ofObject(projectid, oldPermission.getProject());
+        Permission permission =  new Permission();
+        if(patching) BeanUtils.copyProperties(oldPermission, permission);
         autoMapper.map(permissionDto, permission, patching);
+
+        if(!oldPermission.getIsDefault() && permission.getIsDefault()){
+            Permission permissionOther = permissionRepository.findByProjectAndIsDefault(oldPermission.getProject(), true);
+            permissionOther.setIsDefault(false);
+            permissionRepository.save(permissionOther);
+        }
+
         //keep the project of the permission
         permission.setProject(oldPermission.getProject());
         return ModelToGetDTO.tranform(permissionRepository.save(permission));
@@ -57,12 +71,18 @@ public class PermissionService {
         return permissionRepository.findByProject(project).stream().map(ModelToGetDTO::tranform).toList();
     }
 
-    public void delete(Long id, Long substituteId) {
+    public void delete(Long id, Long substituteId, Long projectId) {
         Permission otherPermission = permissionRepository.findById(substituteId).get();
         Permission permission = permissionRepository.findById(id).get();
+        validation.ofObject(projectId, permission.getProject());
+        validation.ofObject(projectId, otherPermission.getProject());
 
         changeInTheGroup(permission, otherPermission);
         changeInTheUser(permission, otherPermission);
+        if(permission.getIsDefault()) {
+            otherPermission.setIsDefault(true);
+            permissionRepository.save(otherPermission);
+        }
 
         permissionRepository.deleteById(id);
     }

@@ -63,6 +63,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
         filterChain.doFilter(request, response); // Call the next filter
 
     }
+  
     private boolean publicRoute(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String method = request.getMethod();
@@ -73,6 +74,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
             return uri.equals("/login") || uri.equals("/user") || uri.equals("/forgotPassword") &&
                     method.equals("POST");
         }
+
     }
 
 }

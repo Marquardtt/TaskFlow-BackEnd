@@ -12,5 +12,5 @@ import java.util.Collection;
 @Repository
 public interface PageRepository extends JpaRepository<Page, Long> {
 
-    Page findByTasks_Task(Task task);
+    Collection<Page> findByTasks_Task(Task task);
 }

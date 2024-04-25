@@ -2,11 +2,11 @@ package br.demo.backend.security.configuration;
 
 import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
+import br.demo.backend.websocket.WebSocketConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 
 @Configuration
 @AllArgsConstructor
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
     private final CorsConfigurationSource corsConfig;
     private final IsChatUser isChatUser;
+    private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
@@ -36,6 +38,7 @@ public class SecurityConfig {
         //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
+
 
                 //USER
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
@@ -48,10 +51,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user").authenticated()
                 .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
-//                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").authenticated()
-//                  esse de cima ele precisa ser o dono do grupo do usuario naquele projeto
+                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").access(isOwnerInThisProject)
+
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
+                .requestMatchers(HttpMethod.POST, "/project/{projectId}/invite-group").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
@@ -106,8 +110,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/group").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
                 .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.GET, "/group").authenticated()
+
                 .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
@@ -115,7 +120,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
                 //CHAT
                 .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/private/{userId}").access(projectOrGroupAuthorization)
                 .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)
@@ -128,6 +133,7 @@ public class SecurityConfig {
 
 
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
+                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
                 .anyRequest().authenticated());
 
 

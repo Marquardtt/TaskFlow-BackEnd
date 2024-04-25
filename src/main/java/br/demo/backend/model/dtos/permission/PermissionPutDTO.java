@@ -16,5 +16,6 @@ public class PermissionPutDTO {
     private Long id;
     private String name;
     private TypePermission permission = TypePermission.READ;
+    private Boolean isDefault;
 
 }

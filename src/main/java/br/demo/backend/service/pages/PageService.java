@@ -7,6 +7,7 @@ import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.repository.relations.TaskPageRepository;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.service.properties.DefaultPropsService;
+import br.demo.backend.utils.IdProjectValidation;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
@@ -50,21 +51,23 @@ public class PageService {
     private TaskOrderedRepository taskOrderedRepository;
     private TaskPageRepository taskPageRepository;
     private DefaultPropsService defaultPropsService;
-
+    private IdProjectValidation validation;
     private AutoMapper<OrderedPage> autoMapperOrdered;
     private AutoMapper<CanvasPage> autoMapperCanvas;
     private AutoMapper<TaskCanvas> autoMapperTaskCanvas;
     private AutoMapper<Page> autoMapperOther;
     private AutoMapper<TaskOrdered> autoMapperTaskOrdered;
 
-    public OrderedPageGetDTO updatePropertiesOrdering(Property prop, Long pageId) {
+    public OrderedPageGetDTO updatePropertiesOrdering(Property prop, Long pageId, Long projectId) {
         OrderedPage page = orderedPageRepository.findById(pageId).get();
+        validation.ofObject(projectId, page.getProject());
         page.setPropertyOrdering(prop);
         return (OrderedPageGetDTO) ModelToGetDTO.tranform(orderedPageRepository.save(page));
     }
 
-    public PageGetDTO updateName(String name, Long id) {
+    public PageGetDTO updateName(String name, Long id, Long projectId) {
         Page page = pageRepository.findById(id).get();
+        validation.ofObject(projectId, page.getProject());
         page.setName(name);
         if (page instanceof CanvasPage canvasPage) {
             return ModelToGetDTO.tranform(canvasPageRepository.save(canvasPage));
@@ -146,8 +149,9 @@ public class PageService {
                 .findFirst().orElse(null);
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long projectId) {
         Page page = pageRepository.findById(id).get();
+        validation.ofObject(projectId, page.getProject());
         page.getProperties().stream().forEach(p -> {
             p.getPages().remove(page);
             propertyRepository.save(p);
@@ -156,8 +160,10 @@ public class PageService {
     }
 
 
-    public TaskPageGetDTO updateTaskPage(TaskPage taskPage) {
+    public TaskPageGetDTO updateTaskPage(TaskPage taskPage, Long projectId) {
         TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
+        Page page = pageRepository.findByTasks_Task(oldTaskPage.getTask()).stream().findFirst().get();
+        validation.ofObject(projectId, page.getProject());
         TaskPageGetDTO taskPageGetDTO = null;
         if(oldTaskPage instanceof TaskCanvas taskCanvas){
             ((TaskCanvas) oldTaskPage).setX(taskCanvas.getX());
@@ -170,25 +176,24 @@ public class PageService {
         }
         return taskPageGetDTO;
     }
-    public TaskOrderedGetDTO updateIndex(TaskOrdered taskOrdered) {
-        TaskOrdered oldTaskOrdered = taskOrderedRepository.findById(taskOrdered.getId()).get();
-        autoMapperTaskOrdered.map(taskOrdered, oldTaskOrdered, true);
-        return (TaskOrderedGetDTO) ModelToGetDTO.tranform(taskOrderedRepository.save(oldTaskOrdered));
-    }
 
-    public CanvasPageGetDTO updateDraw(MultipartFile draw, Long id) {
+    public CanvasPageGetDTO updateDraw(MultipartFile draw, Long id, Long projectId) {
         CanvasPage canvasPage = canvasPageRepository.findById(id).get();
+        validation.ofObject(projectId, canvasPage.getProject());
         Archive archive = new Archive(draw);
         canvasPage.setDraw(archive);
         return (CanvasPageGetDTO) ModelToGetDTO.tranform(canvasPageRepository.save(canvasPage));
     }
 
-    public Collection<PageGetDTO> merge(Collection<Page> pages, Long id) {
+    public Collection<PageGetDTO> merge(Collection<Page> pages, Long id, Long projectId) {
         Page page = pageRepository.findById(id).get();
+        validation.ofObject(projectId, page.getProject());
         pages.forEach(p ->
         {
+            Page pageDataBase = pageRepository.findById(p.getId()).get();
+            validation.ofObject(projectId, pageDataBase.getProject());
             //setting the tasks and properties of the page
-            p.getProperties().addAll(page.getProperties());
+            pageDataBase.getProperties().addAll(page.getProperties());
             //saving the pages
             page.getTasks().forEach(t -> {
                 taskService.addTaskToPage(t.getTask(), pageRepository.findById(p.getId()).get());

@@ -18,5 +18,5 @@ public class PermissionGetDTO {
     private String name;
     private TypePermission permission;
     private SimpleProjectGetDTO project;
-
+    private Boolean isDefault;
 }
