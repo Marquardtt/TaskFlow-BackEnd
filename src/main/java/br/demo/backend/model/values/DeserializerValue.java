@@ -47,7 +47,9 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                 } catch (Exception e) {
                     System.out.println("Deu erro no id da prop");
                 }
+                Property property = new Property(idProp, TypeOfProperty.valueOf(type));
                 if (isPresent(jsonNode, "value")) {
+                    System.out.println(jsonNode);
                     JsonNode jsonValue = jsonNode.get("value");
                     if (isPresent(jsonValue, "value")) {
                         JsonNode value = jsonValue.get("value");
@@ -57,7 +59,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         } catch (Exception e) {
                             System.out.println("Deu erro no id da propValue");
                         }
-                        Property property = new Property(idProp, TypeOfProperty.valueOf(type));
+
                         if (type.equals("TEXT")) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }
@@ -97,15 +99,28 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         }
                         else if(type.equals("TIME")){
                             String color = value.get("color").asText();
-                            ArrayList<LocalDateTime> starts = new ArrayList<>();
+                            ArrayList<DateTimelines> starts = new ArrayList<>();
                             // I have merda here
                             Long idIntervals = value.get("id").asLong();
                                 for(JsonNode valueF : value.get("starts")){
-                                    starts.add(LocalDateTime.parse(valueF.asText()));
+                                       DateTimelines date = new DateTimelines();
+                                    if (isPresent(valueF, "id")){
+                                        date.setId(valueF.get("id").asLong());
+                                    }
+                                    System.out.println(valueF.get("date").asText());
+                                       date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+                                    System.out.println(date);
+//                                    LocalDateTime.parse(valueF.asText())
+                                    starts.add(date);
                                 }
-                            ArrayList<LocalDateTime> ends = new ArrayList<>();
+                            ArrayList<DateTimelines> ends = new ArrayList<>();
                                 for(JsonNode valueF : value.get("ends")){
-                                    ends.add(LocalDateTime.parse(valueF.asText()));
+                                    DateTimelines date = new DateTimelines();
+                                    if (isPresent(valueF, "id")){
+                                        date.setId(valueF.get("id").asLong());
+                                    }
+                                    date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+                                    ends.add(date);
                                 }
                             JsonNode time = value.get("time");
                             if(time.isNull()){

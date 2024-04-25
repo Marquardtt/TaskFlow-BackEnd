@@ -78,7 +78,7 @@ public class PropertyService {
 
     private <T extends Property> T saveGeneric(T property, JpaRepository<T, Long> repo) {
         T prop = repo.save(property);
-        setInTheTasksThatAlreadyExists(prop);
+        if (!property.getPages().isEmpty() || property.getProject() != null) setInTheTasksThatAlreadyExists(prop);
         return prop;
     }
 
@@ -94,15 +94,18 @@ public class PropertyService {
         return saveGeneric(property, selectRepository);
     }
 
-    private <T extends Property> void  updateGeneric(T property, Boolean patching,
-                                                     AutoMapper<T> autoMapper,
-                                                     JpaRepository<T, Long> repo,
-                                                     T empty, Long projectId){
+    private <T extends Property> T updateGeneric(T property, Boolean patching,
+                                                 AutoMapper<T> autoMapper,
+                                                 JpaRepository<T, Long> repo,
+                                                 T empty, Long projectId) {
         T old = repo.findById(property.getId()).get();
-        try {
-            validation.ofObject(projectId, property.getProject());
-        }catch (NullPointerException e){
-            validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
+        if (property.getPages() != null || property.getProject() != null) {
+
+            try {
+                validation.ofObject(projectId, property.getProject());
+            } catch (NullPointerException e) {
+                validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
+            }
         }
         T prop = patching ? old : empty;
         autoMapper.map(property, prop, patching, true);
@@ -110,19 +113,19 @@ public class PropertyService {
         prop.setType(old.getType());
         prop.setPages(old.getPages());
         prop.setProject(old.getProject());
-        repo.save(prop);
+        return repo.save(prop);
     }
 
-    public void update(Limited propertyDTO, Boolean patching, Long projectId) {
-        updateGeneric(propertyDTO, patching, autoMapperLimited, limitedRepository, new Limited(), projectId);
+    public Limited update(Limited propertyDTO, Boolean patching, Long projectId) {
+        return updateGeneric(propertyDTO, patching, autoMapperLimited, limitedRepository, new Limited(), projectId);
     }
 
-    public void update(Date propertyDTO, Boolean patching, Long projectId) {
-        updateGeneric(propertyDTO, patching, autoMapperDate, dateRepository, new Date(), projectId);
+    public Date update(Date propertyDTO, Boolean patching, Long projectId) {
+        return updateGeneric(propertyDTO, patching, autoMapperDate, dateRepository, new Date(), projectId);
     }
 
-    public void update(Select propertyDTO, Boolean patching, Long projectId) {
-        updateGeneric(propertyDTO, patching, autoMapperSelect, selectRepository, new Select(), projectId);
+    public Select update(Select propertyDTO, Boolean patching, Long projectId) {
+        return updateGeneric(propertyDTO, patching, autoMapperSelect, selectRepository, new Select(), projectId);
     }
 
     public void delete(Long id, Long projectId) {
@@ -131,17 +134,17 @@ public class PropertyService {
         if (validateCanBeDeleted(property)) {
             orderedPageRepository.findAllByPropertyOrdering_Id(property.getId())
                     .forEach(p -> {
-                List<TypeOfProperty> types = getPossibleSubstitutesTypes(p.getType());
-                Property newPropOrd = getOtherProp(p, property, types);
-                if(newPropOrd == null) newPropOrd = getOtherProp(p.getProject(), property, types);
-                p.setPropertyOrdering(newPropOrd);
-                orderedPageRepository.save(p);
-            });
+                        List<TypeOfProperty> types = getPossibleSubstitutesTypes(p.getType());
+                        Property newPropOrd = getOtherProp(p, property, types);
+                        if (newPropOrd == null) newPropOrd = getOtherProp(p.getProject(), property, types);
+                        p.setPropertyOrdering(newPropOrd);
+                        orderedPageRepository.save(p);
+                    });
             //this disassociate the property from the tasks
             disassociatePropertyFromTasks(property);
             propertyRepository.delete(property);
         } else {
-            throw  new PropertyCantBeDeletedException();
+            throw new PropertyCantBeDeletedException();
         }
     }
 
@@ -150,7 +153,7 @@ public class PropertyService {
             //here we filter to find the value to this prop
             PropertyValue propertyValue = t.getProperties().stream().filter(p ->
                     p.getProperty().equals(property)).findFirst().orElse(null);
-            if(propertyValue != null){
+            if (propertyValue != null) {
                 //and here we delete the propvalue and save the task without it
                 t.getProperties().remove(propertyValue);
                 taskService.update(t, true, property.getProject() == null ?
@@ -163,20 +166,21 @@ public class PropertyService {
 
     private Boolean validateCanBeDeleted(Property property) {
         TypeOfPage typeOfPage = getTypeOfDependetPage(property);
-        if(typeOfPage == null){
+        if (typeOfPage == null) {
             return true;
         }
-        List <TypeOfProperty> typesOfProperty = getPossibleSubstitutesTypes(typeOfPage);
-        if(property.getProject()!=null){
+        List<TypeOfProperty> typesOfProperty = getPossibleSubstitutesTypes(typeOfPage);
+        if (property.getProject() != null) {
             return testInProject(typeOfPage, property, typesOfProperty);
-        }else{
+        } else {
             return testInPages(typeOfPage, property, property.getPages(), typesOfProperty);
         }
     }
 
     private List<TypeOfProperty> getPossibleSubstitutesTypes(TypeOfPage type) {
         return switch (type) {
-            case KANBAN -> List.of(TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
+            case KANBAN ->
+                    List.of(TypeOfProperty.SELECT, TypeOfProperty.RADIO, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG);
             case CALENDAR -> List.of(TypeOfProperty.DATE);
             case TIMELINE -> List.of(TypeOfProperty.TIME);
             default -> null;
@@ -193,7 +197,6 @@ public class PropertyService {
     }
 
 
-
     //thats the method test if exists some property of some types at the project
     private Boolean testInProject(TypeOfPage typeOfPage, Property property,
                                   List<TypeOfProperty> typesOfProperty) {
@@ -202,12 +205,12 @@ public class PropertyService {
                 !p.equals(property) &&
                         typesOfProperty.contains(p.getType()))) {
             return true;
-        } else return testInPages( typeOfPage, property, project.getPages(), typesOfProperty);
+        } else return testInPages(typeOfPage, property, project.getPages(), typesOfProperty);
     }
 
     //thats the method test if exists some property of some types at the pages
     private Boolean testInPages(TypeOfPage typeOfPage, Property property,
-                                Collection<Page> pages,List<TypeOfProperty> typesOfProperty) {
+                                Collection<Page> pages, List<TypeOfProperty> typesOfProperty) {
         return pages.stream().allMatch(p -> {
             if (typeOfPage.equals(p.getType())) {
                 return getOtherProp(p, property, typesOfProperty) != null;

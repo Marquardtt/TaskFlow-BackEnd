@@ -12,6 +12,7 @@ import org.springframework.boot.web.embedded.netty.NettyWebServer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +27,9 @@ public class Intervals {
     @OneToOne(cascade = CascadeType.ALL)
     private Duration time = new Duration();
 
-    private Collection<LocalDateTime> starts = new ArrayList<>();
-    private Collection<LocalDateTime> ends = new ArrayList<>();
+    @OneToMany(cascade =  CascadeType.ALL)
+    private Collection<DateTimelines> starts = new ArrayList<>();
+    @OneToMany(cascade =  CascadeType.ALL)
+    private Collection<DateTimelines> ends = new ArrayList<>();
     private String color = "#F04A94";
 }
