@@ -53,6 +53,7 @@ public class SecurityConfig {
 
                 //PROJECT
                 .requestMatchers(HttpMethod.POST, "/project").authenticated()
+                .requestMatchers(HttpMethod.POST, "/project/{projectId}/invite-group").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
@@ -117,7 +118,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
                 //CHAT
                 .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/private/{userId}").access(projectOrGroupAuthorization)
                 .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)
