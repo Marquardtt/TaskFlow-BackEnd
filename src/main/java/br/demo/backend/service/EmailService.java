@@ -23,7 +23,7 @@ public class EmailService {
 
     private CodeRepository codeRepository;
     private UserRepository userRepository;
-    public ResponseEntity sendEmail(String to, String from) {
+    public ResponseEntity sendEmail(String username, String to, String from) {
         codeRepository.deleteAll();
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -31,7 +31,7 @@ public class EmailService {
             message.setFrom(from);
             message.setTo(to);
             message.setSubject("Redefinir senha!");
-            String otp = generateOTP();
+            String otp = generateOTP(username, to);
 
             String text = String.format("""
                 Um pedido de mudança de senha foi pedido neste endereço de email
@@ -49,7 +49,7 @@ public class EmailService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private String generateOTP(){
+    private String generateOTP(String username, String email){
         int length = 4;
         StringBuilder otp = new StringBuilder();
         Random random = new Random();
@@ -58,6 +58,8 @@ public class EmailService {
         }
         Code code = new Code();
         code.setCode(otp.toString());
+        code.setUsername(username);
+        code.setEmail(email);
         codeRepository.save(code);
         return otp.toString();
     }
@@ -69,7 +71,7 @@ public class EmailService {
     public ResponseEntity findUser(SendEmailDTO sendEmailDTO) {
         User user = userRepository.findByUserDetailsEntity_Username(sendEmailDTO.getUsername()).get();
         UserGetDTO userGetDTO = ModelToGetDTO.tranform(user);
-        sendEmail(userGetDTO.getMail(), sendEmailDTO.getEmailFrom());
+        sendEmail(sendEmailDTO.getUsername(), userGetDTO.getMail(), sendEmailDTO.getEmailFrom());
         return new ResponseEntity(HttpStatus.OK);
     }
 }
