@@ -57,7 +57,6 @@ public class UserController {
     public UserGetDTO upDatePassword(@PathVariable String username, @RequestBody String password) {
         return userService.updatePassword(username, password);
     }
-
     @DeleteMapping
     public void delete() throws AccessDeniedException {
         userService.delete();

@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 public class SendEmailDTO {
 
     @NotBlank
-    @Email
-    private String emailTo;
+    private String username;
 
     private String emailFrom = "gestaodeprojetosweg@gmail.com";
 }

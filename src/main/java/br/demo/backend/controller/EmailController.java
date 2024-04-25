@@ -17,12 +17,11 @@ public class EmailController {
 
     @PostMapping
     public ResponseEntity sendEmail (@RequestBody SendEmailDTO sendEmailDTO){
-        return ResponseEntity.ok(emailService.sendEmail(sendEmailDTO));
+        return ResponseEntity.ok(emailService.findUser(sendEmailDTO));
     }
 
     @GetMapping("/code")
     private ResponseEntity<List<Code>> getCode(){
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
         return ResponseEntity.ok(emailService.getCode());
     }
 }

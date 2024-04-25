@@ -47,12 +47,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 
 @Component
 public class ModelToGetDTO {
 
     private static GroupRepository groupRepository;
+
 
     @Autowired
     public void setUserRepository(GroupRepository repo) {

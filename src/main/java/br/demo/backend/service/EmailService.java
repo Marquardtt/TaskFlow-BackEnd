@@ -1,8 +1,12 @@
 package br.demo.backend.service;
 
 import br.demo.backend.model.Code;
+import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.email.SendEmailDTO;
+import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.repository.CodeRepository;
+import br.demo.backend.repository.UserRepository;
+import br.demo.backend.utils.ModelToGetDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +22,14 @@ import java.util.Random;
 public class EmailService {
 
     private CodeRepository codeRepository;
-    public ResponseEntity sendEmail(SendEmailDTO sendEmailDTO) {
+    private UserRepository userRepository;
+    public ResponseEntity sendEmail(String to, String from) {
         codeRepository.deleteAll();
         try {
             SimpleMailMessage message = new SimpleMailMessage();
 
-            message.setFrom(sendEmailDTO.getEmailFrom());
-            message.setTo(sendEmailDTO.getEmailTo());
+            message.setFrom(from);
+            message.setTo(to);
             message.setSubject("Redefinir senha!");
             String otp = generateOTP();
 
@@ -59,5 +64,12 @@ public class EmailService {
 
     public List<Code> getCode() {
         return codeRepository.findAll();
+    }
+
+    public ResponseEntity findUser(SendEmailDTO sendEmailDTO) {
+        User user = userRepository.findByUserDetailsEntity_Username(sendEmailDTO.getUsername()).get();
+        UserGetDTO userGetDTO = ModelToGetDTO.tranform(user);
+        sendEmail(userGetDTO.getMail(), sendEmailDTO.getEmailFrom());
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
