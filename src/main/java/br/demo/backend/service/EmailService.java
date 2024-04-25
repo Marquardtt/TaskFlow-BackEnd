@@ -19,9 +19,7 @@ public class EmailService {
 
     private CodeRepository codeRepository;
     public ResponseEntity sendEmail(SendEmailDTO sendEmailDTO) {
-        if (codeRepository.findAll() != null){
-            codeRepository.deleteAll();
-        }
+        codeRepository.deleteAll();
         try {
             SimpleMailMessage message = new SimpleMailMessage();
 
