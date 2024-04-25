@@ -59,6 +59,7 @@ public class GroupService {
             if(group.getUsers() != null){
                 updatePermission(group, group.getPermissions().stream().findFirst().get());
             }
+
             group.setPermissions(groupDto.getPermissions());
         }
         return ModelToGetDTO.tranform(groupRepository.save(group));

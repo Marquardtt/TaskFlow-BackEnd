@@ -63,8 +63,18 @@ public class FilterAuthentication extends OncePerRequestFilter {
         filterChain.doFilter(request, response); // Call the next filter
 
     }
-    private boolean publicRoute (HttpServletRequest request){
-        return (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/user")) && request.getMethod().equals("POST") ;
+  
+    private boolean publicRoute(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
+
+        if (uri.equals("/forgotPassword/code")) {
+            return method.equals("GET");
+        } else {
+            return uri.equals("/login") || uri.equals("/user") || uri.equals("/forgotPassword") &&
+                    method.equals("POST");
+        }
+
     }
 
 }
