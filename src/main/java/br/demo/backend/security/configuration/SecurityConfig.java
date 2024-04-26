@@ -38,8 +38,6 @@ public class SecurityConfig {
         //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
-
-
                 //USER
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
