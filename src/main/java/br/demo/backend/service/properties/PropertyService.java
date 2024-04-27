@@ -118,6 +118,7 @@ public class PropertyService {
         prop.setType(old.getType());
         prop.setPages(old.getPages());
         prop.setProject(old.getProject());
+        System.out.println(prop.getPages().stream().findFirst().get().getId());
         repo.save(prop);
     }
 
