@@ -12,6 +12,7 @@ import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -26,6 +27,7 @@ import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -76,22 +78,26 @@ public class PropertyService {
         return property;
     }
 
-    private <T extends Property> T saveGeneric(T property, JpaRepository<T, Long> repo) {
+    private <T extends Property> T saveGeneric(T property, JpaRepository<T, Long> repo, Long projectId) {
+        if(property.getProject() == null){
+            Page page = pageRepository.findById(property.getPages().stream().findFirst().get().getId()).get();
+            validation.ofObject(projectId, page.getProject());
+        }
         T prop = repo.save(property);
         setInTheTasksThatAlreadyExists(prop);
         return prop;
     }
 
-    public Limited save(Limited property) {
-        return saveGeneric(property, limitedRepository);
+    public Limited save(Limited property, Long projectId) {
+        return saveGeneric(property, limitedRepository, projectId);
     }
 
-    public Date save(Date property) {
-        return saveGeneric(property, dateRepository);
+    public Date save(Date property, Long projectId) {
+        return saveGeneric(property, dateRepository, projectId);
     }
 
-    public Select save(Select property) {
-        return saveGeneric(property, selectRepository);
+    public Select save(Select property, Long projectId) {
+        return saveGeneric(property, selectRepository, projectId);
     }
 
     private <T extends Property> void  updateGeneric(T property, Boolean patching,
@@ -99,10 +105,12 @@ public class PropertyService {
                                                      JpaRepository<T, Long> repo,
                                                      T empty, Long projectId){
         T old = repo.findById(property.getId()).get();
+        if (patching) BeanUtils.copyProperties(old, empty);
+        autoMapper.map(property, empty, patching);
         try {
-            validation.ofObject(projectId, property.getProject());
+            validation.ofObject(projectId, old.getProject());
         }catch (NullPointerException e){
-            validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
+            validation.ofObject(projectId, old.getPages().stream().findFirst().get().getProject());
         }
         T prop = patching ? old : empty;
         autoMapper.map(property, prop, patching, true);

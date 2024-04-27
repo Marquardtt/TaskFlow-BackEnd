@@ -26,30 +26,24 @@ public class PropertyController {
     public ResponseEntity<Limited> save(@RequestBody Limited property, @PathVariable Long projectId){
         try {
             validation.ofObject(projectId, property.getProject());
-        }catch (NullPointerException e){
-            validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
-        }
-        return new ResponseEntity<>(propertyService.save(property), HttpStatus.CREATED);
+        }catch (NullPointerException ignore){}
+        return new ResponseEntity<>(propertyService.save(property, projectId), HttpStatus.CREATED);
     }
     //Precisa ter permissão de post no projeto
     @PostMapping("/select")
     public ResponseEntity<Select> save(@RequestBody Select property, @PathVariable Long projectId){
         try {
             validation.ofObject(projectId, property.getProject());
-        }catch (NullPointerException e){
-            validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
-        }
-        return new ResponseEntity<>(propertyService.save(property), HttpStatus.CREATED);
+        }catch (NullPointerException ignore){}
+        return new ResponseEntity<>(propertyService.save(property, projectId), HttpStatus.CREATED);
     }
     //Precisa ter permissão de post no projeto
     @PostMapping("/date")
     public ResponseEntity<Date> save(@RequestBody Date property, @PathVariable Long projectId){
         try {
             validation.ofObject(projectId, property.getProject());
-        }catch (NullPointerException e){
-            validation.ofObject(projectId, property.getPages().stream().findFirst().get().getProject());
-        }
-        return new ResponseEntity<>(propertyService.save(property),HttpStatus.CREATED);
+        }catch (NullPointerException ignore){}
+        return new ResponseEntity<>(propertyService.save(property, projectId),HttpStatus.CREATED);
     }
 
     //Precisa ter permissão de put no projeto

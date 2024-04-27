@@ -7,6 +7,7 @@ import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.ProjectRepository;
@@ -68,8 +69,10 @@ public class UserService {
             throw new ForbiddenException();
         }
 
-        User user = patching ? oldUser : new User();
+        User user = new User();
+        if (patching) BeanUtils.copyProperties(oldUser, user);
         autoMapper.map(userDTO, user, patching);
+
         keepFields(user, oldUser);
 
 

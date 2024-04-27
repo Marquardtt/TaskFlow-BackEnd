@@ -35,7 +35,6 @@ import java.util.Collection;
 public class ProjectService {
 
     private ProjectRepository projectRepository;
-    private SelectRepository selectRepository;
     private UserRepository userRepository;
     private LogService logService;
     private GroupRepository groupRepository;

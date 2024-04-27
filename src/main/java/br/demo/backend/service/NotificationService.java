@@ -233,25 +233,33 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(id).get();
         notificationRepository.deleteById(id);
         if(notification.getType().equals(TypeOfNotification.ADDINGROUP)){
-            Group group = groupRepository.findById(notification.getObjId()).get();
-            User user = notification.getUser();
-            testAlreadyAceptToGroup(group, user);
-            group.getUsers().add(user);
-            user.getPermissions().addAll(group.getPermissions());
-            groupRepository.save(group);
-            userRepository.save(user);
+            aceptInviteGroup(notification);
         } else if(notification.getType().equals(TypeOfNotification.INVITETOPROJECT)){
-            Group group = groupRepository.findById(notification.getObjId()).get();
-            Project project = projectRepository.findById(notification.getAuxObjId()).get();
-            testAlreadyAceptToProject(group, project);
-            Permission permission = permissionRepository.findByProjectAndIsDefault(project, true);
-            group.getPermissions().add(permission);
-            Collection<User> users = groupRepository.save(group).getUsers();
-            users.forEach(u -> {
-                u.getPermissions().add(permission);
-                userRepository.save(u);
-            });
+            aceptInviteProject(notification);
         }
+    }
+
+    private void aceptInviteGroup(Notification notification) {
+        Group group = groupRepository.findById(notification.getObjId()).get();
+        User user = notification.getUser();
+        testAlreadyAceptToGroup(group, user);
+        group.getUsers().add(user);
+        user.getPermissions().addAll(group.getPermissions());
+        groupRepository.save(group);
+        userRepository.save(user);
+    }
+
+    private void aceptInviteProject(Notification notification) {
+        Group group = groupRepository.findById(notification.getObjId()).get();
+        Project project = projectRepository.findById(notification.getAuxObjId()).get();
+        testAlreadyAceptToProject(group, project);
+        Permission permission = permissionRepository.findByProjectAndIsDefault(project, true);
+        group.getPermissions().add(permission);
+        Collection<User> users = groupRepository.save(group).getUsers();
+        users.forEach(u -> {
+            u.getPermissions().add(permission);
+            userRepository.save(u);
+        });
     }
 
     private void testAlreadyAceptToGroup(Group group, User user){
