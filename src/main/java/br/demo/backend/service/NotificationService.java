@@ -3,24 +3,18 @@ package br.demo.backend.service;
 import br.demo.backend.exception.AlreadyAceptException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.dtos.group.GroupPutDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.*;
 import br.demo.backend.repository.chat.MessageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
-import br.demo.backend.utils.ModelToGetDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 

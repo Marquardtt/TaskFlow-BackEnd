@@ -43,6 +43,10 @@ public class SecurityConfig {
                 //USER
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
+                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()
+                .requestMatchers(HttpMethod.GET, "/forgotPassword").permitAll()
+                .requestMatchers(HttpMethod.GET, "/forgotPassword/code").permitAll()
+                .requestMatchers(HttpMethod.PATCH, "/user/password/{username}").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
@@ -118,7 +122,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
                 //CHAT
                 .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.POST, "/chat/private").access(projectOrGroupAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/private/{userId}").access(projectOrGroupAuthorization)
                 .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)
@@ -129,10 +133,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/notification/click/{id}").access(notificationsOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/notification/{id}").access(notificationsOwnerAuthorization)
 
-                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
+
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
                 .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
                 .anyRequest().authenticated());
+
 
         // Manter a sessão do usuário na requisição ativa
         http.securityContext((context) -> context.securityContextRepository(repo));

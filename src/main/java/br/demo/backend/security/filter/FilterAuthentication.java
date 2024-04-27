@@ -30,11 +30,11 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(!publicRoute(request)) {
-            Cookie cookie ;
+        if (!publicRoute(request)) {
+            Cookie cookie;
             try {
-                cookie= cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
-            }catch (Exception e ){
+                cookie = cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
+            } catch (Exception e) {
                 response.sendError(401);
                 return;
             }
@@ -63,8 +63,17 @@ public class FilterAuthentication extends OncePerRequestFilter {
         filterChain.doFilter(request, response); // Call the next filter
 
     }
-    private boolean publicRoute (HttpServletRequest request){
-        return (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/user")) && request.getMethod().equals("POST") ;
+
+    private boolean publicRoute(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
+
+        if (uri.equals("/forgotPassword/code") || uri.equals("/forgotPassword") || uri.contains("/user/password/")) {
+            return method.equals("GET") || method.equals("POST") || method.equals("PATCH");
+        }  else {
+            return uri.equals("/login") || uri.equals("/user") && method.equals("POST");
+        }
+
     }
 
 }

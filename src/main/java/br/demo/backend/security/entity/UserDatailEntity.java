@@ -28,7 +28,6 @@ import java.util.List;
 @Builder
 public class UserDatailEntity implements UserDetails {
 
-
     @Id
     @EqualsAndHashCode.Include
     private String username;
@@ -37,6 +36,7 @@ public class UserDatailEntity implements UserDetails {
     private String password;
     @OneToOne(mappedBy = "userDetailsEntity")
     @JsonIgnore
+    @ToString.Exclude
     private User user;
     private boolean enabled = true;
     private boolean accountNonExpired = true;
@@ -44,7 +44,6 @@ public class UserDatailEntity implements UserDetails {
     private boolean credentialsNonExpired = true;
     private LocalDateTime lastPasswordEdition;
     private LocalDateTime whenHeTryDelete;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +35,8 @@ public class IsChatUser implements AuthorizationManager<RequestAuthorizationCont
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext object) {
-        User user = userRepository.findByUserDetailsEntity_Username(((UserDatailEntity)supplier.get().getPrincipal()).getUsername()).get();
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user  = userRepository.findByUserDetailsEntity_Username(username).get();
         Long chatId = Long.parseLong(object.getVariables().get("chatId"));
         Chat chat = chatRepository.findById(chatId).get();
         boolean decision = chat.finUsers().contains(user);

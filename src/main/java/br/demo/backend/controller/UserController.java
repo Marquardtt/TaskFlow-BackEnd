@@ -54,10 +54,10 @@ public class UserController {
 
     //FEITO
     @PatchMapping("/password/{username}")
-    public UserGetDTO upDatePassword(@PathVariable String username, @RequestBody String password) {
+    public UserGetDTO upDatePassword(@PathVariable String username, @RequestParam String password) {
+        System.out.println(password);
         return userService.updatePassword(username, password);
     }
-
     @DeleteMapping
     public void delete() throws AccessDeniedException {
         userService.delete();
