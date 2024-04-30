@@ -3,14 +3,14 @@ package br.demo.backend.model.values;
 import br.demo.backend.exception.DeserializerException;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.properties.Option;
-import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.properties.*;
 import br.demo.backend.model.relations.PropertyValue;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import jakarta.validation.constraints.Null;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -40,14 +40,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         if (isPresent(jsonNode, "property")) {
             JsonNode jsonProp = jsonNode.get("property");
             if (isPresent(jsonProp, "type")) {
-                String type = jsonProp.get("type").asText();
-                Long idProp = null;
-                try {
-                    idProp = jsonProp.get("id").asLong();
-                } catch (Exception e) {
-                    System.out.println("Deu erro no id da prop");
-                }
-                Property property = new Property(idProp, TypeOfProperty.valueOf(type));
+                Property property = deserializerProp(jsonProp);
                 if (isPresent(jsonNode, "value")) {
                     System.out.println(jsonNode);
                     JsonNode jsonValue = jsonNode.get("value");
@@ -60,23 +53,23 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             System.out.println("Deu erro no id da propValue");
                         }
 
-                        if (type.equals("TEXT")) {
+                        if (property.getType().equals(TypeOfProperty.TEXT)) {
                             return new PropertyValue(id, property,  new TextValued(idTaskVl, value.asText()));
                         }
-                        else if(type.equals("ARCHIVE")){
+                        else if(property.getType().equals(TypeOfProperty.ARCHIVE)){
                             return new PropertyValue(id, property,  new ArchiveValued(idTaskVl, null));
                         }
-                        else if(type.equals("DATE")){
+                        else if(property.getType().equals(TypeOfProperty.DATE)){
                             if(value.isNull()){
                                 return new PropertyValue(id, property,  new DateValued(idTaskVl, null));
                             }
                             return new PropertyValue(id, property,  new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
 
                         }
-                        else if(type.equals("NUMBER") || type.equals("PROGRESS")){
+                        else if(property.getType().equals(TypeOfProperty.NUMBER) || property.getType().equals(TypeOfProperty.PROGRESS)){
                             return new PropertyValue(id, property, new NumberValued(idTaskVl, value.asDouble()));
                         }
-                        else if(type.equals("RADIO") || type.equals("SELECT")){
+                        else if(property.getType().equals(TypeOfProperty.RADIO) || property.getType().equals(TypeOfProperty.SELECT)){
                             if(isPresent(value, "id")){
                                 Long idOpt = value.get("id").asLong();
                                 String name = value.get("name").asText();
@@ -84,7 +77,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             }
                             return new PropertyValue(id, property, new UniOptionValued(idTaskVl, null));
                         }
-                        else if(type.equals("CHECKBOX") || type.equals("TAG")){
+                        else if(property.getType().equals(TypeOfProperty.CHECKBOX) || property.getType().equals(TypeOfProperty.TAG)){
                             ArrayList<Option> options = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
@@ -97,7 +90,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
 
                             return new PropertyValue(id, property, new MultiOptionValued(idTaskVl, options));
                         }
-                        else if(type.equals("TIME")){
+                        else if(property.getType().equals(TypeOfProperty.TIME)){
                             String color = value.get("color").asText();
                             ArrayList<DateTimelines> starts = new ArrayList<>();
                             // I have merda here
@@ -107,9 +100,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                                     if (isPresent(valueF, "id")){
                                         date.setId(valueF.get("id").asLong());
                                     }
-                                    System.out.println(valueF.get("date").asText());
                                        date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
-                                    System.out.println(date);
 //                                    LocalDateTime.parse(valueF.asText())
                                     starts.add(date);
                                 }
@@ -137,7 +128,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                                     new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
                         }
 
-                        else if(type.equals("USER")){
+                        else if(property.getType().equals(TypeOfProperty.USER)){
                             ArrayList<User> users = new ArrayList<>();
                             for(JsonNode valueF : value){
                                 if(isPresent(valueF, "id")){
@@ -147,15 +138,28 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                             }
                             return new PropertyValue(id, property, new UserValued(idTaskVl, users));
                         }
-                        throw new DeserializerException("Property have a unknown type");
+                        throw new DeserializerException("Property have a unknown type)");
                     }
                     throw new DeserializerException("Value object dont have a value or Id!");
                 }
                 throw new DeserializerException("TaskValue don't have a value");
             }
-                throw new DeserializerException("Property don't have type attribute or id");
+                throw new DeserializerException("Property don't have property.getType() attribute or id");
         }
             throw new DeserializerException("TaskValue don't have a property");
+    }
+    
+    private Property deserializerProp (JsonNode jsonProp){
+        Long idprop = null;
+        try{
+            idprop = jsonProp.get("id").asLong();
+        }catch (NullPointerException ignore){}
+        TypeOfProperty type = TypeOfProperty.valueOf(jsonProp.get("type").asText());
+        return switch (type){
+            case USER, TIME,  TEXT, NUMBER, PROGRESS, ARCHIVE -> new Limited(idprop, type);
+            case DATE -> new Date(idprop, type);
+            default -> new Select(idprop, type);
+        };
     }
 
     private boolean isPresent(JsonNode jsonNode, String text) {

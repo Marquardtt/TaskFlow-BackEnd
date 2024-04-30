@@ -7,13 +7,19 @@ import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
+import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.PageRepository;
+import br.demo.backend.repository.properties.DateRepository;
+import br.demo.backend.repository.properties.LimitedRepository;
+import br.demo.backend.repository.properties.PropertyRepository;
+import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.values.ArchiveValuedRepository;
@@ -43,6 +49,9 @@ public class PropertyValueService {
     ProjectRepository projectRepository;
     ArchiveValuedRepository archiveValuedRepository;
     private PageRepository pageRepository;
+    private LimitedRepository limitedRepository;
+    private DateRepository dateRepository;
+    private SelectRepository selectRepository;
 
     public Collection<PropertyValue> keepPropertyValues(Task task, Task oldTask){
         return task.getProperties().stream().peek(
@@ -142,4 +151,20 @@ public class PropertyValueService {
     }
 
 
+    public Collection<PropertyValue> createNotSaved(Task task) {
+        return  task.getProperties().stream().map(p -> {
+            if(p.getProperty().getId() == null){
+                Property property;
+                if(p.getProperty() instanceof Limited prop){
+                    property = limitedRepository.save(prop);
+                }else if(p.getProperty() instanceof Date prop){
+                    property = dateRepository.save(prop);
+                }else{
+                    property = selectRepository.save((Select)p.getProperty());
+                }
+                p.setProperty(property);
+            }
+            return p;
+        }).toList();
+    }
 }

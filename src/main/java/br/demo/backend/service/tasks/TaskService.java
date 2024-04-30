@@ -114,8 +114,6 @@ public class TaskService {
         autoMapper.map(taskDTO, task, patching);
 
         keepFields(task, oldTask);
-        //generate logs
-
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
 
         logService.generateLog(Action.UPDATE, task, oldTask);
@@ -133,7 +131,7 @@ public class TaskService {
         task.setLogs(oldTask.getLogs());
         task.setCompleted(false);
         task.setDeleted(false);
-        task.setProperties(propertyValueService.keepPropertyValues(task, oldTask));
+        task.setProperties(propertyValueService.createNotSaved(task));
     }
 
 
