@@ -136,6 +136,14 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
                 .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
+
+                //allow the springdoc swagger-ui/api docs
+                .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
                 .anyRequest().authenticated());
 
 
@@ -144,7 +152,7 @@ public class SecurityConfig {
         http.sessionManagement(config -> {
             config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         });
-        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
 
         http.formLogin(AbstractHttpConfigurer::disable);
         http.logout(AbstractHttpConfigurer::disable);
