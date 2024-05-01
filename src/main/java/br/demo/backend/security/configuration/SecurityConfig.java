@@ -9,6 +9,7 @@ import br.demo.backend.security.IsOwnerOrMemberAuthorization;
 import br.demo.backend.security.ProjectOrGroupAuthorization;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.filter.FilterAuthentication;
+import br.demo.backend.security.service.AuthenticationGitHubService;
 import br.demo.backend.security.service.AuthenticationService;
 import br.demo.backend.security.utils.CookieUtil;
 import br.demo.backend.service.UserService;
@@ -44,13 +45,8 @@ public class SecurityConfig {
     private final AuthorizationRequestsRoutes authorizationRequestsRoutes;
     private final IsOwnerAuthorization isOwnerAuthorization;
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
-    private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
-    private SecurityContextRepository securityContextRepository;
-
     private final CorsConfigurationSource corsConfig;
-    private final AuthenticationService authenticationService;
-    private final CookieUtil cookieUtil = new CookieUtil();
-    private final UserService userService;
+    private final AuthenticationGitHubService authenticationGitHubService;
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
@@ -142,36 +138,17 @@ public class SecurityConfig {
                 .oauth2Login(httpOauth2-> httpOauth2.successHandler((request, response, authentication) -> {
                     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
                     String username = oAuth2User.getAttribute("login");
-
                     try {
-                        UserDetails userDetails = authenticationService.loadUserByUsername(username);
-                        Authentication authentication1 =
-                                new UsernamePasswordAuthenticationToken(
-                                        userDetails,
-                                        userDetails.getPassword(),
-                                        userDetails.getAuthorities());// Create the authentication object
-
-                        // Create a new context and set the authentication in it
-                        SecurityContext securityContext = SecurityContextHolder.createEmptyContext(); // Create a new context
-                        securityContext.setAuthentication(authentication1); // Set the authentication in the context because the session strategy will use it
-                        securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
-
-                        Cookie newCookie = cookieUtil.gerarCookieJwt(userDetails); // Generate a new cookie
-
-
+                        Cookie newCookie = authenticationGitHubService.loginWithGitHub(request, response, username);
                         response.addCookie(newCookie); // Add the cookie to the response
                         response.sendRedirect("http://localhost:3000/" + username);
                     } catch (UsernameNotFoundException e) {
 
                         String name = oAuth2User.getAttribute("name");
-                        UserDatailEntity userDatailEntity= new UserDatailEntity();
-                        userDatailEntity.setUsername(username);
-                        userDatailEntity.setPassword(username);
-                        UserPostDTO userPostDTO = new UserPostDTO(name, "",userDatailEntity );
-                        UserGetDTO user =userService.save(userPostDTO);
-
-
-                        System.out.println(user);
+                        authenticationGitHubService.createUserGitHub(username, name);
+                        Cookie newCookie = authenticationGitHubService.loginWithGitHub(request, response, username);
+                        response.addCookie(newCookie); // Add the cookie to the response
+                        response.sendRedirect("http://localhost:3000/" + username);
                     }
                 }) );
 //                .oauth2Client(Customizer.withDefaults());

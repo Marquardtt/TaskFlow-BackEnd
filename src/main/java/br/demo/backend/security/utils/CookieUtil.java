@@ -8,7 +8,6 @@ import org.springframework.web.util.WebUtils;
 import java.util.Arrays;
 
 public class CookieUtil {
-
     public Cookie gerarCookieJwt(UserDetails userDetails){
         String token = new JwtUtil().gerarToken(userDetails);
         Cookie cookie = new Cookie("JWT", token);

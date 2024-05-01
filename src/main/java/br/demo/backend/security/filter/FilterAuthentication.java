@@ -30,7 +30,6 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println(request.getRequestURI());
         if (!publicRoute(request)) {
             Cookie cookie;
             try {
@@ -56,13 +55,9 @@ public class FilterAuthentication extends OncePerRequestFilter {
             securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
 
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
-
-
             response.addCookie(newCookie); // Add the cookie to the response
         }
-
         filterChain.doFilter(request, response); // Call the next filter
-
     }
 
     private boolean publicRoute(HttpServletRequest request) {
