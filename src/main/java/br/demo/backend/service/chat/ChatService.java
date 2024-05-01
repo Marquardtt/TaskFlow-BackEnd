@@ -178,7 +178,7 @@ public class ChatService {
         simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageWithId);
 
         Chat finalChat = chat;
-        message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), finalChat));
+        message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), ModelToGetDTO.tranform(finalChat)));
     }
 
     private Message getmessageWithId(Chat chat, Message message) {
