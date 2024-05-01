@@ -30,11 +30,12 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(!publicRoute(request)) {
-            Cookie cookie ;
+        System.out.println(request.getRequestURI());
+        if (!publicRoute(request)) {
+            Cookie cookie;
             try {
-                cookie= cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
-            }catch (Exception e ){
+                cookie = cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
+            } catch (Exception e) {
                 response.sendError(401);
                 return;
             }
@@ -63,8 +64,9 @@ public class FilterAuthentication extends OncePerRequestFilter {
         filterChain.doFilter(request, response); // Call the next filter
 
     }
-    private boolean publicRoute (HttpServletRequest request){
-        return (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/user")) && request.getMethod().equals("POST") ;
+
+    private boolean publicRoute(HttpServletRequest request) {
+        return ((request.getRequestURI().equals("/login") || (request.getRequestURI().equals("/user")) && request.getMethod().equals("POST"))) || request.getRequestURI().equals("/login/oauth2/github") || request.getRequestURI().equals("/favicon.ico");
     }
 
 }
