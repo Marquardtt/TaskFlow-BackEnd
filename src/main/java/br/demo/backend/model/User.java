@@ -49,7 +49,7 @@ public class User {
     private Configuration configuration = new Configuration();
     @ManyToMany (fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private UserDatailEntity userDetailsEntity;
     @OneToMany(mappedBy = "user")
     private Collection<Notification> notifications;

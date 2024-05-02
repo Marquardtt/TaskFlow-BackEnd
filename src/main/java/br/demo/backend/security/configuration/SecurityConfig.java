@@ -1,15 +1,34 @@
 package br.demo.backend.security.configuration;
-
-import br.demo.backend.security.*;
+import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.UserPostDTO;
+import br.demo.backend.security.AuthorizationRequestsRoutes;
+import br.demo.backend.security.IsOwnerAuthorization;
+import br.demo.backend.security.IsOwnerOrMemberAuthorization;
+import br.demo.backend.security.ProjectOrGroupAuthorization;
+import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.filter.FilterAuthentication;
+import br.demo.backend.security.service.AuthenticationGitHubService;
+import br.demo.backend.security.service.AuthenticationService;
+import br.demo.backend.security.utils.CookieUtil;
+import br.demo.backend.service.UserService;
 import br.demo.backend.websocket.WebSocketConfig;
+import jakarta.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -26,8 +45,8 @@ public class SecurityConfig {
     private final AuthorizationRequestsRoutes authorizationRequestsRoutes;
     private final IsOwnerAuthorization isOwnerAuthorization;
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
-    private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
     private final CorsConfigurationSource corsConfig;
+    private final AuthenticationGitHubService authenticationGitHubService;
     private final IsChatUser isChatUser;
     private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
@@ -38,8 +57,6 @@ public class SecurityConfig {
         //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
-
-
                 //USER
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
@@ -67,7 +84,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/property-value/{id}").access(isOwnerAuthorization)
-                //ProjectAndTask
+
                 //TASK
                 .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/task/property-value/{id}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
@@ -121,7 +138,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
                 .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
                 //CHAT
-                .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerAuthorization)
+                .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerOrMemberAuthorization)
                 .requestMatchers(HttpMethod.POST, "/chat/private/{userId}").access(projectOrGroupAuthorization)
                 .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
                 .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
@@ -132,11 +149,38 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/notification/visualize").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/notification/click/{id}").access(notificationsOwnerAuthorization)
                 .requestMatchers(HttpMethod.DELETE, "/notification/{id}").access(notificationsOwnerAuthorization)
-
-
+                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
                 .requestMatchers(HttpMethod.POST, "/projects").authenticated()
                 .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
-                .anyRequest().authenticated());
+                .requestMatchers(HttpMethod.POST, "/projects").authenticated()
+                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
+
+                //allow the springdoc swagger-ui/api docs
+                .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
+                .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
+                .anyRequest().authenticated())
+                .oauth2Login(httpOauth2-> httpOauth2.successHandler((request, response, authentication) -> {
+                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                    String username = oAuth2User.getAttribute("login");
+                    try {
+                        Cookie newCookie = authenticationGitHubService.loginWithGitHub(request, response, username);
+                        response.addCookie(newCookie); // Add the cookie to the response
+                        response.sendRedirect("http://localhost:3000/" + username);
+                    } catch (UsernameNotFoundException e) {
+
+                        String name = oAuth2User.getAttribute("name");
+                        authenticationGitHubService.createUserGitHub(username, name);
+                        Cookie newCookie = authenticationGitHubService.loginWithGitHub(request, response, username);
+                        response.addCookie(newCookie); // Add the cookie to the response
+                        response.sendRedirect("http://localhost:3000/" + username);
+                    }
+                }) );
+//                .oauth2Client(Customizer.withDefaults());
+
 
 
         // Manter a sessão do usuário na requisição ativa
@@ -144,11 +188,10 @@ public class SecurityConfig {
         http.sessionManagement(config -> {
             config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         });
-        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
 
         http.formLogin(AbstractHttpConfigurer::disable);
         http.logout(AbstractHttpConfigurer::disable);
-
 
         return http.build();
     }

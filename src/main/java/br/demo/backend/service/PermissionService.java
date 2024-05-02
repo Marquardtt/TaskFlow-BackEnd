@@ -1,6 +1,4 @@
 package br.demo.backend.service;
-
-
 import br.demo.backend.model.Group;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -20,7 +18,6 @@ import br.demo.backend.repository.PermissionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
 import java.util.Collection;
 
 @Service
@@ -30,21 +27,22 @@ public class PermissionService {
     private PermissionRepository permissionRepository;
     private AutoMapper<Permission> autoMapper;
     private ProjectRepository projectRepository;
-    private UserRepository useRepository;
+    private UserRepository userRepository;
     private IdProjectValidation validation;
     private GroupRepository groupRepository;
     private GroupService groupService;
     private UserService userService;
+
 
     public PermissionGetDTO save(PermissionPostDTO permissionDto, Long projectId) {
         System.out.println(permissionDto.getIsDefault());
         Project project = projectRepository.findById(projectId).get();
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
-        System.out.println(permission.getIsDefault());
-        permission.setIsDefault(permissionDto.getIsDefault());
-        permission.setProject(project);
-        return ModelToGetDTO.tranform(permissionRepository.save(permission));
+        Permission permissionSaved = permissionRepository.save(permission);
+        User owner  = userRepository.findById(permissionSaved.getProject().getOwner().getId()).get();
+        permissionSaved.getProject().setOwner(owner);
+        return ModelToGetDTO.tranform(permissionSaved);
     }
 
     public PermissionGetDTO update(PermissionPutDTO permissionDto, Boolean patching, Long projectid) {

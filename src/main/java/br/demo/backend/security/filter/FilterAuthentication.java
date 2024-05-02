@@ -55,25 +55,15 @@ public class FilterAuthentication extends OncePerRequestFilter {
             securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
 
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
-
-
             response.addCookie(newCookie); // Add the cookie to the response
         }
-
         filterChain.doFilter(request, response); // Call the next filter
-
     }
 
     private boolean publicRoute(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        String method = request.getMethod();
-
-        if (uri.equals("/forgotPassword/code") || uri.equals("/forgotPassword") || uri.contains("/user/password/")) {
-            return method.equals("GET") || method.equals("POST") || method.equals("PATCH");
-        }  else {
-            return uri.equals("/login") || uri.equals("/user") && method.equals("POST");
-        }
-
+        return ((request.getRequestURI().equals("/login") 
+                 || (request.getRequestURI().equals("/user"))
+                 && request.getMethod().equals("POST"))) || request.getRequestURI().equals("/login/oauth2/github") || request.getRequestURI().equals("/favicon.ico");
     }
 
 }
