@@ -6,7 +6,9 @@ import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.GroupService;
+import br.demo.backend.utils.IdGroupValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
@@ -20,27 +22,29 @@ import java.util.Collection;
 @RequestMapping("/group")
 public class GroupController {
     private GroupService groupService;
+    private IdGroupValidation validation;
 
     //Precisa estar logado
     @PostMapping
     public GroupGetDTO insert(@RequestBody GroupPostDTO group) {
         return groupService.save(group);
     }
-
     @PutMapping("/{groupId}")
-    public GroupGetDTO upDate(@RequestBody GroupPutDTO group) {
+    public GroupGetDTO upDate(@RequestBody GroupPutDTO group, @PathVariable Long groupId) {
+        validation.of(groupId, group.getId());
         return groupService.update(group, false);
     }
     @PatchMapping("/{groupId}")
-    public GroupGetDTO patch(@RequestBody GroupPutDTO group) {
+    public GroupGetDTO patch(@RequestBody GroupPutDTO group, @PathVariable Long groupId) {
+        validation.of(groupId, group.getId());
         return groupService.update(group, true);
     }
 
     @GetMapping("/{groupId}")
-    public GroupGetDTO findOne(@PathVariable Long id) {
-        return groupService.findOne(id);
+    public GroupGetDTO findOne(@PathVariable Long groupId) {
+        return groupService.findOne(groupId);
     }
-    @GetMapping
+    @GetMapping("/my")
     public Collection<SimpleGroupGetDTO> findGroupsByAUser() {
         return groupService.findGroupsByUser();
     }
@@ -60,8 +64,15 @@ public class GroupController {
     }
 
     @PatchMapping("/{groupId}/change-owner")
-    public GroupGetDTO updateOwner(@RequestBody User newOwner, @PathVariable Long groupId) {
+    public GroupGetDTO updateOwner(@RequestBody OtherUsersDTO newOwner, @PathVariable Long groupId) {
         return groupService.updateOwner(newOwner, groupId);
-
     }
+
+    @PostMapping("/{groupId}/add-user/{userId}")
+    public void addUser(@PathVariable Long userId, @PathVariable Long groupId) {
+         groupService.inviteUser( groupId, userId);
+    }
+
+    @GetMapping
+    public Collection<SimpleGroupGetDTO> getAllGroups(){return groupService.findAll();}
 }

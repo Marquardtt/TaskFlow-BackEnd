@@ -3,10 +3,13 @@ package br.demo.backend.service;
 
 import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
+import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
+import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.exception.ForbiddenException;
@@ -36,6 +39,7 @@ public class UserService {
     private ProjectRepository projectRepository;
     private AutoMapper<User> autoMapper;
     private NotificationService notificationService;
+    private PermissionRepository permissionRepository;
 
     //find one, normally used to find a user in the same group or project
     public OtherUsersDTO findOne(String id) {
@@ -47,7 +51,7 @@ public class UserService {
     public UserGetDTO save(UserPostDTO userDto) {
         try {
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
-            throw new IllegalArgumentException("Username is already been using by other user0");
+            throw new UsernameAlreadyUsedException();
         } catch (NoSuchElementException e) {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
@@ -65,8 +69,10 @@ public class UserService {
             throw new ForbiddenException();
         }
 
-        User user = patching ? oldUser : new User();
+        User user = new User();
+        if (patching) BeanUtils.copyProperties(oldUser, user);
         autoMapper.map(userDTO, user, patching);
+
         keepFields(user, oldUser);
 
 
@@ -84,7 +90,7 @@ public class UserService {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         validateDelete(username);
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
-      // thats not a real delete, just a disable for a time
+        // thats not a real delete, just a disable for a time
         user.getUserDetailsEntity().setEnabled(false);
         user.getUserDetailsEntity().setWhenHeTryDelete(LocalDateTime.now());
         userRepository.save(user);
@@ -92,11 +98,17 @@ public class UserService {
 
     private void validateDelete(String username) {
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(username);
+
         if (!projects.isEmpty()) {
-            throw new HeHaveProjectsException();
+            projects.forEach(p -> {
+                Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(p);
+                if (!groups.isEmpty()) {
+                    throw new HeHaveProjectsException();
+                }
+            });
         }
         Collection<Group> groups = groupRepository.findGroupsByOwner_UserDetailsEntity_Username(username);
-        if (!groups.isEmpty()) {
+        if (!groups.isEmpty() && groups.stream().anyMatch(g -> !g.getUsers().isEmpty())) {
             throw new HeHaveGroupsException();
         }
     }
@@ -141,11 +153,13 @@ public class UserService {
         return ModelToGetDTO.tranform(userRepository.findByUserDetailsEntity_Username(username).get());
     }
 
-    public PermissionGetDTO updatePermissionOfAUser(String username, Permission permission) {
+    public PermissionGetDTO updatePermissionOfAUser(String username, Permission permissionTemp) {
+        Permission permission = permissionRepository.findById(permissionTemp.getId()).get();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<Permission> permissions = getNewPermissions(user, permission);
         permissions.add(permission);
         user.setPermissions(permissions);
+        userRepository.save(user);
         return ModelToGetDTO.tranform(permission);
     }
 
@@ -172,15 +186,7 @@ public class UserService {
                 .findFirst().orElse(null);
     }
 
-    public UserGetDTO visualizedNotifications() {
-        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findByUserDetailsEntity_Username(username).get();
-        user.getNotifications().stream().filter(n -> !n.getVisualized()).forEach(n -> {
-            n.setVisualized(true);
-            notificationService.updateNotification(n);
-        });
-        return ModelToGetDTO.tranform(user);
-    }
+
 }
 
 

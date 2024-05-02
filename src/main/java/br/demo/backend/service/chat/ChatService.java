@@ -51,15 +51,17 @@ public class ChatService {
 
     public Collection<ChatPrivateGetDTO> findAllPrivate() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<ChatPrivate> chats = chatPrivateRepository
-                .findChatsByUsers_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
+                .findAllByUsersContainingOrderByLastMessage_DateCreateDesc(user);
         return chats.stream().map(c -> privateToGetDTO(c, username)).toList();
     }
 
     public Collection<ChatGroupGetDTO> findAllGroup() {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<ChatGroup> chatGroups = chatGroupRepository
-                .findChatsByGroup_Users_UserDetailsEntity_UsernameOrderByLastMessage_DateCreateDesc(username);
+                .findAllByGroup_OwnerOrGroup_UsersContainingOrderByLastMessage_DateCreateDesc(user, user);
         return chatGroups.stream().map(this::groupToGetDTO).toList();
     }
 
@@ -92,21 +94,23 @@ public class ChatService {
             n.setVisualized(true);
             notificationService.updateNotification(n);
         });
-        return ModelToGetDTO.tranform(chat);
+        return ModelToGetDTO.tranform(chatRepository.findById(chat.getId()).get());
     }
 
     private void setAllMessagesToVisualized(Chat chat, User user) {
         //set all messages to visualized
-        Collection<Message> messages = chat.getMessages().stream().peek(m -> {
-            m.setDestinations(m.getDestinations().stream().peek(d -> {
-                //if the user is the destination of the message, set the message to visualized
-                if (d.getUser().equals(user)) {
-                    d.setVisualized(true);
-                }
-            }).toList());
+        chat.getMessages().forEach(m -> {
+            ArrayList<Destination> destinations = new ArrayList<>();
+            try {
+                Destination dest = m.getDestinations().stream().filter(d -> d.getUser().equals(user)).findFirst().get();
+                dest.setVisualized(true);
+                destinations.add(dest);
+            } catch (NoSuchElementException ignore) {
+            }
+            destinations.addAll(m.getDestinations().stream().filter(d -> !d.getUser().equals(user)).toList());
+            m.setDestinations(destinations);
             messageRepository.save(m);
-        }).toList();
-        chat.setMessages(messages);
+        });
     }
 
     public ChatGroupGetDTO save(ChatGroupPostDTO chatGroup) {
@@ -117,9 +121,12 @@ public class ChatService {
     }
 
     public ChatPrivateGetDTO save(ChatPrivatePostDTO chatPrivate) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         ChatPrivate chat = new ChatPrivate();
         BeanUtils.copyProperties(chatPrivate, chat);
         chat.setType(TypeOfChat.PRIVATE);
+        chat.getUsers().add(user);
         return (ChatPrivateGetDTO) ModelToGetDTO.tranform(chatPrivateRepository.save(chat));
     }
 
@@ -145,7 +152,7 @@ public class ChatService {
 //    }
 
     //that method update the messages list, so it update a message or insert a new one
-    public MessageGetDTO updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
+    public void updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
         Chat chat = chatRepository.findById(chatId).get();
         //map the string to a message
         MessagePostPutDTO messageDto = objectMapper.readValue(messageString, MessagePostPutDTO.class);
@@ -154,10 +161,10 @@ public class ChatService {
         if (annex != null) {
             message.setAnnex(new Archive(annex));
         }
-        return saveTheUpdatableMessage(chat, message);
+         saveTheUpdatableMessage(chat, message);
     }
 
-    private MessageGetDTO saveTheUpdatableMessage(Chat chat, Message message) {
+    private void saveTheUpdatableMessage(Chat chat, Message message) {
         createDestinations(chat, message);
         //saving the chat with the new message
         if (chat.getType().equals(TypeOfChat.PRIVATE)) {
@@ -167,10 +174,11 @@ public class ChatService {
         }
         Message messageWithId = getmessageWithId(chat, message);
         //generating the notification for each user of the chat
-        MessageGetDTO messageGetDTO = ModelToGetDTO.tranform(messageWithId);
-        notificationService.generateNotification(TypeOfNotification.CHAT, messageGetDTO.getId(), chat.getId());
-        simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageGetDTO);
-        return messageGetDTO;
+        notificationService.generateNotification(TypeOfNotification.CHAT, messageWithId.getId(), chat.getId());
+        simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageWithId);
+
+        Chat finalChat = chat;
+        message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), ModelToGetDTO.tranform(finalChat)));
     }
 
     private Message getmessageWithId(Chat chat, Message message) {
@@ -182,15 +190,12 @@ public class ChatService {
 
     private void createDestinations(Chat chat, Message message) {
         //getting the users of a chat
-        Collection<User> users = null;
-        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
-            users = ((ChatPrivate) chat).getUsers();
-        } else {
-            users = ((ChatGroup) chat).getGroup().getUsers();
-        }
+        Collection<User> users = chat.finUsers();
         //creating a destination for each user of the chat
-        message.setDestinations(users.stream().filter(u -> !u.equals(message.getSender())).map(u -> new Destination(
-                new DestinationId(u.getId(), message.getId()), u, message, false)
+        message.setDestinations(users.stream().filter(u -> !u.equals(message.getSender())).map(u -> {
+                    return new Destination(
+                            new DestinationId(u.getId(), message.getId()), u, message, false);
+                }
         ).toList());
     }
 

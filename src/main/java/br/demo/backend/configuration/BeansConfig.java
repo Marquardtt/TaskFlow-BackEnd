@@ -27,7 +27,7 @@ public class BeansConfig  {
     @Bean
     public CorsConfigurationSource corsConfig(){
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000","https://github.com/")); // all aplications that are allowed
+        corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "https://proxy.hoppscotch.io/","https://github.com/")); // all aplications that are allowed
         corsConfig.setAllowedMethods(List.of("POST","GET", "PUT", "PATCH", "DELETE")); // all requests that are allowed
         corsConfig.setAllowCredentials(true);
         corsConfig.setAllowedHeaders(List.of("*"));

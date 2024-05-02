@@ -1,20 +1,30 @@
 package br.demo.backend.service;
 
 import br.demo.backend.model.Archive;
+import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Date;
+import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
+import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.*;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.repository.pages.PageRepository;
+import br.demo.backend.repository.properties.DateRepository;
+import br.demo.backend.repository.properties.LimitedRepository;
+import br.demo.backend.repository.properties.PropertyRepository;
+import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.repository.values.ArchiveValuedRepository;
 import br.demo.backend.repository.values.UserValuedRepository;
+import br.demo.backend.utils.IdProjectValidation;
 import br.demo.backend.utils.ModelToGetDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,9 +44,14 @@ public class PropertyValueService {
     UserRepository userRepository;
     UserValuedRepository userValuedRepository;
     TaskRepository taskRepository;
+    private IdProjectValidation validation;
     PropertyValueRepository propertyValueRepository;
     ProjectRepository projectRepository;
     ArchiveValuedRepository archiveValuedRepository;
+    private PageRepository pageRepository;
+    private LimitedRepository limitedRepository;
+    private DateRepository dateRepository;
+    private SelectRepository selectRepository;
 
     public Collection<PropertyValue> keepPropertyValues(Task task, Task oldTask){
         return task.getProperties().stream().peek(
@@ -54,7 +69,6 @@ public class PropertyValueService {
         Collection<PropertyValue> propertyValues = new ArrayList<>(properties.stream().map(this::setTaskProperty).toList());
         propertyValues.addAll(taskEmpty.getProperties());
         taskEmpty.setProperties(propertyValues);
-        System.out.println(ModelToGetDTO.tranform(taskEmpty));
     }
 
     public PropertyValue setTaskProperty(Property p) {
@@ -113,9 +127,10 @@ public class PropertyValueService {
         }
     }
 
-    public ArchiveValued setArchived(MultipartFile file, Long id, Boolean isInProject){
+    public ArchiveValued setArchived(MultipartFile file, Long id, Boolean isInProject, Long idProject){
         ArchiveValued archiveValued = archiveValuedRepository.findById(id).get();
-        verifyConsistance(archiveValued, isInProject);
+
+        verifyConsistance(archiveValued, isInProject, idProject);
         Archive archive = null;
         if(file != null){
             archive = new Archive(file);
@@ -123,8 +138,11 @@ public class PropertyValueService {
         archiveValued.setValue(archive);
         return archiveValuedRepository.save(archiveValued);
     }
-    private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject){
+    private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject){
         PropertyValue prop = propertyValueRepository.findByProperty_TypeAndValue(TypeOfProperty.ARCHIVE, archiveValued);
+        Task task = taskRepository.findByPropertiesContaining(prop);
+        Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
+        validation.ofObject(idProject, page.getProject());
         if(taskRepository.findByPropertiesContaining(prop) != null && isInProject){
             throw new IllegalArgumentException("The propertyvalue is on the task and not at the project");
         } else if (projectRepository.findByValuesContaining(prop) != null && !isInProject) {
@@ -133,4 +151,20 @@ public class PropertyValueService {
     }
 
 
+    public Collection<PropertyValue> createNotSaved(Task task) {
+        return  task.getProperties().stream().map(p -> {
+            if(p.getProperty().getId() == null){
+                Property property;
+                if(p.getProperty() instanceof Limited prop){
+                    property = limitedRepository.save(prop);
+                }else if(p.getProperty() instanceof Date prop){
+                    property = dateRepository.save(prop);
+                }else{
+                    property = selectRepository.save((Select)p.getProperty());
+                }
+                p.setProperty(property);
+            }
+            return p;
+        }).toList();
+    }
 }

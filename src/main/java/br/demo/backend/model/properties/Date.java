@@ -36,4 +36,8 @@ public class   Date extends Property {
         this.color = color;
     }
 
+    public Date(Long idprop, TypeOfProperty type) {
+        super(idprop, type);
+    }
+
 }

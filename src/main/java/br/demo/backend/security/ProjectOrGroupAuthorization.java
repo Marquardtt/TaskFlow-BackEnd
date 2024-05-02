@@ -8,6 +8,10 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
+import br.demo.backend.security.utils.GetHisProjects;
+import br.demo.backend.service.ProjectService;
+import br.demo.backend.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -15,7 +19,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
@@ -24,6 +30,7 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
 
     @Override
     public void verify(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
@@ -31,39 +38,34 @@ public class ProjectOrGroupAuthorization implements AuthorizationManager<Request
     }
 
     @Override
+    @Transactional
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext object) {
-        String username = object.getVariables().get("username");
-        User userFind = userRepository.findByUserDetailsEntity_Username(username).get();
-        User user = userRepository.findByUserDetailsEntity_Username(
-                ((UserDatailEntity) supplier.get().getPrincipal()).getUsername()).get();
+        User user = userRepository.findByUserDetailsEntity_Username(((UserDatailEntity)supplier.get().getPrincipal()).getUsername()).get();
+        Map<String, String> variables = object.getVariables();
 
-        String projectId = object.getVariables().get("projectId");
+        Long otherUserId = Long.parseLong(variables.get("userId"));
 
-        Project project = projectRepository.findById(Long.parseLong(projectId)).get();
+        User otherUser = userRepository.findById(otherUserId).get();
 
-        List<Group> groupList = groupRepository.findAll();
-        boolean decision = false;
+        Collection<Group> groups = groupRepository.findGroupsByOwnerOrUsersContaining(user, user);
 
-        if (project.getOwner().equals(user) ) {
-            for (Permission permission : userFind.getPermissions()) {
-                if (permission.getProject().equals(project)) {
-                    decision = true;
-                }
-            }
-        } else if ( project.getOwner().equals(userFind)) {
-            for (Permission permission : user.getPermissions()) {
-                if (permission.getProject().equals(project)){
-                    decision = true;
-                }
 
-            }
-        }else {
-            for (Group group : groupList) {
-                if (group.getUsers().containsAll(List.of(user, userFind))) {
-                    decision = true;
-                }
-            }
+
+        //se ambos estao num mesmo grupo
+        boolean decision = groups.stream().anyMatch(group -> groupTest(otherUser, group));
+
+
+        if (!decision){
+            Collection<Project> projects =  GetHisProjects.getHisProjects(user);
+            Collection<Project> otherProjects = GetHisProjects.getHisProjects(otherUser);
+            decision = projects.stream().anyMatch(otherProjects::contains);
         }
+
+
         return new AuthorizationDecision(decision);
+    }
+
+    private boolean groupTest(User user, Group group) {
+        return group.getOwner().equals(user) || group.getUsers().contains(user);
     }
 }

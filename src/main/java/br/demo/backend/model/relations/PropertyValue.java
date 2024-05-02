@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Table(name = "tb_task_value")
+@Table(name = "tb_property_value")
 @JsonDeserialize(using = DeserializerValue.class)
 public class PropertyValue {
     @Id
@@ -30,9 +30,7 @@ public class PropertyValue {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @NotNull
-    @JoinColumn(nullable = false, updatable = false)
+    @ManyToOne
     private Property property;
     
     @NotNull

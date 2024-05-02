@@ -19,8 +19,7 @@ public class Permission {
     @GeneratedValue
     @EqualsAndHashCode.Include
     private Long id;
-    @NotNull
-    @Column(nullable = false)
+    @Column
     private String name;
     @NotNull
     @Column(nullable = false)
@@ -28,8 +27,8 @@ public class Permission {
     private TypePermission permission = TypePermission.READ;
     @ManyToOne()
     @JoinColumn(nullable = false)
-    @NotNull
     private Project project;
+    private Boolean isDefault = false;
 
     public Permission(Long id) {
         this.id = id;

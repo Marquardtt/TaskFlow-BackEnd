@@ -11,7 +11,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/notification", "/chat");
+        config.enableSimpleBroker("/notification", "/chat", "/chats");
         config.setApplicationDestinationPrefixes("/app");
 
     }
@@ -19,7 +19,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/notifications").setAllowedOrigins("http://localhost:3000").withSockJS();
-
     }
 
 }

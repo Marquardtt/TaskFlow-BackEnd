@@ -61,7 +61,9 @@ public class FilterAuthentication extends OncePerRequestFilter {
     }
 
     private boolean publicRoute(HttpServletRequest request) {
-        return ((request.getRequestURI().equals("/login") || (request.getRequestURI().equals("/user")) && request.getMethod().equals("POST"))) || request.getRequestURI().equals("/login/oauth2/github") || request.getRequestURI().equals("/favicon.ico");
+        return ((request.getRequestURI().equals("/login") 
+                 || (request.getRequestURI().equals("/user"))
+                 && request.getMethod().equals("POST"))) || request.getRequestURI().equals("/login/oauth2/github") || request.getRequestURI().equals("/favicon.ico");
     }
 
 }

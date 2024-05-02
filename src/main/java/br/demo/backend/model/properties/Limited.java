@@ -37,4 +37,8 @@ public class Limited extends Property {
         super(id, name, visible, obligatory, type, pages, project);
         this.maximum = maximum;
     }
+    public Limited(Long idprop, TypeOfProperty type) {
+        super(idprop, type);
+    }
+
 }

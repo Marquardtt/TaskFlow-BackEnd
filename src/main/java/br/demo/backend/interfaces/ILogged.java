@@ -1,4 +1,4 @@
-package br.demo.backend.model.interfaces;
+package br.demo.backend.interfaces;
 
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;

@@ -32,27 +32,22 @@ public class AuthorizationRequestsRoutes implements AuthorizationManager<Request
         UserDatailEntity userDatailEntity = (UserDatailEntity) authentication.getPrincipal();
         Map<String, String> variables = object.getVariables();
         long projectId = Long.parseLong(variables.get("projectId"));
-        Project project = projectRepository.findById(projectId).get();
         boolean decision = false;
-        if (!project.getOwner().equals(((UserDatailEntity) authentication.getPrincipal()).getUser())) {
-            if (!object.getRequest().getRequestURI().contains("picture")) {
-                if (userDatailEntity.getAuthorities() != null) {
-                    for (GrantedAuthority simple :
-                            userDatailEntity.getAuthorities()) {
-                        if (!(object.getRequest().getRequestURI().contains("redo") && simple.getAuthority().contains("Project_" + projectId + "_DELETE"))) {  // verifica se for uma task e se for o método redo, pois o mesmo precisa da permissão DELETE para realizar o redo
-                            if ((("Project_" + projectId + "_").contains(simple.getAuthority()) && (object.getRequest().getMethod()).contains(simple.getAuthority()))) {
-                                decision = true;
-                                break;
-                            }
-                        }else {
+        if (!object.getRequest().getRequestURI().contains("picture")) {
+            if (userDatailEntity.getAuthorities() != null) {
+                for (GrantedAuthority simple :
+                        userDatailEntity.getAuthorities()) {
+                    if (!(object.getRequest().getRequestURI().contains("redo"))) {  // verifica se for uma task e se for o método redo, pois o mesmo precisa da permissão DELETE para realizar o redo
+                        if ((simple.getAuthority().contains(("Project_" + projectId + "_")) && (simple.getAuthority()).contains(object.getRequest().getMethod()))) {
                             decision = true;
+                            break;
                         }
+                    } else if (simple.getAuthority().contains("Project_" + projectId) && simple.getAuthority().contains("DELETE")) {
+                        decision = true;
+                        break;
                     }
                 }
             }
-        } else {
-            System.out.println("OWNER");
-            decision = true;
         }
         return new AuthorizationDecision(decision);
     }

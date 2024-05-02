@@ -2,6 +2,7 @@ package br.demo.backend.model.chat;
 
 import br.demo.backend.model.User;
 import br.demo.backend.model.ids.DestinationId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,7 @@ public class Destination {
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     @MapsId("messageId")
+    @JsonIgnore
     private Message message;
     private Boolean visualized = false;
 

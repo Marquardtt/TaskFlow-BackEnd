@@ -1,35 +1,27 @@
 package br.demo.backend.service;
 
+import br.demo.backend.exception.AlreadyAceptException;
 import br.demo.backend.model.*;
-import br.demo.backend.model.chat.Destination;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.pages.Page;
-import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
-import br.demo.backend.repository.GroupRepository;
-import br.demo.backend.repository.NotificationRepository;
-import br.demo.backend.repository.ProjectRepository;
-import br.demo.backend.repository.UserRepository;
+import br.demo.backend.repository.*;
 import br.demo.backend.repository.chat.MessageRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
-import br.demo.backend.websocket.MyHandle;
 import lombok.AllArgsConstructor;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.client.WebSocketClient;
-
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class NotificationService {
+
 
     private TaskRepository taskRepository;
     private UserRepository userRepository;
@@ -37,15 +29,16 @@ public class NotificationService {
     private ProjectRepository projectRepository;
     private PageRepository pageRepository;
     private GroupRepository groupRepository;
-    private SimpMessagingTemplate simpMessagingTemplate;
     private MessageRepository messageRepository;
+    private PermissionRepository permissionRepository;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-    public void generateNotification(TypeOfNotification type, Long idPrincipal, Long auxiliary) {
-        ArrayList<Object> returns = switch (type) {
+    public void generateNotification(TypeOfNotification type, Long idPrincipal, Long auxiliary){
+        switch (type){
 //                When someone change my permission in a project
-            case CHANGEPERMISSION -> generateChangePermission(idPrincipal, auxiliary, type);
+            case CHANGEPERMISSION -> generateChangePermission(idPrincipal, auxiliary, type) ;
 //                When someone add me in a group
-            case ADDORREMOVEINGROUP -> generateAddInGroup(idPrincipal, auxiliary, type);
+            case ADDINGROUP, REMOVEINGROUP -> generateAddInGroup(idPrincipal, auxiliary, type);
 //                When someone change something in a task
             case CHANGETASK -> generateChangeTask(idPrincipal, type);
 //                When someone send a message in a chat
@@ -58,217 +51,220 @@ public class NotificationService {
             case SCHEDULE -> generateDeadlineOrScheduling(idPrincipal, auxiliary, type);
 //                When someone pass the target of points
             case POINTS -> generatePoints(idPrincipal, auxiliary, type);
-        };
-        simpMessagingTemplate.convertAndSend("/notification/" + ((User) returns.get(0)).getId(), returns.get(1));
+            case INVITETOPROJECT -> generateInviteProject(idPrincipal, auxiliary, type);
+        }
     }
 
-    private ArrayList<Object> generateChangePermission(Long idUser, Long idProject, TypeOfNotification type) {
-        User user = userRepository.findById(idUser).get();
-        if (!verifyIfHeWantsThisNotification(type, user)) return null;
+    private void generateInviteProject(Long idProject, Long idGroup, TypeOfNotification type) {
+        Project project = projectRepository.findById(idProject).get();
+        Group group = groupRepository.findById(idGroup).get();
+        Notification notify = notificationRepository.save(new Notification(null, project.getName(), type, "/"+group.getOwner().getUserDetailsEntity().getUsername()+"/"+
+                project.getId(), group.getOwner(), false,  project.getId(), group.getId()));
+        simpMessagingTemplate.convertAndSend("/notifications/"+group.getOwner().getId(), notify);
+    }
 
+    private void generateChangePermission(Long idUser, Long idProject, TypeOfNotification type ){
+        User user  = userRepository.findById(idUser).get();
+        if (!verifyIfHeWantsThisNotification(type, user)) return;
         Project project = projectRepository.findById(idProject).get();
         Group group = groupRepository.findGroupByPermissions_ProjectAndUsersContaining(project, user);
-        ArrayList<Object> list = new ArrayList<Object>();
-        list.add(user);
-        list.add(notificationRepository.save(new Notification(null, "Your permission was changed at project '" +
-                project.getName() + "'", type, "/" + user.getUserDetailsEntity().getUsername() + "/" +
-                project.getId() + "/group/" + group.getId(), user, false)));
-        return list;
 
+        Notification notify = notificationRepository.save(new Notification(null, project.getName(), type, "/"+user.getUserDetailsEntity().getUsername()+"/"+
+                project.getId()+"/group/"+group.getId(), user, false, group.getId(), project.getId()));
+        simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 
-    private ArrayList<Object> generateAddInGroup(Long userId, Long groupId, TypeOfNotification type) {
-        User user = userRepository.findById(userId).get();
-        if (!verifyIfHeWantsThisNotification(type, user)) return null;
+    private void generateAddInGroup(Long userId, Long groupId, TypeOfNotification type){
+        User user  = userRepository.findById(userId).get();
+        if (!verifyIfHeWantsThisNotification(type, user)) return;
+
         Group group = groupRepository.findById(groupId).get();
-        Notification notification;
-        if (group.getUsers().contains(user)) {
-            notification = notificationRepository.save(new Notification(null, "You was added at group '" + group.getName() + "'",
-                    type, "/" + user.getUserDetailsEntity().getUsername() + "/group/" + groupId, user, false));
-        } else {
-            notification = notificationRepository.save(new Notification(null, "You was removed at group '" + group.getName() + "'",
-                    type, "", user, false));
-        }
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(user);
-        list.add(notification);
-        return list;
+        Notification notify = notificationRepository.save(new Notification(null, group.getName(),
+                type, type == TypeOfNotification.ADDINGROUP ? "/"+
+                user.getUserDetailsEntity().getUsername()+"/group/"+groupId : "",
+                user, false, null, group.getId()));
+        simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
+
     }
 
-    private ArrayList<Object> generateChangeTask(Long taskId, TypeOfNotification type) {
+
+    private void generateChangeTask(Long taskId, TypeOfNotification type) {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 
         Task task = taskRepository.findById(taskId).get();
-        Page page = pageRepository.findByTasks_Task(task);
+        Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
         Project project = page.getProject();
 
         Collection<User> users = userRepository.findAllByPermissions_Project(project);
         users.add(project.getOwner());
-        ArrayList<Object> list = new ArrayList<>();
 
-        for (User user : users) {
-            if (!user.getUserDetailsEntity().getUsername().equals(username)) {
-                list.add(sendNotification(type, user, task, project, page));
-                list.add(user);
-                return list;
-            }
-        }
-        return null;
+        users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
+            if (!verifyIfHeWantsThisNotification(type, user)) return;
+            Notification notify = notificationRepository.save(new Notification(null, task.getName(),
+                    type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() +
+                    "/" + page.getId(), user, false, null,taskId));
+            simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
+        });
     }
 
-    private Notification sendNotification(TypeOfNotification type, User user, Task task, Project project, Page page) {
-        if (!verifyIfHeWantsThisNotification(type, user)) return null;
-        String message = getMessageTask(task);
-
-        return notificationRepository.save(new Notification(null, message,
-                type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() +
-                "/" + page.getId() + "/" + task.getId(), user, false));
-    }
-
-    private static String getMessageTask(Task task) {
-        Log lastLog = new ArrayList<>(task.getLogs()).get(task.getLogs().size() - 1);
-        //Specify what happend with de task.
-        String message =
-                switch (lastLog.getAction()) {
-                    case UPDATE -> "The task '" + task.getName() + "' was modified";
-                    case REDO -> "The task '" + task.getName() + "' was redone";
-                    case CREATE -> "A task was created";
-                    case DELETE -> "The task '" + task.getName() + "' was deleted";
-                    case COMPLETE -> "The task '" + task.getName() + "' was completed";
-                };
-        return message;
-    }
-
-    private ArrayList<Object> generateChat(Long messageId, Long chatId, TypeOfNotification type) {
+    private void generateChat (Long messageId, Long chatId, TypeOfNotification type) {
         Message message = messageRepository.findById(messageId).get();
-
-        for (Destination destination : message.getDestinations()) {
-
-            ArrayList<Object> list = new ArrayList<>();
-            Notification notification;
-            if (!verifyIfHeWantsThisNotification(type, destination.getUser())) return null;
+        message.getDestinations().forEach(destination -> {
+            if (!verifyIfHeWantsThisNotification(type,destination.getUser())) return;
             //Verify if the notification just have an annex
             if (message.getValue().isEmpty()) {
-                notification = notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " send a annex to you", type,
-                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false));
+                Notification notify = notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
+                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false,  message.getSender().getId(), chatId));
+                simpMessagingTemplate.convertAndSend("/notifications/"+destination.getUser().getId(), notify);
             } else {
-                notification = notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername() + " send '" + message.getValue() + "' to you", type,
-                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false));
+                Notification notify = notificationRepository.save(new Notification(null, message.getSender().getUserDetailsEntity().getUsername(), type,
+                        "/" + destination.getUser().getUserDetailsEntity().getUsername() + "/chat/" + chatId, destination.getUser(), false,  message.getSender().getId(), chatId));
+                simpMessagingTemplate.convertAndSend("/notifications/"+destination.getUser().getId(), notify);
             }
-            list.add(destination.getUser());
-            list.add(notification);
-            return list;
-        }
-        return null;
+        });
     }
 
-    private ArrayList<Object> generateComment(Long idTask, Long idComment, TypeOfNotification type) {
+    private void generateComment(Long idTask, Long idComment, TypeOfNotification type){
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 
         Task task = taskRepository.findById(idTask).get();
         Message message = messageRepository.findById(idComment).get();
-        Page page = pageRepository.findByTasks_Task(task);
+        Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
         Project project = page.getProject();
 
         Collection<User> users = userRepository.findAllByPermissions_Project(project);
         users.add(project.getOwner());
-        Notification notification;
-        ArrayList<Object> list = new ArrayList<>();
-
-        for (User user : users) {
-            if (!user.getUserDetailsEntity().getUsername().equals(username)) {
-                if (!verifyIfHeWantsThisNotification(type, user)) continue;
-               notification = notificationRepository.save(new Notification(
-                        null,
-                        message.getSender().getUserDetailsEntity().getUsername() + " comment in the task '" + task.getName() + "' '" + message.getValue() + "'",
-                        type,
-                        "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() + "/" + page.getId() + "/" + idTask,
-                        user,
-                        false
-                ));
-               list.add(user);
-               list.add(notification);
-               return list;
-            }
-        }
-        return null;
+        users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
+            if (!verifyIfHeWantsThisNotification(type, user)) return;
+            Notification notify = notificationRepository.save(new Notification(null, task.getName() , type,
+                    "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, message.getId(), idTask));
+            simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
+        });
     }
 
-    private ArrayList<Object> generatePoints(Long idUser, Long pointsTarget, TypeOfNotification type) {
-
-        User user = userRepository.findById(idUser).get();
-        if (!verifyIfHeWantsThisNotification(type, user)) return null;
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(user);
-        list.add(notificationRepository.save(new Notification(null, "Congrats! You pass the target of " + pointsTarget + " points", type,
-                "/" + user.getUserDetailsEntity().getUsername() + "/configurations/account", user, false)));
-        return list;
-
+    private void generatePoints(Long idUser, Long pointsTarget , TypeOfNotification type){
+        User user  = userRepository.findById(idUser).get();
+        if (!verifyIfHeWantsThisNotification(type, user)) return;
+        Notification notify = notificationRepository.save(new Notification(null, pointsTarget.toString(), type,
+                "/"+user.getUserDetailsEntity().getUsername()+"/configurations/account",
+                user, false, user.getPoints(), user.getId()));
+        simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 
     //typeObj: 0 = task; 1 = project
-    private ArrayList<Object> generateDeadlineOrScheduling(Long idObj, Long typeObj, TypeOfNotification type) {
+    private void generateDeadlineOrScheduling(Long idObj, Long typeObj ,TypeOfNotification type){
 
-        if (typeObj == 0) {
+        if(typeObj == 0){
             Task task = taskRepository.findById(idObj).get();
-            Page page = pageRepository.findByTasks_Task(task);
+            Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
             Project project = page.getProject();
-           return generateForEachUserDeadlineAndSchedule(type, typeObj, project, task, page);
-        } else {
+            generateForEachUserDeadlineAndSchedule(type, typeObj, project, task, page);
+        }else{
             Project project = projectRepository.findById(idObj).get();
-            return generateForEachUserDeadlineAndSchedule(type, typeObj, project, null, null);
+            generateForEachUserDeadlineAndSchedule(type, typeObj, project, null, null);
         }
     }
 
-    private ArrayList<Object> generateForEachUserDeadlineAndSchedule(TypeOfNotification type, Long typeObj,
-                                                                     Project project, Task task, Page page) {
+    private void generateForEachUserDeadlineAndSchedule(TypeOfNotification type, Long typeObj,
+                                                        Project project, Task task, Page page){
         Collection<User> users = userRepository.findAllByPermissions_Project(project);
         users.add(project.getOwner());
-        ArrayList<Object> list = new ArrayList<>();
-
-        for (User user : users){
-            if (!verifyIfHeWantsThisNotification(type, user)) return null;
-            if (typeObj == 0) {
-                list = generateInTaskNotification(user, type, project, task, page);
-            } else {
-               list = generateInProjectNotification(project, type, user);
+        users.forEach(user -> {
+            if (!verifyIfHeWantsThisNotification(type, user)) return;
+            if(typeObj == 0){
+                generateInTaskNotification(user, type, project,task, page);
+            }else{
+                generateInProjectNotification(project,type,user);
             }
-        }
-        return list;
+        });
     }
 
-    public ArrayList<Object> generateInProjectNotification(Project project, TypeOfNotification type, User user) {
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(user);
-        list.add(notificationRepository.save(new Notification(null, "The project '" + project.getName() + "' has a " + (TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline") + " in 24 hours",
-                type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId(), user, false)));
-        return list;
+    public  void generateInProjectNotification(Project project, TypeOfNotification type, User user){
+        Notification notify = notificationRepository.save(new Notification(null, project.getName(),
+                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId(), user, false, null, project.getId() ));
+        simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
+    }
+    public void generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page){
+        Notification notify = notificationRepository.save(new Notification(null, task.getName(),
+                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false, null, task.getId() ));
+        simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 
-    public ArrayList<Object> generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page) {
-        ArrayList<Object> list = new ArrayList<>();
-        list.add(user);
-        list.add(notificationRepository.save(new Notification(null, "The task '" + task.getName() + "' has a " + (TypeOfNotification.SCHEDULE.equals(type) ? "schedule" : "deadline") + " in 24 hours",
-                type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() + "/" + page.getId() + "/" + task.getId(), user, false)));
-        return list;
-    }
 
-    private Boolean verifyIfHeWantsThisNotification(TypeOfNotification type, User user) {
-        Configuration config = user.getConfiguration();
-        if (!config.getNotifications()) return false;
-        return switch (type) {
-            case ADDORREMOVEINGROUP -> config.getNotificAtAddMeInAGroup();
-            case CHANGEPERMISSION -> config.getNotificWhenChangeMyPermission();
-            case CHANGETASK -> config.getNotificTasks();
-            case CHAT -> config.getNotificChats();
-            case POINTS -> config.getNotificMyPointsChange();
-            case DEADLINE -> config.getNotificDeadlines();
-            case SCHEDULE -> config.getNotificSchedules();
-            case COMMENTS -> config.getNotificComments();
+    private Boolean verifyIfHeWantsThisNotification(TypeOfNotification type, User user){
+        Configuration config  = user.getConfiguration();
+        if(!config.getNotifications() &&
+                !List.of(TypeOfNotification.ADDINGROUP, TypeOfNotification.INVITETOPROJECT).contains(type)) return false;
+        return switch (type){
+            case INVITETOPROJECT -> true;
+            case ADDINGROUP -> true;
+            case REMOVEINGROUP ->  config.getNotificAtAddMeInAGroup();
+            case CHANGEPERMISSION ->  config.getNotificWhenChangeMyPermission();
+            case CHANGETASK ->  config.getNotificTasks();
+            case CHAT ->  config.getNotificChats();
+            case POINTS ->  config.getNotificMyPointsChange();
+            case DEADLINE ->  config.getNotificDeadlines();
+            case SCHEDULE ->  config.getNotificSchedules();
+            case COMMENTS ->  config.getNotificComments();
         };
     }
 
-    public void updateNotification(Notification notification) {
+    public Collection<Notification> visualize(){
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        Collection<Notification> notifications = notificationRepository.findAllByUser(user);
+        return notifications.stream().map(n -> {
+            n.setVisualized(true);
+            notificationRepository.save(n);
+            return n;
+        }).toList();
+    }
+    public void deleteNotification(Long id){
+        notificationRepository.deleteById(id);
+    }
+
+    public void click(Long id) {
+        Notification notification = notificationRepository.findById(id).get();
+        notificationRepository.deleteById(id);
+        if(notification.getType().equals(TypeOfNotification.ADDINGROUP)){
+            aceptInviteGroup(notification);
+        } else if(notification.getType().equals(TypeOfNotification.INVITETOPROJECT)){
+            aceptInviteProject(notification);
+        }
+    }
+
+    private void aceptInviteGroup(Notification notification) {
+        Group group = groupRepository.findById(notification.getObjId()).get();
+        User user = notification.getUser();
+        testAlreadyAceptToGroup(group, user);
+        group.getUsers().add(user);
+        user.getPermissions().addAll(group.getPermissions());
+        groupRepository.save(group);
+        userRepository.save(user);
+    }
+
+    private void aceptInviteProject(Notification notification) {
+        Group group = groupRepository.findById(notification.getObjId()).get();
+        Project project = projectRepository.findById(notification.getAuxObjId()).get();
+        testAlreadyAceptToProject(group, project);
+        Permission permission = permissionRepository.findByProjectAndIsDefault(project, true);
+        group.getPermissions().add(permission);
+        Collection<User> users = groupRepository.save(group).getUsers();
+        users.forEach(u -> {
+            u.getPermissions().add(permission);
+            userRepository.save(u);
+        });
+    }
+
+    private void testAlreadyAceptToGroup(Group group, User user){
+        if(group.getUsers().contains(user)) throw new AlreadyAceptException();
+    }
+    private void testAlreadyAceptToProject(Group group, Project project){
+        if(group.getPermissions().stream().anyMatch(p -> p.getProject().equals(project))) throw new AlreadyAceptException();
+    }
+
+
+    public void updateNotification(Notification notification){
         notificationRepository.save(notification);
     }
 }

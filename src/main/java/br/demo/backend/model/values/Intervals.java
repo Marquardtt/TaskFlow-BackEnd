@@ -7,10 +7,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.internal.IgnoreForbiddenApisErrors;
 import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
+import org.springframework.boot.web.embedded.netty.NettyWebServer;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,9 +24,12 @@ public class Intervals {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Duration time;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Duration time = new Duration();
 
-    private Collection<LocalDateTime> starts;
-    private Collection<LocalDateTime> ends;
-    private String color;
+    @OneToMany(cascade =  CascadeType.ALL)
+    private Collection<DateTimelines> starts = new ArrayList<>();
+    @OneToMany(cascade =  CascadeType.ALL)
+    private Collection<DateTimelines> ends = new ArrayList<>();
+    private String color = "#F04A94";
 }
