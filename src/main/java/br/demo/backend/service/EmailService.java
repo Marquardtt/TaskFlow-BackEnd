@@ -74,6 +74,8 @@ public class EmailService {
     }
 
     public ResponseEntity findUser(SendEmailDTO sendEmailDTO) {
+        System.out.println(sendEmailDTO.getUsername() +  " username");
+
         User user = userRepository.findByUserDetailsEntity_Username(sendEmailDTO.getUsername()).get();
         UserGetDTO userGetDTO = ModelToGetDTO.tranform(user);
         sendEmail(sendEmailDTO.getUsername(), userGetDTO.getMail(), sendEmailDTO.getEmailFrom());

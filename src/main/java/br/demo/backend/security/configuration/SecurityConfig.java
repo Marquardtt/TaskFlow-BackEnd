@@ -2,10 +2,7 @@ package br.demo.backend.security.configuration;
 import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.security.AuthorizationRequestsRoutes;
-import br.demo.backend.security.IsOwnerAuthorization;
-import br.demo.backend.security.IsOwnerOrMemberAuthorization;
-import br.demo.backend.security.ProjectOrGroupAuthorization;
+import br.demo.backend.security.*;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.filter.FilterAuthentication;
 import br.demo.backend.security.service.AuthenticationGitHubService;
@@ -50,6 +47,7 @@ public class SecurityConfig {
     private final IsChatUser isChatUser;
     private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
+    private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
