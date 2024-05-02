@@ -94,21 +94,23 @@ public class ChatService {
             n.setVisualized(true);
             notificationService.updateNotification(n);
         });
-        return ModelToGetDTO.tranform(chat);
+        return ModelToGetDTO.tranform(chatRepository.findById(chat.getId()).get());
     }
 
     private void setAllMessagesToVisualized(Chat chat, User user) {
         //set all messages to visualized
-        Collection<Message> messages = chat.getMessages().stream().peek(m -> {
-            m.setDestinations(m.getDestinations().stream().peek(d -> {
-                //if the user is the destination of the message, set the message to visualized
-                if (d.getUser().equals(user)) {
-                    d.setVisualized(true);
-                }
-            }).toList());
+        chat.getMessages().forEach(m -> {
+            ArrayList<Destination> destinations = new ArrayList<>();
+            try {
+                Destination dest = m.getDestinations().stream().filter(d -> d.getUser().equals(user)).findFirst().get();
+                dest.setVisualized(true);
+                destinations.add(dest);
+            } catch (NoSuchElementException ignore) {
+            }
+            destinations.addAll(m.getDestinations().stream().filter(d -> !d.getUser().equals(user)).toList());
+            m.setDestinations(destinations);
             messageRepository.save(m);
-        }).toList();
-        chat.setMessages(messages);
+        });
     }
 
     public ChatGroupGetDTO save(ChatGroupPostDTO chatGroup) {
@@ -174,6 +176,9 @@ public class ChatService {
         //generating the notification for each user of the chat
         notificationService.generateNotification(TypeOfNotification.CHAT, messageWithId.getId(), chat.getId());
         simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageWithId);
+
+        Chat finalChat = chat;
+        message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), ModelToGetDTO.tranform(finalChat)));
     }
 
     private Message getmessageWithId(Chat chat, Message message) {
@@ -185,15 +190,12 @@ public class ChatService {
 
     private void createDestinations(Chat chat, Message message) {
         //getting the users of a chat
-        Collection<User> users = null;
-        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
-            users = ((ChatPrivate) chat).getUsers();
-        } else {
-            users = ((ChatGroup) chat).getGroup().getUsers();
-        }
+        Collection<User> users = chat.finUsers();
         //creating a destination for each user of the chat
-        message.setDestinations(users.stream().filter(u -> !u.equals(message.getSender())).map(u -> new Destination(
-                new DestinationId(u.getId(), message.getId()), u, message, false)
+        message.setDestinations(users.stream().filter(u -> !u.equals(message.getSender())).map(u -> {
+                    return new Destination(
+                            new DestinationId(u.getId(), message.getId()), u, message, false);
+                }
         ).toList());
     }
 

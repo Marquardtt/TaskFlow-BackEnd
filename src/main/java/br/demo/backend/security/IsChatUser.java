@@ -10,6 +10,7 @@ import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.chat.ChatRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -34,6 +35,7 @@ public class IsChatUser implements AuthorizationManager<RequestAuthorizationCont
     }
 
     @Override
+    @Transactional
     public AuthorizationDecision check(Supplier<Authentication> supplier, RequestAuthorizationContext object) {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user  = userRepository.findByUserDetailsEntity_Username(username).get();
