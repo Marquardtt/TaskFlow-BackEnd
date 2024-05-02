@@ -36,8 +36,8 @@ public class   Date extends Property {
         this.color = color;
     }
 
-    public Date(Long idprop, TypeOfProperty type) {
-        super(idprop, type);
+    public Date(Long idprop, TypeOfProperty type, String name) {
+        super(idprop, type, name);
     }
 
 }

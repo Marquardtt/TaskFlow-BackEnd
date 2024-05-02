@@ -46,8 +46,9 @@ public class Property {
     public Property(Long id){
         this.id = id;
     }
-    public Property(Long id, TypeOfProperty type){
+    public Property(Long id, TypeOfProperty type, String name){
         this.id = id;
         this.type = type;
+        this.name = name;
     }
 }

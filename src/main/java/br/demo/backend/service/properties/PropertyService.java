@@ -58,6 +58,7 @@ public class PropertyService {
         if (property.getPages() != null && !property.getPages().isEmpty()) {
             return setRelationAtPage(property, property.getPages());
         } else {
+            System.out.println("sdfghjklçlkjhgfdfghjkl");
             Project project = projectRepository.findById(property.getProject().getId()).get();
             return setRelationAtPage(property, project.getPages());
         }
@@ -71,7 +72,7 @@ public class PropertyService {
             page.getTasks().stream().map(tP -> {
                 //add the property to the task
                 tP.getTask().getProperties().add(propertyValueService.setTaskProperty(property));
-                taskService.update(tP.getTask(), true, page.getProject().getId());
+                taskService.update(tP.getTask(), false, page.getProject().getId());
                 return tP;
             }).toList();
         });
@@ -113,7 +114,7 @@ public class PropertyService {
         }catch (NullPointerException e){
             try {
                 validation.ofObject(projectId, old.getPages().stream().findFirst().get().getProject());
-            } catch (NullPointerException ignore){}
+            } catch (NoSuchElementException ignore){}
         }
         T prop = patching ? old : empty;
         autoMapper.map(property, prop, patching, true);

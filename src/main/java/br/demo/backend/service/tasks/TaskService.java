@@ -108,15 +108,16 @@ public class TaskService {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
-        //TODO: aplicar esse beanutils em todos os puts
+
         Task task = new Task();
         if (patching) BeanUtils.copyProperties(oldTask, task);
         autoMapper.map(taskDTO, task, patching);
 
         keepFields(task, oldTask);
+        logService.generateLog(Action.UPDATE,task, oldTask);
+
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
 
-        logService.generateLog(Action.UPDATE, task, oldTask);
 
         //generate the notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
