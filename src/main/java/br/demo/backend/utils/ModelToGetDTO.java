@@ -268,6 +268,7 @@ public class ModelToGetDTO {
         if(obj == null) return null;
         OtherUsersDTO simpleUser = new OtherUsersDTO();
         BeanUtils.copyProperties(obj, simpleUser);
+        System.out.println(obj.getUserDetailsEntity());
         System.out.println(simpleUser);
         simpleUser.setUsername(obj.getUserDetailsEntity().getUsername());
         return simpleUser;

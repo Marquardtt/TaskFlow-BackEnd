@@ -33,6 +33,7 @@ public class UserDatailEntity implements UserDetails {
     private String password;
     @OneToOne(mappedBy = "userDetailsEntity")
     @JsonIgnore
+    @ToString.Exclude
     private User user;
     private boolean enabled = true;
     private boolean accountNonExpired = true;

@@ -2,7 +2,9 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.model.Project;
+import br.demo.backend.model.User;
 import br.demo.backend.repository.ProjectRepository;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.Permission;
@@ -24,11 +26,15 @@ public class PermissionService {
     private PermissionRepository permissionRepository;
     private AutoMapper<Permission> autoMapper;
     private ProjectRepository projectRepository;
+    private UserRepository userRepository;
 
     public PermissionGetDTO save(PermissionPostDTO permissionDto) {
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);
-        return ModelToGetDTO.tranform(permissionRepository.save(permission));
+        Permission permissionSaved = permissionRepository.save(permission);
+        User owner  = userRepository.findById(permissionSaved.getProject().getOwner().getId()).get();
+        permissionSaved.getProject().setOwner(owner);
+        return ModelToGetDTO.tranform(permissionSaved);
     }
 
     public PermissionGetDTO update(PermissionPutDTO permissionDto, Boolean patching) {
