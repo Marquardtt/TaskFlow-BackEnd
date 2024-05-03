@@ -20,7 +20,7 @@ import java.util.List;
 @Table(name = "tb_valued_multi_option")
 public class MultiOptionValued extends Value{
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Option> multiOptions;
 
     public MultiOptionValued(Long id, List<Option> archive){

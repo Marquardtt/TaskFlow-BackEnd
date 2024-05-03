@@ -151,14 +151,15 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     
     private Property deserializerProp (JsonNode jsonProp){
         Long idprop = null;
+        String name = jsonProp.get("name").asText();
         try{
             idprop = jsonProp.get("id").asLong();
         }catch (NullPointerException ignore){}
         TypeOfProperty type = TypeOfProperty.valueOf(jsonProp.get("type").asText());
         return switch (type){
-            case USER, TIME,  TEXT, NUMBER, PROGRESS, ARCHIVE -> new Limited(idprop, type);
-            case DATE -> new Date(idprop, type);
-            default -> new Select(idprop, type);
+            case USER, TIME,  TEXT, NUMBER, PROGRESS, ARCHIVE -> new Limited(idprop, type, name);
+            case DATE -> new Date(idprop, type, name);
+            default -> new Select(idprop, type, name);
         };
     }
 

@@ -68,33 +68,43 @@ public class LogService {
     }
 
     private void updateLogs(ILogged obj, ILogged old) {
+
         String typeObj = obj instanceof Task ? "task" : "project";
         updateName(obj, old, typeObj);
         Collection<Log> logs = obj.getPropertiesValues().stream()
-                .map(prop -> updateProperty(obj, old, prop))
+                .map(prop ->  updateProperty(obj, old, prop)
+                )
                 .filter(Objects::nonNull).toList();
         obj.getLogs().addAll(logs);
     }
 
     private Log updateProperty(ILogged obj, ILogged old, PropertyValue prop) {
+        if (prop.getValue()==null)return null;
+        if (prop.getValue().getId()==null) return null;
         PropertyValue first = old.getPropertiesValues().stream()
                 .filter(p -> p.getValue().getId().equals(prop.getValue().getId()))
                 .findFirst()
                 .orElse(null);
+        System.out.println("DIFERENCE " + first.getValue().getValue()  + " : " + prop.getValue().getValue());
 
         if (testIfIsDiferent(prop, first)) {
-            PropertyValue propertyValue = new PropertyValue(first);
-            return new Log(null,  Action.UPDATE, getUser(), LocalDateTime.now(), propertyValue);
+            PropertyValue propertyValue = new PropertyValue(prop);
+            // antes era o first, agora é o prop tá, fica ligadinho
+            return new Log(null,  Action.UPDATE, getUser(), LocalDateTime.now(),propertyValue );
         }
         return null; // Se não há alteração, retorna null
     }
 
     private boolean testIfIsDiferent(PropertyValue prop, PropertyValue first) {
-        return first != null  && !(prop.getValue().getValue() == null && first.getValue().getValue() == null) &&
-                ((first.getValue().getValue() == null && prop.getValue().getValue() != null) ||
-                        (prop.getValue().getValue() == null && first.getValue().getValue() != null) ||
-                        (!prop.getValue().getValue().equals(first.getValue().getValue()))
-                );
+        System.out.println("DIFERENCE " + first.getValue().getValue()  + " : " + prop.getValue().getValue());
+        if(first == null){
+            return false;
+        }else if(first.getValue().getValue() == null && prop.getValue().getValue() == null){
+            return  false;
+        } else if (first.getValue().getValue() != null && prop.getValue().getValue() != null) {
+            return !first.getValue().getValue().equals(prop.getValue().getValue());
+        }
+        return true;
     }
 
 

@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class PropertyValue {
     private Value value;
 
     public PropertyValue(PropertyValue first){
+        System.out.println(first);
         this.property =  new Property(first.getProperty().getId());
         this.id = null;
         Object value = first.getValue().getValue();
@@ -51,7 +53,7 @@ public class PropertyValue {
                         valueInt.getStarts(), valueInt.getEnds(), valueInt.getColor()));
             }
             case TEXT -> new TextValued(null, (String) value);
-            case TAG, CHECKBOX ->new MultiOptionValued(null, (List<Option>) value) ;
+            case TAG, CHECKBOX ->new MultiOptionValued(null, new ArrayList<>((List<Option>) value));
             case USER -> new UserValued(null, (List<User>) value) ;
             case ARCHIVE -> {
                 Archive valueArchv = (Archive) value;
