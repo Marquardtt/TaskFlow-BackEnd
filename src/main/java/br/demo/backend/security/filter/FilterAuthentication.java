@@ -80,7 +80,4 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
         return false;
     }
-
-
-
 }
