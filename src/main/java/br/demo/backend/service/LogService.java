@@ -4,6 +4,7 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.interfaces.ILogged;
+import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -102,7 +103,19 @@ public class LogService {
         }else if(first.getValue().getValue() == null && prop.getValue().getValue() == null){
             return  false;
         } else if (first.getValue().getValue() != null && prop.getValue().getValue() != null) {
-            return !first.getValue().getValue().equals(prop.getValue().getValue());
+            if (List.of(TypeOfProperty.USER, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG).contains(prop.getProperty().getType())){
+                return !testIfListsHaveSameElements((Collection<?>)first.getValue().getValue(), (Collection<?>) prop.getValue().getValue());
+            }else{
+                return !first.getValue().getValue().equals(prop.getValue().getValue());
+            }
+        }
+        return true;
+    }
+
+    private boolean testIfListsHaveSameElements(Collection<?> first, Collection<?> second) {
+        if (first.size() != second.size()) return false;
+        for (Object o : first) {
+            if (!second.contains(o)) return false;
         }
         return true;
     }
