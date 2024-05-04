@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -58,7 +59,9 @@ public class FilterAuthentication extends OncePerRequestFilter {
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
             response.addCookie(newCookie); // Add the cookie to the response
         }
-        filterChain.doFilter(request, response); // Call the next filter
+
+            filterChain.doFilter(request, response);    // Call the next filter
+
     }
 
     private boolean publicRoute(HttpServletRequest request) {
@@ -68,7 +71,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
         if (method.equals("GET")) {
             return
                     uri.equals("/login/oauth2/github") || uri.equals("/favicon.ico") || uri.equals("/forgotPassword") ||
-                    uri.equals("/forgotPassword/code") || uri.equals("/auth/login/code/github");
+                    uri.equals("/forgotPassword/code") || uri.equals("/auth/login/code/github") || uri.equals("/login");
         }
 
         if (method.equals("POST")) {
