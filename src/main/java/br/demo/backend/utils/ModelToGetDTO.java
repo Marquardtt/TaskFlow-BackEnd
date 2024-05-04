@@ -329,7 +329,7 @@ public class ModelToGetDTO {
         if (obj == null) return null;
         SimpleGroupGetDTO group = new SimpleGroupGetDTO();
         BeanUtils.copyProperties(obj, group);
-        group.setOwnerId(obj.getOwner().getId());
+        group.setOwnerUsername(obj.getOwner().getUserDetailsEntity().getUsername());
         return group;
     }
 
