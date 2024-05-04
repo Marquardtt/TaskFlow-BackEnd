@@ -16,4 +16,5 @@ public class SimpleGroupGetDTO {
     private String name;
     private Archive picture;
     private String description;
+    private Long ownerId;
 }
