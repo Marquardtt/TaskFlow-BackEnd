@@ -1,4 +1,9 @@
 package br.demo.backend.security.configuration;
+import br.demo.backend.model.User;
+import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.user.UserPostDTO;
+import br.demo.backend.security.*;
+import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
 import br.demo.backend.security.service.AuthenticationGitHub;
@@ -145,6 +150,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
                 .anyRequest().authenticated())
                 .oauth2Login(httpOauth2-> httpOauth2.successHandler(authenticationGitHub::externalLogin));
+
 
         // Manter a sessão do usuário na requisição ativa
         http.securityContext((context) -> context.securityContextRepository(repo));

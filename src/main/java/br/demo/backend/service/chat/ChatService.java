@@ -161,7 +161,7 @@ public class ChatService {
         if (annex != null) {
             message.setAnnex(new Archive(annex));
         }
-         saveTheUpdatableMessage(chat, message);
+        saveTheUpdatableMessage(chat, message);
     }
 
     private void saveTheUpdatableMessage(Chat chat, Message message) {
@@ -178,7 +178,15 @@ public class ChatService {
         simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageWithId);
 
         Chat finalChat = chat;
-        message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), ModelToGetDTO.tranform(finalChat)));
+        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
+
+            simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), privateToGetDTO((ChatPrivate) finalChat, messageWithId.getSender().getUserDetailsEntity().getUsername()));
+            message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), privateToGetDTO((ChatPrivate) finalChat, d.getUser().getUserDetailsEntity().getUsername())));
+        } else {
+            simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), groupToGetDTO((ChatGroup) finalChat));
+            message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), groupToGetDTO((ChatGroup) finalChat)));
+        }
+
     }
 
     private Message getmessageWithId(Chat chat, Message message) {
