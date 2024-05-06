@@ -38,8 +38,8 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
                 //USER
-                .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/logout").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/exit/group/{groupId}").authenticated()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()
                 .requestMatchers(HttpMethod.GET, "/forgotPassword").permitAll()

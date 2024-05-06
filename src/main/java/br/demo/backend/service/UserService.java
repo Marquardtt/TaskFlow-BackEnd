@@ -191,6 +191,17 @@ public class UserService {
                 .findFirst().orElse(null);
     }
 
+    public void getOutOfGroup(Long groupId) {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        Group group = groupRepository.findById(groupId).get();
+        Collection<Project> projects = group.getPermissions().stream().map(Permission::getProject).toList();
+        user.getPermissions().removeAll(user.getPermissions().stream().filter(p-> projects.contains(p.getProject())).toList());
+        group.getUsers().remove(user);
+        userRepository.save(user);
+        groupRepository.save(group);
+    }
+
 
 }
 
