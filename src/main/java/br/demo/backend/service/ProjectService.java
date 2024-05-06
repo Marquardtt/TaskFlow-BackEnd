@@ -20,6 +20,7 @@ import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.properties.SelectRepository;
+import br.demo.backend.utils.ResizeImage;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -27,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -47,6 +49,10 @@ public class ProjectService {
         Project project = projectRepository.findById(id).get();
         project.setPicture(new Archive(picture));
         //generate logs
+        try {
+            project.getPicture().setData(ResizeImage.resizeImage(picture, 100, 100));
+        } catch (IOException ignore) {
+        }
         logService.updatePicture(project);
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }

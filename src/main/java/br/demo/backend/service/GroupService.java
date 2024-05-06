@@ -20,6 +20,7 @@ import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -172,6 +174,10 @@ public class GroupService {
     public GroupGetDTO updatePicture(MultipartFile picture, Long id) {
         Group group = groupRepository.findById(id).get();
         group.setPicture(new Archive(picture));
+        try {
+            group.getPicture().setData(ResizeImage.resizeImage(picture, 150, 150));
+        } catch (IOException ignore) {
+        }
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 

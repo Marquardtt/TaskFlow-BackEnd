@@ -20,12 +20,14 @@ import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -117,6 +119,9 @@ public class UserService {
         String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         user.setPicture(new Archive(picture));
+        try {
+            user.getPicture().setData(ResizeImage.resizeImage(picture, 200, 200));
+        } catch (IOException ignore) {}
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
