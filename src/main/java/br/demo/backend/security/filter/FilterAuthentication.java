@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,6 +31,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println(request.getRequestURI());
         if (!publicRoute(request)) {
             Cookie cookie;
             try {
@@ -57,13 +59,29 @@ public class FilterAuthentication extends OncePerRequestFilter {
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
             response.addCookie(newCookie); // Add the cookie to the response
         }
-        filterChain.doFilter(request, response); // Call the next filter
+
+            filterChain.doFilter(request, response);    // Call the next filter
+
     }
 
     private boolean publicRoute(HttpServletRequest request) {
-        return ((request.getRequestURI().equals("/login") 
-                 || (request.getRequestURI().equals("/user"))
-                 && request.getMethod().equals("POST"))) || request.getRequestURI().equals("/login/oauth2/github") || request.getRequestURI().equals("/favicon.ico");
-    }
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
 
+        if (method.equals("GET")) {
+            return
+                    uri.equals("/login/oauth2/github") || uri.equals("/favicon.ico") || uri.equals("/forgotPassword") ||
+                    uri.equals("/forgotPassword/code") || uri.equals("/auth/login/code/github") || uri.equals("/login");
+        }
+
+        if (method.equals("POST")) {
+            return uri.equals("/forgotPassword") || uri.equals("/user")||  uri.equals("/login");
+        }
+
+        if (method.equals("PATCH")) {
+            return uri.startsWith("/user/password/");
+        }
+
+        return false;
+    }
 }

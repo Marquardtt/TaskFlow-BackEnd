@@ -288,6 +288,8 @@ public class ModelToGetDTO {
         LogGetDTO log = new LogGetDTO();
         BeanUtils.copyProperties(obj, log);
         log.setUser(tranformSimple(obj.getUser()));
+        log.setValue(ModelToGetDTO.tranform(obj.getValue()));
+
         return log;
     }
 
@@ -327,6 +329,7 @@ public class ModelToGetDTO {
         if (obj == null) return null;
         SimpleGroupGetDTO group = new SimpleGroupGetDTO();
         BeanUtils.copyProperties(obj, group);
+        group.setOwnerUsername(obj.getOwner().getUserDetailsEntity().getUsername());
         return group;
     }
 

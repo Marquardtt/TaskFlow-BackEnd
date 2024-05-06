@@ -4,32 +4,19 @@ import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.security.*;
 import br.demo.backend.security.entity.UserDatailEntity;
+import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
-import br.demo.backend.security.service.AuthenticationGitHubService;
-import br.demo.backend.security.service.AuthenticationService;
-import br.demo.backend.security.utils.CookieUtil;
-import br.demo.backend.service.UserService;
-import br.demo.backend.websocket.WebSocketConfig;
-import jakarta.servlet.http.Cookie;
+import br.demo.backend.security.service.AuthenticationGitHub;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 
@@ -43,7 +30,7 @@ public class SecurityConfig {
     private final IsOwnerAuthorization isOwnerAuthorization;
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
     private final CorsConfigurationSource corsConfig;
-    private final AuthenticationGitHubService authenticationGitHubService;
+    private final AuthenticationGitHub authenticationGitHub;
     private final IsChatUser isChatUser;
     private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
@@ -56,7 +43,8 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfig));
         http.authorizeHttpRequests(authz -> authz
                 //USER
-                .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/exit/group/{groupId}").authenticated()
                 .requestMatchers(HttpMethod.POST, "/user").permitAll()
                 .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()
                 .requestMatchers(HttpMethod.GET, "/forgotPassword").permitAll()
@@ -161,27 +149,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
                 .anyRequest().authenticated())
-                .oauth2Login(httpOauth2-> httpOauth2.successHandler((request, response, authentication) -> {
-                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                    String username = oAuth2User.getAttribute("login");
-                    try {
-                        Cookie newCookie = authenticationGitHubService.loginWithGitHub(request, response, username);
-                        response.addCookie(newCookie); // Add the cookie to the response
-                        System.out.println("adasdasd");
-                        response.sendRedirect("http://localhost:3000/" + username);
-
-                    } catch (UsernameNotFoundException e) {
-                        System.out.println("adasdasd");
-
-                        String name = oAuth2User.getAttribute("name");
-                        authenticationGitHubService.createUserGitHub(username, name);
-                        Cookie newCookie = authenticationGitHubService.loginWithGitHub(request, response, username);
-                        response.addCookie(newCookie); // Add the cookie to the response
-                        response.sendRedirect("http://localhost:3000/" + username);
-                    }
-                }) );
-//                .oauth2Client(Customizer.withDefaults());
-
+                .oauth2Login(httpOauth2-> httpOauth2.successHandler(authenticationGitHub::externalLogin));
 
 
         // Manter a sessão do usuário na requisição ativa
@@ -189,8 +157,8 @@ public class SecurityConfig {
         http.sessionManagement(config -> {
             config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         });
-//        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
 
+        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
         http.formLogin(AbstractHttpConfigurer::disable);
         http.logout(AbstractHttpConfigurer::disable);
 

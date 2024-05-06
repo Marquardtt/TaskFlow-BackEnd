@@ -4,6 +4,7 @@ import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.interfaces.ILogged;
+import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.model.tasks.Task;
@@ -68,33 +69,55 @@ public class LogService {
     }
 
     private void updateLogs(ILogged obj, ILogged old) {
+
         String typeObj = obj instanceof Task ? "task" : "project";
         updateName(obj, old, typeObj);
         Collection<Log> logs = obj.getPropertiesValues().stream()
-                .map(prop -> updateProperty(obj, old, prop))
+                .map(prop ->  updateProperty(obj, old, prop)
+                )
                 .filter(Objects::nonNull).toList();
         obj.getLogs().addAll(logs);
     }
 
     private Log updateProperty(ILogged obj, ILogged old, PropertyValue prop) {
+        if (prop.getValue()==null)return null;
+        if (prop.getValue().getId()==null) return null;
         PropertyValue first = old.getPropertiesValues().stream()
                 .filter(p -> p.getValue().getId().equals(prop.getValue().getId()))
                 .findFirst()
                 .orElse(null);
+        System.out.println("DIFERENCE " + first.getValue().getValue()  + " : " + prop.getValue().getValue());
 
         if (testIfIsDiferent(prop, first)) {
-            PropertyValue propertyValue = new PropertyValue(first);
-            return new Log(null,  Action.UPDATE, getUser(), LocalDateTime.now(), propertyValue);
+            PropertyValue propertyValue = new PropertyValue(prop);
+            // antes era o first, agora é o prop tá, fica ligadinho
+            return new Log(null,  Action.UPDATE, getUser(), LocalDateTime.now(),propertyValue );
         }
         return null; // Se não há alteração, retorna null
     }
 
     private boolean testIfIsDiferent(PropertyValue prop, PropertyValue first) {
-        return first != null  && !(prop.getValue().getValue() == null && first.getValue().getValue() == null) &&
-                ((first.getValue().getValue() == null && prop.getValue().getValue() != null) ||
-                        (prop.getValue().getValue() == null && first.getValue().getValue() != null) ||
-                        (!prop.getValue().getValue().equals(first.getValue().getValue()))
-                );
+        System.out.println("DIFERENCE " + first.getValue().getValue()  + " : " + prop.getValue().getValue());
+        if(first == null){
+            return false;
+        }else if(first.getValue().getValue() == null && prop.getValue().getValue() == null){
+            return  false;
+        } else if (first.getValue().getValue() != null && prop.getValue().getValue() != null) {
+            if (List.of(TypeOfProperty.USER, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG).contains(prop.getProperty().getType())){
+                return !testIfListsHaveSameElements((Collection<?>)first.getValue().getValue(), (Collection<?>) prop.getValue().getValue());
+            }else{
+                return !first.getValue().getValue().equals(prop.getValue().getValue());
+            }
+        }
+        return true;
+    }
+
+    private boolean testIfListsHaveSameElements(Collection<?> first, Collection<?> second) {
+        if (first.size() != second.size()) return false;
+        for (Object o : first) {
+            if (!second.contains(o)) return false;
+        }
+        return true;
     }
 
 

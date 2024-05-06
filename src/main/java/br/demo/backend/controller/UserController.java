@@ -76,4 +76,9 @@ public class UserController {
         validation.ofObject(projectId, permission.getProject());
         return userService.updatePermissionOfAUser(username, permission);
     }
+
+    @PatchMapping("/exit/group/{groupId}")
+    public void updatePermission(@PathVariable Long groupId){
+        userService.getOutOfGroup(groupId);
+    }
 }

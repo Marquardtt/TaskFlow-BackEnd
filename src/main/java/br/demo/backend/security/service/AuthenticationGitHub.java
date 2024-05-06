@@ -1,6 +1,4 @@
 package br.demo.backend.security.service;
-
-import br.demo.backend.model.dtos.user.UserGetDTO;
 import br.demo.backend.model.dtos.user.UserPostDTO;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.utils.CookieUtil;
@@ -14,12 +12,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 @Service
 @AllArgsConstructor
-public class AuthenticationGitHubService {
+public class AuthenticationGitHub {
 
     private final SecurityContextRepository securityContextRepository;
     private final AuthenticationService authenticationService;
@@ -51,6 +53,23 @@ public class AuthenticationGitHubService {
             userService.save(userPostDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error creating user");
+        }
+    }
+
+    public void externalLogin( HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String username = oAuth2User.getAttribute("login");
+        try {
+            Cookie newCookie = loginWithGitHub(request, response, username);
+            response.addCookie(newCookie); // Add the cookie to the response
+            response.sendRedirect("http://localhost:3000/" + username);
+        } catch (UsernameNotFoundException e) {
+
+            String name = oAuth2User.getAttribute("name");
+            createUserGitHub(username, name);
+            Cookie newCookie = loginWithGitHub(request, response, username);
+            response.addCookie(newCookie); // Add the cookie to the response
+            response.sendRedirect("http://localhost:3000/" + username);
         }
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class AuthenticationService implements UserDetailsService {
 
     private final UserRepository userRepository;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -38,6 +40,19 @@ public class AuthenticationService implements UserDetailsService {
     }
 
 
-
+    public List<Cookie> removeCookies (HttpServletRequest request){
+        try{
+            CookieUtil cookieUtil = new CookieUtil();
+            Cookie jwt =
+                    cookieUtil.getCookie(request, "JWT");
+            Cookie jsession =
+                    cookieUtil.getCookie(request, "JSESSIONID");
+            jwt.setMaxAge(0);
+            jsession.setMaxAge(0);
+            return List.of(jwt,jsession);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 
 }

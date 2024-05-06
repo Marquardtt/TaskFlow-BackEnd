@@ -1,7 +1,9 @@
 package br.demo.backend.model.dtos.tasks;
 
+import br.demo.backend.model.dtos.relations.PropertyValueGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.relations.PropertyValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,4 +22,5 @@ public class LogGetDTO {
     private Action action;
     private OtherUsersDTO user;
     private LocalDateTime datetime;
+    private PropertyValueGetDTO value;
 }

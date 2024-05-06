@@ -27,10 +27,10 @@ public class OrderedPage extends Page {
     private Property propertyOrdering;
 
 
-    @Override
-    public String toString() {
-        return "OrderedPage{" +
-                "propertyOrdering=" + propertyOrdering +
-                "} " + super.toString();
-    }
+//    @Override
+//    public String toString() {
+//        return "OrderedPage{" +
+//                "propertyOrdering=" + propertyOrdering +
+//                "} " + super.toString();
+//    }
 }
