@@ -36,12 +36,15 @@ public class AuthenticateController {
     private final AuthenticationService authenticationService;
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println(userLogin);
         try {
 
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(userLogin.getUsername(),userLogin.getPassword());
+            System.out.println(token);
 
             Authentication authentication = authenticationManager.authenticate(token);
+
             UserDetails user = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
             Cookie cookie = cookieUtil.gerarCookieJwt(user);// Create a cookie with the JWT
             response.addCookie(cookie);// Add the cookie to the response

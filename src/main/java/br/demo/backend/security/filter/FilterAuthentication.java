@@ -31,7 +31,6 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println(request.getRequestURI());
         if (!publicRoute(request)) {
             Cookie cookie;
             try {

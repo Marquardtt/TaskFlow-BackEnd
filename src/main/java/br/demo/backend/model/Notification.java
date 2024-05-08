@@ -13,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Builder
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "tb_notification")
 
 public class Notification  {
@@ -25,6 +26,7 @@ public class Notification  {
 
     @ManyToOne
     @JsonIgnore
+    @ToString.Exclude
     private User user;
     private Boolean visualized;
     private Long auxObjId;

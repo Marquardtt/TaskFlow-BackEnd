@@ -8,10 +8,7 @@ import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Log;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import br.demo.backend.model.relations.PropertyValue;
 
 import java.time.LocalDate;
@@ -23,6 +20,7 @@ import java.util.Collection;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Entity
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "tb_project")
 public class Project implements ILogged, IHasProperties {
     @Id
@@ -42,6 +40,7 @@ public class Project implements ILogged, IHasProperties {
     @ManyToOne
     @NotNull
     @JoinColumn(nullable = false)
+    @ToString.Exclude
     private User owner;
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)
     private Collection<Page> pages;
