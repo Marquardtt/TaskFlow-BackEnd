@@ -86,7 +86,6 @@ public class LogService {
                 .filter(p -> p.getValue().getId().equals(prop.getValue().getId()))
                 .findFirst()
                 .orElse(null);
-        System.out.println("DIFERENCE " + first.getValue().getValue()  + " : " + prop.getValue().getValue());
 
         if (testIfIsDiferent(prop, first)) {
             PropertyValue propertyValue = new PropertyValue(prop);
@@ -97,7 +96,6 @@ public class LogService {
     }
 
     private boolean testIfIsDiferent(PropertyValue prop, PropertyValue first) {
-        System.out.println("DIFERENCE " + first.getValue().getValue()  + " : " + prop.getValue().getValue());
         if(first == null){
             return false;
         }else if(first.getValue().getValue() == null && prop.getValue().getValue() == null){

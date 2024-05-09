@@ -36,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -96,7 +97,7 @@ public class PropertyValueService {
                                 .findByProperty_TypeAndValue(TypeOfProperty.USER, v))
                         .toList();
         //get the tasks that contains the propertyvalues
-        Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).toList();
+        Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).filter(Objects::nonNull).toList();
         return tasks.stream().filter(t ->
                         t.getProperties().stream().anyMatch(p ->
                                 testIfIsTodayBasesInConfigs(p, user)))
