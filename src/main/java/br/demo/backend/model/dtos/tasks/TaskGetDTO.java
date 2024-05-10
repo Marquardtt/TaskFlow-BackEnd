@@ -21,6 +21,7 @@ public class TaskGetDTO {
 
     private Boolean deleted;
     private Boolean completed;
+    private Boolean waitingRevision;
 
     private Collection<PropertyValueGetDTO> properties;
 
