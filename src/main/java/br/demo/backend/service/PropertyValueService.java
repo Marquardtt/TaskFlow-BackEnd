@@ -1,5 +1,6 @@
 package br.demo.backend.service;
 
+import br.demo.backend.interfaces.ILogged;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
 import br.demo.backend.model.User;
@@ -53,6 +54,7 @@ public class PropertyValueService {
     private LimitedRepository limitedRepository;
     private DateRepository dateRepository;
     private SelectRepository selectRepository;
+    private LogService logService;
 
     public Collection<PropertyValue> keepPropertyValues(Task task, Task oldTask){
         return task.getProperties().stream().peek(
@@ -137,6 +139,15 @@ public class PropertyValueService {
             archive = new Archive(file);
         }
         archiveValued.setValue(archive);
+        PropertyValue propertyValue = propertyValueRepository.findByProperty_TypeAndValue(TypeOfProperty.ARCHIVE, archiveValued);
+        ILogged iLogged;
+        if(isInProject){
+            iLogged = projectRepository.findByValuesContaining(propertyValue);
+        }else{
+            iLogged = taskRepository.findByPropertiesContaining(propertyValue);
+        }
+        System.out.println("soy archive valued"+archiveValued);
+    logService.updateLogsArchive(iLogged, propertyValue);
         return archiveValuedRepository.save(archiveValued);
     }
     private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject){
