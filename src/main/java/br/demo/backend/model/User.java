@@ -39,6 +39,7 @@ public class User {
     private String mail;
     private String phone;
     private String description;
+
     //Patch
     @Column(nullable = false)
     private Long points = 0L;
