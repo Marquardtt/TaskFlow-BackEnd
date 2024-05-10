@@ -101,6 +101,7 @@ public class ProjectService {
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
+        project.setLogs(oldProject.getLogs());
 
         if(changeDescription(oldProject, project)){
             logService.updateDescription(project);

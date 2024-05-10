@@ -58,7 +58,6 @@ public class PropertyService {
         if (property.getPages() != null && !property.getPages().isEmpty()) {
             return setRelationAtPage(property, property.getPages());
         } else {
-            System.out.println("sdfghjklçlkjhgfdfghjkl");
             Project project = projectRepository.findById(property.getProject().getId()).get();
             return setRelationAtPage(property, project.getPages());
         }

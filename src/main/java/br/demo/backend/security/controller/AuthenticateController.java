@@ -41,13 +41,11 @@ public class AuthenticateController {
     private final EmailService emailService;
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println(userLogin);
         try {
 
             //
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(userLogin.getUsername(),userLogin.getPassword());
-            System.out.println(token);
 
             Authentication authentication = authenticationManager.authenticate(token);
 
@@ -80,7 +78,6 @@ public class AuthenticateController {
             for (Cookie cookie : authenticationService.removeCookies(request)){
                 response.addCookie(cookie);
             }
-            System.out.println("ENTROU LOGOUT");
         }catch (Exception e){
             response.setStatus(401);
         }

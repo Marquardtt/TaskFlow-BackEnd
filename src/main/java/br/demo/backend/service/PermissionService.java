@@ -35,7 +35,6 @@ public class PermissionService {
 
 
     public PermissionGetDTO save(PermissionPostDTO permissionDto, Long projectId) {
-        System.out.println(permissionDto.getIsDefault());
         Project project = projectRepository.findById(projectId).get();
         Permission permission = new Permission();
         BeanUtils.copyProperties(permissionDto, permission);

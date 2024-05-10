@@ -165,6 +165,7 @@ public class ChatService {
     }
 
     private void saveTheUpdatableMessage(Chat chat, Message message) {
+        String usernameLogged  = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         createDestinations(chat, message);
         //saving the chat with the new message
         if (chat.getType().equals(TypeOfChat.PRIVATE)) {
@@ -179,14 +180,12 @@ public class ChatService {
 
         Chat finalChat = chat;
         if (chat.getType().equals(TypeOfChat.PRIVATE)) {
-
-            simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), privateToGetDTO((ChatPrivate) finalChat, messageWithId.getSender().getUserDetailsEntity().getUsername()));
+            simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), privateToGetDTO((ChatPrivate) finalChat, usernameLogged));
             message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), privateToGetDTO((ChatPrivate) finalChat, d.getUser().getUserDetailsEntity().getUsername())));
         } else {
             simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), groupToGetDTO((ChatGroup) finalChat));
             message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), groupToGetDTO((ChatGroup) finalChat)));
         }
-
     }
 
     private Message getmessageWithId(Chat chat, Message message) {

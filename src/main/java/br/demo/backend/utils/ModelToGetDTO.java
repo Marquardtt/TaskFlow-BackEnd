@@ -162,6 +162,10 @@ public class ModelToGetDTO {
         } catch (NullPointerException ignore) {
         }
 
+        try {
+            project.setLogs(obj.getLogs().stream().map(ModelToGetDTO::tranform).toList());
+        }catch (NullPointerException ignore){}
+
         project.setOwner(tranformSimple(obj.getOwner()));
         return project;
     }
