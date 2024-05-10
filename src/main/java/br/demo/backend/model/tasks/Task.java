@@ -35,6 +35,7 @@ public class Task implements ILogged {
     private LocalDateTime dateCompleted;
     //Patch
     private Boolean completed = false;
+    private Boolean waitingRevision = false;
 
     //Patch
     @JoinColumn(name = "task_id")

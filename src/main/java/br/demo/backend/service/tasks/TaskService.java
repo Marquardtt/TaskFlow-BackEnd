@@ -4,6 +4,8 @@ package br.demo.backend.service.tasks;
 import br.demo.backend.exception.TaskAlreadyCompleteException;
 import br.demo.backend.exception.TaskAlreadyDeletedException;
 import br.demo.backend.model.tasks.Log;
+import br.demo.backend.repository.UserRepository;
+import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.LogService;
 import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.service.UserService;
@@ -34,6 +36,7 @@ import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.utils.AutoMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,6 +59,7 @@ public class TaskService {
     private UserService userService;
     private PropertyValueService propertyValueService;
     private IdProjectValidation validation;
+    private UserRepository userRepository;
 
 
     public TaskGetDTO save(Long idpage, Long idProject) {
@@ -191,22 +195,36 @@ public class TaskService {
 
     public TaskGetDTO complete(Long id, Long projectID) {
         Task task = taskRepository.findById(id).get();
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
 
         if (task.getCompleted()) throw new TaskAlreadyCompleteException();
         Page page = pageRepositorry.findByTasks_Task(task).stream().findFirst().get();
         validation.ofObject(projectID, page.getProject());
         //setting attributes to complete the task
-        task.setDateCompleted(LocalDateTime.now());
-        task.setCompleted(true);
-
-        //generate the logs and notifications
-        logService.generateLog(Action.COMPLETE, task);
-
-        TaskGetDTO tranform = ModelToGetDTO.tranform(taskRepository.save(task));
-        generatePointsOfComplete(task.getLogs());
-        // generate notifications
-        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+        TaskGetDTO tranform;
+        if(page.getProject().getOwner().equals(user)){
+            task.setDateCompleted(LocalDateTime.now());
+            task.setCompleted(true);
+            //generate the logs and notifications
+            logService.generateLog(Action.COMPLETE, task);
+            tranform = ModelToGetDTO.tranform(taskRepository.save(task));
+            generatePointsOfComplete(task.getLogs());
+            // generate notifications
+            notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+        }else{
+            task.setWaitingRevision(true);
+            tranform = ModelToGetDTO.tranform(taskRepository.save(task));
+        }
         return tranform;
+    }
+
+    public TaskGetDTO cancelComplete(Long id, Long projectId){
+        Task task = taskRepository.findById(id).get();
+        Page page = pageRepositorry.findByTasks_Task(task).stream().findFirst().get();
+        validation.ofObject(projectId, page.getProject());
+        task.setWaitingRevision(false);
+        return ModelToGetDTO.tranform(taskRepository.save(task));
     }
 
     public void generatePointsOfComplete(Collection<Log> logs) {

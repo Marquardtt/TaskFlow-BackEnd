@@ -67,5 +67,10 @@ public class TaskController {
     public TaskGetDTO complete(@PathVariable Long id, @PathVariable Long projectId){
         return  taskService.complete(id, projectId);
     }
+    @PatchMapping("/{id}/project/{projectId}/complete-deny")
+    public TaskGetDTO completeDeny(@PathVariable Long id, @PathVariable Long projectId){
+        return  taskService.cancelComplete(id, projectId);
+    }
+
 
 }
