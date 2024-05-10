@@ -95,6 +95,8 @@ public class TaskService {
 
     public void addTaskToPage(Task task, Page page) {
         //this if separate tasks ata tasks at canvas or tasks at other pages
+        addPropertiesAtANewTask(page, task);
+
         if (page.getType().equals(TypeOfPage.CANVAS)) {
             page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
             canvasPageRepository.save((CanvasPage) page);
