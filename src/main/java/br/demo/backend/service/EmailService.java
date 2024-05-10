@@ -28,8 +28,6 @@ public class EmailService {
     public ResponseEntity sendEmail(String username, String to, String from) {
         codeRepository.deleteAll();
         try {
-            System.out.println(from);
-            System.out.println(to);
             SimpleMailMessage message = new SimpleMailMessage();
 
             message.setFrom(from);
@@ -74,7 +72,6 @@ public class EmailService {
     }
 
     public ResponseEntity findUser(SendEmailDTO sendEmailDTO) {
-        System.out.println(sendEmailDTO.getUsername() +  " username");
 
         User user = userRepository.findByUserDetailsEntity_Username(sendEmailDTO.getUsername()).get();
         UserGetDTO userGetDTO = ModelToGetDTO.tranform(user);

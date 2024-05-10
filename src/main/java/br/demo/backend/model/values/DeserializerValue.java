@@ -44,7 +44,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             if (isPresent(jsonProp, "type")) {
                 Property property = deserializerProp(jsonProp);
                 if (isPresent(jsonNode, "value")) {
-                    System.out.println(jsonNode);
                     JsonNode jsonValue = jsonNode.get("value");
                     if (isPresent(jsonValue, "value")) {
                         JsonNode value = jsonValue.get("value");
@@ -86,14 +85,12 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             if (isPresent(valueF, "id")) {
                 Long idUser = valueF.get("id").asLong();
                 User user = new User(idUser);
-                System.out.println("Sou um usuário que tá aqui meu mano,relaxa");
 
                 UserDatailEntity userDetailsEntity = new UserDatailEntity();
                 String username = valueF.get("username").asText();
                 userDetailsEntity.setUsername(username);
                 user.setUserDetailsEntity(userDetailsEntity);
                 users.add(user);
-                System.out.println(user);
             }
         }
         return new PropertyValue(id, property, new UserValued(idTaskVl, users));

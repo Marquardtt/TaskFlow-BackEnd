@@ -40,7 +40,6 @@ public class PropertyValue {
     private Value value;
 
     public PropertyValue(PropertyValue first){
-        System.out.println(first);
         this.property =  new Property(first.getProperty().getId());
         this.id = null;
         Object value = first.getValue().getValue();
