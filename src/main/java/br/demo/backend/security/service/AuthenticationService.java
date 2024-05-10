@@ -27,7 +27,6 @@ public class AuthenticationService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
@@ -54,5 +53,9 @@ public class AuthenticationService implements UserDetailsService {
             throw new RuntimeException(e);
         }
     }
+
+//    public boolean twoFactorAuthentication(UserDetails userDetails) {
+//
+//    }
 
 }

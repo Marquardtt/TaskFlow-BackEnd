@@ -1,10 +1,14 @@
 package br.demo.backend.security.controller;
 
 
+import br.demo.backend.model.Code;
+import br.demo.backend.model.User;
 import br.demo.backend.repository.UserRepository;
+import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.model.UserLogin;
 import br.demo.backend.security.service.AuthenticationService;
 import br.demo.backend.security.utils.CookieUtil;
+import br.demo.backend.service.EmailService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,21 +38,32 @@ public class AuthenticateController {
     private final CookieUtil cookieUtil = new CookieUtil();
     private final UserRepository repository;
     private final AuthenticationService authenticationService;
+    private final EmailService emailService;
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response) throws IOException {
         System.out.println(userLogin);
         try {
 
+            //
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(userLogin.getUsername(),userLogin.getPassword());
             System.out.println(token);
 
             Authentication authentication = authenticationManager.authenticate(token);
 
-            UserDetails user = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
-            Cookie cookie = cookieUtil.gerarCookieJwt(user);// Create a cookie with the JWT
-            response.addCookie(cookie);// Add the cookie to the response
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
+            User user = repository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
 
+            if(user.getUserDetailsEntity().isAuthenticate()){
+                String email= user.getMail();
+                emailService.generateOTP(user.getUserDetailsEntity().getUsername(), email);
+                emailService.sendEmail(email,email,email);
+                response.sendRedirect("/two-factor");
+
+            }else {
+                Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);// Create a cookie with the JWT
+                response.addCookie(cookie);// Add the cookie to the response
+            }
 
             return ResponseEntity.ok("User authenticated");
 
@@ -70,4 +85,13 @@ public class AuthenticateController {
             response.setStatus(401);
         }
     }
+//    @PostMapping("/two-factor/login")
+//    public HttpServletResponse twoFactor(@RequestBody Code code){
+//        try{
+//
+//        }catch (){
+//
+//        }
+//
+//    }
 }
