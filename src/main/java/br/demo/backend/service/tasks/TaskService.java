@@ -218,7 +218,7 @@ public class TaskService {
         validation.ofObject(projectID, page.getProject());
         //setting attributes to complete the task
         TaskGetDTO tranform;
-        if(page.getProject().getOwner().equals(user)){
+        if(page.getProject().getOwner().equals(user) || !page.getProject().getRevision()){
             task.setDateCompleted(LocalDateTime.now());
             task.setCompleted(true);
             task.setWaitingRevision(false);
