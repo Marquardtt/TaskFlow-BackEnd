@@ -44,6 +44,7 @@ public class UserDatailEntity implements UserDetails {
     private boolean credentialsNonExpired = true;
     private LocalDateTime lastPasswordEdition;
     private LocalDateTime whenHeTryDelete;
+    private boolean authenticate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

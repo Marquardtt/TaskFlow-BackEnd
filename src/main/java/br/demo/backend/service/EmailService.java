@@ -44,7 +44,7 @@ public class EmailService {
                 """, otp);
 
             message.setText(text);
-            javaMailSender.send(message);
+            // javaMailSender.send(message);
 
         } catch (MailException e){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -52,7 +52,7 @@ public class EmailService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private String generateOTP(String username, String email){
+    public String generateOTP(String username, String email){
         int length = 4;
         StringBuilder otp = new StringBuilder();
         Random random = new Random();
