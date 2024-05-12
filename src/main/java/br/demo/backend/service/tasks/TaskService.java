@@ -85,12 +85,14 @@ public class TaskService {
 
     private void addPropertiesAtANewTask(Page page, Task taskEmpty) {
         //get the task's page's and task's project's properties
-        Collection<Property> propertiesPage = page.getProperties();
+        Collection<Property> propertiesPage = page.getProperties().stream().filter( p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
         Project project = projectRepository.findByPagesContaining(page);
-        Collection<Property> propertiesProject = project.getProperties();
+        Collection<Property> propertiesProject = project.getProperties().stream().filter( p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
 
         //set the property values at the task
-        taskEmpty.setProperties(new HashSet<>());
+        if(taskEmpty.getProperties() == null){
+            taskEmpty.setProperties(new HashSet<>());
+        }
         propertyValueService.setTaskProperties(propertiesPage, taskEmpty);
         propertyValueService.setTaskProperties(propertiesProject, taskEmpty);
     }
