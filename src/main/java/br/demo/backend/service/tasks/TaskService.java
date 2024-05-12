@@ -42,10 +42,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -147,10 +144,12 @@ public class TaskService {
         task.setDeleted(false);
         task.setProperties(propertyValueService.createNotSaved(task));
         Stream<PropertyValue> archiveProps = task.getProperties().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
-        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldTask.getProperties().stream().filter(o -> o.equals(p)).findFirst().orElse(p)).filter(Objects::nonNull);
+        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldTask.getProperties().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
         List<PropertyValue> finalProps = archivePropsOld.toList();
-        task.getProperties().removeAll(finalProps.stream().filter(p -> task.getProperties().contains(p)).toList());
-        task.getProperties().addAll(finalProps);
+        ArrayList<PropertyValue> taskProps = new ArrayList(task.getProperties());
+        taskProps.removeAll(finalProps.stream().filter(p -> task.getProperties().contains(p)).toList());
+        taskProps.addAll(finalProps);
+        task.setProperties(taskProps);
     }
 
 
