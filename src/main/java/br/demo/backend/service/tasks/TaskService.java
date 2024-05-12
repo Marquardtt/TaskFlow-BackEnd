@@ -3,6 +3,8 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.exception.TaskAlreadyCompleteException;
 import br.demo.backend.exception.TaskAlreadyDeletedException;
+import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
@@ -42,6 +44,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -139,6 +144,11 @@ public class TaskService {
         task.setCompleted(false);
         task.setDeleted(false);
         task.setProperties(propertyValueService.createNotSaved(task));
+        Stream<PropertyValue> archiveProps = task.getProperties().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
+        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldTask.getProperties().stream().filter(o -> o.equals(p)).findFirst().orElse(p)).filter(Objects::nonNull);
+        List<PropertyValue> finalProps = archivePropsOld.toList();
+        task.getProperties().removeAll(finalProps.stream().filter(p -> task.getProperties().contains(p)).toList());
+        task.getProperties().addAll(finalProps);
     }
 
 
