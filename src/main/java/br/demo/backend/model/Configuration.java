@@ -54,4 +54,6 @@ public class Configuration {
     private Boolean googleCalendar = false;
     private Boolean isTutorialMade = false;
     private Boolean showPropertiesName = true;
+    private String font = "Montserrat";
+
 }
