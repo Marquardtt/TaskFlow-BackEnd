@@ -1,6 +1,7 @@
 package br.demo.backend.service.chat;
 
 
+import br.demo.backend.exception.ChatAlreadyExistsException;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.*;
@@ -114,6 +115,7 @@ public class ChatService {
     }
 
     public ChatGroupGetDTO save(ChatGroupPostDTO chatGroup) {
+        if(chatGroupRepository.existsByGroup_Id(chatGroup.getGroup().getId())) throw   new ChatAlreadyExistsException();
         ChatGroup chat = new ChatGroup();
         BeanUtils.copyProperties(chatGroup, chat);
         chat.setType(TypeOfChat.GROUP);
@@ -127,6 +129,7 @@ public class ChatService {
         BeanUtils.copyProperties(chatPrivate, chat);
         chat.setType(TypeOfChat.PRIVATE);
         chat.getUsers().add(user);
+        if(chatPrivateRepository.findAllByUsersContaining(user).stream().anyMatch(c -> c.getUsers().contains(chatPrivate.getUsers().stream().findFirst().get()))) throw  new ChatAlreadyExistsException();
         return (ChatPrivateGetDTO) ModelToGetDTO.tranform(chatPrivateRepository.save(chat));
     }
 
