@@ -3,6 +3,9 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.exception.TaskAlreadyCompleteException;
 import br.demo.backend.exception.TaskAlreadyDeletedException;
+import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
+import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
@@ -40,8 +43,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -83,18 +86,22 @@ public class TaskService {
 
     private void addPropertiesAtANewTask(Page page, Task taskEmpty) {
         //get the task's page's and task's project's properties
-        Collection<Property> propertiesPage = page.getProperties();
+        if(taskEmpty.getProperties() == null){
+            taskEmpty.setProperties(new HashSet<>());
+        }
+        Collection<Property> propertiesPage = page.getProperties().stream().filter( p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
         Project project = projectRepository.findByPagesContaining(page);
-        Collection<Property> propertiesProject = project.getProperties();
+        Collection<Property> propertiesProject = project.getProperties().stream().filter( p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
 
         //set the property values at the task
-        taskEmpty.setProperties(new HashSet<>());
         propertyValueService.setTaskProperties(propertiesPage, taskEmpty);
         propertyValueService.setTaskProperties(propertiesProject, taskEmpty);
     }
 
     public void addTaskToPage(Task task, Page page) {
         //this if separate tasks ata tasks at canvas or tasks at other pages
+        addPropertiesAtANewTask(page, task);
+
         if (page.getType().equals(TypeOfPage.CANVAS)) {
             page.getTasks().add(new TaskCanvas(null, task, 0.0, 0.0));
             canvasPageRepository.save((CanvasPage) page);
@@ -110,6 +117,7 @@ public class TaskService {
 
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
+        Collection<Message> oldComments = List.copyOf(oldTask.getComments());
         if(oldTask.getCompleted()) throw new TaskAlreadyCompleteException();
         if(oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
@@ -122,12 +130,13 @@ public class TaskService {
         keepFields(task, oldTask);
         logService.generateLog(Action.UPDATE,task, oldTask);
 
+        if(task.getLogs().size() != oldTask.getLogs().size()){
+            notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+        }
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
-
-
+        Collection<Message> comments = task.getComments().stream().filter(c ->
+                oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
         //generate the notifications
-        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
-        Collection<Message> comments = task.getComments().stream().filter(c -> !oldTask.getComments().contains(c)).toList();
         comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
 
         return taskGetDTO;
@@ -135,10 +144,17 @@ public class TaskService {
 
     //this keep the fields that can't be changed
     private void keepFields(Task task, Task oldTask) {
-        task.setLogs(oldTask.getLogs());
+        task.setLogs(List.copyOf(oldTask.getLogs()));
         task.setCompleted(false);
         task.setDeleted(false);
         task.setProperties(propertyValueService.createNotSaved(task));
+        Stream<PropertyValue> archiveProps = task.getProperties().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
+        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldTask.getProperties().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
+        List<PropertyValue> finalProps = archivePropsOld.toList();
+        ArrayList<PropertyValue> taskProps = new ArrayList<>(task.getProperties());
+        taskProps.removeAll(finalProps.stream().filter(p -> task.getProperties().contains(p)).toList());
+        taskProps.addAll(finalProps);
+        task.setProperties(taskProps);
     }
 
 
@@ -205,7 +221,7 @@ public class TaskService {
         validation.ofObject(projectID, page.getProject());
         //setting attributes to complete the task
         TaskGetDTO tranform;
-        if(page.getProject().getOwner().equals(user)){
+        if(page.getProject().getOwner().equals(user) || !page.getProject().getRevision()){
             task.setDateCompleted(LocalDateTime.now());
             task.setCompleted(true);
             task.setWaitingRevision(false);

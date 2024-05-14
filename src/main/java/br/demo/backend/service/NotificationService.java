@@ -125,6 +125,7 @@ public class NotificationService {
     }
 
     private void generateComment(Long idTask, Long idComment, TypeOfNotification type){
+        System.out.println("COMMENTING");
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 
         Task task = taskRepository.findById(idTask).get();
