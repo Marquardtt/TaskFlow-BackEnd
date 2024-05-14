@@ -27,7 +27,6 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 public class UserDatailEntity implements UserDetails {
-
     @Id
     @EqualsAndHashCode.Include
     private String username;
@@ -44,7 +43,6 @@ public class UserDatailEntity implements UserDetails {
     private boolean credentialsNonExpired = true;
     private LocalDateTime lastPasswordEdition;
     private LocalDateTime whenHeTryDelete;
-    private boolean authenticate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

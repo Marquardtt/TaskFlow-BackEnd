@@ -69,12 +69,12 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
         if (method.equals("GET")) {
             return
-                    uri.equals("/login/oauth2/github") || uri.equals("/favicon.ico") || uri.equals("/forgotPassword") ||
-                    uri.equals("/forgotPassword/code") || uri.equals("/auth/login/code/github") || uri.equals("/login");
+                    uri.equals("/login/oauth2/github") || uri.equals("/favicon.ico") || uri.equals("/sendEmail") ||
+                    uri.equals("/sendEmail/code") || uri.equals("/auth/login/code/github") || uri.equals("/login");
         }
 
         if (method.equals("POST")) {
-            return uri.equals("/forgotPassword") || uri.equals("/user")||  uri.equals("/login");
+            return uri.equals("/two-factor/login") || uri.equals("/sendEmail/auth") || uri.equals("/sendEmail/forgotPassword") || uri.equals("/user")||  uri.equals("/login");
         }
 
         if (method.equals("PATCH")) {

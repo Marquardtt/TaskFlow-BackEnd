@@ -10,14 +10,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/forgotPassword")
+@RequestMapping("/sendEmail")
 @AllArgsConstructor
 public class EmailController {
     private EmailService emailService;
 
-    @PostMapping
-    public ResponseEntity sendEmail (@RequestBody SendEmailDTO sendEmailDTO){
-        return ResponseEntity.ok(emailService.findUser(sendEmailDTO));
+    @PostMapping("/forgotPassword")
+    public ResponseEntity sendEmailForgotPassword (@RequestBody SendEmailDTO sendEmailDTO){
+        return ResponseEntity.ok(emailService.findUser(sendEmailDTO, "forgot-password"));
+    }
+
+    @PostMapping("/auth")
+    public ResponseEntity sendEmailAuth (@RequestBody SendEmailDTO sendEmailDTO){
+        return ResponseEntity.ok(emailService.findUser(sendEmailDTO, "auth"));
     }
 
     @GetMapping("/code")

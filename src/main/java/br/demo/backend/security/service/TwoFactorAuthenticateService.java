@@ -21,7 +21,6 @@ public class TwoFactorAuthenticateService {
     public boolean verifyTwoFactor(Code responseUser){
         List<Code> codes = emailService.getCode();
         return codes.contains(responseUser);
-
     }
 
 }

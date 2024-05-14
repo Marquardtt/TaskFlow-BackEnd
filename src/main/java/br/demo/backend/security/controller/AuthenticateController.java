@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @AllArgsConstructor
@@ -39,56 +40,60 @@ public class AuthenticateController {
     private final UserRepository repository;
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
+
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            User user = repository.findByUserDetailsEntity_Username(userLogin.getUsername()).get();
+            if (user.isAuthenticate()) return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 
-            //
             UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(),userLogin.getPassword());
+                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(token);
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
-            User user = repository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
-
-            if(user.getUserDetailsEntity().isAuthenticate()){
-                String email= user.getMail();
-                emailService.generateOTP(user.getUserDetailsEntity().getUsername(), email);
-                emailService.sendEmail(email,email,email);
-                response.sendRedirect("/two-factor");
-
-            }else {
                 Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);// Create a cookie with the JWT
                 response.addCookie(cookie);// Add the cookie to the response
-            }
 
             return ResponseEntity.ok("User authenticated");
 
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired");
-        }catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
+            System.out.println("estou aqui");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request, HttpServletResponse response){
-        try{
-            for (Cookie cookie : authenticationService.removeCookies(request)){
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            for (Cookie cookie : authenticationService.removeCookies(request)) {
                 response.addCookie(cookie);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(401);
         }
     }
-//    @PostMapping("/two-factor/login")
-//    public HttpServletResponse twoFactor(@RequestBody Code code){
-//        try{
-//
-//        }catch (){
-//
-//        }
-//
-//    }
+    @PostMapping("/two-factor/login")
+    public  ResponseEntity<String> twoFactor(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response){
+        try{
+            UsernamePasswordAuthenticationToken token =
+                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
+
+            Authentication authentication = authenticationManager.authenticate(token);
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
+            Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);// Create a cookie with the JWT
+            response.addCookie(cookie);// Add the cookie to the response
+            return ResponseEntity.ok("User authenticated");
+        }catch (CredentialsExpiredException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired");
+        } catch (AuthenticationException e) {
+            System.out.println("estou aqui");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+    }
 }
