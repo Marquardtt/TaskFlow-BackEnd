@@ -26,6 +26,7 @@ public class ProjectPutDTO {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
+    private Boolean revision;
     private String description;
     private Collection<Message> comments;
     private Collection<PropertyValue> values;

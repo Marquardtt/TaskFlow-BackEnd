@@ -34,5 +34,7 @@ public class ProjectGetDTO {
     private Collection<MessageGetDTO> comments;
     private Collection<PropertyValueGetDTO> values;
     private Collection<LogGetDTO> logs;
+    private Boolean revision;
+
 
 }

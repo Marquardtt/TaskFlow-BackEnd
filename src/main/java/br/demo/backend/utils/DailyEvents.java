@@ -104,13 +104,16 @@ public class DailyEvents {
     }
 
     private void generateNotificationsDates(ILogged obj) {
+        System.out.println("EXECUTANDO - NOTIFY DATES");
         obj.getPropertiesValues().forEach(property -> {
             if(checkIfIsIn24Hours((LocalDateTime)property.getValue().getValue() )){
                 if (checkIfIsSchedulingDate(property.getProperty())) {
+                    System.out.println("SCHEDULE");
                     notificationService.generateNotification(TypeOfNotification.SCHEDULE,
                             obj.getId(), property.getId());
                 }
                 if (checkIfIsDeadlineDate(property.getProperty())) {
+                    System.out.println("DEADLINE");
                     notificationService.generateNotification(TypeOfNotification.DEADLINE,
                             obj.getId(), property.getId());
                 }
