@@ -78,9 +78,6 @@ public class PageService {
     }
 
 
-
-
-
     public PageGetDTO save(PagePostDTO page, Long projectId) {
         page.setProject(projectRepository.findById(projectId).get());
         return switch (page.getType()) {
@@ -94,7 +91,7 @@ public class PageService {
                 OrderedPage saved = (OrderedPage) saveSpecific(autoMapperOrdered, page, new OrderedPage());
                 //setting the property ordering
                 generatePropertyOrdering(saved);
-                yield  ModelToGetDTO.tranform(orderedPageRepository.save(saved));
+                yield ModelToGetDTO.tranform(orderedPageRepository.save(saved));
             }
         };
     }
@@ -109,7 +106,7 @@ public class PageService {
         saved.setPropertyOrdering(propOrdering);
     }
 
-    private <T> Page saveSpecific(AutoMapper<T> autoMapper, PagePostDTO page, T emptyModel){
+    private <T> Page saveSpecific(AutoMapper<T> autoMapper, PagePostDTO page, T emptyModel) {
         autoMapper.map(page, emptyModel, false);
         return pageRepository.save((Page) emptyModel);
     }
@@ -123,6 +120,7 @@ public class PageService {
         }
         return select;
     }
+
     private Property propOrdDate(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Date date = (Date) testType(project, TypeOfProperty.DATE);
@@ -131,6 +129,7 @@ public class PageService {
         }
         return date;
     }
+
     private Property propOrdTime(OrderedPage page) {
         Project project = projectRepository.findById(page.getProject().getId()).get();
         Limited limited = (Limited) testType(project, TypeOfProperty.TIME);
@@ -141,7 +140,7 @@ public class PageService {
     }
 
     //that method return the first property of the types passed as parameter
-    private Property testType(Project project, TypeOfProperty ...types){
+    private Property testType(Project project, TypeOfProperty... types) {
         return project
                 .getProperties()
                 .stream()
@@ -161,20 +160,22 @@ public class PageService {
 
 
     public TaskPageGetDTO updateTaskPage(TaskPage taskPage, Long projectId) {
+        System.out.println("============================");
+        System.out.println(taskPage.getId() + " " +taskPage);
         TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
         Page page = pageRepository.findByTasks_Task(oldTaskPage.getTask()).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
-        TaskPageGetDTO taskPageGetDTO = null;
-        if(oldTaskPage instanceof TaskCanvas taskCanvas){
+        System.out.println(taskPage.getId() + " " +taskPage);
+        if (taskPage instanceof TaskCanvas taskCanvas) {
+            System.out.println("TASKCANVAS");
             ((TaskCanvas) oldTaskPage).setX(taskCanvas.getX());
             ((TaskCanvas) oldTaskPage).setY(taskCanvas.getY());
-            taskPageGetDTO = ModelToGetDTO.tranform(taskCanvasRepository.save(taskCanvas));
+            System.out.println(taskPage.getId() + " " +oldTaskPage);
+            return ModelToGetDTO.tranform(taskCanvasRepository.save((TaskCanvas) oldTaskPage));
         }
-        else {
-            ((TaskOrdered) oldTaskPage).setIndexAtColumn(((TaskOrdered)taskPage).getIndexAtColumn());
-            taskPageGetDTO = ModelToGetDTO.tranform(taskOrderedRepository.save((TaskOrdered) oldTaskPage));
-        }
-        return taskPageGetDTO;
+        ((TaskOrdered) oldTaskPage).setIndexAtColumn(((TaskOrdered) taskPage).getIndexAtColumn());
+        return ModelToGetDTO.tranform(taskOrderedRepository.save((TaskOrdered) oldTaskPage));
+
     }
 
     public CanvasPageGetDTO updateDraw(MultipartFile draw, Long id, Long projectId) {
@@ -199,6 +200,6 @@ public class PageService {
                 taskService.addTaskToPage(t.getTask(), pageRepository.findById(p.getId()).get());
             });
         });
-        return  pages.stream().map(p -> ModelToGetDTO.tranform(pageRepository.findById(p.getId()).get())).toList();
+        return pages.stream().map(p -> ModelToGetDTO.tranform(pageRepository.findById(p.getId()).get())).toList();
     }
 }
