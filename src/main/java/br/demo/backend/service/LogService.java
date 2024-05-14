@@ -77,7 +77,9 @@ public class LogService {
                 .map(prop ->  updateProperty(obj, old, prop)
                 )
                 .filter(Objects::nonNull).toList();
-        obj.getLogs().addAll(logs);
+        ArrayList<Log> oldLogs = new ArrayList<>(obj.getLogs());
+        oldLogs.addAll(logs);
+        obj.setLogs(oldLogs);
     }
 
     public void updateLogsArchive(ILogged obj, PropertyValue newArvchive) {
