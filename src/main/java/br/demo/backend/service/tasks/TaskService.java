@@ -3,6 +3,7 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.exception.TaskAlreadyCompleteException;
 import br.demo.backend.exception.TaskAlreadyDeletedException;
+import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
@@ -128,12 +129,13 @@ public class TaskService {
         keepFields(task, oldTask);
         logService.generateLog(Action.UPDATE,task, oldTask);
 
+        if(task.getLogs().size() != oldTask.getLogs().size()){
+            notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+        }
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
-
-
+        Collection<MessageGetDTO> comments = taskGetDTO.getComments().stream().filter(c ->
+                oldTask.getComments().stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
         //generate the notifications
-        notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
-        Collection<Message> comments = task.getComments().stream().filter(c -> !oldTask.getComments().contains(c)).toList();
         comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
 
         return taskGetDTO;
@@ -141,14 +143,14 @@ public class TaskService {
 
     //this keep the fields that can't be changed
     private void keepFields(Task task, Task oldTask) {
-        task.setLogs(oldTask.getLogs());
+        task.setLogs(List.copyOf(oldTask.getLogs()));
         task.setCompleted(false);
         task.setDeleted(false);
         task.setProperties(propertyValueService.createNotSaved(task));
         Stream<PropertyValue> archiveProps = task.getProperties().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
         Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldTask.getProperties().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
         List<PropertyValue> finalProps = archivePropsOld.toList();
-        ArrayList<PropertyValue> taskProps = new ArrayList(task.getProperties());
+        ArrayList<PropertyValue> taskProps = new ArrayList<>(task.getProperties());
         taskProps.removeAll(finalProps.stream().filter(p -> task.getProperties().contains(p)).toList());
         taskProps.addAll(finalProps);
         task.setProperties(taskProps);

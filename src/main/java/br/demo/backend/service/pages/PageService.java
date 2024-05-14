@@ -197,7 +197,7 @@ public class PageService {
             pageDataBase.getProperties().addAll(page.getProperties());
             //saving the pages
             page.getTasks().forEach(t -> {
-                taskService.addTaskToPage(t.getTask(), pageRepository.findById(p.getId()).get());
+                taskService.addTaskToPage(t.getTask(), pageDataBase);
             });
         });
         return pages.stream().map(p -> ModelToGetDTO.tranform(pageRepository.findById(p.getId()).get())).toList();

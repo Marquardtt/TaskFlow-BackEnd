@@ -12,5 +12,5 @@ public interface ChatGroupRepository extends JpaRepository<ChatGroup, Long> {
     public Collection<ChatGroup> findAllByGroup_OwnerOrGroup_UsersContainingOrderByLastMessage_DateCreateDesc(User user, User user2);
     public Collection<ChatGroup> findAllByGroup_UsersContaining( User user);
 
-
+    Boolean existsByGroup_Id(Long id);
 }

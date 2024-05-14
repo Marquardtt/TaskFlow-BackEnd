@@ -130,4 +130,9 @@ public class ErrorHandler {
         exceptionLogger.logException(exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
+    @ExceptionHandler(ChatAlreadyExistsException.class)
+    public ResponseEntity<String> handleException(ChatAlreadyExistsException exception) {
+        exceptionLogger.logException(exception);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
+    }
 }
