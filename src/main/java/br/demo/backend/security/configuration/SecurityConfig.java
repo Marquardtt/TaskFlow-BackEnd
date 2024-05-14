@@ -1,168 +1,140 @@
-package br.demo.backend.security.configuration;
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.security.*;
-import br.demo.backend.security.entity.UserDatailEntity;
-import br.demo.backend.security.*;
-import br.demo.backend.security.filter.FilterAuthentication;
-import br.demo.backend.security.service.AuthenticationGitHub;
-import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.socket.WebSocketHttpHeaders;
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>br.demo</groupId>
+    <artifactId>backend</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>backend</name>
+    <description>Demo project for Spring Boot</description>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
 
-@Configuration
-@AllArgsConstructor
-public class SecurityConfig {
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.restdocs</groupId>
+            <artifactId>spring-restdocs-mockmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 
-    private final SecurityContextRepository repo;
-    private final FilterAuthentication filterAuthentication;
-    private final AuthorizationRequestsRoutes authorizationRequestsRoutes;
-    private final IsOwnerAuthorization isOwnerAuthorization;
-    private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
-    private final CorsConfigurationSource corsConfig;
-    private final AuthenticationGitHub authenticationGitHub;
-    private final IsChatUser isChatUser;
-    private final IsOwnerInThisProject isOwnerInThisProject;
-    private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
-    private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
-    @Bean
-    public SecurityFilterChain config(HttpSecurity http) throws Exception {
-        // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
-        http.csrf(AbstractHttpConfigurer::disable);
-        //isso seta o cors, provavel atualização do spring porque nao pres
-        http.cors(cors -> cors.configurationSource(corsConfig));
-        http.authorizeHttpRequests(authz -> authz
-                //USER
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/exit/group/{groupId}").authenticated()
-                .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()
-                .requestMatchers(HttpMethod.GET, "/forgotPassword").permitAll()
-                .requestMatchers(HttpMethod.GET, "/forgotPassword/code").permitAll()
-                .requestMatchers(HttpMethod.PATCH, "/user/password/{username}").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
-                .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
-                .requestMatchers(HttpMethod.GET, "/user").authenticated()
-                .requestMatchers(HttpMethod.GET, "/user/logged").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/user/{username}/update-permission/project/{projectId}").access(isOwnerInThisProject)
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
 
-                //PROJECT
-                .requestMatchers(HttpMethod.POST, "/project").authenticated()
-                .requestMatchers(HttpMethod.POST, "/project/{projectId}/invite-group").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/project/my").authenticated()
-                .requestMatchers(HttpMethod.GET, "/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/property-value/{id}").access(isOwnerAuthorization)
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
-                //TASK
-                .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/task/property-value/{id}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.POST, "/task/project/{projectId}/{pageId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
-                .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                        .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerOrMemberAuthorization)
-                        .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete-deny").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}").access(authorizationRequestsRoutes)
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
 
-                //PROPERTY
-                .requestMatchers(HttpMethod.POST, "/property/project/{projectId}/limited").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.POST, "/property/project/{projectId}/select").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.POST, "/property/project/{projectId}/date").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "/property/project/{projectId}/limited").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "/property/project/{projectId}/select").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PUT, "/property/project/{projectId}/date").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/property/project/{projectId}/limited").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/property/project/{projectId}/select").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/property/project/{projectId}/date").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.DELETE, "/property/project/{projectId}/{id}").access(authorizationRequestsRoutes)
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-                //PAGE
-                .requestMatchers(HttpMethod.POST, "/page/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/task-page/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/draw/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.PATCH, "/page/prop-ordering/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-                .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/page/merge/{id}/project/{projectId}").access(authorizationRequestsRoutes)
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.4.4</version>
+        </dependency>
 
-                //PERMISSION
-                .requestMatchers(HttpMethod.POST, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PUT, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/permission/project/{projectId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/permission/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/{id}/other/{substituteId}/project/{projectId}").access(isOwnerAuthorization)
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
-                //GROUP
-                .requestMatchers(HttpMethod.POST, "/group").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
-                .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
 
-                .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/change-owner").access(isOwnerAuthorization)
-                .requestMatchers(HttpMethod.POST, "/group/{groupId}/add-user/{userId}").access(isOwnerAuthorization)
-                //CHAT
-                .requestMatchers(HttpMethod.POST, "/chat/group/{groupId}").access(isOwnerOrMemberAuthorization)
-                .requestMatchers(HttpMethod.POST, "/chat/private/{userId}").access(projectOrGroupAuthorization)
-                .requestMatchers(HttpMethod.GET, "/chat/group").authenticated()
-                .requestMatchers(HttpMethod.GET, "/chat/private").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/chat/visualized/{chatId}").access(isChatUser)
-                .requestMatchers(HttpMethod.PATCH, "/chat/{chatId}").access(isChatUser)
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
 
-                //NOTIFICATIONS
-                .requestMatchers(HttpMethod.PATCH, "/notification/visualize").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/notification/click/{id}").access(notificationsOwnerAuthorization)
-                .requestMatchers(HttpMethod.DELETE, "/notification/{id}").access(notificationsOwnerAuthorization)
-                .requestMatchers(HttpMethod.POST, "/forgotPassword").permitAll()// vai ser o esqueceu sua senha
-                .requestMatchers(HttpMethod.POST, "/projects").authenticated()
-                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
-                .requestMatchers(HttpMethod.POST, "/projects").authenticated()
-                .requestMatchers(WebSocketHttpHeaders.ALLOW,"/notifications").authenticated()
+    </dependencies>
 
-                //allow the springdoc swagger-ui/api docs
-                .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
-                .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
-                .anyRequest().authenticated())
-                .oauth2Login(httpOauth2-> httpOauth2.successHandler(authenticationGitHub::externalLogin));
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-
-        // Manter a sessão do usuário na requisição ativa
-        http.securityContext((context) -> context.securityContextRepository(repo));
-        http.sessionManagement(config -> {
-            config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        });
-
-        http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
-        http.formLogin(AbstractHttpConfigurer::disable);
-        http.logout(AbstractHttpConfigurer::disable);
-
-        return http.build();
-    }
-}
+</project>

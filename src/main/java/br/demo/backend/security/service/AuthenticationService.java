@@ -1,8 +1,10 @@
 package br.demo.backend.security.service;
 
+import br.demo.backend.model.Code;
 import br.demo.backend.model.User;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.utils.CookieUtil;
+import br.demo.backend.service.EmailService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,6 +55,7 @@ public class AuthenticationService implements UserDetailsService {
             throw new RuntimeException(e);
         }
     }
+
 
 //    public boolean twoFactorAuthentication(UserDetails userDetails) {
 //
