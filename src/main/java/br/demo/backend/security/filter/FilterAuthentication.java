@@ -74,7 +74,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
         }
 
         if (method.equals("POST")) {
-            return uri.equals("/two-factor/login") || uri.equals("/sendEmail/auth") || uri.equals("/sendEmail/forgotPassword") || uri.equals("/user")||  uri.equals("/login");
+            return uri.equals("/verify-otp") || uri.equals("/sendEmail/auth") || uri.equals("/sendEmail/forgotPassword") || uri.equals("/user")||  uri.equals("/login");
         }
 
         if (method.equals("PATCH")) {

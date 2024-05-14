@@ -2,6 +2,7 @@ package br.demo.backend.security.controller;
 
 
 import br.demo.backend.model.Code;
+import br.demo.backend.model.OtpVerificationRequest;
 import br.demo.backend.model.User;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -41,30 +44,50 @@ public class AuthenticateController {
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
 
+
+//    User user = repository.findByUserDetailsEntity_Username(userLogin.getUsername()).get();
+//
+//            if (user.isAuthenticate()) {
+//        // User requires 2FA, send OTP
+//        emailService.sendEmailAuth(user.getName(),user.getMail());
+//        return ResponseEntity.ok("OTP sent, please verify to complete authentication");
+//    }
+//
+//    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
+//    Authentication authentication = authenticationManager.authenticate(token);
+//    UserDetails userDetails = (UserDetails) authentication.getPrincipal(); // Get the user details from the authentication object
+//
+//    // User does not require 2FA, generate JWT cookie
+//    Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+//            cookie.setHttpOnly(true);
+//            cookie.setSecure(true); // Ensure cookies are sent over HTTPS only
+//            response.addCookie(cookie);
+
     @PostMapping("/login")
-    public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletResponse response) {
         try {
             User user = repository.findByUserDetailsEntity_Username(userLogin.getUsername()).get();
-            if (user.isAuthenticate()) return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 
-            UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
+            if (!user.isAuthenticate()) {
+                UsernamePasswordAuthenticationToken token =
+                        new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
+                Authentication authentication = authenticationManager.authenticate(token);
 
-            Authentication authentication = authenticationManager.authenticate(token);
-
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
-                Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);// Create a cookie with the JWT
-                response.addCookie(cookie);// Add the cookie to the response
-
-            return ResponseEntity.ok("User authenticated");
-
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+                response.addCookie(cookie);
+                return ResponseEntity.ok("User authenticated");
+            } else {
+                emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
+                return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            }
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired");
         } catch (AuthenticationException e) {
-            System.out.println("estou aqui");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
+
 
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -76,24 +99,25 @@ public class AuthenticateController {
             response.setStatus(401);
         }
     }
-    @PostMapping("/two-factor/login")
-    public  ResponseEntity<String> twoFactor(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response){
-        try{
-            UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
 
-            Authentication authentication = authenticationManager.authenticate(token);
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest, HttpServletResponse response) {
+        System.out.println("entrei, tô aqui " + LocalTime.now());
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
-            Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);// Create a cookie with the JWT
-            response.addCookie(cookie);// Add the cookie to the response
-            return ResponseEntity.ok("User authenticated");
-        }catch (CredentialsExpiredException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired");
-        } catch (AuthenticationException e) {
-            System.out.println("estou aqui");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(otpRequest.getUsername(), otpRequest.getPassword());
+        Authentication authentication = authenticationManager.authenticate(token);
 
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        System.out.println("vascooooo");
+
+        Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+        cookie.setMaxAge(3 * 30 * 24 * 3600);
+        response.addCookie(cookie);
+        System.out.println(cookie.getValue());
+
+        return ResponseEntity.ok("OTP verified, user authenticated successfully");
     }
+
 }

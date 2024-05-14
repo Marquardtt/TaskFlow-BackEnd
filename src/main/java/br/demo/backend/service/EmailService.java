@@ -16,6 +16,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 
@@ -29,6 +30,7 @@ public class EmailService {
     private final String from = "gestaodeprojetosweg@gmail.com";
 
 
+
     public ResponseEntity sendEmailForgot(String username, String to) {
         codeRepository.deleteAll();
         try {
@@ -37,7 +39,7 @@ public class EmailService {
             message.setFrom(from);
             message.setTo(to);
             message.setSubject("Redefinir senha!");
-            String otp = generateOTP(username, to, 4);
+            String otp = generateOTP(username, to);
 
             String text = String.format("""
                 Um pedido de mudança de senha foi pedido neste endereço de email
@@ -64,7 +66,7 @@ public class EmailService {
             message.setFrom(from);
             message.setTo(to);
             message.setSubject("Autenticação de dois fatores!");
-            String otp = generateOTP(username, to, 2);
+            String otp = generateOTPCode(username, to);
 
             String text = String.format("""
                 Um pedido de login foi feito neste endereço de email
@@ -83,8 +85,8 @@ public class EmailService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public String generateOTP(String username, String email, Integer number){
-        int length = number;
+    public String generateOTP(String username, String email){
+        int length = 4;
         StringBuilder otp = new StringBuilder();
         System.out.println(length);
         Random random = new Random();
@@ -98,6 +100,28 @@ public class EmailService {
         codeRepository.save(code);
         return otp.toString();
     }
+
+
+    public String generateOTPCode(String username, String email) {
+        int length = 8; // Definindo o tamanho do OTP
+        StringBuilder otp = new StringBuilder();
+        SecureRandom random = new SecureRandom();
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            otp.append(characters.charAt(index));
+        }
+
+        Code code = new Code();
+        code.setCode(otp.toString());
+        code.setUsername(username);
+        code.setEmail(email);
+        codeRepository.save(code);
+
+        return otp.toString();
+    }
+
 
 
     public List<Code> getCode() {

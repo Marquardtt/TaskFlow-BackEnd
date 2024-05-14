@@ -46,6 +46,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authz -> authz
                         //USER
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/exit/group/{groupId}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/sendEmail").permitAll()
