@@ -58,8 +58,8 @@ public class NotificationService {
     private void generateInviteProject(Long idProject, Long idGroup, TypeOfNotification type) {
         Project project = projectRepository.findById(idProject).get();
         Group group = groupRepository.findById(idGroup).get();
-        Notification notify = notificationRepository.save(new Notification(null, project.getName(), type, "/"+group.getOwner().getUserDetailsEntity().getUsername()+"/"+
-                project.getId(), group.getOwner(), false,  project.getId(), group.getId()));
+        Notification notify = notificationRepository.save(new Notification(null, project.getName(), type, "/"+group.getOwner().getUserDetailsEntity().getUsername()+"/group/"+
+                idGroup, group.getOwner(), false,  project.getId(), group.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+group.getOwner().getId(), notify);
     }
 
@@ -80,8 +80,7 @@ public class NotificationService {
 
         Group group = groupRepository.findById(groupId).get();
         Notification notify = notificationRepository.save(new Notification(null, group.getName(),
-                type, type == TypeOfNotification.ADDINGROUP ? "/"+
-                user.getUserDetailsEntity().getUsername()+"/group/"+groupId : "",
+                type,  null,
                 user, false, null, group.getId()));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
 
@@ -102,7 +101,7 @@ public class NotificationService {
             if (!verifyIfHeWantsThisNotification(type, user)) return;
             Notification notify = notificationRepository.save(new Notification(null, task.getName(),
                     type, "/" + user.getUserDetailsEntity().getUsername() + "/" + project.getId() +
-                    "/" + page.getId(), user, false, null,taskId));
+                    "/" + page.getId(), user, false, project.getId(),taskId));
             simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
         });
     }
@@ -138,7 +137,7 @@ public class NotificationService {
         users.stream().filter(u -> !u.getUserDetailsEntity().getUsername().equals(username)).forEach(user -> {
             if (!verifyIfHeWantsThisNotification(type, user)) return;
             Notification notify = notificationRepository.save(new Notification(null, task.getName() , type,
-                    "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, message.getId(), idTask));
+                    "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, project.getId(), idTask));
             simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
         });
     }
@@ -187,7 +186,7 @@ public class NotificationService {
     }
     public void generateInTaskNotification(User user, TypeOfNotification type, Project project, Task task, Page page){
         Notification notify = notificationRepository.save(new Notification(null, task.getName(),
-                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId()+"/"+task.getId(), user, false, null, task.getId() ));
+                type, "/"+user.getUserDetailsEntity().getUsername()+"/"+project.getId() +"/"+page.getId(), user, false, project.getId(), task.getId() ));
         simpMessagingTemplate.convertAndSend("/notifications/"+user.getId(), notify);
     }
 

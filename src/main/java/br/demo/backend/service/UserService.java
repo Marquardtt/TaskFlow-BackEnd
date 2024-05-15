@@ -129,7 +129,7 @@ public class UserService {
     public UserGetDTO updatePassword(String id, String password) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.getUserDetailsEntity().setPassword(password);
-        user.getUserDetailsEntity().setAccountNonExpired(true);
+        user.getUserDetailsEntity().setCredentialsNonExpired(true);
         user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }

@@ -76,7 +76,7 @@ public class DailyEvents {
         users.stream().filter(u -> checkIfIsMoreThan6Months(u.getUserDetailsEntity()
                 .getLastPasswordEdition())).forEach(
                 u -> {
-                    u.getUserDetailsEntity().setAccountNonExpired(false);
+                    u.getUserDetailsEntity().setCredentialsNonExpired(false);
                     userRepository.save(u);
                 }
         );
