@@ -5,7 +5,7 @@ import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
 import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
-import br.demo.backend.model.dtos.user.OtherUsersDTO;
+import br.demo.backend.model.dtos.user.*;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
@@ -16,9 +16,6 @@ import br.demo.backend.security.exception.ForbiddenException;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
@@ -78,7 +75,17 @@ public class UserService {
 
         keepFields(user, oldUser);
 
+        return ModelToGetDTO.tranform(userRepository.save(user));
+    }
 
+    public UserGetDTO changeUsername(String username) throws AccessDeniedException {
+        UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        User user = userRepository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
+
+        if(userRepository.findByUserDetailsEntity_Username(username).isPresent()){
+                throw new UsernameAlreadyUsedException();
+        }
+        user.getUserDetailsEntity().setUsername(username);
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 

@@ -28,6 +28,8 @@ import java.util.List;
 @Builder
 public class UserDatailEntity implements UserDetails {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @EqualsAndHashCode.Include
     private String username;
     @Length(min = 8)
