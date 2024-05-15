@@ -117,6 +117,7 @@ public class TaskService {
 
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
+        Collection<Message> oldComments = List.copyOf(oldTask.getComments());
         if(oldTask.getCompleted()) throw new TaskAlreadyCompleteException();
         if(oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
@@ -133,8 +134,8 @@ public class TaskService {
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         }
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
-        Collection<MessageGetDTO> comments = taskGetDTO.getComments().stream().filter(c ->
-                oldTask.getComments().stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
+        Collection<Message> comments = task.getComments().stream().filter(c ->
+                oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
         //generate the notifications
         comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
 

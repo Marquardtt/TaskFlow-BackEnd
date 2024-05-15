@@ -39,6 +39,7 @@ public class User {
     private String mail;
     private String phone;
     private String description;
+    private boolean authenticate;
 
     //Patch
     @Column(nullable = false)

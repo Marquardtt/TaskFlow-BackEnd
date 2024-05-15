@@ -17,7 +17,7 @@ import java.util.Collection;
 @Entity
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_date")
-public class   Date extends Property {
+public class Date extends Property {
 
     private Boolean canBePass = false;
     private Boolean includesHours =false;

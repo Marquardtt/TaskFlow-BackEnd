@@ -26,6 +26,7 @@ public class UserPutDTO {
     private String phone;
     private String description;
     private Configuration configuration;
+    private boolean authenticate;
     private Collection<Permission> permissions;
 
 }

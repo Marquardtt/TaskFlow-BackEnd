@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "tb_valued_uni_option")
 public class UniOptionValued extends Value{
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne()
     private Option uniOption;
 
     public UniOptionValued(Long id, Option uniOption){

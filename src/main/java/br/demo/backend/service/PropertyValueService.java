@@ -101,6 +101,7 @@ public class PropertyValueService {
         //get the tasks that contains the propertyvalues
         Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).filter(Objects::nonNull).toList();
         return tasks.stream().filter(t ->
+                !t.getCompleted() &&
                         t.getProperties().stream().anyMatch(p ->
                                 testIfIsTodayBasesInConfigs(p, user)))
                 .map(ModelToGetDTO::tranform).toList();

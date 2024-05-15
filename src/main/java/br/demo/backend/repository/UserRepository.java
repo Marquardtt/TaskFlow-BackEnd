@@ -12,8 +12,8 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    public Optional<User>findByUserDetailsEntity_Username(String username);
-    public Optional<User>findByUserDetailsEntity_UsernameContainingOrNameContaining(String username, String name);
+    Optional<User>findByUserDetailsEntity_Username(String username);
+    Optional<User>findByUserDetailsEntity_UsernameContainingOrNameContaining(String username, String name);
     Collection<User> findAllByPermissions_Project(Project project);
 
     Collection<User> findByPermissionsContaining(Permission permission);

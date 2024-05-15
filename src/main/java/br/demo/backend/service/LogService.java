@@ -77,7 +77,9 @@ public class LogService {
                 .map(prop ->  updateProperty(obj, old, prop)
                 )
                 .filter(Objects::nonNull).toList();
-        obj.getLogs().addAll(logs);
+        ArrayList<Log> oldLogs = new ArrayList<>(obj.getLogs());
+        oldLogs.addAll(logs);
+        obj.setLogs(oldLogs);
     }
 
     public void updateLogsArchive(ILogged obj, PropertyValue newArvchive) {
@@ -131,8 +133,10 @@ public class LogService {
         if (obj.getName() == null && old.getName() != null ||
                 obj.getName() != null && old.getName() == null ||
                 !obj.getName().equals(old.getName())) {
-            obj.getLogs().add(new Log(null, Action.UPDATENAME, getUser(),
+           ArrayList<Log> logs = new ArrayList<>(obj.getLogs());
+           logs.add(new Log(null, Action.UPDATENAME, getUser(),
                     LocalDateTime.now(), null));
+           obj.setLogs(logs);
         }
     }
     public void updatePicture(Project project) {
