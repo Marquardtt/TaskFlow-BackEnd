@@ -2,6 +2,7 @@ package br.demo.backend.controller.properties;
 
 import br.demo.backend.model.dtos.properties.DateGetDTO;
 import br.demo.backend.model.dtos.properties.LimitedGetDTO;
+import br.demo.backend.model.dtos.properties.PropertyGetDTO;
 import br.demo.backend.model.dtos.properties.SelectGetDTO;
 import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Limited;
@@ -57,17 +58,17 @@ public class PropertyController {
 
     //Precisa ter permissão de put no projeto
     @PutMapping("/limited")
-    public ResponseEntity<Limited> update(@RequestBody Limited property, @PathVariable Long projectId){
+    public ResponseEntity<PropertyGetDTO> update(@RequestBody Limited property, @PathVariable Long projectId){
         return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
     //Precisa ter permissão de put no projeto
     @PutMapping("/select")
-    public ResponseEntity<Select> update(@RequestBody Select property, @PathVariable Long projectId){
+    public ResponseEntity<PropertyGetDTO> update(@RequestBody Select property, @PathVariable Long projectId){
         return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
     //Precisa ter permissão de put no projeto
     @PutMapping("/date")
-    public ResponseEntity<Date> update(@RequestBody Date property, @PathVariable Long projectId){
+    public ResponseEntity<PropertyGetDTO> update(@RequestBody Date property, @PathVariable Long projectId){
         return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
     //Precisa ter permissão de put no projeto

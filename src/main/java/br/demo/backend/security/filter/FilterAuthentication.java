@@ -35,6 +35,10 @@ public class FilterAuthentication extends OncePerRequestFilter {
             Cookie cookie;
             try {
                 cookie = cookieUtil.getCookie(request, "JWT");// Get the cookie from the request
+                if(cookie == null) {
+                    response.sendError(401);
+                    return;
+                }
             } catch (Exception e) {
                 response.sendError(401);
                 return;
