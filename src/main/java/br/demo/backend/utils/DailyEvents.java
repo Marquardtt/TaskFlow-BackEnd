@@ -109,10 +109,12 @@ public class DailyEvents {
                 if (checkIfIsSchedulingDate(property.getProperty())) {
                     notificationService.generateNotification(TypeOfNotification.SCHEDULE,
                             obj.getId(), property.getId());
+                    System.out.println("SCHEDULEEE");
                 }
                 if (checkIfIsDeadlineDate(property.getProperty())) {
                     notificationService.generateNotification(TypeOfNotification.DEADLINE,
                             obj.getId(), property.getId());
+                    System.out.println("DEADLINEEE");
                 }
             }
         });
