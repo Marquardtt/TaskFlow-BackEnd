@@ -325,7 +325,7 @@ public class ModelToGetDTO {
         return new SimpleProjectGetDTO(
                 obj.getId(), obj.getName(), obj.getDescription(), obj.getPicture(),
                 progress, groups.stream().map(ModelToGetDTO::tranformSimple).toList(),
-                user, qttyPages, qttyProperties
+                user, obj.getVisualizedAt(), qttyPages, qttyProperties
         );
 
     }
