@@ -50,7 +50,7 @@ public class EmailService {
                 """, otp);
 
             message.setText(text);
-            // javaMailSender.send(message);
+             javaMailSender.send(message);
 
         } catch (MailException e){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -77,7 +77,7 @@ public class EmailService {
                 """, otp);
 
             message.setText(text);
-            // javaMailSender.send(message)
+             javaMailSender.send(message);
 
         } catch (MailException e){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -121,8 +121,6 @@ public class EmailService {
 
         return otp.toString();
     }
-
-
 
     public List<Code> getCode() {
         return codeRepository.findAll();
