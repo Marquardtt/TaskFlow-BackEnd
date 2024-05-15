@@ -44,12 +44,13 @@ public class AuthenticationGitHub {
         return newCookie;
     }
 
-    public void createUserGitHub(String username, String name) {
+    public void createUserGitHub(String username, String name, String email) {
         try {
             UserDatailEntity userDatailEntity = new UserDatailEntity();
             userDatailEntity.setUsername(username);
             userDatailEntity.setPassword(username);
-            UserPostDTO userPostDTO = new UserPostDTO(name, "", false, userDatailEntity);
+
+            UserPostDTO userPostDTO = new UserPostDTO(name, "", email, false, userDatailEntity);
             userService.save(userPostDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error creating user");
@@ -58,7 +59,9 @@ public class AuthenticationGitHub {
 
     public void externalLogin( HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        System.out.println(oAuth2User);
         String username = oAuth2User.getAttribute("login");
+        String email = oAuth2User.getAttribute("email");
         try {
             Cookie newCookie = loginWithGitHub(request, response, username);
             response.addCookie(newCookie); // Add the cookie to the response
@@ -66,7 +69,7 @@ public class AuthenticationGitHub {
         } catch (UsernameNotFoundException e) {
 
             String name = oAuth2User.getAttribute("name");
-            createUserGitHub(username, name);
+            createUserGitHub(username, email, name);
             Cookie newCookie = loginWithGitHub(request, response, username);
             response.addCookie(newCookie); // Add the cookie to the response
             response.sendRedirect("http://localhost:3000/" + username);
