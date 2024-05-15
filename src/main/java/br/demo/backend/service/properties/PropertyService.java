@@ -3,6 +3,7 @@ package br.demo.backend.service.properties;
 
 import br.demo.backend.exception.PropertyCantBeDeletedException;
 import br.demo.backend.model.Project;
+import br.demo.backend.model.dtos.properties.PropertyGetDTO;
 import br.demo.backend.model.enums.TypeOfPage;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.interfaces.IHasProperties;
@@ -26,6 +27,7 @@ import br.demo.backend.repository.relations.PropertyValueRepository;
 import br.demo.backend.repository.tasks.TaskRepository;
 import br.demo.backend.service.tasks.TaskService;
 import br.demo.backend.utils.IdProjectValidation;
+import br.demo.backend.utils.ModelToGetDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -100,10 +102,10 @@ public class PropertyService {
         return saveGeneric(property, selectRepository, projectId);
     }
 
-    private <T extends Property> T updateGeneric(T property, Boolean patching,
-                                                 AutoMapper<T> autoMapper,
-                                                 JpaRepository<T, Long> repo,
-                                                 T empty, Long projectId) {
+    private <T extends Property> PropertyGetDTO updateGeneric(T property, Boolean patching,
+                                                              AutoMapper<T> autoMapper,
+                                                              JpaRepository<T, Long> repo,
+                                                              T empty, Long projectId) {
         T old = repo.findById(property.getId()).get();
 
         if (patching) BeanUtils.copyProperties(old, empty);
@@ -121,24 +123,30 @@ public class PropertyService {
         prop.setType(old.getType());
         prop.setPages(old.getPages());
         prop.setProject(old.getProject());
-        return repo.save(prop);
+        return ModelToGetDTO.tranform(repo.save(prop));
     }
 
-    public Limited update(Limited propertyDTO, Boolean patching, Long projectId) {
+    public PropertyGetDTO update(Limited propertyDTO, Boolean patching, Long projectId) {
         return updateGeneric(propertyDTO, patching, autoMapperLimited, limitedRepository, new Limited(), projectId);
     }
 
-    public Date update(Date propertyDTO, Boolean patching, Long projectId) {
+    public PropertyGetDTO update(Date propertyDTO, Boolean patching, Long projectId) {
         return updateGeneric(propertyDTO, patching, autoMapperDate, dateRepository, new Date(), projectId);
     }
 
-    public Select update(Select propertyDTO, Boolean patching, Long projectId) {
+    public PropertyGetDTO update(Select propertyDTO, Boolean patching, Long projectId) {
         return updateGeneric(propertyDTO, patching, autoMapperSelect, selectRepository, new Select(), projectId);
     }
 
     public void delete(Long id, Long projectId) {
         Property property = propertyRepository.findById(id).get();
+        if(property.getProject() == null){
+            Page page = pageRepository.findByPropertiesContaining(property).stream().findFirst().get();
+
+            validation.ofObject(projectId, page.getProject());
+        }else{
         validation.ofObject(projectId, property.getProject());
+        }
         if (validateCanBeDeleted(property)) {
             orderedPageRepository.findAllByPropertyOrdering_Id(property.getId())
                     .forEach(p -> {
