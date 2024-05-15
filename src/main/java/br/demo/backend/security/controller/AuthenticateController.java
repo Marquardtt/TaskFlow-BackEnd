@@ -44,25 +44,6 @@ public class AuthenticateController {
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
 
-
-//    User user = repository.findByUserDetailsEntity_Username(userLogin.getUsername()).get();
-//
-//            if (user.isAuthenticate()) {
-//        // User requires 2FA, send OTP
-//        emailService.sendEmailAuth(user.getName(),user.getMail());
-//        return ResponseEntity.ok("OTP sent, please verify to complete authentication");
-//    }
-//
-//    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
-//    Authentication authentication = authenticationManager.authenticate(token);
-//    UserDetails userDetails = (UserDetails) authentication.getPrincipal(); // Get the user details from the authentication object
-//
-//    // User does not require 2FA, generate JWT cookie
-//    Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
-//            cookie.setHttpOnly(true);
-//            cookie.setSecure(true); // Ensure cookies are sent over HTTPS only
-//            response.addCookie(cookie);
-
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletResponse response) {
         try {
@@ -88,7 +69,6 @@ public class AuthenticateController {
         }
     }
 
-
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -102,15 +82,12 @@ public class AuthenticateController {
 
     @PostMapping("/verify-otp")
     public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest, HttpServletResponse response) {
-        System.out.println("entrei, tô aqui " + LocalTime.now());
 
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(otpRequest.getUsername(), otpRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(token);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        System.out.println("vascooooo");
 
         Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
         cookie.setMaxAge(3 * 30 * 24 * 3600);
