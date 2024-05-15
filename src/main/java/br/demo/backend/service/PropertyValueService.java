@@ -124,8 +124,8 @@ public class PropertyValueService {
     private Boolean compareToThisDay(LocalDateTime time){
         try {
             return time.getMonthValue() == LocalDate.now().getMonthValue() &&
-                    time.getYear() == time.getYear() &&
-                    time.getDayOfMonth() == time.getDayOfMonth();
+                    time.getYear() == LocalDate.now().getYear() &&
+                    time.getDayOfMonth() == LocalDate.now().getDayOfMonth();
         }catch (NullPointerException e){
             return false;
         }
