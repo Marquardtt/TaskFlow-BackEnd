@@ -13,6 +13,4 @@ public class SendEmailDTO {
 
     @NotBlank
     private String username;
-
-    private String emailFrom = "gestaodeprojetosweg@gmail.com";
 }

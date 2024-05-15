@@ -30,6 +30,7 @@ public class UserGetDTO {
     private String description;
     private Long points;
     private Configuration configuration;
+    private boolean authenticate;
     private Collection<PermissionGetDTO> permissions;
     private Collection<Notification> notifications;
 

@@ -49,7 +49,7 @@ public class AuthenticationGitHub {
             UserDatailEntity userDatailEntity = new UserDatailEntity();
             userDatailEntity.setUsername(username);
             userDatailEntity.setPassword(username);
-            UserPostDTO userPostDTO = new UserPostDTO(name, "", userDatailEntity);
+            UserPostDTO userPostDTO = new UserPostDTO(name, "", false, userDatailEntity);
             userService.save(userPostDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error creating user");

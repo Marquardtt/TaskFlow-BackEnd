@@ -2,6 +2,7 @@ package br.demo.backend.security.controller;
 
 
 import br.demo.backend.model.Code;
+import br.demo.backend.model.OtpVerificationRequest;
 import br.demo.backend.model.User;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
@@ -27,8 +28,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @AllArgsConstructor
@@ -39,56 +43,58 @@ public class AuthenticateController {
     private final UserRepository repository;
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
+
     @PostMapping("/login")
-    public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletResponse response) {
         try {
+            User user = repository.findByUserDetailsEntity_Username(userLogin.getUsername()).get();
 
-            //
-            UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(userLogin.getUsername(),userLogin.getPassword());
+            if (!user.isAuthenticate()) {
+                UsernamePasswordAuthenticationToken token =
+                        new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
+                Authentication authentication = authenticationManager.authenticate(token);
 
-            Authentication authentication = authenticationManager.authenticate(token);
-
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();// Get the user from the authentication object
-            User user = repository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
-
-            if(user.getUserDetailsEntity().isAuthenticate()){
-                String email= user.getMail();
-                emailService.generateOTP(user.getUserDetailsEntity().getUsername(), email);
-                emailService.sendEmail(email,email,email);
-                response.sendRedirect("/two-factor");
-
-            }else {
-                Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);// Create a cookie with the JWT
-                response.addCookie(cookie);// Add the cookie to the response
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+                response.addCookie(cookie);
+                return ResponseEntity.ok("User authenticated");
+            } else {
+                emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
+                return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
             }
-
-            return ResponseEntity.ok("User authenticated");
-
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired");
-        }catch (AuthenticationException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request, HttpServletResponse response){
-        try{
-            for (Cookie cookie : authenticationService.removeCookies(request)){
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            for (Cookie cookie : authenticationService.removeCookies(request)) {
                 response.addCookie(cookie);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(401);
         }
     }
-//    @PostMapping("/two-factor/login")
-//    public HttpServletResponse twoFactor(@RequestBody Code code){
-//        try{
-//
-//        }catch (){
-//
-//        }
-//
-//    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest, HttpServletResponse response) {
+
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(otpRequest.getUsername(), otpRequest.getPassword());
+        Authentication authentication = authenticationManager.authenticate(token);
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+        cookie.setMaxAge(3 * 30 * 24 * 3600);
+        response.addCookie(cookie);
+        System.out.println(cookie.getValue());
+
+        return ResponseEntity.ok("OTP verified, user authenticated successfully");
+    }
+
 }
