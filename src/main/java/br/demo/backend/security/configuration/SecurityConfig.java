@@ -1,10 +1,5 @@
 package br.demo.backend.security.configuration;
 
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.security.*;
-import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
 import br.demo.backend.security.service.AuthenticationGitHub;
@@ -17,7 +12,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.savedrequest.NullRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 
@@ -37,12 +35,22 @@ public class SecurityConfig {
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
 
+
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
+
         http.csrf(AbstractHttpConfigurer::disable);
         //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
+        // Manter a sessão do usuário na requisição ativa
+        http.securityContext((context) -> context.securityContextRepository(repo));
+        http
+                .sessionManagement(config -> {
+            config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            config.sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy());
+        });
+//                .sessionManagement(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests(authz -> authz
                         //USER
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
@@ -159,11 +167,7 @@ public class SecurityConfig {
                 .oauth2Login(httpOauth2 -> httpOauth2.successHandler(authenticationGitHub::externalLogin));
 
 
-        // Manter a sessão do usuário na requisição ativa
-        http.securityContext((context) -> context.securityContextRepository(repo));
-        http.sessionManagement(config -> {
-            config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        });
+
 
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
         http.formLogin(AbstractHttpConfigurer::disable);

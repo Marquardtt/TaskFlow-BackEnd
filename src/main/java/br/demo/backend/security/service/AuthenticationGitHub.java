@@ -1,5 +1,8 @@
 package br.demo.backend.security.service;
+
+import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.user.UserPostDTO;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.utils.CookieUtil;
 import br.demo.backend.service.UserService;
@@ -18,6 +21,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -26,10 +30,12 @@ public class AuthenticationGitHub {
     private final SecurityContextRepository securityContextRepository;
     private final AuthenticationService authenticationService;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final CookieUtil cookieUtil = new CookieUtil();
 
     public Cookie loginWithGitHub(HttpServletRequest request, HttpServletResponse response, String username) {
-        UserDetails userDetails = authenticationService.loadUserByUsername(username);
+
+        UserDetails userDetails = authenticationService.loadUserByUsernameGitHub(username);
         Authentication authentication1 =
                 new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -47,30 +53,47 @@ public class AuthenticationGitHub {
     public void createUserGitHub(String username, String name, String email) {
         try {
             UserDatailEntity userDatailEntity = new UserDatailEntity();
-            userDatailEntity.setUsername(username);
+            userDatailEntity.setUsername(username+ name);
             userDatailEntity.setPassword(username);
-
-            UserPostDTO userPostDTO = new UserPostDTO(name, "", email, false, userDatailEntity);
+            userDatailEntity.setUsernameGitHub(username);
+            userDatailEntity.setLinkedWithGitHub(true);
+            UserPostDTO userPostDTO = new UserPostDTO(name, "", email,  false, userDatailEntity);
             userService.save(userPostDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error creating user");
         }
     }
 
-    public void externalLogin( HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    public void externalLogin(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        System.out.println(request.getUserPrincipal());
+
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         System.out.println(oAuth2User);
         String username = oAuth2User.getAttribute("login");
-        String email = oAuth2User.getAttribute("email");
-        try {
-            Cookie newCookie = loginWithGitHub(request, response, username);
-            response.addCookie(newCookie); // Add the cookie to the response
-            response.sendRedirect("http://localhost:3000/" + username);
-        } catch (UsernameNotFoundException e) {
 
+        Optional<User> user = userRepository.findByUserDetailsEntity_UsernameGitHub(username);
+
+
+        try {
+            if (user.isPresent() && user.get().getUserDetailsEntity().isLinkedWithGitHub() && user.get().getUserDetailsEntity().getUsernameGitHub().equals(username)) {
+                    Cookie newCookie = loginWithGitHub(request, response, username);
+                    response.addCookie(newCookie); // Add the cookie to the response
+                    response.sendRedirect("http://localhost:3000/" + username);
+            } else {
+                throw new UsernameNotFoundException("User not found");
+            }
+        } catch (UsernameNotFoundException e) {
+            Cookie newCookie = null;
             String name = oAuth2User.getAttribute("name");
-            createUserGitHub(username, email, name);
-            Cookie newCookie = loginWithGitHub(request, response, username);
+            if (!user.isPresent()) {
+                createUserGitHub(username, name);
+                newCookie = loginWithGitHub(request, response, username);
+            } else if (user.get().getUserDetailsEntity().getUsername().equals(username)) {
+
+                createUserGitHub(username, "TESTE");
+                newCookie = loginWithGitHub(request, response, username);
+            }
+
             response.addCookie(newCookie); // Add the cookie to the response
             response.sendRedirect("http://localhost:3000/" + username);
         }
