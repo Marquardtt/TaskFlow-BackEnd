@@ -70,7 +70,7 @@ public class AuthenticationGitHub {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         System.out.println(oAuth2User);
         String username = oAuth2User.getAttribute("login");
-
+        String email = oAuth2User.getAttribute("email");
         Optional<User> user = userRepository.findByUserDetailsEntity_UsernameGitHub(username);
 
 
@@ -86,11 +86,11 @@ public class AuthenticationGitHub {
             Cookie newCookie = null;
             String name = oAuth2User.getAttribute("name");
             if (!user.isPresent()) {
-                createUserGitHub(username, name);
+                createUserGitHub(username, name,email);
                 newCookie = loginWithGitHub(request, response, username);
             } else if (user.get().getUserDetailsEntity().getUsername().equals(username)) {
 
-                createUserGitHub(username, "TESTE");
+                createUserGitHub(username, "TESTE", email);
                 newCookie = loginWithGitHub(request, response, username);
             }
 
