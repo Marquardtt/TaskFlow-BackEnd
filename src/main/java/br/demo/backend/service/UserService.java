@@ -26,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -56,7 +57,7 @@ public class UserService {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
-            user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+            user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
             return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
@@ -102,7 +103,7 @@ public class UserService {
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         // thats not a real delete, just a disable for a time
         user.getUserDetailsEntity().setEnabled(false);
-        user.getUserDetailsEntity().setWhenHeTryDelete(LocalDateTime.now());
+        user.getUserDetailsEntity().setWhenHeTryDelete(OffsetDateTime.now());
         userRepository.save(user);
     }
 
@@ -137,7 +138,7 @@ public class UserService {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.getUserDetailsEntity().setPassword(password);
         user.getUserDetailsEntity().setCredentialsNonExpired(true);
-        user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+        user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 

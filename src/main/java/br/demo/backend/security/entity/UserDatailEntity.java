@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,8 +45,8 @@ public class UserDatailEntity implements UserDetails {
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
-    private LocalDateTime lastPasswordEdition;
-    private LocalDateTime whenHeTryDelete;
+    private OffsetDateTime lastPasswordEdition;
+    private OffsetDateTime whenHeTryDelete;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

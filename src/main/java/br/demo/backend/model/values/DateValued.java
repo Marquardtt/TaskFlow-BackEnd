@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,14 +16,14 @@ import java.time.LocalDateTime;
 @Table(name = "tb_valued_date")
 public class DateValued extends Value{
 
-    private LocalDateTime dateTime;
-    public DateValued(Long id, LocalDateTime dateTime){
+    private OffsetDateTime dateTime;
+    public DateValued(Long id, OffsetDateTime dateTime){
         super(id);
         this.dateTime = dateTime;
     }
 
     @Override
-    public void setValue(Object value){this.dateTime = (LocalDateTime) value;}
+    public void setValue(Object value){this.dateTime = (OffsetDateTime) value;}
     @Override
     public Object getValue(){
         return this.dateTime;

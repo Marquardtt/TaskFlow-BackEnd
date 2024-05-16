@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 public class DeserializerValue extends StdDeserializer<PropertyValue> {
@@ -106,7 +107,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             if (isPresent(valueF, "id")) {
                 date.setId(valueF.get("id").asLong());
             }
-            date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+            date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
 //                                    LocalDateTime.parse(valueF.asText())
             starts.add(date);
         }
@@ -116,7 +117,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             if (isPresent(valueF, "id")) {
                 date.setId(valueF.get("id").asLong());
             }
-            date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+            date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
             ends.add(date);
         }
         JsonNode time = value.get("time");
@@ -165,7 +166,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         if (value.isNull()) {
             return new PropertyValue(id, property, new DateValued(idTaskVl, null));
         }
-        return new PropertyValue(id, property, new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
+        return new PropertyValue(id, property, new DateValued(idTaskVl, OffsetDateTime.parse(value.asText())));
     }
 
     private static PropertyValue deserializeArchive(Long id, Property property, Long idTaskVl) {
