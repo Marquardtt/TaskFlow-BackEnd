@@ -149,6 +149,7 @@ public class PropertyValueService {
         }
         System.out.println("soy archive valued"+archiveValued);
     logService.updateLogsArchive(iLogged, propertyValue);
+        System.out.println(archiveValued);
         return archiveValuedRepository.save(archiveValued);
     }
     private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject){
