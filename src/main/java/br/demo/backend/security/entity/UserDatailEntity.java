@@ -30,6 +30,7 @@ public class UserDatailEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
     @EqualsAndHashCode.Include
     private String username;
     @Length(min = 8)
