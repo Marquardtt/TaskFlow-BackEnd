@@ -124,7 +124,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
-
+                        .requestMatchers(HttpMethod.PATCH, "/remove/{id}/from/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
