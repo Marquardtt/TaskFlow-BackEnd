@@ -43,6 +43,9 @@ public class UserDatailEntity implements UserDetails {
     private boolean credentialsNonExpired = true;
     private LocalDateTime lastPasswordEdition;
     private LocalDateTime whenHeTryDelete;
+    private boolean linkedWithGitHub = false;
+    @Column(unique = true)
+    private String usernameGitHub;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

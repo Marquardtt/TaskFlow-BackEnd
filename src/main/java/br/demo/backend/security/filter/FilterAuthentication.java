@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
@@ -60,6 +62,8 @@ public class FilterAuthentication extends OncePerRequestFilter {
             securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
 
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
+            Cookie cookie1 = Arrays.stream(request.getCookies()).filter(x -> x.getName().equals("JSESSIONID")).findFirst().get();
+            cookie1.setMaxAge(0);
             response.addCookie(newCookie); // Add the cookie to the response
         }
 
