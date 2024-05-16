@@ -65,6 +65,7 @@ public class AuthenticateController {
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired - 403");
         } catch (AuthenticationException e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials - 401");
         }
     }

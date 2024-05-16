@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 
@@ -21,7 +22,7 @@ public class SimpleProjectGetDTO {
     private Integer progress;
     private Collection<SimpleGroupGetDTO> groups;
     private OtherUsersDTO owner;
-    private LocalDateTime visualizedAt;
+    private OffsetDateTime visualizedAt;
     private Integer qttyPages;
     private Integer qttyProperties;
 }

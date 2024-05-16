@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -19,5 +20,5 @@ class DateTimelines {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    private LocalDateTime date;
+    private OffsetDateTime date;
 }

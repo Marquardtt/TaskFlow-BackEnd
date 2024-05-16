@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Service
@@ -133,7 +134,7 @@ public class ProjectService {
 
         //set a default property
         defaultPropsService.select(project, null);
-        emptyProject.setVisualizedAt(LocalDateTime.now());
+        emptyProject.setVisualizedAt(OffsetDateTime.now());
 
         return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
@@ -141,7 +142,7 @@ public class ProjectService {
    //set that the project was visualized by a user, to sort by this on the projects page
     public ProjectGetDTO setVisualizedNow(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
-        project.setVisualizedAt(LocalDateTime.now());
+        project.setVisualizedAt(OffsetDateTime.now());
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 

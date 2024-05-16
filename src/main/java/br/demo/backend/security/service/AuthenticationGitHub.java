@@ -50,14 +50,14 @@ public class AuthenticationGitHub {
         return newCookie;
     }
 
-    public void createUserGitHub(String username, String name) {
+    public void createUserGitHub(String username, String name, String email) {
         try {
             UserDatailEntity userDatailEntity = new UserDatailEntity();
             userDatailEntity.setUsername(username+ name);
             userDatailEntity.setPassword(username);
             userDatailEntity.setUsernameGitHub(username);
             userDatailEntity.setLinkedWithGitHub(true);
-            UserPostDTO userPostDTO = new UserPostDTO(name, "", false, userDatailEntity);
+            UserPostDTO userPostDTO = new UserPostDTO(name, "", email,  false, userDatailEntity);
             userService.save(userPostDTO);
         } catch (Exception e) {
             throw new RuntimeException("Error creating user");
@@ -68,9 +68,12 @@ public class AuthenticationGitHub {
         System.out.println(request.getUserPrincipal());
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        System.out.println(oAuth2User);
         String username = oAuth2User.getAttribute("login");
+
         Optional<User> user = userRepository.findByUserDetailsEntity_UsernameGitHub(username);
-        System.out.println(user.isPresent());
+
+
         try {
             if (user.isPresent() && user.get().getUserDetailsEntity().isLinkedWithGitHub() && user.get().getUserDetailsEntity().getUsernameGitHub().equals(username)) {
                     Cookie newCookie = loginWithGitHub(request, response, username);
@@ -90,6 +93,7 @@ public class AuthenticationGitHub {
                 createUserGitHub(username, "TESTE");
                 newCookie = loginWithGitHub(request, response, username);
             }
+
             response.addCookie(newCookie); // Add the cookie to the response
             response.sendRedirect("http://localhost:3000/" + username);
         }

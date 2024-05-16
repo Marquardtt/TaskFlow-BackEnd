@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +22,6 @@ public class LogGetDTO {
     private String description;
     private Action action;
     private OtherUsersDTO user;
-    private LocalDateTime datetime;
+    private OffsetDateTime datetime;
     private PropertyValueGetDTO value;
 }

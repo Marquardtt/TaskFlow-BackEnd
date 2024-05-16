@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +45,7 @@ public class PropertyValue {
         this.id = null;
         Object value = first.getValue().getValue();
         this.value = switch (first.getProperty().getType()){
-            case DATE -> new DateValued(null, (LocalDateTime)value );
+            case DATE -> new DateValued(null, (OffsetDateTime)value );
             case SELECT, RADIO -> new UniOptionValued(null, (Option) value);
             case TIME -> {
                 Intervals valueInt = (Intervals) value;

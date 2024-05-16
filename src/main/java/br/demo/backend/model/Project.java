@@ -12,7 +12,7 @@ import lombok.*;
 import br.demo.backend.model.relations.PropertyValue;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Data
@@ -36,7 +36,7 @@ public class Project implements ILogged, IHasProperties {
     //Patch
     @NotNull
     @Column(nullable = false)
-    private LocalDateTime visualizedAt = LocalDateTime.now();
+    private OffsetDateTime visualizedAt = OffsetDateTime.now();
     @ManyToOne
     @NotNull
     @JoinColumn(nullable = false)

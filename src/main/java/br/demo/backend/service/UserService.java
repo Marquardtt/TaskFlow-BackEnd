@@ -5,7 +5,7 @@ import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
 import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
-import br.demo.backend.model.dtos.user.OtherUsersDTO;
+import br.demo.backend.model.dtos.user.*;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
@@ -16,9 +16,6 @@ import br.demo.backend.security.exception.ForbiddenException;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
@@ -29,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -59,7 +57,7 @@ public class UserService {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
-            user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+            user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
             return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
@@ -78,7 +76,17 @@ public class UserService {
 
         keepFields(user, oldUser);
 
+        return ModelToGetDTO.tranform(userRepository.save(user));
+    }
 
+    public UserGetDTO changeUsername(String username) throws AccessDeniedException {
+        UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        User user = userRepository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
+
+        if(userRepository.findByUserDetailsEntity_Username(username).isPresent()){
+                throw new UsernameAlreadyUsedException();
+        }
+        user.getUserDetailsEntity().setUsername(username);
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
@@ -95,7 +103,7 @@ public class UserService {
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         // thats not a real delete, just a disable for a time
         user.getUserDetailsEntity().setEnabled(false);
-        user.getUserDetailsEntity().setWhenHeTryDelete(LocalDateTime.now());
+        user.getUserDetailsEntity().setWhenHeTryDelete(OffsetDateTime.now());
         userRepository.save(user);
     }
 
@@ -129,8 +137,8 @@ public class UserService {
     public UserGetDTO updatePassword(String id, String password) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.getUserDetailsEntity().setPassword(password);
-        user.getUserDetailsEntity().setAccountNonExpired(true);
-        user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+        user.getUserDetailsEntity().setCredentialsNonExpired(true);
+        user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 

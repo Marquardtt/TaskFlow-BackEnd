@@ -33,8 +33,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -116,16 +115,16 @@ public class PropertyValueService {
             } else {
                 deadlineOrScheduling = property.getScheduling();
             }
-            return deadlineOrScheduling && compareToThisDay((LocalDateTime) p.getValue().getValue());
+            return deadlineOrScheduling && compareToThisDay((OffsetDateTime) p.getValue().getValue());
         }
         return false;
     }
 
-    private Boolean compareToThisDay(LocalDateTime time){
+    private Boolean compareToThisDay(OffsetDateTime time){
         try {
-            return time.getMonthValue() == LocalDate.now().getMonthValue() &&
-                    time.getYear() == time.getYear() &&
-                    time.getDayOfMonth() == time.getDayOfMonth();
+            return time.getMonthValue() == OffsetDateTime.now().getMonthValue() &&
+                    time.getYear() == OffsetDateTime.now().getYear() &&
+                    time.getDayOfMonth() == OffsetDateTime.now().getDayOfMonth();
         }catch (NullPointerException e){
             return false;
         }
@@ -149,6 +148,7 @@ public class PropertyValueService {
         }
         System.out.println("soy archive valued"+archiveValued);
     logService.updateLogsArchive(iLogged, propertyValue);
+        System.out.println(archiveValued);
         return archiveValuedRepository.save(archiveValued);
     }
     private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject){

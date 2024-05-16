@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -196,5 +197,16 @@ public class GroupService {
 
     public Collection<SimpleGroupGetDTO> findAll() {
         return groupRepository.findAll().stream().map(ModelToGetDTO::tranformSimple).toList();
+    }
+
+    public GroupGetDTO removeFromProject(Long groupId, Long projectId) {
+        System.out.println("ASDASDASDASD");
+        Group group = groupRepository.findById(groupId).get();
+        group.setPermissions(new ArrayList<>(group.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList()));
+        group.getUsers().forEach(u -> {
+            u.setPermissions(u.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList());
+            userRepository.save(u);
+        });
+        return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 }

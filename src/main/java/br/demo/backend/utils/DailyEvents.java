@@ -21,7 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Service
@@ -76,24 +76,24 @@ public class DailyEvents {
         users.stream().filter(u -> checkIfIsMoreThan6Months(u.getUserDetailsEntity()
                 .getLastPasswordEdition())).forEach(
                 u -> {
-                    u.getUserDetailsEntity().setAccountNonExpired(false);
+                    u.getUserDetailsEntity().setCredentialsNonExpired(false);
                     userRepository.save(u);
                 }
         );
     }
 
-    private Boolean checkIfIsIn24Hours(LocalDateTime date) {
-        LocalDateTime currentDate = LocalDateTime.now();
+    private Boolean checkIfIsIn24Hours(OffsetDateTime date) {
+        OffsetDateTime currentDate = OffsetDateTime.now();
         return date.isBefore(currentDate.plusDays(1)) && date.isAfter(currentDate);
     }
 
-    private Boolean checkIfIsMoreThan30Days(LocalDateTime date) {
-        LocalDateTime currentDate = LocalDateTime.now();
+    private Boolean checkIfIsMoreThan30Days(OffsetDateTime date) {
+        OffsetDateTime currentDate = OffsetDateTime.now();
         return date.isBefore(currentDate.plusDays(30));
     }
 
-    private Boolean checkIfIsMoreThan6Months(LocalDateTime date) {
-        LocalDateTime currentDate = LocalDateTime.now();
+    private Boolean checkIfIsMoreThan6Months(OffsetDateTime date) {
+        OffsetDateTime currentDate = OffsetDateTime.now();
         return date.isBefore(currentDate.plusDays(30 * 6));
     }
 
@@ -111,7 +111,7 @@ public class DailyEvents {
         obj.getPropertiesValues().forEach(property -> {
             if(!property.getProperty().getType().equals(TypeOfProperty.DATE)) return;
             if(property.getValue().getValue() == null) return;
-            if(checkIfIsIn24Hours((LocalDateTime)property.getValue().getValue() )){
+            if(checkIfIsIn24Hours((OffsetDateTime)property.getValue().getValue() )){
                 if (((Date)property.getProperty()).getScheduling()) {
                     System.out.println("SCHEDULE");
                     notificationService.generateNotification(TypeOfNotification.SCHEDULE,

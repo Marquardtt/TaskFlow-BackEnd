@@ -42,7 +42,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -166,7 +166,7 @@ public class TaskService {
         validation.ofObject(projectId, page.getProject());
 
         //set the attributes to delete the task
-        task.setDateDeleted(LocalDateTime.now());
+        task.setDateDeleted(OffsetDateTime.now());
         task.setDeleted(true);
 
         // generate logs
@@ -222,7 +222,7 @@ public class TaskService {
         //setting attributes to complete the task
         TaskGetDTO tranform;
         if(page.getProject().getOwner().equals(user) || !page.getProject().getRevision()){
-            task.setDateCompleted(LocalDateTime.now());
+            task.setDateCompleted(OffsetDateTime.now());
             task.setCompleted(true);
             task.setWaitingRevision(false);
 
