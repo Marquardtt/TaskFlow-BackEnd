@@ -14,6 +14,7 @@ public class UserPostDTO {
 
     private String name;
     private String surname;
+    private String mail;
     private boolean authenticate;
     private UserDatailEntity userDetailsEntity;
 }
