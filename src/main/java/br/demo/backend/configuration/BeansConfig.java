@@ -12,10 +12,11 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
+import org.springframework.session.web.http.HttpSessionIdResolver;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
 
 @Configuration
@@ -36,10 +37,10 @@ public class BeansConfig  {
         corsConfigurationSource.registerCorsConfiguration("/**",corsConfig);
         return corsConfigurationSource;
     }
-
     @Bean
     public SecurityContextRepository securityContextRepository(){
-        return new HttpSessionSecurityContextRepository(); // Mantém a seção do úsuario na requisição
+        HttpSessionSecurityContextRepository http =  new HttpSessionSecurityContextRepository(); // Mantém a seção do úsuario na requisição
+        return http;
     }
 
     @Bean
@@ -62,4 +63,5 @@ public class BeansConfig  {
         modelMapper.getConfiguration().setAmbiguityIgnored(true);
         return modelMapper;
     }
+
 }

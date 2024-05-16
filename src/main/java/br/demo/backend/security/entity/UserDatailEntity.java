@@ -45,6 +45,9 @@ public class UserDatailEntity implements UserDetails {
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
+    private boolean linkedWithGitHub = false;
+    @Column(unique = true)
+    private String usernameGitHub;
     private OffsetDateTime lastPasswordEdition;
     private OffsetDateTime whenHeTryDelete;
 

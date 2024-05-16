@@ -40,6 +40,15 @@ public class AuthenticationService implements UserDetailsService {
         throw new UsernameNotFoundException("User not found");
     }
 
+    public UserDetails loadUserByUsernameGitHub(String username)throws UsernameNotFoundException {
+
+        Optional<User> userOptional = userRepository.findByUserDetailsEntity_UsernameGitHub(username);
+        if (userOptional.isPresent()) {
+            userOptional.get().getUserDetailsEntity().setEnabled(true);
+            return userOptional.get().getUserDetailsEntity();
+        }
+        throw new UsernameNotFoundException("User not found");
+    }
 
     public List<Cookie> removeCookies (HttpServletRequest request){
         try{
