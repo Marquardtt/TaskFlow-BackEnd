@@ -1,5 +1,6 @@
 package br.demo.backend.model.values;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -16,12 +17,12 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_valued_date")
 public class DateValued extends Value{
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private DateWithGoogle date;
 
     public DateValued(Long id, DateWithGoogle dateTime){
         super(id);
-        this.date = date;
+        this.date = dateTime;
     }
 
     @Override

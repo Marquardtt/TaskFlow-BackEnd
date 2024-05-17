@@ -169,6 +169,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     }
 
     private static PropertyValue deserializeDate(JsonNode value, Long id, Property property, Long idTaskVl) {
+        System.out.println(value);
         if (value.isNull()) {
             return new PropertyValue(id, property, new DateValued(idTaskVl, null));
         }
