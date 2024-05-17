@@ -25,6 +25,7 @@ public class Intervals {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne(cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Include
     private Duration time = new Duration();
 
     @OneToMany(cascade =  CascadeType.ALL)

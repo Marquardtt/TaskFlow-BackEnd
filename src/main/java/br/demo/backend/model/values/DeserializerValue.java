@@ -58,7 +58,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         if (property.getType() == null) {
                             throw new DeserializerException("Property don't have property.getType() attribute");
                         }
-
+                        System.out.println(jsonValue);
                         return switch (property.getType()) {
                             case USER -> deserializeUser(value, id, property, idTaskVl);
                             case TIME -> deserializeTime(value, id, property, idTaskVl);
@@ -98,10 +98,14 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     }
 
     private PropertyValue deserializeTime(JsonNode value, Long id, Property property, Long idTaskVl) {
+        System.out.println(value);
         String color = value.get("color").asText();
         ArrayList<DateTimelines> starts = new ArrayList<>();
+        System.out.println("color");
         // I have merda here
         Long idIntervals = value.get("id").asLong();
+        System.out.println("id");
+
         for (JsonNode valueF : value.get("starts")) {
             DateTimelines date = new DateTimelines();
             if (isPresent(valueF, "id")) {
