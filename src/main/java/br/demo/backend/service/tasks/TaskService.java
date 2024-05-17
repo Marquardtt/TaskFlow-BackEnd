@@ -118,7 +118,7 @@ public class TaskService {
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
         Collection<Message> oldComments = List.copyOf(oldTask.getComments());
-        if(oldTask.getCompleted()){
+        if(oldTask.getCompleted() || oldTask.getWaitingRevision()){
             oldTask.setComments(taskDTO.getComments());
             TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
             Collection<Message> comments = oldTask.getComments().stream().filter(c ->
