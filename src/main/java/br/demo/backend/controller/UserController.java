@@ -33,9 +33,14 @@ public class UserController {
         return userService.update(user, true);
     }
 
-    @PutMapping("/changeUsername")
+    @PatchMapping("/changeUsername")
     public void changeUsername(@RequestBody UserChangeUsernameDTO userChangeUsernameDTO) throws AccessDeniedException {
          userService.changeUsername(userChangeUsernameDTO);
+    }
+
+    @PatchMapping("/changePassword")
+    public void changePassword(@RequestBody UserChangePasswordDTO userChangePasswordDTO) throws AccessDeniedException {
+        userService.changePassword(userChangePasswordDTO);
     }
 
     @GetMapping("/{username}")

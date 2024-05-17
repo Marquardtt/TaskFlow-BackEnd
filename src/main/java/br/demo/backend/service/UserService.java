@@ -1,13 +1,13 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.exception.CurrentPasswordDontMatchException;
 import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
 import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.user.*;
 import br.demo.backend.model.enums.TypeOfNotification;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.ProjectRepository;
@@ -78,17 +78,27 @@ public class UserService {
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
-    public void changeUsername(UserChangeUsernameDTO userChangeUsernameDTO) throws AccessDeniedException {
+    public void changeUsername(UserChangeUsernameDTO userChangeUsernameDTO){
         UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         User user = userRepository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
 
         if(userRepository.findByUserDetailsEntity_Username(userChangeUsernameDTO.getUsername()).isPresent()){
-                throw new UsernameAlreadyUsedException();
+            throw new UsernameAlreadyUsedException();
         }
         if(userRepository.findByUserDetailsEntity_Username(userChangeUsernameDTO.getUsername()).equals(userChangeUsernameDTO.getUsername())){
             throw new UsernameAlreadyUsedException();
         }
         user.getUserDetailsEntity().setUsername(userChangeUsernameDTO.getUsername());
+        ModelToGetDTO.tranform(userRepository.save(user));
+    }
+
+    public void changePassword(UserChangePasswordDTO userChangePasswordDTO){
+        UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        User user = userRepository.findById(userDetails.getId()).get();
+        if (user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
+            throw new CurrentPasswordDontMatchException();
+        }
+        user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getPassword());
         ModelToGetDTO.tranform(userRepository.save(user));
     }
 
