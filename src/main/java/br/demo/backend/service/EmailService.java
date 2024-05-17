@@ -29,8 +29,6 @@ public class EmailService {
     private JavaMailSender javaMailSender;
     private final String from = "gestaodeprojetosweg@gmail.com";
 
-
-
     public ResponseEntity sendEmailForgot(String username, String to) {
         codeRepository.deleteAll();
         try {
@@ -50,7 +48,7 @@ public class EmailService {
                 """, otp);
 
             message.setText(text);
-             javaMailSender.send(message);
+           //  javaMailSender.send(message);
 
         } catch (MailException e){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -77,7 +75,7 @@ public class EmailService {
                 """, otp);
 
             message.setText(text);
-             javaMailSender.send(message);
+            // javaMailSender.send(message);
 
         } catch (MailException e){
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -103,7 +101,7 @@ public class EmailService {
 
 
     public String generateOTPCode(String username, String email) {
-        int length = 8; // Definindo o tamanho do OTP
+        int length = 6;
         StringBuilder otp = new StringBuilder();
         SecureRandom random = new SecureRandom();
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

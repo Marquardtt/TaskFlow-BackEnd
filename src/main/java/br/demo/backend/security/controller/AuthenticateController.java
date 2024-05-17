@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @RestController
@@ -59,12 +60,13 @@ public class AuthenticateController {
                 response.addCookie(cookie);
                 return ResponseEntity.ok("User authenticated");
             } else {
+                System.out.println("entrei");
                 emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
-                return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Credentials Expired - 406");
             }
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired - 403");
-        } catch (AuthenticationException e) {
+        } catch (AuthenticationException | NoSuchElementException e) {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials - 401");
         }
