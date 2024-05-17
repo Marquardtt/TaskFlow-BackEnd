@@ -78,15 +78,18 @@ public class UserService {
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 
-    public UserGetDTO changeUsername(String username) throws AccessDeniedException {
+    public void changeUsername(UserChangeUsernameDTO userChangeUsernameDTO) throws AccessDeniedException {
         UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         User user = userRepository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
 
-        if(userRepository.findByUserDetailsEntity_Username(username).isPresent()){
+        if(userRepository.findByUserDetailsEntity_Username(userChangeUsernameDTO.getUsername()).isPresent()){
                 throw new UsernameAlreadyUsedException();
         }
-        user.getUserDetailsEntity().setUsername(username);
-        return ModelToGetDTO.tranform(userRepository.save(user));
+        if(userRepository.findByUserDetailsEntity_Username(userChangeUsernameDTO.getUsername()).equals(userChangeUsernameDTO.getUsername())){
+            throw new UsernameAlreadyUsedException();
+        }
+        user.getUserDetailsEntity().setUsername(userChangeUsernameDTO.getUsername());
+        ModelToGetDTO.tranform(userRepository.save(user));
     }
 
     private void keepFields(User user, User oldUser){

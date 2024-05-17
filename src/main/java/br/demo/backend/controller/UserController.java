@@ -34,8 +34,8 @@ public class UserController {
     }
 
     @PutMapping("/changeUsername")
-    public UserGetDTO changeUsername(@RequestBody String username) throws AccessDeniedException {
-        return userService.changeUsername(username);
+    public void changeUsername(@RequestBody UserChangeUsernameDTO userChangeUsernameDTO) throws AccessDeniedException {
+         userService.changeUsername(userChangeUsernameDTO);
     }
 
     @GetMapping("/{username}")
