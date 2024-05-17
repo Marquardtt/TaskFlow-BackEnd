@@ -36,6 +36,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private Archive picture = new Archive(null,  "picture", "jpg", new byte[0]);
 
+    @Column(unique = true)
     private String mail;
     private String phone;
     private String description;

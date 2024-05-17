@@ -44,6 +44,7 @@ public class UserDatailEntity implements UserDetails {
     private LocalDateTime lastPasswordEdition;
     private LocalDateTime whenHeTryDelete;
     private boolean linkedWithGitHub = false;
+    private boolean linkedWithGoogle = false;
     @Column(unique = true)
     private String usernameGitHub;
 
