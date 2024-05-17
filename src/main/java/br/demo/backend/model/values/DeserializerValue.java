@@ -115,6 +115,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
 //                                    LocalDateTime.parse(valueF.asText())
             starts.add(date);
         }
+        System.out.println("S");
         ArrayList<DateTimelines> ends = new ArrayList<>();
         for (JsonNode valueF : value.get("ends")) {
             DateTimelines date = new DateTimelines();
@@ -124,7 +125,9 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
             ends.add(date);
         }
+        System.out.println("end");
         JsonNode time = value.get("time");
+        System.out.println("time");
         if (time.isNull()) {
             return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
         }
