@@ -121,7 +121,7 @@ public class PropertyValueService {
             } else {
                 deadlineOrScheduling = property.getScheduling();
             }
-            return deadlineOrScheduling && compareToThisDay((OffsetDateTime) p.getValue().getValue(), date);
+            return deadlineOrScheduling && compareToThisDay(((DateWithGoogle) p.getValue().getValue()).getDateTime(), date);
         }
         return false;
     }
