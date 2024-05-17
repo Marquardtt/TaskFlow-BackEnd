@@ -1,5 +1,6 @@
 package br.demo.backend.service;
 
+import br.demo.backend.interfaces.IHasProperties;
 import br.demo.backend.interfaces.ILogged;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.Project;
@@ -171,8 +172,8 @@ public class PropertyValueService {
     }
 
 
-    public Collection<PropertyValue> createNotSaved(Task task) {
-        return  task.getProperties().stream().map(p -> {
+    public Collection<PropertyValue> createNotSaved(ILogged task) {
+        return  task.getPropertiesValues().stream().map(p -> {
             if(p.getProperty().getId() == null){
                 Property property;
                 if(p.getProperty() instanceof Limited prop){

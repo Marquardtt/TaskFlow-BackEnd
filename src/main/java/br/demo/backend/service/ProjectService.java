@@ -45,6 +45,7 @@ public class ProjectService {
     private AutoMapper<Project> autoMapper;
     private PermissionRepository permissionRepositoru;
     private NotificationService notificationService;
+    private PropertyValueService propertyValueService;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
         Project project = projectRepository.findById(id).get();
@@ -98,20 +99,25 @@ public class ProjectService {
         if(patching) BeanUtils.copyProperties(oldProject, project);
         autoMapper.map(projectDTO, project, patching);
         //keep the owner, pages, properties and picture of the project
+        keepFileds(project, oldProject);
+
+        if(changeDescription(oldProject, project)){
+            logService.updateDescription(project);
+        }
+        //generate the logs
+        logService.generateLog(Action.UPDATE, project, oldProject);
+        return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+
+    private  void keepFileds(Project project, Project oldProject) {
         project.setOwner(oldProject.getOwner());
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
         project.setLogs(oldProject.getLogs());
-
-        if(changeDescription(oldProject, project)){
-            logService.updateDescription(project);
-        }
-
-        //generate the logs
-        logService.generateLog(Action.UPDATE, project, oldProject);
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        project.setValues(propertyValueService.createNotSaved(project));
     }
+
     private Boolean changeDescription(Project oldProject, Project project){
         return oldProject.getDescription() == null && project.getDescription() != null ||
                 project.getDescription() == null && oldProject.getDescription() != null ||
