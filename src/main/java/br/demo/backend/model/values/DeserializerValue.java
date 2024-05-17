@@ -138,8 +138,10 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         Integer seconds = time.get("seconds").asInt();
         Integer minutes = time.get("minutes").asInt();
         Integer hours = time.get("hours").asInt();
-        return new PropertyValue(id, property, new TimeValued(idTaskVl,
+        PropertyValue p = new PropertyValue(id, property, new TimeValued(idTaskVl,
                 new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
+        System.out.println(p.getValue().getValue());
+        return p;
     }
 
     private PropertyValue deserializeMutiOptioned(JsonNode value, Long id, Property property, Long idTaskVl) {
