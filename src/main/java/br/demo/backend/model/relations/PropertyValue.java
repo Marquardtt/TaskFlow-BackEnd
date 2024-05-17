@@ -45,7 +45,7 @@ public class PropertyValue {
         this.id = null;
         Object value = first.getValue().getValue();
         this.value = switch (first.getProperty().getType()){
-            case DATE -> new DateValued(null, (OffsetDateTime)value );
+            case DATE -> new DateValued(null, new DateWithGoogle(null, ((DateWithGoogle)value).getDateTime(), ((DateWithGoogle)value).getIdGoogle()) );
             case SELECT, RADIO -> new UniOptionValued(null, (Option) value);
             case TIME -> {
                 Intervals valueInt = (Intervals) value;

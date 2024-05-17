@@ -9,6 +9,7 @@ import br.demo.backend.utils.IdGroupValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @RestController
@@ -38,7 +39,7 @@ public class TaskController {
 
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
-        return  propertyValueService.getTasksToday(id);
+        return  propertyValueService.getTasksToday(OffsetDateTime.now());
     }
 
 

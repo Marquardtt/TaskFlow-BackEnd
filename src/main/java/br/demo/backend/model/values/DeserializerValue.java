@@ -172,7 +172,10 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         if (value.isNull()) {
             return new PropertyValue(id, property, new DateValued(idTaskVl, null));
         }
-        return new PropertyValue(id, property, new DateValued(idTaskVl, OffsetDateTime.parse(value.asText())));
+        String idGoogle = value.get("idGoogle").asText();
+        Long idDate = value.get("id").asLong();
+        return new PropertyValue(id, property, new DateValued(idTaskVl, new DateWithGoogle(idDate,
+                OffsetDateTime.parse(value.asText()), idGoogle)));
     }
 
     private static PropertyValue deserializeArchive(Long id, Property property, Long idTaskVl) {

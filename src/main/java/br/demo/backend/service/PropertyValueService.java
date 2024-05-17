@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -87,10 +88,16 @@ public class PropertyValueService {
         return new PropertyValue(null, p, value);
     }
 
-    public Collection<TaskGetDTO> getTasksToday(String id) {
+    public Collection<TaskGetDTO> getTasksToday(OffsetDateTime date) {
         String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         //get the values that contains the logged user
+        return getTaskByUser(date, user);
+    }
+
+
+
+    private List<TaskGetDTO> getTaskByUser(OffsetDateTime date, User user) {
         Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
         //get the property values that contains the values
         Collection<PropertyValue> taskValues =
@@ -100,14 +107,13 @@ public class PropertyValueService {
         //get the tasks that contains the propertyvalues
         Collection<Task> tasks = taskValues.stream().map(tVl -> taskRepository.findByPropertiesContaining(tVl)).filter(Objects::nonNull).toList();
         return tasks.stream().filter(t ->
-                !t.getCompleted() &&
-                        t.getProperties().stream().anyMatch(p ->
-                                testIfIsTodayBasesInConfigs(p, user)))
+                        !t.getCompleted() &&
+                                t.getProperties().stream().anyMatch(p ->
+                                        testIfIsTodayBasesInConfigs(p, user, date)))
                 .map(ModelToGetDTO::tranform).toList();
     }
 
-
-    private Boolean testIfIsTodayBasesInConfigs(PropertyValue p, User user) {
+    private Boolean testIfIsTodayBasesInConfigs(PropertyValue p, User user, OffsetDateTime date) {
         if (p.getProperty() instanceof Date property) {
             Boolean deadlineOrScheduling;
             if (user.getConfiguration().getInitialPageTasksPerDeadline()) {
@@ -115,16 +121,17 @@ public class PropertyValueService {
             } else {
                 deadlineOrScheduling = property.getScheduling();
             }
-            return deadlineOrScheduling && compareToThisDay((OffsetDateTime) p.getValue().getValue());
+            return deadlineOrScheduling && compareToThisDay((OffsetDateTime) p.getValue().getValue(), date);
         }
         return false;
     }
 
-    private Boolean compareToThisDay(OffsetDateTime time){
+    private Boolean compareToThisDay(OffsetDateTime time, OffsetDateTime date){
         try {
-            return time.getMonthValue() == OffsetDateTime.now().getMonthValue() &&
-                    time.getYear() == OffsetDateTime.now().getYear() &&
-                    time.getDayOfMonth() == OffsetDateTime.now().getDayOfMonth();
+            if(date == null) return true;
+            return time.getMonthValue() == date.getMonthValue() &&
+                    time.getYear() == date.getYear() &&
+                    time.getDayOfMonth() == date.getDayOfMonth();
         }catch (NullPointerException e){
             return false;
         }
