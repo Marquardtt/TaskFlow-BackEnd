@@ -113,6 +113,7 @@ public class LogService {
             if (List.of(TypeOfProperty.USER, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG).contains(prop.getProperty().getType())){
                 return !testIfListsHaveSameElements((Collection<?>)first.getValue().getValue(), (Collection<?>) prop.getValue().getValue());
             }else{
+                System.out.println(first.getValue().getValue() + " - " + prop.getValue().getValue());
                 return !first.getValue().getValue().equals(prop.getValue().getValue());
             }
         }

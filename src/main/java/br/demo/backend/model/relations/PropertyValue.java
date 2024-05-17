@@ -49,8 +49,7 @@ public class PropertyValue {
             case SELECT, RADIO -> new UniOptionValued(null, (Option) value);
             case TIME -> {
                 Intervals valueInt = (Intervals) value;
-                yield new TimeValued(null, new Intervals(null, valueInt.getTime(),
-                        valueInt.getStarts(), valueInt.getEnds(), valueInt.getColor()));
+                yield new TimeValued(null, new Intervals(valueInt));
             }
             case TEXT -> new TextValued(null, (String) value);
             case TAG, CHECKBOX ->new MultiOptionValued(null, new ArrayList<>((List<Option>) value));

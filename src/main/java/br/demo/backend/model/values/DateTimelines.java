@@ -21,4 +21,9 @@ class DateTimelines {
     @Id
     private Long id;
     private OffsetDateTime date;
+
+    public DateTimelines(DateTimelines dateTimelines) {
+        this.id = null;
+        this.date = dateTimelines.getDate();
+    }
 }
