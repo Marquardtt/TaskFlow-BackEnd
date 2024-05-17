@@ -118,7 +118,15 @@ public class TaskService {
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
         Collection<Message> oldComments = List.copyOf(oldTask.getComments());
-        if(oldTask.getCompleted()) throw new TaskAlreadyCompleteException();
+        if(oldTask.getCompleted()){
+            oldTask.setComments(taskDTO.getComments());
+            TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
+            Collection<Message> comments = oldTask.getComments().stream().filter(c ->
+                    oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
+            //generate the notifications
+            comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, oldTask.getId(), c.getId()));
+            return taskGetDTO;
+        }
         if(oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
