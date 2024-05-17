@@ -9,6 +9,7 @@ import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.model.values.DateValued;
+import br.demo.backend.model.values.DateWithGoogle;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -111,7 +112,7 @@ public class DailyEvents {
         obj.getPropertiesValues().forEach(property -> {
             if(!property.getProperty().getType().equals(TypeOfProperty.DATE)) return;
             if(property.getValue().getValue() == null) return;
-            if(checkIfIsIn24Hours((OffsetDateTime)property.getValue().getValue() )){
+            if(checkIfIsIn24Hours(((DateWithGoogle) property.getValue().getValue()).getDateTime())){
                 if (((Date)property.getProperty()).getScheduling()) {
                     System.out.println("SCHEDULE");
                     notificationService.generateNotification(TypeOfNotification.SCHEDULE,
