@@ -57,12 +57,12 @@ public class PropertyValueService {
     private SelectRepository selectRepository;
     private LogService logService;
 
-    public Collection<PropertyValue> keepPropertyValues(Task task, Task oldTask){
+    public Collection<PropertyValue> keepPropertyValues(Task task, Task oldTask) {
         return task.getProperties().stream().peek(
-                p-> {
+                p -> {
                     PropertyValue prVlOld = oldTask.getProperties().stream()
                             .filter(pOld -> p.getId() != null && p.getId().equals(pOld.getId())).findFirst().orElse(null);
-                    if(prVlOld != null && p.getProperty().getType().equals(TypeOfProperty.ARCHIVE)){
+                    if (prVlOld != null && p.getProperty().getType().equals(TypeOfProperty.ARCHIVE)) {
                         p.getValue().setValue(prVlOld.getValue().getValue());
                     }
                 }
@@ -76,7 +76,7 @@ public class PropertyValueService {
     }
 
     public PropertyValue setTaskProperty(Property p) {
-        Value value= switch (p.getType()) {
+        Value value = switch (p.getType()) {
             case RADIO, SELECT -> new UniOptionValued();
             case CHECKBOX, TAG -> new MultiOptionValued();
             case TEXT -> new TextValued();
@@ -95,7 +95,6 @@ public class PropertyValueService {
         //get the values that contains the logged user
         return getTaskByUser(date, user);
     }
-
 
 
     private List<TaskGetDTO> getTaskByUser(OffsetDateTime date, User user) {
@@ -127,44 +126,42 @@ public class PropertyValueService {
         return false;
     }
 
-    private Boolean compareToThisDay(OffsetDateTime time, OffsetDateTime date){
+    private Boolean compareToThisDay(OffsetDateTime time, OffsetDateTime date) {
         try {
-            if(date == null) return true;
+            if (date == null) return true;
             return time.getMonthValue() == date.getMonthValue() &&
                     time.getYear() == date.getYear() &&
                     time.getDayOfMonth() == date.getDayOfMonth();
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return false;
         }
     }
 
-    public ArchiveValued setArchived(MultipartFile file, Long id, Boolean isInProject, Long idProject){
+    public ArchiveValued setArchived(MultipartFile file, Long id, Boolean isInProject, Long idProject) {
         ArchiveValued archiveValued = archiveValuedRepository.findById(id).get();
-
         verifyConsistance(archiveValued, isInProject, idProject);
         Archive archive = null;
-        if(file != null){
+        if (file != null) {
             archive = new Archive(file);
         }
         archiveValued.setValue(archive);
         PropertyValue propertyValue = propertyValueRepository.findByProperty_TypeAndValue(TypeOfProperty.ARCHIVE, archiveValued);
         ILogged iLogged;
-        if(isInProject){
+        if (isInProject) {
             iLogged = projectRepository.findByValuesContaining(propertyValue);
-        }else{
+        } else {
             iLogged = taskRepository.findByPropertiesContaining(propertyValue);
         }
-        System.out.println("soy archive valued"+archiveValued);
-    logService.updateLogsArchive(iLogged, propertyValue);
-        System.out.println(archiveValued);
+        logService.updateLogsArchive(iLogged, propertyValue);
         return archiveValuedRepository.save(archiveValued);
     }
-    private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject){
+
+    private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject) {
         PropertyValue prop = propertyValueRepository.findByProperty_TypeAndValue(TypeOfProperty.ARCHIVE, archiveValued);
         Task task = taskRepository.findByPropertiesContaining(prop);
         Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
         validation.ofObject(idProject, page.getProject());
-        if(taskRepository.findByPropertiesContaining(prop) != null && isInProject){
+        if (taskRepository.findByPropertiesContaining(prop) != null && isInProject) {
             throw new IllegalArgumentException("The propertyvalue is on the task and not at the project");
         } else if (projectRepository.findByValuesContaining(prop) != null && !isInProject) {
             throw new IllegalArgumentException("The propertyvalue is on the project and not at the task");
@@ -173,15 +170,15 @@ public class PropertyValueService {
 
 
     public Collection<PropertyValue> createNotSaved(ILogged task) {
-        return  task.getPropertiesValues().stream().map(p -> {
-            if(p.getProperty().getId() == null){
+        return task.getPropertiesValues().stream().map(p -> {
+            if (p.getProperty().getId() == null) {
                 Property property;
-                if(p.getProperty() instanceof Limited prop){
+                if (p.getProperty() instanceof Limited prop) {
                     property = limitedRepository.save(prop);
-                }else if(p.getProperty() instanceof Date prop){
+                } else if (p.getProperty() instanceof Date prop) {
                     property = dateRepository.save(prop);
-                }else{
-                    property = selectRepository.save((Select)p.getProperty());
+                } else {
+                    property = selectRepository.save((Select) p.getProperty());
                 }
                 p.setProperty(property);
             }
