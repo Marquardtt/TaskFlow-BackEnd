@@ -52,6 +52,16 @@ public class AuthenticationService implements UserDetailsService {
         }
     }
 
+    public UserDetails loadByEmail(String email) throws UsernameNotFoundException{
+        Optional<User> userOptional = userRepository.findByMail(email);
+        if (userOptional.isPresent()) {
+            userOptional.get().getUserDetailsEntity().setEnabled(true);
+            return userOptional.get().getUserDetailsEntity();
+        }else {
+            throw new UsernameNotFoundException("User not found");
+        }
+    }
+
     public List<Cookie> removeCookies (HttpServletRequest request){
         try{
             CookieUtil cookieUtil = new CookieUtil();

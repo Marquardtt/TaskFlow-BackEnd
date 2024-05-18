@@ -51,9 +51,9 @@ public class AuthenticationExternalService {
         Cookie newCookie = cookieUtil.gerarCookieJwt(userDetails); // Generate a new cookie
         return newCookie;
     }
-    public Cookie loginWithGoogle(HttpServletRequest request, HttpServletResponse response, String username) {
+    public Cookie loginWithGoogle(HttpServletRequest request, HttpServletResponse response, String email) {
 
-        UserDetails userDetails = authenticationService.loadUserByUsername(username);
+        UserDetails userDetails = authenticationService.loadByEmail(email);
         Authentication authentication1 =
                 new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -128,7 +128,7 @@ public class AuthenticationExternalService {
                 if (user.isPresent() && user.get().getUserDetailsEntity().isLinkedWithGitHub() && user.get().getUserDetailsEntity().getUsernameGitHub().equals(username)) {
                     newCookie = loginWithExternalService(request, response, username);
                     response.addCookie(newCookie); // Add the cookie to the response
-                    response.sendRedirect("http://localhost:3000/" + username);
+                    response.sendRedirect("http://localhost:3000/" + user.get().getUserDetailsEntity().getUsername());
                 } else {
                     throw new UsernameNotFoundException("User not found");
                 }
@@ -150,19 +150,20 @@ public class AuthenticationExternalService {
 
             try {
                 if (userOptional.isPresent() && userOptional.get().getUserDetailsEntity().isLinkedWithGoogle()) {
-                    newCookie = loginWithGoogle(request, response, name);
+                    newCookie = loginWithGoogle(request, response, email);
                 }else {
                     throw new UsernameNotFoundException("User not found");
                 }
                 response.addCookie(newCookie);
-                response.sendRedirect("http://localhost:3000/" + name );
+                response.sendRedirect("http://localhost:3000/" + userOptional.get().getUserDetailsEntity().getUsername() );
             } catch (UsernameNotFoundException e) {
+
                 if (!userOptional.isPresent()) {
                     returnUsername = createUserGoogle( name,email);
-                    newCookie = loginWithGoogle(request, response, name);
+                    newCookie = loginWithGoogle(request, response, email);
                 } else if (userOptional.get().getUserDetailsEntity().getUsername().equals(name)) {
                     returnUsername = createUserGoogle(name, email);
-                    newCookie = loginWithGoogle(request, response, name);
+                    newCookie = loginWithGoogle(request, response, email);
                 }
                 response.addCookie(newCookie); // Add the cookie to the response
                 response.sendRedirect("http://localhost:3000/" + returnUsername);
