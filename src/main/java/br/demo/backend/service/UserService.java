@@ -101,7 +101,7 @@ public class UserService {
         }
         user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getPassword());
         user.getUserDetailsEntity().setCredentialsNonExpired(true);
-        user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+        user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
         ModelToGetDTO.tranform(userRepository.save(user));
     }
 

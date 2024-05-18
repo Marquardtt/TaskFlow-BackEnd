@@ -118,16 +118,10 @@ public class TaskService {
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
         Collection<Message> oldComments = List.copyOf(oldTask.getComments());
-        if(oldTask.getCompleted() || oldTask.getWaitingRevision()){
-            oldTask.setComments(taskDTO.getComments());
-            TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
-            Collection<Message> comments = oldTask.getComments().stream().filter(c ->
-                    oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
-            //generate the notifications
-            comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, oldTask.getId(), c.getId()));
-            return taskGetDTO;
-        }
+        TaskGetDTO taskGetDTO = null;
         if(oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
+        if (commentsWheIsComplete(taskDTO, oldTask, oldComments)) return taskGetDTO;
+
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
 
@@ -138,16 +132,36 @@ public class TaskService {
         keepFields(task, oldTask);
         logService.generateLog(Action.UPDATE,task, oldTask);
 
+        taskGetDTO = savingAndGenerateNotifications(task, oldTask, oldComments);
+
+        return taskGetDTO;
+    }
+
+    private TaskGetDTO savingAndGenerateNotifications(Task task, Task oldTask, Collection<Message> oldComments) {
+        TaskGetDTO taskGetDTO;
         if(task.getLogs().size() != oldTask.getLogs().size()){
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         }
-        TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
+        taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
         Collection<Message> comments = task.getComments().stream().filter(c ->
                 oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
         //generate the notifications
         comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
-
         return taskGetDTO;
+    }
+
+    private boolean commentsWheIsComplete(Task taskDTO, Task oldTask, Collection<Message> oldComments) {
+        TaskGetDTO taskGetDTO;
+        if(oldTask.getCompleted() || oldTask.getWaitingRevision()){
+            oldTask.setComments(taskDTO.getComments());
+            taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
+            Collection<Message> comments = oldTask.getComments().stream().filter(c ->
+                    oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
+            //generate the notifications
+            comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, oldTask.getId(), c.getId()));
+            return true;
+        }
+        return false;
     }
 
     //this keep the fields that can't be changed
