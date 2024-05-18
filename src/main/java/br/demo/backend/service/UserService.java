@@ -96,10 +96,12 @@ public class UserService {
     public void changePassword(UserChangePasswordDTO userChangePasswordDTO){
         UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         User user = userRepository.findById(userDetails.getId()).get();
-        if (user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
+        if (!user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
             throw new CurrentPasswordDontMatchException();
         }
         user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getPassword());
+        user.getUserDetailsEntity().setCredentialsNonExpired(true);
+        user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
         ModelToGetDTO.tranform(userRepository.save(user));
     }
 
