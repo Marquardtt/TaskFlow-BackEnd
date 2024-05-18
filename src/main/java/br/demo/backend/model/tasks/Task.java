@@ -10,7 +10,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Entity
@@ -29,10 +30,10 @@ public class Task implements ILogged {
     private String name;
 
 
-    private LocalDateTime dateDeleted;
+    private OffsetDateTime dateDeleted;
     //Patch
     private Boolean deleted = false;
-    private LocalDateTime dateCompleted;
+    private OffsetDateTime dateCompleted;
     //Patch
     private Boolean completed = false;
     private Boolean waitingRevision = false;

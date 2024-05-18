@@ -64,7 +64,6 @@ request.getSession(true);
             securityContextRepository.saveContext(securityContext, request, response); // Save the context in the session
 
             Cookie newCookie = cookieUtil.gerarCookieJwt(user); // Generate a new cookie
-
             response.addCookie(newCookie); // Add the cookie to the response
         }
 
@@ -84,7 +83,7 @@ request.getSession(true);
         }
 
         if (method.equals("POST")) {
-            return uri.equals("/verify-otp") || uri.equals("/sendEmail/auth") || uri.equals("/sendEmail/forgotPassword") || uri.equals("/user")||  uri.equals("/login");
+            return uri.equals("/verify-otp") || uri.equals("/sendEmail/auth") || uri.equals("/sendEmail/forgotPassword") || uri.equals("/user")||  uri.equals("/login")||  uri.equals("/logout");
         }
 
         if (method.equals("PATCH")) {

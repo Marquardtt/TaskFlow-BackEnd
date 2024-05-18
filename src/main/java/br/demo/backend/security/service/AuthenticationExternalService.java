@@ -78,7 +78,7 @@ public class AuthenticationExternalService {
             userDatailEntity.setPassword(username);
             userDatailEntity.setUsernameGitHub(username);
             userDatailEntity.setLinkedWithGitHub(true);
-            UserPostDTO userPostDTO = new UserPostDTO(name, "", false, userDatailEntity);
+            UserPostDTO userPostDTO = new UserPostDTO(name, "", "",false, userDatailEntity);
             userService.save(userPostDTO);
             return username;
         } catch (Exception e) {
@@ -103,7 +103,7 @@ public class AuthenticationExternalService {
             userDatailEntity.setPassword(name);
             userDatailEntity.setLinkedWithGoogle(true);
 
-            UserPostDTO userPostDTO = new UserPostDTO(name, "", false, userDatailEntity);
+            UserPostDTO userPostDTO = new UserPostDTO(name, "",email, false, userDatailEntity);
            UserGetDTO userGet =userService.save(userPostDTO);
             User user = userRepository.findById(userGet.getId()).get();
             user.setMail(email);

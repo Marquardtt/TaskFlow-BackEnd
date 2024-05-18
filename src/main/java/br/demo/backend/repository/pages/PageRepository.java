@@ -13,4 +13,5 @@ import java.util.Collection;
 public interface PageRepository extends JpaRepository<Page, Long> {
 
     Collection<Page> findByTasks_Task(Task task);
+    Collection<Page> findByPropertiesContaining(Property prop);
 }

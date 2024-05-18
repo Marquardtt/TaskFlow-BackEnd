@@ -1,13 +1,13 @@
 package br.demo.backend.service;
 
 
+import br.demo.backend.exception.CurrentPasswordDontMatchException;
 import br.demo.backend.exception.HeHaveGroupsException;
 import br.demo.backend.exception.HeHaveProjectsException;
 import br.demo.backend.exception.UsernameAlreadyUsedException;
 import br.demo.backend.model.*;
-import br.demo.backend.model.dtos.user.OtherUsersDTO;
+import br.demo.backend.model.dtos.user.*;
 import br.demo.backend.model.enums.TypeOfNotification;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.ProjectRepository;
@@ -16,9 +16,6 @@ import br.demo.backend.security.exception.ForbiddenException;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.model.dtos.user.UserPutDTO;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
@@ -29,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -59,7 +57,7 @@ public class UserService {
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
-            user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+            user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
             return ModelToGetDTO.tranform(userRepository.save(user));
         }
     }
@@ -78,8 +76,31 @@ public class UserService {
 
         keepFields(user, oldUser);
 
-
         return ModelToGetDTO.tranform(userRepository.save(user));
+    }
+
+    public void changeUsername(UserChangeUsernameDTO userChangeUsernameDTO){
+        UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        User user = userRepository.findByUserDetailsEntity_Username(userDetails.getUsername()).get();
+
+        if(userRepository.findByUserDetailsEntity_Username(userChangeUsernameDTO.getUsername()).isPresent()){
+            throw new UsernameAlreadyUsedException();
+        }
+        if(userRepository.findByUserDetailsEntity_Username(userChangeUsernameDTO.getUsername()).equals(userChangeUsernameDTO.getUsername())){
+            throw new UsernameAlreadyUsedException();
+        }
+        user.getUserDetailsEntity().setUsername(userChangeUsernameDTO.getUsername());
+        ModelToGetDTO.tranform(userRepository.save(user));
+    }
+
+    public void changePassword(UserChangePasswordDTO userChangePasswordDTO){
+        UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        User user = userRepository.findById(userDetails.getId()).get();
+        if (user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
+            throw new CurrentPasswordDontMatchException();
+        }
+        user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getPassword());
+        ModelToGetDTO.tranform(userRepository.save(user));
     }
 
     private void keepFields(User user, User oldUser){
@@ -95,7 +116,7 @@ public class UserService {
         User user = userRepository.findByUserDetailsEntity_Username(username).get();
         // thats not a real delete, just a disable for a time
         user.getUserDetailsEntity().setEnabled(false);
-        user.getUserDetailsEntity().setWhenHeTryDelete(LocalDateTime.now());
+        user.getUserDetailsEntity().setWhenHeTryDelete(OffsetDateTime.now());
         userRepository.save(user);
     }
 
@@ -129,8 +150,8 @@ public class UserService {
     public UserGetDTO updatePassword(String id, String password) {
         User user = userRepository.findByUserDetailsEntity_Username(id).get();
         user.getUserDetailsEntity().setPassword(password);
-        user.getUserDetailsEntity().setAccountNonExpired(true);
-        user.getUserDetailsEntity().setLastPasswordEdition(LocalDateTime.now());
+        user.getUserDetailsEntity().setCredentialsNonExpired(true);
+        user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
         return ModelToGetDTO.tranform(userRepository.save(user));
     }
 

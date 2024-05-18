@@ -21,7 +21,7 @@ public class Option {
     private String name;
     @NotNull
     @Column(nullable = false)
-    private String color = "#F04A94";
+    private String color;
     @NotNull
     @Column(nullable = false)
     private Integer indexAtSelect = 0;

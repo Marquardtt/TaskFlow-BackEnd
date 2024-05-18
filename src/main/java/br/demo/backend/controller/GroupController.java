@@ -40,6 +40,11 @@ public class GroupController {
         return groupService.update(group, true);
     }
 
+    @PatchMapping("/remove/{id}/from/{projectId}")
+    public GroupGetDTO patch(@PathVariable Long projectId, @PathVariable Long id) {
+        return groupService.removeFromProject(id, projectId);
+    }
+
     @GetMapping("/{groupId}")
     public GroupGetDTO findOne(@PathVariable Long groupId) {
         return groupService.findOne(groupId);

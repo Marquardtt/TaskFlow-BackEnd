@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Service
@@ -44,6 +45,7 @@ public class ProjectService {
     private AutoMapper<Project> autoMapper;
     private PermissionRepository permissionRepositoru;
     private NotificationService notificationService;
+    private PropertyValueService propertyValueService;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
         Project project = projectRepository.findById(id).get();
@@ -97,20 +99,25 @@ public class ProjectService {
         if(patching) BeanUtils.copyProperties(oldProject, project);
         autoMapper.map(projectDTO, project, patching);
         //keep the owner, pages, properties and picture of the project
+        keepFileds(project, oldProject);
+
+        if(changeDescription(oldProject, project)){
+            logService.updateDescription(project);
+        }
+        //generate the logs
+        logService.generateLog(Action.UPDATE, project, oldProject);
+        return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+
+    private  void keepFileds(Project project, Project oldProject) {
         project.setOwner(oldProject.getOwner());
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
         project.setLogs(oldProject.getLogs());
-
-        if(changeDescription(oldProject, project)){
-            logService.updateDescription(project);
-        }
-
-        //generate the logs
-        logService.generateLog(Action.UPDATE, project, oldProject);
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        project.setValues(propertyValueService.createNotSaved(project));
     }
+
     private Boolean changeDescription(Project oldProject, Project project){
         return oldProject.getDescription() == null && project.getDescription() != null ||
                 project.getDescription() == null && oldProject.getDescription() != null ||
@@ -133,7 +140,7 @@ public class ProjectService {
 
         //set a default property
         defaultPropsService.select(project, null);
-        emptyProject.setVisualizedAt(LocalDateTime.now());
+        emptyProject.setVisualizedAt(OffsetDateTime.now());
 
         return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
@@ -141,7 +148,7 @@ public class ProjectService {
    //set that the project was visualized by a user, to sort by this on the projects page
     public ProjectGetDTO setVisualizedNow(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
-        project.setVisualizedAt(LocalDateTime.now());
+        project.setVisualizedAt(OffsetDateTime.now());
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 

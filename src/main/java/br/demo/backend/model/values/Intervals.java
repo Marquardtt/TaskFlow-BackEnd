@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +26,7 @@ public class Intervals {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne(cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Include
     private Duration time = new Duration();
 
     @OneToMany(cascade =  CascadeType.ALL)
@@ -32,4 +34,12 @@ public class Intervals {
     @OneToMany(cascade =  CascadeType.ALL)
     private Collection<DateTimelines> ends = new ArrayList<>();
     private String color = "#F04A94";
+
+    public Intervals(Intervals valueInt) {
+        this.id = null;
+        this.time = new Duration(null, valueInt.getTime().getSeconds(), valueInt.getTime().getMinutes(), valueInt.getTime().getHours());
+        this.starts = valueInt.getStarts().stream().map(DateTimelines::new).toList();
+        this.ends = valueInt.getEnds().stream().map(DateTimelines::new).toList();
+        this.color = valueInt.getColor();
+    }
 }

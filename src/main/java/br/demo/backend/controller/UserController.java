@@ -2,10 +2,7 @@ package br.demo.backend.controller;
 
 import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.OtherUsersDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.model.dtos.user.UserPutDTO;
+import br.demo.backend.model.dtos.user.*;
 import br.demo.backend.service.UserService;
 import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
@@ -34,6 +31,16 @@ public class UserController {
     @PatchMapping
     public UserGetDTO patch(@RequestBody UserPutDTO user) throws AccessDeniedException {
         return userService.update(user, true);
+    }
+
+    @PatchMapping("/changeUsername")
+    public void changeUsername(@RequestBody UserChangeUsernameDTO userChangeUsernameDTO) throws AccessDeniedException {
+         userService.changeUsername(userChangeUsernameDTO);
+    }
+
+    @PatchMapping("/changePassword")
+    public void changePassword(@RequestBody UserChangePasswordDTO userChangePasswordDTO) throws AccessDeniedException {
+        userService.changePassword(userChangePasswordDTO);
     }
 
     @GetMapping("/{username}")

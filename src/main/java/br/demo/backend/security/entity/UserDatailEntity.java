@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,6 +29,9 @@ import java.util.List;
 @Builder
 public class UserDatailEntity implements UserDetails {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true)
     @EqualsAndHashCode.Include
     private String username;
     @Length(min = 8)
@@ -41,12 +45,12 @@ public class UserDatailEntity implements UserDetails {
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
-    private LocalDateTime lastPasswordEdition;
-    private LocalDateTime whenHeTryDelete;
     private boolean linkedWithGitHub = false;
     private boolean linkedWithGoogle = false;
     @Column(unique = true)
     private String usernameGitHub;
+    private OffsetDateTime lastPasswordEdition;
+    private OffsetDateTime whenHeTryDelete;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

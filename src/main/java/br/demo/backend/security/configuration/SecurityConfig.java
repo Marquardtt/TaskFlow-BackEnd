@@ -95,7 +95,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                        .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerAuthorization)
+                        .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete-deny").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}").access(authorizationRequestsRoutes)
@@ -134,7 +134,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
-
+                        .requestMatchers(HttpMethod.PATCH, "/remove/{id}/from/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)

@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 public class DeserializerValue extends StdDeserializer<PropertyValue> {
@@ -57,7 +58,7 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         if (property.getType() == null) {
                             throw new DeserializerException("Property don't have property.getType() attribute");
                         }
-
+                        System.out.println(property.getType());
                         return switch (property.getType()) {
                             case USER -> deserializeUser(value, id, property, idTaskVl);
                             case TIME -> deserializeTime(value, id, property, idTaskVl);
@@ -97,28 +98,32 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     }
 
     private PropertyValue deserializeTime(JsonNode value, Long id, Property property, Long idTaskVl) {
-        String color = value.get("color").asText();
+        System.out.println(value);
+
+        String color = value.get("color") == null ? "F04A94" : value.get("color").asText();
         ArrayList<DateTimelines> starts = new ArrayList<>();
         // I have merda here
+        System.out.println("passou 1");
         Long idIntervals = value.get("id").asLong();
         for (JsonNode valueF : value.get("starts")) {
             DateTimelines date = new DateTimelines();
             if (isPresent(valueF, "id")) {
                 date.setId(valueF.get("id").asLong());
             }
-            date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
-//                                    LocalDateTime.parse(valueF.asText())
+            date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
             starts.add(date);
         }
+        System.out.println("passou 2");
         ArrayList<DateTimelines> ends = new ArrayList<>();
         for (JsonNode valueF : value.get("ends")) {
             DateTimelines date = new DateTimelines();
             if (isPresent(valueF, "id")) {
                 date.setId(valueF.get("id").asLong());
             }
-            date.setDate(LocalDateTime.parse(valueF.get("date").asText()));
+            date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
             ends.add(date);
         }
+        System.out.println("passou 3");
         JsonNode time = value.get("time");
         if (time.isNull()) {
             return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
@@ -130,8 +135,10 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         Integer seconds = time.get("seconds").asInt();
         Integer minutes = time.get("minutes").asInt();
         Integer hours = time.get("hours").asInt();
-        return new PropertyValue(id, property, new TimeValued(idTaskVl,
+        PropertyValue p = new PropertyValue(id, property, new TimeValued(idTaskVl,
                 new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
+        System.out.println(p.getValue().getValue());
+        return p;
     }
 
     private PropertyValue deserializeMutiOptioned(JsonNode value, Long id, Property property, Long idTaskVl) {
@@ -162,10 +169,16 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     }
 
     private static PropertyValue deserializeDate(JsonNode value, Long id, Property property, Long idTaskVl) {
+        System.out.println(value);
         if (value.isNull()) {
             return new PropertyValue(id, property, new DateValued(idTaskVl, null));
         }
-        return new PropertyValue(id, property, new DateValued(idTaskVl, LocalDateTime.parse(value.asText())));
+        String idGoogle = value.get("idGoogle").asText();
+        Long idDate = value.get("id").asLong();
+        PropertyValue p =  new PropertyValue(id, property, new DateValued(idTaskVl, new DateWithGoogle(idDate,
+                OffsetDateTime.parse(value.get("dateTime").asText()), idGoogle)));
+        System.out.println(p);
+        return p;
     }
 
     private static PropertyValue deserializeArchive(Long id, Property property, Long idTaskVl) {

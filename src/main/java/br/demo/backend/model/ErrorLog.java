@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -18,12 +19,12 @@ public class ErrorLog {
     private Long id;
 
     private String exceptionMessage;
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
     private String stackTrace;
 
     public ErrorLog(Exception e) {
         this.exceptionMessage = e.getMessage();
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = OffsetDateTime.now();
     }
 
 }

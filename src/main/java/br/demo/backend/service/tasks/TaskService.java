@@ -42,7 +42,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -118,7 +118,15 @@ public class TaskService {
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
         Collection<Message> oldComments = List.copyOf(oldTask.getComments());
-        if(oldTask.getCompleted()) throw new TaskAlreadyCompleteException();
+        if(oldTask.getCompleted() || oldTask.getWaitingRevision()){
+            oldTask.setComments(taskDTO.getComments());
+            TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
+            Collection<Message> comments = oldTask.getComments().stream().filter(c ->
+                    oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
+            //generate the notifications
+            comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, oldTask.getId(), c.getId()));
+            return taskGetDTO;
+        }
         if(oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
@@ -166,7 +174,7 @@ public class TaskService {
         validation.ofObject(projectId, page.getProject());
 
         //set the attributes to delete the task
-        task.setDateDeleted(LocalDateTime.now());
+        task.setDateDeleted(OffsetDateTime.now());
         task.setDeleted(true);
 
         // generate logs
@@ -222,7 +230,7 @@ public class TaskService {
         //setting attributes to complete the task
         TaskGetDTO tranform;
         if(page.getProject().getOwner().equals(user) || !page.getProject().getRevision()){
-            task.setDateCompleted(LocalDateTime.now());
+            task.setDateCompleted(OffsetDateTime.now());
             task.setCompleted(true);
             task.setWaitingRevision(false);
 

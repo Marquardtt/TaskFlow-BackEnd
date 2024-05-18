@@ -28,10 +28,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-
+    
     private String name;
     private String surname;
-    private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
     private Archive picture = new Archive(null,  "picture", "jpg", new byte[0]);

@@ -12,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -32,7 +33,7 @@ public class Log {
     @ManyToOne
     @JoinColumn(nullable = false)
     private User user;
-    private LocalDateTime datetime = LocalDateTime.now();
+    private OffsetDateTime datetime = OffsetDateTime.now();
     @OneToOne(cascade = CascadeType.ALL)
     private PropertyValue value;
 }
