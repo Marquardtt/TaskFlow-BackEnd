@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUserDetailsEntity_UsernameGitHub(String username);
 
+    Optional<User> findByMail(String email);
+
 }

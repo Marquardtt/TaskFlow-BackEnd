@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Component
@@ -33,6 +34,7 @@ public class FilterAuthentication extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+request.getSession(true);
         if (!publicRoute(request)) {
             Cookie cookie;
             try {
@@ -76,7 +78,8 @@ public class FilterAuthentication extends OncePerRequestFilter {
         if (method.equals("GET")) {
             return
                     uri.equals("/login/oauth2/github") || uri.equals("/favicon.ico") || uri.equals("/sendEmail") ||
-                    uri.equals("/sendEmail/code") || uri.equals("/auth/login/code/github") || uri.equals("/login");
+                    uri.equals("/sendEmail/code") || uri.equals("/auth/login/code/github") || uri.equals("/login")
+            || uri.equals("/login/oauth2/code/google");
         }
 
         if (method.equals("POST")) {
