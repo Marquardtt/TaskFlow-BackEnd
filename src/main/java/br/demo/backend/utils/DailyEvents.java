@@ -90,12 +90,12 @@ public class DailyEvents {
 
     private Boolean checkIfIsMoreThan30Days(OffsetDateTime date) {
         OffsetDateTime currentDate = OffsetDateTime.now();
-        return date.isBefore(currentDate.plusDays(30));
+        return date.isAfter(currentDate.plusDays(30));
     }
 
     private Boolean checkIfIsMoreThan6Months(OffsetDateTime date) {
         OffsetDateTime currentDate = OffsetDateTime.now();
-        return date.isBefore(currentDate.plusDays(30 * 6));
+        return date.isAfter(currentDate.plusDays(30 * 6));
     }
 
 

@@ -35,13 +35,22 @@ public class IsAGroupOnMyProjectsAuthotization implements AuthorizationManager<R
     @Transactional
     public AuthorizationDecision check(Supplier<Authentication> suplier, RequestAuthorizationContext object) {
 
+        UserDatailEntity userDatailEntity = (UserDatailEntity) suplier.get().getPrincipal();
         Long groupId = Long.parseLong(object.getVariables().get("groupId"));
         Group group = groupRepository.findById(groupId).get();
         Collection<SimpleProjectGetDTO> projects = projectService.finAllOfAUser();
-        return new AuthorizationDecision(group.getPermissions().stream().anyMatch(
+        boolean decision = group.getPermissions().stream().anyMatch(
                 permission -> projects.stream().anyMatch(
                         project -> project.getId().equals(permission.getProject().getId())
                 )
-        ));
+        );
+
+        if(!decision){
+            decision = group.getOwner().getUserDetailsEntity().getUsername().equals(userDatailEntity.getUsername());
+            if(!decision){
+                decision = group.getUsers().stream().anyMatch(user -> user.getUserDetailsEntity().getUsername().equals(userDatailEntity.getUsername()));
+            }
+        }
+        return new AuthorizationDecision(decision);
     }
 }
