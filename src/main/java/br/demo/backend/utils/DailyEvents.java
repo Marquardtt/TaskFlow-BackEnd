@@ -58,7 +58,6 @@ public class DailyEvents {
         //and test if the task was deleted
         taskRepository.findAll().forEach(task -> {
             if (task.getDeleted()) {
-                System.out.println("DELETED TASK");
                 deleteTask(task);
                 return;
             } else if (task.getCompleted()) return;
@@ -67,7 +66,6 @@ public class DailyEvents {
     }
 
     private void usersRules() {
-        System.out.println("USERRULES");
         Collection<User> users = userRepository.findAll();
         //that delete the user that don't try to log before 30 days of his deletion
         users.stream().filter(u -> !u.getUserDetailsEntity().isEnabled() &&
@@ -108,21 +106,17 @@ public class DailyEvents {
 
     @Transactional
     public void generateNotificationsDates(ILogged obj) {
-        System.out.println("EXECUTANDO - NOTIFY DATES");
         obj.getPropertiesValues().forEach(property -> {
             if(!property.getProperty().getType().equals(TypeOfProperty.DATE)) return;
             if(property.getValue().getValue() == null) return;
             if(checkIfIsIn24Hours(((DateWithGoogle) property.getValue().getValue()).getDateTime())){
                 if (((Date)property.getProperty()).getScheduling()) {
-                    System.out.println("SCHEDULE");
                     notificationService.generateNotification(TypeOfNotification.SCHEDULE,
 
                             obj.getId(), obj instanceof Task ? 0L : 1L);
                 }
                 if (((Date)property.getProperty()).getDeadline()) {
-                    System.out.println("DEADLINE");
                     notificationService.generateNotification(TypeOfNotification.DEADLINE,
-
                             obj.getId(), obj instanceof Task ? 0L : 1L);
                 }
             }

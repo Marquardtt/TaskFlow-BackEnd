@@ -248,7 +248,6 @@ public class TaskService {
             task.setCompleted(true);
             task.setWaitingRevision(false);
 
-            System.out.println("COMPLETING");
             //generate the logs and notifications
             logService.generateLog(Action.COMPLETE, task);
             tranform = ModelToGetDTO.tranform(taskRepository.save(task));

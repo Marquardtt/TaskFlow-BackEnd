@@ -59,7 +59,6 @@ public class EmailService {
 
     public ResponseEntity sendEmailAuth(String username, String to) {
         codeRepository.deleteAll();
-        System.out.println(codeRepository.findAll());
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(from);
@@ -89,7 +88,6 @@ public class EmailService {
     public String generateOTP(String username, String email){
         int length = 4;
         StringBuilder otp = new StringBuilder();
-        System.out.println(length);
         Random random = new Random();
         for (int i = 0; i < length; i++) {
             otp.append(random.nextInt(10));

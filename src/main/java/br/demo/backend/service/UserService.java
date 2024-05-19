@@ -53,7 +53,6 @@ public class UserService {
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
             throw new UsernameAlreadyUsedException();
         } catch (NoSuchElementException e) {
-            System.out.println(userDto);
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());

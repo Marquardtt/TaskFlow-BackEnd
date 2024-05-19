@@ -107,12 +107,10 @@ public class AuthenticateController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         LocalDateTime newTwoFactorResetTime = LocalDateTime.now().plus(3, ChronoUnit.MONTHS);
-        System.out.println(newTwoFactorResetTime);
         user.getUserDetailsEntity().setTwoFactorResetTime(newTwoFactorResetTime);
         repository.save(user);
         Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
         response.addCookie(cookie);
-        System.out.println(cookie.getValue());
 
         return ResponseEntity.ok("OTP verified, user authenticated successfully");
     }
