@@ -20,7 +20,6 @@ public class UserPutDTO {
     private Long id;
     private String name;
     private String surname;
-    private String address;
     @Email
     private String mail;
     private String phone;

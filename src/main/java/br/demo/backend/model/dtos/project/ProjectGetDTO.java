@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Data
@@ -27,7 +28,7 @@ public class ProjectGetDTO {
     private String name;
     private String description;
     private Archive picture;
-    private LocalDateTime visualizedAt;
+    private OffsetDateTime visualizedAt;
     private OtherUsersDTO owner;
     private Collection<PageGetDTO> pages;
     private Collection<PropertyGetDTO> properties;

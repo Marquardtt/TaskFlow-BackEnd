@@ -1,28 +1,26 @@
 package br.demo.backend.security.configuration;
 
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.security.*;
-import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.*;
 import br.demo.backend.security.filter.FilterAuthentication;
-import br.demo.backend.security.service.AuthenticationGitHub;
+import br.demo.backend.security.service.AuthenticationExternalService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 
 @Configuration
 @AllArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final SecurityContextRepository repo;
@@ -31,18 +29,30 @@ public class SecurityConfig {
     private final IsOwnerAuthorization isOwnerAuthorization;
     private final IsOwnerOrMemberAuthorization isOwnerOrMemberAuthorization;
     private final CorsConfigurationSource corsConfig;
-    private final AuthenticationGitHub authenticationGitHub;
+    private final AuthenticationExternalService authenticationGitHub;
     private final IsChatUser isChatUser;
     private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
 
+
     @Bean
     public SecurityFilterChain config(HttpSecurity http) throws Exception {
         // Prevenção ao ataque CSRF (Cross-Site Request Forgery)
+
         http.csrf(AbstractHttpConfigurer::disable);
         //isso seta o cors, provavel atualização do spring porque nao pres
         http.cors(cors -> cors.configurationSource(corsConfig));
+        // Manter a sessão do usuário na requisição ativa
+        http.securityContext((context) -> context.securityContextRepository(repo));
+        http
+                .sessionManagement(config -> {
+            config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            config.sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy());
+        });
+
+
+//                .sessionManagement(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests(authz -> authz
                         //USER
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
@@ -85,7 +95,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
-                        .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerAuthorization)
+                        .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete-deny").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}/permanent").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/task/project/{projectId}/{id}").access(authorizationRequestsRoutes)
@@ -124,7 +134,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
-
+                        .requestMatchers(HttpMethod.PATCH, "/remove/{id}/from/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}/picture").access(isOwnerAuthorization)
@@ -156,14 +166,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
                         .anyRequest().authenticated())
-                .oauth2Login(httpOauth2 -> httpOauth2.successHandler(authenticationGitHub::externalLogin));
-
-
-        // Manter a sessão do usuário na requisição ativa
-        http.securityContext((context) -> context.securityContextRepository(repo));
-        http.sessionManagement(config -> {
-            config.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        });
+                .oauth2Login(httpOauth2 -> {
+                            httpOauth2.successHandler(authenticationGitHub::externalLogin);
+                        }
+                );
 
         http.addFilterBefore(filterAuthentication, UsernamePasswordAuthenticationFilter.class);
         http.formLogin(AbstractHttpConfigurer::disable);

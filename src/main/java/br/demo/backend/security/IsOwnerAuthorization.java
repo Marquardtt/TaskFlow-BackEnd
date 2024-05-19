@@ -30,7 +30,7 @@ public class IsOwnerAuthorization implements AuthorizationManager<RequestAuthori
         UserDatailEntity userDatailEntity = (UserDatailEntity) suplier.get().getPrincipal();
         boolean decision = false;
 
-        if (object.getRequest().getRequestURI().contains("/group")) {
+        if (object.getVariables().get("groupId") != null) {
             Group group = groupRepository.findById(Long.parseLong(object.getVariables().get("groupId"))).get();
             if (group.getOwner().getUserDetailsEntity().getUsername().equals(userDatailEntity.getUsername())){
                 decision = true;

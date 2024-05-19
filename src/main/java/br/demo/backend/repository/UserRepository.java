@@ -18,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Collection<User> findByPermissionsContaining(Permission permission);
 
+    Optional<User> findByUserDetailsEntity_UsernameGitHub(String username);
+
+    Optional<User> findByMail(String email);
+
 }

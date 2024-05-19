@@ -35,6 +35,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @RestController
@@ -58,17 +59,18 @@ public class AuthenticateController {
                 return getStringResponseEntity(userLogin, response);
             } else {
                 if ((twoFactorResetTime != null && !today.equals(twoFactorResetTime))){
-                    System.out.println("gayyy");
                     return getStringResponseEntity(userLogin, response);
                 }
                     emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
                     return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
                 
+
             }
         } catch (CredentialsExpiredException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired");
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired - 403");
+        } catch (AuthenticationException | NoSuchElementException e) {
+            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials - 401");
         }
     }
 

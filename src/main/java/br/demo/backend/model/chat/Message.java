@@ -13,6 +13,7 @@ import org.hibernate.annotations.Immutable;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -35,8 +36,8 @@ public class Message {
     @NotNull
     @JoinColumn(nullable = false, updatable = false)
     private User sender;
-    private LocalDateTime dateCreate = LocalDateTime.now();
-    private LocalDateTime dateUpdate;
+    private OffsetDateTime dateCreate = OffsetDateTime.now();
+    private OffsetDateTime dateUpdate;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "message")
     private Collection<Destination> destinations;

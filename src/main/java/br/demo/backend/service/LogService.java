@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -48,25 +48,25 @@ public class LogService {
 
     private void completeLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
-        obj.getLogs().add(new Log(null,  Action.COMPLETE, getUser(), LocalDateTime.now(), null));
+        obj.getLogs().add(new Log(null,  Action.COMPLETE, getUser(), OffsetDateTime.now(), null));
 
     }
 
     private void redoLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
-        obj.getLogs().add(new Log(null,  Action.REDO, getUser(), LocalDateTime.now(), null));
+        obj.getLogs().add(new Log(null,  Action.REDO, getUser(), OffsetDateTime.now(), null));
 
     }
 
     private void deleteLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
-        obj.getLogs().add(new Log(null, Action.DELETE, getUser(), LocalDateTime.now(), null));
+        obj.getLogs().add(new Log(null, Action.DELETE, getUser(), OffsetDateTime.now(), null));
     }
 
     private void createLog(ILogged obj) {
         String typeObj = obj.getClass().getSimpleName();
         obj.setLogs(new HashSet<>());
-        obj.getLogs().add(new Log(null,  Action.CREATE, getUser(), LocalDateTime.now(), null));
+        obj.getLogs().add(new Log(null,  Action.CREATE, getUser(), OffsetDateTime.now(), null));
     }
 
     private void updateLogs(ILogged obj, ILogged old) {
@@ -83,7 +83,7 @@ public class LogService {
     }
 
     public void updateLogsArchive(ILogged obj, PropertyValue newArvchive) {
-        obj.getLogs().add(new Log(null,  Action.UPDATE, getUser(), LocalDateTime.now(), new PropertyValue(newArvchive) ));
+        obj.getLogs().add(new Log(null,  Action.UPDATE, getUser(), OffsetDateTime.now(), new PropertyValue(newArvchive) ));
     }
 
     private Log updateProperty(ILogged obj, ILogged old, PropertyValue prop) {
@@ -97,7 +97,7 @@ public class LogService {
         if (testIfIsDiferent(prop, first)) {
             PropertyValue propertyValue = new PropertyValue(prop);
             // antes era o first, agora é o prop tá, fica ligadinho
-            return new Log(null,  Action.UPDATE, getUser(), LocalDateTime.now(),propertyValue );
+            return new Log(null,  Action.UPDATE, getUser(), OffsetDateTime.now(),propertyValue );
         }
         return null; // Se não há alteração, retorna null
     }
@@ -113,6 +113,7 @@ public class LogService {
             if (List.of(TypeOfProperty.USER, TypeOfProperty.CHECKBOX, TypeOfProperty.TAG).contains(prop.getProperty().getType())){
                 return !testIfListsHaveSameElements((Collection<?>)first.getValue().getValue(), (Collection<?>) prop.getValue().getValue());
             }else{
+                System.out.println(first.getValue().getValue() + " - " + prop.getValue().getValue());
                 return !first.getValue().getValue().equals(prop.getValue().getValue());
             }
         }
@@ -135,27 +136,27 @@ public class LogService {
                 !obj.getName().equals(old.getName())) {
            ArrayList<Log> logs = new ArrayList<>(obj.getLogs());
            logs.add(new Log(null, Action.UPDATENAME, getUser(),
-                    LocalDateTime.now(), null));
+                    OffsetDateTime.now(), null));
            obj.setLogs(logs);
         }
     }
     public void updatePicture(Project project) {
         project.getLogs().add(
                 new Log(null,
-                        Action.UPDATEPICTURE, getUser(), LocalDateTime.now(), null)
+                        Action.UPDATEPICTURE, getUser(), OffsetDateTime.now(), null)
         );
     }
 
     public void updateOwner(Project project) {
         project.getLogs().add(
                 new Log(null,
-                        Action.UPDATEOWNER, getUser(), LocalDateTime.now(), null)
+                        Action.UPDATEOWNER, getUser(), OffsetDateTime.now(), null)
         );
     }
     public void updateDescription(Project project) {
         project.getLogs().add(
                 new Log(null,
-                        Action.UPDATEDESCRIPTION, getUser(), LocalDateTime.now(), null)
+                        Action.UPDATEDESCRIPTION, getUser(), OffsetDateTime.now(), null)
         );
     }
 }

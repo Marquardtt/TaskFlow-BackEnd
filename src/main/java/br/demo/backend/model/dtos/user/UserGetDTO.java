@@ -23,7 +23,6 @@ public class UserGetDTO {
     private String username;
     private String name;
     private String surname;
-    private String address;
     private Archive picture;
     private String mail;
     private String phone;

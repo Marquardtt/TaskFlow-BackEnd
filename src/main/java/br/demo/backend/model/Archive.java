@@ -22,7 +22,7 @@ public class Archive {
     private String name;
     private String type;
     @Lob
-    @Column(length = 1500000)
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] data;
 
     public Archive(MultipartFile file) {

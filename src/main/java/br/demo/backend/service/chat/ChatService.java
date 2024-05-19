@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -216,11 +217,11 @@ public class ChatService {
             message = chat.getMessages().stream().filter(m -> m.getId().equals(messageDto.getId())).findFirst().get();
             mapperMessage.map(messageDto, message, true);
             message.setDateCreate(message.getDateCreate());
-            message.setDateUpdate(LocalDateTime.now());
+            message.setDateUpdate(OffsetDateTime.now());
         } catch (NoSuchElementException e) {
             message = new Message();
             mapperMessage.map(messageDto, message, true);
-            message.setDateCreate(LocalDateTime.now());
+            message.setDateCreate(OffsetDateTime.now());
             chat.getMessages().add(message);
             //that sets the last message of the chat to the new message
             updateLastMessage(chat);

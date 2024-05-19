@@ -2,10 +2,13 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.SomeUserAlreadyIsInProjectException;
+import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
@@ -30,7 +33,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -44,6 +51,7 @@ public class ProjectService {
     private AutoMapper<Project> autoMapper;
     private PermissionRepository permissionRepositoru;
     private NotificationService notificationService;
+    private PropertyValueService propertyValueService;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
         Project project = projectRepository.findById(id).get();
@@ -97,20 +105,31 @@ public class ProjectService {
         if(patching) BeanUtils.copyProperties(oldProject, project);
         autoMapper.map(projectDTO, project, patching);
         //keep the owner, pages, properties and picture of the project
+        keepFileds(project, oldProject);
+        logService.generateLog(Action.UPDATE,project,oldProject);
+        if(changeDescription(oldProject, project)){
+            logService.updateDescription(project);
+        }
+        //generate the logs
+        return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+
+    private  void keepFileds(Project project, Project oldProject) {
         project.setOwner(oldProject.getOwner());
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
         project.setLogs(oldProject.getLogs());
-
-        if(changeDescription(oldProject, project)){
-            logService.updateDescription(project);
-        }
-
-        //generate the logs
-        logService.generateLog(Action.UPDATE, project, oldProject);
-        return ModelToGetDTO.tranform(projectRepository.save(project));
+        project.setValues(propertyValueService.createNotSaved(project));
+        Stream<PropertyValue> archiveProps = project.getValues().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
+        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldProject.getValues().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
+        List<PropertyValue> finalProps = archivePropsOld.toList();
+        ArrayList<PropertyValue> projectProps = new ArrayList<>(project.getValues());
+        projectProps.removeAll(finalProps.stream().filter(p -> project.getValues().contains(p)).toList());
+        projectProps.addAll(finalProps);
+        project.setValues(projectProps);
     }
+
     private Boolean changeDescription(Project oldProject, Project project){
         return oldProject.getDescription() == null && project.getDescription() != null ||
                 project.getDescription() == null && oldProject.getDescription() != null ||
@@ -133,7 +152,7 @@ public class ProjectService {
 
         //set a default property
         defaultPropsService.select(project, null);
-        emptyProject.setVisualizedAt(LocalDateTime.now());
+        emptyProject.setVisualizedAt(OffsetDateTime.now());
 
         return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
@@ -141,7 +160,7 @@ public class ProjectService {
    //set that the project was visualized by a user, to sort by this on the projects page
     public ProjectGetDTO setVisualizedNow(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
-        project.setVisualizedAt(LocalDateTime.now());
+        project.setVisualizedAt(OffsetDateTime.now());
         return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
