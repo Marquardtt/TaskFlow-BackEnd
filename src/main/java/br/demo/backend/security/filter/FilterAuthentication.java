@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
-public class FilterAuthentication extends OncePerRequestFilter {
+public class  FilterAuthentication extends OncePerRequestFilter {
     private SecurityContextRepository securityContextRepository;
     private final CookieUtil cookieUtil = new CookieUtil();
     private final JwtUtil jwtUtil = new JwtUtil();

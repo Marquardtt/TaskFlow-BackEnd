@@ -14,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -49,20 +52,19 @@ public class AuthenticateController {
     public ResponseEntity<String> authenticate(@RequestBody UserLogin userLogin, HttpServletResponse response) {
         try {
             User user = repository.findByUserDetailsEntity_Username(userLogin.getUsername()).get();
+            LocalDateTime twoFactorResetTime = user.getUserDetailsEntity().getTwoFactorResetTime();
+            LocalDateTime today = LocalDateTime.now();
 
             if (!user.isAuthenticate()) {
-                UsernamePasswordAuthenticationToken token =
-                        new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
-                Authentication authentication = authenticationManager.authenticate(token);
-
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
-                response.addCookie(cookie);
-                return ResponseEntity.ok("User authenticated");
+                return getStringResponseEntity(userLogin, response);
             } else {
-                System.out.println("entrei");
-                emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Credentials Expired - 406");
+                if ((twoFactorResetTime != null && !today.equals(twoFactorResetTime))){
+                    return getStringResponseEntity(userLogin, response);
+                }
+                    emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
+                    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+                
+
             }
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired - 403");
@@ -70,6 +72,17 @@ public class AuthenticateController {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials - 401");
         }
+    }
+
+    private ResponseEntity<String> getStringResponseEntity(@RequestBody UserLogin userLogin, HttpServletResponse response) {
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(userLogin.getUsername(), userLogin.getPassword());
+        Authentication authentication = authenticationManager.authenticate(token);
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+        response.addCookie(cookie);
+        return ResponseEntity.ok("User authenticated");
     }
 
     @PostMapping("/logout")
@@ -90,10 +103,14 @@ public class AuthenticateController {
                 new UsernamePasswordAuthenticationToken(otpRequest.getUsername(), otpRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(token);
 
+        User user = repository.findByUserDetailsEntity_Username(otpRequest.getUsername()).get();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
+        LocalDateTime newTwoFactorResetTime = LocalDateTime.now().plus(3, ChronoUnit.MONTHS);
+        System.out.println(newTwoFactorResetTime);
+        user.getUserDetailsEntity().setTwoFactorResetTime(newTwoFactorResetTime);
+        repository.save(user);
         Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
-        cookie.setMaxAge(3 * 30 * 24 * 3600);
         response.addCookie(cookie);
         System.out.println(cookie.getValue());
 
