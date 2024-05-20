@@ -82,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
+                        .requestMatchers(HttpMethod.PATCH, "/project/comment/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/project/my").authenticated()

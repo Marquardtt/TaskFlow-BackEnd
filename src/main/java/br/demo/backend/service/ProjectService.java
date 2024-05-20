@@ -2,13 +2,17 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.SomeUserAlreadyIsInProjectException;
+import br.demo.backend.exception.TaskAlreadyDeletedException;
 import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
@@ -112,6 +116,12 @@ public class ProjectService {
         }
         //generate the logs
         return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+
+    public ProjectGetDTO comment(ProjectPutDTO projectDTO) {
+        Project oldTask = projectRepository.findById(projectDTO.getId()).get();
+        oldTask.setComments(projectDTO.getComments());
+        return ModelToGetDTO.tranform(projectRepository.save(oldTask));
     }
 
     private  void keepFileds(Project project, Project oldProject) {
