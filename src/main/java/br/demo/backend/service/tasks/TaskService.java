@@ -86,12 +86,12 @@ public class TaskService {
 
     private void addPropertiesAtANewTask(Page page, Task taskEmpty) {
         //get the task's page's and task's project's properties
-        if(taskEmpty.getProperties() == null){
+        if (taskEmpty.getProperties() == null) {
             taskEmpty.setProperties(new HashSet<>());
         }
-        Collection<Property> propertiesPage = page.getProperties().stream().filter( p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
+        Collection<Property> propertiesPage = page.getProperties().stream().filter(p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
         Project project = projectRepository.findByPagesContaining(page);
-        Collection<Property> propertiesProject = project.getProperties().stream().filter( p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
+        Collection<Property> propertiesProject = project.getProperties().stream().filter(p -> taskEmpty.getProperties().stream().noneMatch(p2 -> p2.getProperty().equals(p))).toList();
 
         //set the property values at the task
         propertyValueService.setTaskProperties(propertiesPage, taskEmpty);
@@ -115,19 +115,25 @@ public class TaskService {
         }
     }
 
+    public TaskGetDTO comment(Task taskDTO, Long projectId) {
+        Task oldTask = taskRepository.findById(taskDTO.getId()).get();
+        if (oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
+        Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
+        validation.ofObject(projectId, page.getProject());
+        Collection<Message> oldComments = List.copyOf(oldTask.getComments());
+        oldTask.setComments(taskDTO.getComments());
+        TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
+        Collection<Message> comments = oldTask.getComments().stream().filter(c ->
+                oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
+        //generate the notifications
+        comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, oldTask.getId(), c.getId()));
+        return taskGetDTO;
+    }
+
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
-        Collection<Message> oldComments = List.copyOf(oldTask.getComments());
-        if(oldTask.getCompleted() || oldTask.getWaitingRevision()){
-            oldTask.setComments(taskDTO.getComments());
-            TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(oldTask));
-            Collection<Message> comments = oldTask.getComments().stream().filter(c ->
-                    oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
-            //generate the notifications
-            comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, oldTask.getId(), c.getId()));
-            return taskGetDTO;
-        }
-        if(oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
+
+        if (oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
 
@@ -136,18 +142,14 @@ public class TaskService {
         autoMapper.map(taskDTO, task, patching);
 
         keepFields(task, oldTask);
-        logService.generateLog(Action.UPDATE,task, oldTask);
+        logService.generateLog(Action.UPDATE, task, oldTask);
 
-        if(task.getLogs().size() != oldTask.getLogs().size()){
+        if (task.getLogs().size() != oldTask.getLogs().size()) {
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         }
-        TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
-        Collection<Message> comments = task.getComments().stream().filter(c ->
-                oldComments.stream().noneMatch(c2 -> c2.getId().equals(c.getId()))).toList();
-        //generate the notifications
-        comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
+        return ModelToGetDTO.tranform(taskRepository.save(task));
 
-        return taskGetDTO;
+
     }
 
     //this keep the fields that can't be changed
@@ -155,6 +157,7 @@ public class TaskService {
         task.setLogs(List.copyOf(oldTask.getLogs()));
         task.setCompleted(false);
         task.setDeleted(false);
+        task.setComments(oldTask.getComments());
         task.setProperties(propertyValueService.createNotSaved(task));
         Stream<PropertyValue> archiveProps = task.getProperties().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
         Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldTask.getProperties().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
@@ -229,7 +232,7 @@ public class TaskService {
         validation.ofObject(projectID, page.getProject());
         //setting attributes to complete the task
         TaskGetDTO tranform;
-        if(page.getProject().getOwner().equals(user) || !page.getProject().getRevision()){
+        if (page.getProject().getOwner().equals(user) || !page.getProject().getRevision()) {
             task.setDateCompleted(OffsetDateTime.now());
             task.setCompleted(true);
             task.setWaitingRevision(false);
@@ -241,14 +244,14 @@ public class TaskService {
             generatePointsOfComplete(task.getLogs());
             // generate notifications
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
-        }else{
+        } else {
             task.setWaitingRevision(true);
             tranform = ModelToGetDTO.tranform(taskRepository.save(task));
         }
         return tranform;
     }
 
-    public TaskGetDTO cancelComplete(Long id, Long projectId){
+    public TaskGetDTO cancelComplete(Long id, Long projectId) {
         Task task = taskRepository.findById(id).get();
         Page page = pageRepositorry.findByTasks_Task(task).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());

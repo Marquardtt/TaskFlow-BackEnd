@@ -36,6 +36,12 @@ public class TaskController {
         return taskService.update(task, true, projectId);
     }
 
+    @PatchMapping("/comment/project/{projectId}")
+    public TaskGetDTO comment(@RequestBody Task task, @PathVariable Long projectId){
+        return taskService.comment(task, projectId);
+    }
+
+
 
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
