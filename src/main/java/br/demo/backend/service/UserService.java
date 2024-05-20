@@ -53,7 +53,6 @@ public class UserService {
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
             throw new UsernameAlreadyUsedException();
         } catch (NoSuchElementException e) {
-            System.out.println(userDto);
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
@@ -96,10 +95,12 @@ public class UserService {
     public void changePassword(UserChangePasswordDTO userChangePasswordDTO){
         UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         User user = userRepository.findById(userDetails.getId()).get();
-        if (user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
+        if (!user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
             throw new CurrentPasswordDontMatchException();
         }
         user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getPassword());
+        user.getUserDetailsEntity().setCredentialsNonExpired(true);
+        user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
         ModelToGetDTO.tranform(userRepository.save(user));
     }
 

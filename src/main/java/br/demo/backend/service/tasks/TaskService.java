@@ -133,7 +133,9 @@ public class TaskService {
     public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
 
+
         if (oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
+
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
 
@@ -148,7 +150,6 @@ public class TaskService {
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         }
         return ModelToGetDTO.tranform(taskRepository.save(task));
-
 
     }
 
@@ -237,7 +238,6 @@ public class TaskService {
             task.setCompleted(true);
             task.setWaitingRevision(false);
 
-            System.out.println("COMPLETING");
             //generate the logs and notifications
             logService.generateLog(Action.COMPLETE, task);
             tranform = ModelToGetDTO.tranform(taskRepository.save(task));

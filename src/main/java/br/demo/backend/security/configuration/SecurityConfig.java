@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
+    private  final  IsAGroupOnMyProjectsAuthotization isAGroupOnMyProjectsAuthotization;
 
 
     @Bean
@@ -135,7 +136,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
+                        .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isAGroupOnMyProjectsAuthotization)
                         .requestMatchers(HttpMethod.PATCH, "/remove/{id}/from/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)

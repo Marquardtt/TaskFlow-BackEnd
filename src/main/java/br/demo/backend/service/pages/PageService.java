@@ -160,17 +160,12 @@ public class PageService {
 
 
     public TaskPageGetDTO updateTaskPage(TaskPage taskPage, Long projectId) {
-        System.out.println("============================");
-        System.out.println(taskPage.getId() + " " +taskPage);
         TaskPage oldTaskPage = taskPageRepository.findById(taskPage.getId()).get();
         Page page = pageRepository.findByTasks_Task(oldTaskPage.getTask()).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());
-        System.out.println(taskPage.getId() + " " +taskPage);
         if (taskPage instanceof TaskCanvas taskCanvas) {
-            System.out.println("TASKCANVAS");
             ((TaskCanvas) oldTaskPage).setX(taskCanvas.getX());
             ((TaskCanvas) oldTaskPage).setY(taskCanvas.getY());
-            System.out.println(taskPage.getId() + " " +oldTaskPage);
             return ModelToGetDTO.tranform(taskCanvasRepository.save((TaskCanvas) oldTaskPage));
         }
         ((TaskOrdered) oldTaskPage).setIndexAtColumn(((TaskOrdered) taskPage).getIndexAtColumn());

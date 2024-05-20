@@ -200,7 +200,6 @@ public class GroupService {
     }
 
     public GroupGetDTO removeFromProject(Long groupId, Long projectId) {
-        System.out.println("ASDASDASDASD");
         Group group = groupRepository.findById(groupId).get();
         group.setPermissions(new ArrayList<>(group.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList()));
         group.getUsers().forEach(u -> {

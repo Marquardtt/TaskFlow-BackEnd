@@ -52,13 +52,12 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
                         try {
                             idTaskVl = jsonValue.get("id").asLong();
                         } catch (Exception e) {
-                            System.out.println("Deu erro no id da propValue");
+                            System.out.println(e);
                         }
 
                         if (property.getType() == null) {
                             throw new DeserializerException("Property don't have property.getType() attribute");
                         }
-                        System.out.println(property.getType());
                         return switch (property.getType()) {
                             case USER -> deserializeUser(value, id, property, idTaskVl);
                             case TIME -> deserializeTime(value, id, property, idTaskVl);
@@ -98,12 +97,10 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     }
 
     private PropertyValue deserializeTime(JsonNode value, Long id, Property property, Long idTaskVl) {
-        System.out.println(value);
 
         String color = value.get("color") == null ? "F04A94" : value.get("color").asText();
         ArrayList<DateTimelines> starts = new ArrayList<>();
         // I have merda here
-        System.out.println("passou 1");
         Long idIntervals = value.get("id").asLong();
         for (JsonNode valueF : value.get("starts")) {
             DateTimelines date = new DateTimelines();
@@ -113,7 +110,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
             starts.add(date);
         }
-        System.out.println("passou 2");
         ArrayList<DateTimelines> ends = new ArrayList<>();
         for (JsonNode valueF : value.get("ends")) {
             DateTimelines date = new DateTimelines();
@@ -123,7 +119,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
             date.setDate(OffsetDateTime.parse(valueF.get("date").asText()));
             ends.add(date);
         }
-        System.out.println("passou 3");
         JsonNode time = value.get("time");
         if (time.isNull()) {
             return new PropertyValue(id, property, new TimeValued(idTaskVl, new Intervals(idIntervals, null, starts, ends, color)));
@@ -137,7 +132,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         Integer hours = time.get("hours").asInt();
         PropertyValue p = new PropertyValue(id, property, new TimeValued(idTaskVl,
                 new Intervals(idIntervals, new Duration(idTime, seconds, minutes, hours), starts, ends, color)));
-        System.out.println(p.getValue().getValue());
         return p;
     }
 
@@ -169,7 +163,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
     }
 
     private static PropertyValue deserializeDate(JsonNode value, Long id, Property property, Long idTaskVl) {
-        System.out.println(value);
         if (value.isNull()) {
             return new PropertyValue(id, property, new DateValued(idTaskVl, null));
         }
@@ -177,7 +170,6 @@ public class DeserializerValue extends StdDeserializer<PropertyValue> {
         Long idDate = value.get("id").asLong();
         PropertyValue p =  new PropertyValue(id, property, new DateValued(idTaskVl, new DateWithGoogle(idDate,
                 OffsetDateTime.parse(value.get("dateTime").asText()), idGoogle)));
-        System.out.println(p);
         return p;
     }
 
