@@ -28,6 +28,7 @@ import br.demo.backend.repository.values.ArchiveValuedRepository;
 import br.demo.backend.repository.values.UserValuedRepository;
 import br.demo.backend.utils.IdProjectValidation;
 import br.demo.backend.utils.ModelToGetDTO;
+import com.google.api.services.calendar.model.Event;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -97,7 +98,8 @@ public class PropertyValueService {
     }
 
 
-    private List<TaskGetDTO> getTaskByUser(OffsetDateTime date, User user) {
+    public List<TaskGetDTO> getTaskByUser(OffsetDateTime date, User user) {
+
         Collection<Value> values = userValuedRepository.findAllByUsersContaining(user);
         //get the property values that contains the values
         Collection<PropertyValue> taskValues =
@@ -185,4 +187,5 @@ public class PropertyValueService {
             return p;
         }).toList();
     }
+
 }

@@ -36,8 +36,9 @@ public class AuthenticationService implements UserDetailsService {
         if (userOptional.isPresent()) {
             userOptional.get().getUserDetailsEntity().setEnabled(true);
             return userOptional.get().getUserDetailsEntity();
+        }else {
+            throw new UsernameNotFoundException("User not found");
         }
-        throw new UsernameNotFoundException("User not found");
     }
 
     public UserDetails loadUserByUsernameGitHub(String username)throws UsernameNotFoundException {
@@ -46,8 +47,19 @@ public class AuthenticationService implements UserDetailsService {
         if (userOptional.isPresent()) {
             userOptional.get().getUserDetailsEntity().setEnabled(true);
             return userOptional.get().getUserDetailsEntity();
+        }else {
+            throw new UsernameNotFoundException("User not found");
         }
-        throw new UsernameNotFoundException("User not found");
+    }
+
+    public UserDetails loadByEmail(String email) throws UsernameNotFoundException{
+        Optional<User> userOptional = userRepository.findByMail(email);
+        if (userOptional.isPresent()) {
+            userOptional.get().getUserDetailsEntity().setEnabled(true);
+            return userOptional.get().getUserDetailsEntity();
+        }else {
+            throw new UsernameNotFoundException("User not found");
+        }
     }
 
     public List<Cookie> removeCookies (HttpServletRequest request){
