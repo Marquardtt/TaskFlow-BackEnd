@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserChangePasswordDTO {
     private String password;
-    private String currentPassword;
+    private String newPassword;
 }

@@ -25,6 +25,6 @@ public class OtherUsersDTO {
     private Integer points;
     private String description;
     private Archive picture;
-    private boolean bundinha;
-    public Collection<PermissionGetDTO> permissions;
+    private boolean authenticate;
+    private Collection<PermissionGetDTO> permissions;
 }
