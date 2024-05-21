@@ -164,7 +164,7 @@ public class TaskService {
         if (task.getLogs().size() != oldTask.getLogs().size()) {
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         }
-        return ModelToGetDTO.tranform(taskRepository.save(task));
+        TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
       
         generateGoogleCalendar(taskGetDTO);
         return taskGetDTO;
