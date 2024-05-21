@@ -5,9 +5,7 @@ import br.demo.backend.security.entity.UserDatailEntity;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -17,6 +15,8 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,83 +32,82 @@ import java.util.List;
 @Configuration
 @AllArgsConstructor
 public class GoogleCalendarConfig {
-    protected static final String APPLICATION_NAME = "TaskFlow";
-    protected static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    protected static final String TOKENS_DIRECTORY_PATH = "tokens";
-    protected static final List<String> SCOPES =
-            Collections.singletonList(CalendarScopes.CALENDAR);
-    protected static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleCalendarConfig.class);
+    private static final String APPLICATION_NAME = "TaskFlow";
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
+    private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
+    private static final String REDIRECT_URI = "http://localhost:9999/callback/google"; // Ensure this matches your registered URI
 
-    protected static Credential getCredentials(Long userId)
-            throws IOException {
+    private static GoogleAuthorizationCodeFlow buildFlow(String userId) throws IOException, GeneralSecurityException {
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        File credentialsFile = new File(CREDENTIALS_FILE_PATH);
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(new FileInputStream(credentialsFile)));
 
+        return new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH + "/" + userId)))
+                .setAccessType("offline")
+                .build();
+    }
+
+    protected static Credential getCredentials(String userId) throws IOException {
         try {
-            HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            // Load client secrets.
-            File in = new File(CREDENTIALS_FILE_PATH);
-            GoogleClientSecrets clientSecrets =
-                    GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(new FileInputStream(in)));
-
-            // Build flow and trigger user authorization request.
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                    HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                    .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH + "/" + userId.toString())))
-                    .setAccessType("offline")
-                    .build();
-
-//        GoogleAuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl();
-//        authorizationUrl.setRedirectUri("http://localhost:8888/Callback");
-//        authorizationUrl.setAccessType("offline");
-//        String url = authorizationUrl.build();
-//        response.sendRedirect(url);
-
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-            Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId.toString());
-//        //returns an authorized Credential object.
-            return credential;
-//            return null;
+            GoogleAuthorizationCodeFlow flow = buildFlow(userId);
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(9999).build(); // Match the port with your redirect URI
+            return new AuthorizationCodeInstalledApp(flow, receiver).authorize(userId);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            LOGGER.error("Failed to get credentials for user: {}", userId, e);
+            throw new RuntimeException("Failed to get credentials for user: " + userId, e);
         }
     }
 
-    public static Calendar createCalendar()
-            throws GeneralSecurityException, IOException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        return
-                new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(
-                        ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()
-                ))
-                        .setApplicationName(APPLICATION_NAME)
-                        .build();
+    public static Calendar createCalendar() throws GeneralSecurityException, IOException {
+        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(userDetails instanceof UserDatailEntity)) {
+            throw new IllegalStateException("Authentication principal is not of type UserDatailEntity");
+        }
+        UserDatailEntity user = (UserDatailEntity) userDetails;
+        return new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(user.getUsername()))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
     }
 
-    private String generateUrl() {
+    public String generateUrl() {
         try {
-            Long userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-            HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            // Load client secrets.
-            File in = new File(CREDENTIALS_FILE_PATH);
-            GoogleClientSecrets clientSecrets =
-                    GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(new FileInputStream(in)));
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!(userDetails instanceof UserDatailEntity)) {
+                throw new IllegalStateException("Authentication principal is not of type UserDatailEntity");
+            }
+            UserDatailEntity user = (UserDatailEntity) userDetails;
+            GoogleAuthorizationCodeFlow flow = buildFlow(user.getUsername());
 
-            // Build flow and trigger user authorization request.
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                    HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                    .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH + "/" + userId.toString())))
-                    .setAccessType("offline")
-                    .build();
-
-            GoogleAuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl();
-            authorizationUrl.setRedirectUri("http://localhost:9999/Callback");
-            authorizationUrl.setAccessType("offline");
+            GoogleAuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl()
+                    .setRedirectUri(REDIRECT_URI)
+                    .setAccessType("offline");
 
             return authorizationUrl.build();
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            LOGGER.error("Failed to generate authorization URL", e);
+            throw new RuntimeException("Failed to generate authorization URL", e);
         }
     }
 
+    public Credential exchangeCodeForToken(String code, UserDatailEntity userId) throws IOException, GeneralSecurityException {
+        try {
+            GoogleAuthorizationCodeFlow flow = buildFlow(userId.getUsername());
+
+            GoogleAuthorizationCodeTokenRequest tokenRequest = flow.newTokenRequest(code)
+                    .setRedirectUri(REDIRECT_URI);
+
+            GoogleTokenResponse tokenResponse = tokenRequest.execute();
+            userId.setLinkedWithGoogleCalendar(true);
+
+            return flow.createAndStoreCredential(tokenResponse, userId.getUsername());
+        } catch (Exception e) {
+            LOGGER.error("Failed to exchange code for token", e);
+            throw new RuntimeException("Failed to exchange code for token", e);
+        }
+    }
 }

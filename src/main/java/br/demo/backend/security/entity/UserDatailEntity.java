@@ -51,6 +51,7 @@ public class UserDatailEntity implements UserDetails {
     private String usernameGitHub;
     private OffsetDateTime lastPasswordEdition;
     private OffsetDateTime whenHeTryDelete;
+    private Boolean linkedWithGoogleCalendar= false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
