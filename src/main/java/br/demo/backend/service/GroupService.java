@@ -139,6 +139,8 @@ public class GroupService {
         removed.forEach(u -> {
             if (!u.equals(group.getOwner())) {
                 notificationService.generateNotification(TypeOfNotification.REMOVEINGROUP, u.getId(), group.getId());
+//                showUser.permissions.filter(p => group.permissions.find(p2 => p.project.id == p2.project.id) == undefined);
+                    u.getPermissions().stream().filter(p -> group.getPermissions().stream().noneMatch(p2 -> p.getProject().getId() == p2.getProject().getId()));
             }
         });
     }
@@ -200,7 +202,6 @@ public class GroupService {
     }
 
     public GroupGetDTO removeFromProject(Long groupId, Long projectId) {
-        System.out.println("ASDASDASDASD");
         Group group = groupRepository.findById(groupId).get();
         group.setPermissions(new ArrayList<>(group.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList()));
         group.getUsers().forEach(u -> {

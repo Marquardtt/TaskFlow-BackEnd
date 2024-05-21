@@ -282,7 +282,7 @@ public class ModelToGetDTO {
         } catch (NullPointerException ignore) {
         }
         try {
-            group.setUsers(obj.getUsers().stream().map(ModelToGetDTO::tranformSimple).toList());
+            group.setUsers(obj.getUsers().stream().map(ModelToGetDTO::transformOther).toList());
         } catch (NullPointerException ignore) {
         }
         return group;

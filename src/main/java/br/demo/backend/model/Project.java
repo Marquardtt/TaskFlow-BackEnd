@@ -56,7 +56,7 @@ public class Project implements ILogged, IHasProperties {
     private Collection<Log> logs;
     //===================== /Adições
 
-    private Boolean revision = false;
+    private Boolean revision = true;
     public Project(Long id){
         this.id = id;
     }

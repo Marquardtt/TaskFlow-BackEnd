@@ -13,7 +13,6 @@ import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.PropertyValue;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -56,28 +55,28 @@ public class PropertyService {
     private PropertyValueService propertyValueService;
 
     //that method is used to add the new property to the tasks that already exists
-    private Property setInTheTasksThatAlreadyExists(Property property) {
+    private void setInTheTasksThatAlreadyExists(Property property) {
         if (property.getPages() != null && !property.getPages().isEmpty()) {
-            return setRelationAtPage(property, property.getPages());
+            setRelationAtPage(property, property.getPages());
         } else {
             Project project = projectRepository.findById(property.getProject().getId()).get();
-            return setRelationAtPage(property, project.getPages());
+            setRelationAtPage(property, project.getPages());
         }
     }
 
-    private Property setRelationAtPage(Property property, Collection<Page> pages) {
-        pages.stream().forEach(p -> {
+    private void setRelationAtPage(Property property, Collection<Page> pages) {
+        pages.forEach(p -> {
             //get the page from the database
             Page page = pageRepository.findById(p.getId()).get();
             //get the tasks from the page
-            page.getTasks().stream().map(tP -> {
+            page.getTasks().stream().filter(t -> t.getTask().getProperties().stream()
+                    .noneMatch(prop -> prop.getProperty().getId().equals(property.getId())))
+                    .forEach(tP -> {
                 //add the property to the task
                 tP.getTask().getProperties().add(propertyValueService.setTaskProperty(property));
-                taskService.update(tP.getTask(), false, page.getProject().getId());
-                return tP;
-            }).toList();
+                taskService.update(tP.getTask(), false, page.getProject().getId(), false);
+            });
         });
-        return property;
     }
 
     private <T extends Property> T saveGeneric(T property, JpaRepository<T, Long> repo, Long projectId) {
@@ -174,7 +173,7 @@ public class PropertyService {
                 t.getProperties().remove(propertyValue);
                 taskService.update(t, true, property.getProject() == null ?
                         property.getPages().stream().findFirst().get().getProject().getId() :
-                        property.getProject().getId());
+                        property.getProject().getId(), false);
                 taskValueRepository.deleteById(propertyValue.getId());
             }
         });

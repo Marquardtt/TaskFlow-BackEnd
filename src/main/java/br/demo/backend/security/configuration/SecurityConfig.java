@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final IsOwnerInThisProject isOwnerInThisProject;
     private final NotificationsOwnerAuthorization notificationsOwnerAuthorization;
     private final ProjectOrGroupAuthorization projectOrGroupAuthorization;
+    private  final  IsAGroupOnMyProjectsAuthotization isAGroupOnMyProjectsAuthotization;
 
 
     @Bean
@@ -67,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/sendEmail/code").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/user/password/{username}").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/user/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/user").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/user/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/user").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/{username}").authenticated()
@@ -80,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/picture").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/set-now").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}").access(isOwnerAuthorization)
+                        .requestMatchers(HttpMethod.PATCH, "/project/comment/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/project/{projectId}/change-owner").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PUT, "/project/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/project/my").authenticated()
@@ -94,6 +97,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/task/project/{projectId}/redo/{id}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.PATCH, "/task/project/{projectId}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.GET, "/task/today/{id}").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/task/comment/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.GET, "/task/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/task/{id}/project/{projectId}/complete-deny").access(isOwnerAuthorization)
@@ -118,7 +122,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/page/task-page/project/{projectId}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.PATCH, "/page/draw/{id}/project/{projectId}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.PATCH, "/page/prop-ordering/{id}/project/{projectId}").access(authorizationRequestsRoutes)
-                        .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(isOwnerAuthorization)
+                        .requestMatchers(HttpMethod.DELETE, "/page/{id}/project/{projectId}").access(authorizationRequestsRoutes)
                         .requestMatchers(HttpMethod.PATCH, "/page/merge/{id}/project/{projectId}").access(authorizationRequestsRoutes)
 
                         //PERMISSION
@@ -133,7 +137,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.PATCH, "/group/{groupId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/my").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isOwnerOrMemberAuthorization)
+                        .requestMatchers(HttpMethod.GET, "/group/{groupId}").access(isAGroupOnMyProjectsAuthotization)
                         .requestMatchers(HttpMethod.PATCH, "/remove/{id}/from/{projectId}").access(isOwnerAuthorization)
                         .requestMatchers(HttpMethod.GET, "/group/project/{projectId}").access(isOwnerOrMemberAuthorization)
                         .requestMatchers(HttpMethod.DELETE, "/group/{groupId}").access(isOwnerAuthorization)

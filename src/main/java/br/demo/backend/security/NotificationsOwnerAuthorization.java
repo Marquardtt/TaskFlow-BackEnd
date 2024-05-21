@@ -25,7 +25,6 @@ public class NotificationsOwnerAuthorization implements AuthorizationManager<Req
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
-        System.out.println(object.getVariables().get("id"));
         UserDatailEntity userDatailEntity = (UserDatailEntity) authentication.get().getPrincipal();
         Notification notification = notificationRepository.findById(Long.parseLong(object.getVariables().get("id"))).get();
        return new AuthorizationDecision(notification.getUser().getUserDetailsEntity().getUsername().equals(userDatailEntity.getUsername()));

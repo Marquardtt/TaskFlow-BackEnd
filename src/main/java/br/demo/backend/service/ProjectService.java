@@ -2,10 +2,17 @@ package br.demo.backend.service;
 
 
 import br.demo.backend.exception.SomeUserAlreadyIsInProjectException;
+import br.demo.backend.exception.TaskAlreadyDeletedException;
+import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.Page;
+import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
@@ -31,7 +38,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -100,13 +110,18 @@ public class ProjectService {
         autoMapper.map(projectDTO, project, patching);
         //keep the owner, pages, properties and picture of the project
         keepFileds(project, oldProject);
-
+        logService.generateLog(Action.UPDATE,project,oldProject);
         if(changeDescription(oldProject, project)){
             logService.updateDescription(project);
         }
         //generate the logs
-        logService.generateLog(Action.UPDATE, project, oldProject);
         return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+
+    public ProjectGetDTO comment(ProjectPutDTO projectDTO) {
+        Project oldTask = projectRepository.findById(projectDTO.getId()).get();
+        oldTask.setComments(projectDTO.getComments());
+        return ModelToGetDTO.tranform(projectRepository.save(oldTask));
     }
 
     private  void keepFileds(Project project, Project oldProject) {
@@ -116,6 +131,13 @@ public class ProjectService {
         project.setPicture(oldProject.getPicture());
         project.setLogs(oldProject.getLogs());
         project.setValues(propertyValueService.createNotSaved(project));
+        Stream<PropertyValue> archiveProps = project.getValues().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
+        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldProject.getValues().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
+        List<PropertyValue> finalProps = archivePropsOld.toList();
+        ArrayList<PropertyValue> projectProps = new ArrayList<>(project.getValues());
+        projectProps.removeAll(finalProps.stream().filter(p -> project.getValues().contains(p)).toList());
+        projectProps.addAll(finalProps);
+        project.setValues(projectProps);
     }
 
     private Boolean changeDescription(Project oldProject, Project project){

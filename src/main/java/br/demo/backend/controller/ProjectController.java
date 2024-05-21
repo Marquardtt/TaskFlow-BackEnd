@@ -48,6 +48,12 @@ public class ProjectController {
         return projectService.update(project, true);
     }
 
+    @PatchMapping("/comment/{projectId}")
+    public ProjectGetDTO comment(@RequestBody ProjectPutDTO project, @PathVariable Long projectId) {
+        validation.of(projectId, project.getId());
+        return projectService.comment(project);
+    }
+
     @GetMapping("/{projectId}")
     public ProjectGetDTO findOne(@PathVariable("projectId") Long id) {
         return projectService.findOne(id);

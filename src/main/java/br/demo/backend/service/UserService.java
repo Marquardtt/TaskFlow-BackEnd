@@ -13,6 +13,7 @@ import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.security.exception.ForbiddenException;
+import br.demo.backend.security.service.AuthenticationService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
@@ -20,7 +21,13 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,6 +47,8 @@ public class UserService {
     private AutoMapper<User> autoMapper;
     private NotificationService notificationService;
     private PermissionRepository permissionRepository;
+    private AuthenticationManager authenticationManager;
+
 
     //find one, normally used to find a user in the same group or project
     public OtherUsersDTO findOne(String id) {
@@ -53,7 +62,6 @@ public class UserService {
             userRepository.findByUserDetailsEntity_Username(userDto.getUserDetailsEntity().getUsername()).get();
             throw new UsernameAlreadyUsedException();
         } catch (NoSuchElementException e) {
-            System.out.println(userDto);
             User user = new User();
             BeanUtils.copyProperties(userDto, user);
             user.setConfiguration(new Configuration());
@@ -96,11 +104,19 @@ public class UserService {
     public void changePassword(UserChangePasswordDTO userChangePasswordDTO){
         UserDatailEntity userDetails = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         User user = userRepository.findById(userDetails.getId()).get();
-        if (user.getUserDetailsEntity().getPassword().equals(userChangePasswordDTO.getCurrentPassword())){
+
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(user.getUserDetailsEntity().getUsername(), userChangePasswordDTO.getPassword());
+        try {
+            authenticationManager.authenticate(token);
+            user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getNewPassword());
+            user.getUserDetailsEntity().setCredentialsNonExpired(true);
+            user.getUserDetailsEntity().setLastPasswordEdition(OffsetDateTime.now());
+            ModelToGetDTO.tranform(userRepository.save(user));
+        }catch (AuthenticationException e){
             throw new CurrentPasswordDontMatchException();
         }
-        user.getUserDetailsEntity().setPassword(userChangePasswordDTO.getPassword());
-        ModelToGetDTO.tranform(userRepository.save(user));
+
     }
 
     private void keepFields(User user, User oldUser){
@@ -225,6 +241,11 @@ public class UserService {
     }
 
 
+    public void updateAllPermissions(String username, List<Permission> permissions) {
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        user.setPermissions(permissions);
+        userRepository.save(user);
+    }
 }
 
 
