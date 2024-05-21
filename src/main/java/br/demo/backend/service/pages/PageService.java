@@ -191,7 +191,8 @@ public class PageService {
             //setting the tasks and properties of the page
             pageDataBase.getProperties().addAll(page.getProperties());
             //saving the pages
-            page.getTasks().forEach(t -> {
+            page.getTasks().stream().filter(tp -> pageDataBase.getTasks().stream()
+                    .noneMatch(tp2 -> tp.getTask().getId().equals(tp2.getTask().getId()))).forEach(t -> {
                 taskService.addTaskToPage(t.getTask(), pageDataBase);
             });
         });
