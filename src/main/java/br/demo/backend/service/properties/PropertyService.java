@@ -73,7 +73,7 @@ public class PropertyService {
             page.getTasks().stream().map(tP -> {
                 //add the property to the task
                 tP.getTask().getProperties().add(propertyValueService.setTaskProperty(property));
-                taskService.update(tP.getTask(), false, page.getProject().getId());
+                taskService.update(tP.getTask(), false, page.getProject().getId(), false);
                 return tP;
             }).toList();
         });
@@ -174,7 +174,7 @@ public class PropertyService {
                 t.getProperties().remove(propertyValue);
                 taskService.update(t, true, property.getProject() == null ?
                         property.getPages().stream().findFirst().get().getProject().getId() :
-                        property.getProject().getId());
+                        property.getProject().getId(), false);
                 taskValueRepository.deleteById(propertyValue.getId());
             }
         });

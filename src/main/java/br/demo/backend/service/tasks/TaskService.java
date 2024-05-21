@@ -130,11 +130,14 @@ public class TaskService {
         return taskGetDTO;
     }
 
-    public TaskGetDTO update(Task taskDTO, Boolean patching, Long projectId) {
+    public TaskGetDTO update(Task taskDTO, Boolean patching,
+                             Long projectId, Boolean isUserRequest) {
         Task oldTask = taskRepository.findById(taskDTO.getId()).get();
 
-
-        if (oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
+        if(isUserRequest){
+            if (oldTask.getDeleted()) throw new TaskAlreadyDeletedException();
+            if (oldTask.getCompleted()) throw new TaskAlreadyCompleteException();
+        }
 
         Page page = pageRepositorry.findByTasks_Task(oldTask).stream().findFirst().get();
         validation.ofObject(projectId, page.getProject());

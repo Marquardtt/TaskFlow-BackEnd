@@ -28,12 +28,12 @@ public class TaskController {
     @PutMapping("/project/{projectId}")
     public TaskGetDTO upDate(@RequestBody Task task, @PathVariable Long projectId){
 
-        return taskService.update(task, false, projectId);
+        return taskService.update(task, false, projectId, true);
     }
 
     @PatchMapping("/project/{projectId}")
     public TaskGetDTO patch(@RequestBody Task task, @PathVariable Long projectId){
-        return taskService.update(task, true, projectId);
+        return taskService.update(task, true, projectId, true);
     }
 
     @PatchMapping("/comment/project/{projectId}")
