@@ -175,7 +175,7 @@ public class TaskService {
             Collection<OtherUsersDTO> users = list.stream().map(prop -> (Collection<OtherUsersDTO>) prop.getValue().getValue())
                     .flatMap(Collection::stream).filter(u -> {
                         User user = userRepository.findById(u.getId()).get();
-                        return user.getUserDetailsEntity().isLinkedWithGoogle();
+                        return user.getUserDetailsEntity().getLinkedWithGoogleCalendar();
                     }).toList();
             Collection<PropertyValueGetDTO> valuesdates = dates.stream().map(d ->
             {

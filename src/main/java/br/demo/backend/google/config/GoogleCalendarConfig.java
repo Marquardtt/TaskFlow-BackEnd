@@ -1,6 +1,7 @@
 package br.demo.backend.google.config;
 
 import br.demo.backend.model.User;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -39,6 +40,8 @@ public class GoogleCalendarConfig {
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
     private static final String CREDENTIALS_FILE_PATH = "src/main/resources/credentials.json";
     private static final String REDIRECT_URI = "http://localhost:9999/callback/google"; // Ensure this matches your registered URI
+
+    private UserRepository userRepository;
 
     private static GoogleAuthorizationCodeFlow buildFlow(String userId) throws IOException, GeneralSecurityException {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -102,8 +105,10 @@ public class GoogleCalendarConfig {
                     .setRedirectUri(REDIRECT_URI);
 
             GoogleTokenResponse tokenResponse = tokenRequest.execute();
-            userId.setLinkedWithGoogleCalendar(true);
 
+           User user = userRepository.findByUserDetailsEntity_Username(userId.getUsername()).get();
+           user.getUserDetailsEntity().setLinkedWithGoogleCalendar(true);
+           userRepository.save(user);
             return flow.createAndStoreCredential(tokenResponse, userId.getUsername());
         } catch (Exception e) {
             LOGGER.error("Failed to exchange code for token", e);

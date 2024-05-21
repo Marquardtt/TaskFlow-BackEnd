@@ -36,8 +36,6 @@ public class GoogleCalendarController {
 
     @GetMapping("/calendar/google/auth")
     public ResponseEntity<?> redirectGoogleCalendar(HttpServletResponse response ) throws IOException {
-        System.out.println(service.generateUrl()
-        );
         response.sendRedirect(service.generateUrl());
         return ResponseEntity.ok("OK");
     }
@@ -52,6 +50,7 @@ public class GoogleCalendarController {
                 Credential credential = service.exchangeCodeForToken(code, userId);
 
                 response.sendRedirect("http://localhost:3000");
+
                 return ResponseEntity.ok("Bem-sucedido");
             } catch (IOException | GeneralSecurityException e) {
                 e.printStackTrace();
