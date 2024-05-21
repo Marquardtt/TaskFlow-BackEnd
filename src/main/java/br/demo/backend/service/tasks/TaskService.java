@@ -3,10 +3,18 @@ package br.demo.backend.service.tasks;
 
 import br.demo.backend.exception.TaskAlreadyCompleteException;
 import br.demo.backend.exception.TaskAlreadyDeletedException;
+import br.demo.backend.google.service.GoogleCalendarService;
 import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
+import br.demo.backend.model.dtos.properties.DateGetDTO;
+import br.demo.backend.model.dtos.relations.PropertyValueGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.properties.Date;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Log;
+import br.demo.backend.model.values.DateValued;
+import br.demo.backend.model.values.DateWithGoogle;
+import br.demo.backend.repository.DateWithGoogleRepository;
 import br.demo.backend.repository.UserRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.LogService;
@@ -42,6 +50,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Stream;
@@ -63,7 +73,9 @@ public class TaskService {
     private PropertyValueService propertyValueService;
     private IdProjectValidation validation;
     private UserRepository userRepository;
+    private DateWithGoogleRepository dateWithGoogleRepository;
 
+    private GoogleCalendarService googleCalendarService;
 
     public TaskGetDTO save(Long idpage, Long idProject) {
         Page page = pageRepositorry.findById(idpage).get();
@@ -147,7 +159,94 @@ public class TaskService {
         //generate the notifications
         comments.forEach(c -> notificationService.generateNotification(TypeOfNotification.COMMENTS, task.getId(), c.getId()));
 
+
+        generateGoogleCalendar(taskGetDTO);
         return taskGetDTO;
+    }
+
+    //TODO: quando ele mudar os users da task
+    private void generateGoogleCalendar(TaskGetDTO task) {
+        try {
+            List<PropertyValueGetDTO> list = task.getProperties().stream()
+                    .filter(p -> p.getProperty().getType().equals(TypeOfProperty.USER)).toList();
+            List<PropertyValueGetDTO> dates = task.getProperties().stream().filter(prop ->
+                    prop.getProperty().getType().equals(TypeOfProperty.DATE) &&
+                            ((DateGetDTO) prop.getProperty()).getDeadline()).toList();
+            Collection<OtherUsersDTO> users = list.stream().map(prop -> (Collection<OtherUsersDTO>) prop.getValue().getValue())
+                    .flatMap(Collection::stream).filter(u -> {
+                        User user = userRepository.findById(u.getId()).get();
+                        return user.getUserDetailsEntity().isLinkedWithGoogle();
+                    }).toList();
+            Collection<PropertyValueGetDTO> valuesdates = dates.stream().map(d ->
+            {
+                if (d.getValue().getValue() == null) return d;
+                DateWithGoogle value = dateWithGoogleRepository.findById( ((DateWithGoogle) d.getValue().getValue()).getId()).get();
+                if (value.getIdGoogle().isEmpty()) {
+                    notExistsInGoogle(users, task, value);
+                } else {
+                    alreadyExistisInGoogle(users, task, value);
+                }
+                return d;
+            }).toList();
+            ArrayList<PropertyValueGetDTO> values = new ArrayList<>(task.getProperties().stream().filter(prop ->
+                    !prop.getProperty().getType().equals(TypeOfProperty.DATE) ||
+                            !((DateGetDTO)prop.getProperty()).getDeadline()).toList());
+            values.addAll(valuesdates);
+            task.setProperties(values);
+        }catch (NullPointerException ignore){
+            return;
+        }
+
+
+    }
+
+    private void deleteFromCalendar(Task task){
+        List<PropertyValue> dates = task.getProperties().stream().filter(prop ->
+                prop.getProperty().getType().equals(TypeOfProperty.DATE) &&
+                        ( (Date)prop.getProperty()).getDeadline()).toList();
+        dates.forEach(d ->
+        {
+            DateWithGoogle value = (DateWithGoogle) d.getValue().getValue();
+            if (value == null) return ;
+            if (!value.getIdGoogle().isEmpty()) {
+                try {
+                    googleCalendarService.delete(value.getIdGoogle());
+                    value.setIdGoogle("");
+                    dateWithGoogleRepository.save(value);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (GeneralSecurityException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+
+
+
+
+
+    private void alreadyExistisInGoogle(Collection<OtherUsersDTO> u, TaskGetDTO t, DateWithGoogle value) {
+        try {
+            googleCalendarService.update(u, t, value.getDateTime(), value.getIdGoogle());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void notExistsInGoogle(Collection<OtherUsersDTO> u, TaskGetDTO t, DateWithGoogle value) {
+        try {
+            System.out.println("NOT EXISTS");
+            value.setIdGoogle(googleCalendarService.create(u, t, value.getDateTime()));
+            dateWithGoogleRepository.save(value);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //this keep the fields that can't be changed
@@ -180,8 +279,12 @@ public class TaskService {
         // generate logs
         logService.generateLog(Action.DELETE, task);
         taskRepository.save(task);
+        deleteFromCalendar(task);
+
         //generate notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
+
+
     }
 
     public void deletePermanent(Long id, Long projectId) {
@@ -201,9 +304,9 @@ public class TaskService {
         task.setDateDeleted(null);
         //generate  logs
         logService.generateLog(Action.REDO, task);
-
         TaskGetDTO tranform = ModelToGetDTO.tranform(taskRepository.save(task));
 
+        generateGoogleCalendar(tranform);
         //generate notifications
         notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         return tranform;
@@ -233,8 +336,7 @@ public class TaskService {
             task.setDateCompleted(OffsetDateTime.now());
             task.setCompleted(true);
             task.setWaitingRevision(false);
-
-            System.out.println("COMPLETING");
+            deleteFromCalendar(task);
             //generate the logs and notifications
             logService.generateLog(Action.COMPLETE, task);
             tranform = ModelToGetDTO.tranform(taskRepository.save(task));
