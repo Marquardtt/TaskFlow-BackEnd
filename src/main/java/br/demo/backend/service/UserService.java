@@ -241,6 +241,11 @@ public class UserService {
     }
 
 
+    public void updateAllPermissions(String username, List<Permission> permissions) {
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        user.setPermissions(permissions);
+        userRepository.save(user);
+    }
 }
 
 

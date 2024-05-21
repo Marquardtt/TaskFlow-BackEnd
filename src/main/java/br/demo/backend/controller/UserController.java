@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -87,4 +88,7 @@ public class UserController {
     public void updatePermission(@PathVariable Long groupId){
         userService.getOutOfGroup(groupId);
     }
+
+    @PatchMapping("/updateAllPermissions/{username}")
+    public void updateAllPermissions(@PathVariable String username, @RequestBody List<Permission> permissions){userService.updateAllPermissions(username, permissions);}
 }
