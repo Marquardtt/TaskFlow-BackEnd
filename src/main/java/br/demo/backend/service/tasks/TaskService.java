@@ -156,7 +156,7 @@ public class TaskService {
     //this keep the fields that can't be changed
     private void keepFields(Task task, Task oldTask) {
         task.setLogs(List.copyOf(oldTask.getLogs()));
-        task.setCompleted(false);
+//        task.setCompleted(false);
         task.setDeleted(false);
         task.setComments(oldTask.getComments());
         task.setProperties(propertyValueService.createNotSaved(task));
