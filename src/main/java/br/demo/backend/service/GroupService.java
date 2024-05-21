@@ -22,6 +22,7 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -212,11 +213,22 @@ public class GroupService {
 
     public GroupGetDTO removeFromProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
-        group.setPermissions(new ArrayList<>(group.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList()));
+
+        List<Permission> updatedGroupPermissions = group.getPermissions().stream()
+                .filter(p -> !p.getProject().getId().equals(projectId))
+                .collect(Collectors.toList());
+        group.setPermissions(updatedGroupPermissions);
+
         group.getUsers().forEach(u -> {
-            u.setPermissions(u.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList());
+            List<Permission> updatedUserPermissions = u.getPermissions().stream()
+                    .filter(p -> !p.getProject().getId().equals(projectId))
+                    .collect(Collectors.toList());
+            u.setPermissions(updatedUserPermissions);
             userRepository.save(u);
         });
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+
+        Group updatedGroup = groupRepository.save(group);
+        return ModelToGetDTO.tranform(updatedGroup);
     }
+
 }
