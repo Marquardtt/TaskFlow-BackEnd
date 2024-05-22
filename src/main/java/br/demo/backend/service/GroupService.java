@@ -180,6 +180,15 @@ public class GroupService {
 
 
     public void delete(Long id) {
+        Group group = groupRepository.findById(id).get();
+
+        group.getUsers().forEach(u -> {
+            List<Permission> permissionsCopy = new ArrayList<>(u.getPermissions());
+            permissionsCopy.removeIf(p -> group.getPermissions().stream()
+                    .anyMatch(p2 -> p.getProject().getId().equals(p2.getProject().getId())));
+
+            u.setPermissions(permissionsCopy);
+        });
         groupRepository.deleteById(id);
     }
 
