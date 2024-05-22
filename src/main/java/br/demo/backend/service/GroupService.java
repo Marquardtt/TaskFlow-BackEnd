@@ -1,7 +1,6 @@
 package br.demo.backend.service;
 
 
-
 import br.demo.backend.exception.AlreadyInGroupException;
 import br.demo.backend.exception.UserCantBeAddedInThisGroupException;
 import br.demo.backend.model.*;
@@ -23,6 +22,7 @@ import br.demo.backend.repository.UserRepository;
 import br.demo.backend.utils.ResizeImage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -58,8 +61,8 @@ public class GroupService {
         BeanUtils.copyProperties(groupDto, group);
 
         group.setOwner(user);
-        if (group.getPermissions() != null ) {
-            if(group.getUsers() != null){
+        if (group.getPermissions() != null) {
+            if (group.getUsers() != null) {
                 updatePermission(group, group.getPermissions().stream().findFirst().get());
             }
 
@@ -105,13 +108,14 @@ public class GroupService {
 
     public GroupGetDTO update(GroupPutDTO groupDTO, Boolean patching) {
         Group oldGroup = groupRepository.findById(groupDTO.getId()).get();
+        List<User> oldUsers = List.copyOf(oldGroup.getUsers());
         //this is to keep the old group, to keep the owner and the picture and use patch our put
         Group group = new Group();
-        if(patching) BeanUtils.copyProperties(oldGroup, group);
+        if (patching) BeanUtils.copyProperties(oldGroup, group);
         autoMapper.map(groupDTO, group, patching);
 
 
-        if (group.getUsers() != null){
+        if (group.getUsers() != null) {
             setTheMembers(group, groupDTO);
         }
 
@@ -119,7 +123,7 @@ public class GroupService {
         keepFields(group, oldGroup);
 
         //this get the new permissions of the group and update the permission to the users
-        if (group.getPermissions() != null){
+        if (group.getPermissions() != null) {
             group.getPermissions().stream().filter(p ->
                     !oldGroup.getPermissions().contains(p)
             ).forEach(p -> updatePermission(group, p));
@@ -127,20 +131,26 @@ public class GroupService {
 
         //saving and generating notifications
         GroupGetDTO groupGetDTO = ModelToGetDTO.tranform(groupRepository.save(group));
-        notificationsAddOrRemove(group, oldGroup);
+        notificationsAddOrRemove(group, oldUsers);
         return groupGetDTO;
     }
 
-    private void notificationsAddOrRemove(Group group, Group groupOld) {
-        Collection <User> removed = groupOld.getUsers().stream().filter(u ->
+    private void notificationsAddOrRemove(Group group, Collection<User> oldUsers) {
+        Collection<User> removed = oldUsers.stream().filter(u ->
                 !group.getUsers().contains(u)
         ).toList();
         //this generates the notification to add ou remove someone
         removed.forEach(u -> {
             if (!u.equals(group.getOwner())) {
                 notificationService.generateNotification(TypeOfNotification.REMOVEINGROUP, u.getId(), group.getId());
-//                showUser.permissions.filter(p => group.permissions.find(p2 => p.project.id == p2.project.id) == undefined);
-                    u.getPermissions().stream().filter(p -> group.getPermissions().stream().noneMatch(p2 -> p.getProject().getId() == p2.getProject().getId()));
+
+                List<Permission> permissionsCopy = new ArrayList<>(u.getPermissions());
+                permissionsCopy.removeIf(p -> group.getPermissions().stream()
+                        .anyMatch(p2 -> p.getProject().getId().equals(p2.getProject().getId())));
+
+                u.setPermissions(permissionsCopy);
+
+                userRepository.save(u);
             }
         });
     }
@@ -148,10 +158,10 @@ public class GroupService {
     private void keepFields(Group group, Group oldGroup) {
         group.setOwner(oldGroup.getOwner());
         group.setPicture(oldGroup.getPicture());
-        if(group.getUsers() == null){
+        if (group.getUsers() == null) {
             group.setUsers(new ArrayList<>());
         }
-        if (oldGroup.getUsers() == null){
+        if (oldGroup.getUsers() == null) {
             oldGroup.setUsers(new ArrayList<>());
         }
     }
@@ -170,6 +180,15 @@ public class GroupService {
 
 
     public void delete(Long id) {
+        Group group = groupRepository.findById(id).get();
+
+        group.getUsers().forEach(u -> {
+            List<Permission> permissionsCopy = new ArrayList<>(u.getPermissions());
+            permissionsCopy.removeIf(p -> group.getPermissions().stream()
+                    .anyMatch(p2 -> p.getProject().getId().equals(p2.getProject().getId())));
+
+            u.setPermissions(permissionsCopy);
+        });
         groupRepository.deleteById(id);
     }
 
@@ -187,11 +206,11 @@ public class GroupService {
     public void inviteUser(Long groupId, Long userId) {
         User user = userRepository.findById(userId).get();
         Group group = groupRepository.findById(groupId).get();
-        if(projectService.findProjectsByUser(user).stream().anyMatch(
-                p -> group.getPermissions().stream().anyMatch(pe -> pe.getProject().equals(p)))){
+        if (projectService.findProjectsByUser(user).stream().anyMatch(
+                p -> group.getPermissions().stream().anyMatch(pe -> pe.getProject().equals(p)))) {
             throw new UserCantBeAddedInThisGroupException();
         }
-        if(group.getUsers().contains(user)){
+        if (group.getUsers().contains(user)) {
             throw new AlreadyInGroupException();
         }
         notificationService.generateNotification(TypeOfNotification.ADDINGROUP, userId, groupId);
@@ -203,11 +222,22 @@ public class GroupService {
 
     public GroupGetDTO removeFromProject(Long groupId, Long projectId) {
         Group group = groupRepository.findById(groupId).get();
-        group.setPermissions(new ArrayList<>(group.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList()));
+
+        List<Permission> updatedGroupPermissions = group.getPermissions().stream()
+                .filter(p -> !p.getProject().getId().equals(projectId))
+                .collect(Collectors.toList());
+        group.setPermissions(updatedGroupPermissions);
+
         group.getUsers().forEach(u -> {
-            u.setPermissions(u.getPermissions().stream().filter(p -> !p.getProject().getId().equals(projectId)).toList());
+            List<Permission> updatedUserPermissions = u.getPermissions().stream()
+                    .filter(p -> !p.getProject().getId().equals(projectId))
+                    .collect(Collectors.toList());
+            u.setPermissions(updatedUserPermissions);
             userRepository.save(u);
         });
-        return ModelToGetDTO.tranform(groupRepository.save(group));
+
+        Group updatedGroup = groupRepository.save(group);
+        return ModelToGetDTO.tranform(updatedGroup);
     }
+
 }
