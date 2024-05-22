@@ -135,4 +135,32 @@ public class EmailService {
         }
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    public ResponseEntity sendUsernameAndPasswordGoogle(String username, String to, String password) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(from);
+            message.setTo(to);
+            message.setSubject("Conta google Criada!");
+            String otp = generateOTPCode(username, to);
+
+            String text = String.format("""
+                Sua conta Google foi criada
+                
+                Seu Nome de usuário é: """ + username + """
+                
+                Sua Senha é:""" + password+"""               
+                Caso não tenha sido você, desconsidere esta mensagem.
+                """, otp);
+
+            message.setText(text);
+
+            javaMailSender.send(message);
+
+
+        } catch (MailException e){
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
