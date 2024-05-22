@@ -16,4 +16,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Project findByPagesContaining(Page p);
 
     Collection<Project> findProjectsByOwner_UserDetailsEntity_Username(String id);
+
+    Collection<Project> findAllByValuesContaining(PropertyValue p);
 }

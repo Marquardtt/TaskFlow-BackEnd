@@ -39,7 +39,7 @@ public class Page implements IHasProperties {
     private Collection<TaskPage> tasks;
 
 
-    @ManyToMany(mappedBy = "pages")
+    @ManyToMany(mappedBy = "pages", cascade = CascadeType.REMOVE)
     private Collection<Property> properties;
 
     @ManyToOne

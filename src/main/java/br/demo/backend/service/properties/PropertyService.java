@@ -13,6 +13,8 @@ import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.model.tasks.Log;
+import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.pages.OrderedPageRepository;
 import br.demo.backend.repository.pages.PageRepository;
@@ -20,6 +22,7 @@ import br.demo.backend.repository.properties.DateRepository;
 import br.demo.backend.repository.properties.LimitedRepository;
 import br.demo.backend.repository.properties.PropertyRepository;
 import br.demo.backend.repository.properties.SelectRepository;
+import br.demo.backend.repository.tasks.LogRepository;
 import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.repository.relations.PropertyValueRepository;
@@ -53,6 +56,8 @@ public class PropertyService {
     private OrderedPageRepository orderedPageRepository;
     private PropertyValueRepository taskValueRepository;
     private PropertyValueService propertyValueService;
+    private PropertyValueRepository propertyValueRepository;
+    private LogRepository logRepository;
 
     //that method is used to add the new property to the tasks that already exists
     private void setInTheTasksThatAlreadyExists(Property property) {
@@ -140,9 +145,10 @@ public class PropertyService {
     public void delete(Long id, Long projectId) {
         Property property = propertyRepository.findById(id).get();
         if(property.getProject() == null){
-            Page page = pageRepository.findByPropertiesContaining(property).stream().findFirst().get();
-
-            validation.ofObject(projectId, page.getProject());
+            try {
+                Page page = pageRepository.findByPropertiesContaining(property).stream().findFirst().get();
+                validation.ofObject(projectId, page.getProject());
+            }catch (NoSuchElementException ignore){}
         }else{
         validation.ofObject(projectId, property.getProject());
         }
@@ -156,27 +162,36 @@ public class PropertyService {
                         orderedPageRepository.save(p);
                     });
             //this disassociate the property from the tasks
-            disassociatePropertyFromTasks(property);
-            propertyRepository.delete(property);
+            disassociate(property);
+            System.out.println(property);
+            propertyRepository.deleteById(property.getId());
         } else {
             throw new PropertyCantBeDeletedException();
         }
     }
 
-    private void disassociatePropertyFromTasks(Property property) {
-        taskRepository.findAll().stream().forEach(t -> {
-            //here we filter to find the value to this prop
-            PropertyValue propertyValue = t.getProperties().stream().filter(p ->
-                    p.getProperty().equals(property)).findFirst().orElse(null);
-            if (propertyValue != null) {
-                //and here we delete the propvalue and save the task without it
-                t.getProperties().remove(propertyValue);
-                taskService.update(t, true, property.getProject() == null ?
-                        property.getPages().stream().findFirst().get().getProject().getId() :
-                        property.getProject().getId(), false);
-                taskValueRepository.deleteById(propertyValue.getId());
-            }
+
+    public void disassociate(Property property){
+        Collection<PropertyValue> allByPropertyId = propertyValueRepository.findAllByProperty_Id(property.getId());
+        allByPropertyId.forEach(prop -> {
+            Collection<Task> tasks = taskRepository.findTasksByPropertiesContaining(prop);
+            tasks.forEach(t -> {
+                t.setProperties(new ArrayList<>(t.getProperties().stream().filter(p -> !p.getProperty().getId().equals(property.getId())).toList()));
+                taskRepository.save(t);
+            });
+            Collection<Project> projects = projectRepository.findAllByValuesContaining(prop);
+            projects.forEach(t -> {
+                t.setValues((new ArrayList<>(t.getValues().stream().filter(p -> !p.getProperty().getId().equals(property.getId())).toList())));
+                projectRepository.save(t);
+
+            });
+            Collection<Log> logs = logRepository.findAllByValue(prop);
+            logs.forEach(t -> {
+                logRepository.deleteById(t.getId());
+            });
+            propertyValueRepository.deleteById(prop.getId());
         });
+
     }
 
     private Boolean validateCanBeDeleted(Property property) {

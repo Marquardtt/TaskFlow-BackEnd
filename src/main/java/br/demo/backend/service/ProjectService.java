@@ -10,12 +10,15 @@ import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.OrderedPage;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.PropertyValue;
 import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.PermissionRepository;
+import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.service.properties.DefaultPropsService;
+import br.demo.backend.service.properties.PropertyService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
@@ -56,6 +59,9 @@ public class ProjectService {
     private PermissionRepository permissionRepositoru;
     private NotificationService notificationService;
     private PropertyValueService propertyValueService;
+    private PropertyService propertyService;
+    private PageRepository pageRepository;
+    private UserService userService;
 
     public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
         Project project = projectRepository.findById(id).get();
@@ -89,7 +95,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public Collection<Project> findProjectsByUser(User user){
+    public Collection<Project> findProjectsByUser(User user) {
         Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(user.getUserDetailsEntity().getUsername());
         //get the projects that the user is member
         projects.addAll(user.getPermissions().stream().map(Permission::getProject).toList());
@@ -106,12 +112,12 @@ public class ProjectService {
     public ProjectGetDTO update(ProjectPutDTO projectDTO, Boolean patching) {
         Project oldProject = projectRepository.findById(projectDTO.getId()).get();
         Project project = new Project();
-        if(patching) BeanUtils.copyProperties(oldProject, project);
+        if (patching) BeanUtils.copyProperties(oldProject, project);
         autoMapper.map(projectDTO, project, patching);
         //keep the owner, pages, properties and picture of the project
         keepFileds(project, oldProject);
-        logService.generateLog(Action.UPDATE,project,oldProject);
-        if(changeDescription(oldProject, project)){
+        logService.generateLog(Action.UPDATE, project, oldProject);
+        if (changeDescription(oldProject, project)) {
             logService.updateDescription(project);
         }
         //generate the logs
@@ -124,7 +130,7 @@ public class ProjectService {
         return ModelToGetDTO.tranform(projectRepository.save(oldTask));
     }
 
-    private  void keepFileds(Project project, Project oldProject) {
+    private void keepFileds(Project project, Project oldProject) {
         project.setOwner(oldProject.getOwner());
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
@@ -140,7 +146,7 @@ public class ProjectService {
         project.setValues(projectProps);
     }
 
-    private Boolean changeDescription(Project oldProject, Project project){
+    private Boolean changeDescription(Project oldProject, Project project) {
         return oldProject.getDescription() == null && project.getDescription() != null ||
                 project.getDescription() == null && oldProject.getDescription() != null ||
                 oldProject.getDescription() != null &&
@@ -167,7 +173,7 @@ public class ProjectService {
         return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
 
-   //set that the project was visualized by a user, to sort by this on the projects page
+    //set that the project was visualized by a user, to sort by this on the projects page
     public ProjectGetDTO setVisualizedNow(Long projectId) {
         Project project = projectRepository.findById(projectId).get();
         project.setVisualizedAt(OffsetDateTime.now());
@@ -175,15 +181,41 @@ public class ProjectService {
     }
 
     public void delete(Long id) {
+        Project project = projectRepository.findById(id).get();
+        project.getValues().forEach(p -> propertyService.delete(p.getProperty().getId(), project.getId()));
+        project.getProperties().forEach(p -> propertyService.delete(p.getId(), project.getId()));
+        project.getPages().forEach(p -> {
+            p.getProperties().forEach(prop -> propertyService.disassociate(prop));
+            if (p instanceof OrderedPage page) {
+                page.setPropertyOrdering(null);
+                pageRepository.save(p);
+            }
+        });
+        Collection<Permission> permissions = permissionRepositoru.findByProject(project);
+        permissions.forEach(p -> {
+            Collection<User> users = userRepository.findAllByPermissions_Project(project);
+            Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(project);
+            users.forEach(u -> {
+                u.setPermissions(new ArrayList<>(u.getPermissions().stream().filter(per -> per.getProject().getId().equals(id)).toList()));
+                userRepository.save(u);
+            });
+            groups.forEach(u -> {
+                u.setPermissions(new ArrayList<>(u.getPermissions().stream().filter(per -> per.getProject().getId().equals(id)).toList()));
+                groupRepository.save(u);
+            });
+            permissionRepositoru.deleteById(p.getId());
+
+        });
+
         projectRepository.deleteById(id);
     }
 
     public void inviteAGroup(Long projectId, SimpleGroupGetDTO groupdto) {
         Group group = groupRepository.findById(groupdto.getId()).get();
-        for(User user : group.getUsers()){
-            if(user.getPermissions().stream().anyMatch(p -> p.getProject().getId().equals(projectId))){
+        for (User user : group.getUsers()) {
+            if (user.getPermissions().stream().anyMatch(p -> p.getProject().getId().equals(projectId))) {
                 throw new SomeUserAlreadyIsInProjectException();
-            }else if(projectRepository.findById(projectId).get().getOwner().equals(user)){
+            } else if (projectRepository.findById(projectId).get().getOwner().equals(user)) {
                 throw new SomeUserAlreadyIsInProjectException();
             }
         }

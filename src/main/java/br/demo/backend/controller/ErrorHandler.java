@@ -19,7 +19,7 @@ public class ErrorHandler {
 
     private final ErrorLoggerService exceptionLogger;
 
-    @ExceptionHandler(Exception.class)
+//    @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception exception) {
         exceptionLogger.logException(exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -31,7 +31,7 @@ public class ErrorHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
+//    @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<String> handleException(NoSuchElementException exception) {
         exceptionLogger.logException(exception);
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
