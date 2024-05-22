@@ -18,9 +18,12 @@ import org.apache.http.HttpResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.core.Authentication;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,14 +46,11 @@ public class GoogleCalendarController {
     @GetMapping("/callback/google")
     public ResponseEntity<?> callback (HttpServletResponse response, HttpServletRequest request){
         String code = request.getParameter("code");
-        System.out.println(code);
         if (code != null) {
             try {
                 UserDatailEntity userId = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
                 Credential credential = service.exchangeCodeForToken(code, userId);
-
                 response.sendRedirect("http://localhost:3000");
-
                 return ResponseEntity.ok("Bem-sucedido");
             } catch (IOException | GeneralSecurityException e) {
                 e.printStackTrace();
@@ -61,6 +61,9 @@ public class GoogleCalendarController {
         }
     }
 
+    @GetMapping("/calendar/isLinkedGoogle/{id}")
+    public boolean isLinkedGoogle(@PathVariable Long id) {
+        return service.getLinked(id);
 
-
+    }
 }

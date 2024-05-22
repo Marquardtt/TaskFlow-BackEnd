@@ -106,10 +106,23 @@ public class GoogleCalendarConfig {
 
             GoogleTokenResponse tokenResponse = tokenRequest.execute();
 
+           User user = userRepository.findByUserDetailsEntity_Username(userId.getUsername()).get();
+           user.getUserDetailsEntity().setLinkedWithGoogleCalendar(true);
+           userRepository.save(user);
             return flow.createAndStoreCredential(tokenResponse, userId.getUsername());
         } catch (Exception e) {
             LOGGER.error("Failed to exchange code for token", e);
             throw new RuntimeException("Failed to exchange code for token", e);
         }
     }
+
+    public boolean getLinked(Long id){
+        User user = userRepository.findById(id).get();
+        if (user.getUserDetailsEntity().isLinkedWithGoogle()){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
 }

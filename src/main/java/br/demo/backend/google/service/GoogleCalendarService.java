@@ -60,16 +60,19 @@ public class GoogleCalendarService {
     }
 
     private static Event createEvent(TaskGetDTO task, OffsetDateTime dateTime, Collection<OtherUsersDTO> users) {
+        System.out.println(dateTime);
         Event event = new Event()
                 .setSummary(task.getName());
 
         //TODO: ZONA NÃO FUNCIONA
         ;
         Date date = Date.from(dateTime.toInstant());
-        DateTime startDateTime = new DateTime(date,  TimeZone.getTimeZone(dateTime.toZonedDateTime().getZone()));
+
+        DateTime startDateTime = new DateTime(date,  TimeZone.getTimeZone("America/Sao_Paulo"));
+
         EventDateTime start = new EventDateTime()
                 .setDateTime(startDateTime)
-                .setTimeZone(TimeZone.getTimeZone(dateTime.toZonedDateTime().getZone()).getID());
+                .setTimeZone("America/Sao_Paulo");
         event.setStart(start);
 
         Date date2 = Date.from(dateTime.plusHours(1).toInstant());
