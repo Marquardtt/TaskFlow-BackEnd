@@ -161,15 +161,19 @@ public class PropertyValueService {
     private void verifyConsistance(ArchiveValued archiveValued, Boolean isInProject, Long idProject) {
         PropertyValue prop = propertyValueRepository.findByProperty_TypeAndValue(TypeOfProperty.ARCHIVE, archiveValued);
         Task task = taskRepository.findByPropertiesContaining(prop);
-        Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
-        validation.ofObject(idProject, page.getProject());
+        if (isInProject){
+            Project project = projectRepository.findById(idProject).get();
+            validation.ofObject(idProject, project);
+        } else{
+            Page page = pageRepository.findByTasks_Task(task).stream().findFirst().get();
+            validation.ofObject(idProject, page.getProject());
+        }
         if (taskRepository.findByPropertiesContaining(prop) != null && isInProject) {
             throw new IllegalArgumentException("The propertyvalue is on the task and not at the project");
         } else if (projectRepository.findByValuesContaining(prop) != null && !isInProject) {
             throw new IllegalArgumentException("The propertyvalue is on the project and not at the task");
         }
     }
-
 
     public Collection<PropertyValue> createNotSaved(ILogged task) {
         return task.getPropertiesValues().stream().map(p -> {
