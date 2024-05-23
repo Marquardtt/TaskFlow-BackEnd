@@ -1,19 +1,13 @@
 package br.demo.backend.service;
 
-
 import br.demo.backend.exception.SomeUserAlreadyIsInProjectException;
-import br.demo.backend.exception.TaskAlreadyDeletedException;
-import br.demo.backend.model.chat.Message;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
-import br.demo.backend.model.dtos.tasks.TaskGetDTO;
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
 import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.enums.TypeOfProperty;
 import br.demo.backend.model.pages.OrderedPage;
-import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.relations.PropertyValue;
-import br.demo.backend.model.tasks.Task;
 import br.demo.backend.repository.PermissionRepository;
 import br.demo.backend.repository.pages.PageRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
@@ -29,7 +23,6 @@ import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
-import br.demo.backend.repository.properties.SelectRepository;
 import br.demo.backend.utils.ResizeImage;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -37,14 +30,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+
 
 @Service
 @AllArgsConstructor
@@ -220,5 +212,6 @@ public class ProjectService {
             }
         }
         notificationService.generateNotification(TypeOfNotification.INVITETOPROJECT, projectId, group.getId());
+
     }
 }

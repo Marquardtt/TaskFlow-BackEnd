@@ -1,7 +1,5 @@
 package br.demo.backend.controller;
 
-import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.group.GroupGetDTO;
 import br.demo.backend.model.dtos.group.GroupPostDTO;
 import br.demo.backend.model.dtos.group.GroupPutDTO;
@@ -10,11 +8,8 @@ import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.GroupService;
 import br.demo.backend.utils.IdGroupValidation;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Collection;
 
 @RestController
@@ -80,4 +75,5 @@ public class GroupController {
 
     @GetMapping
     public Collection<SimpleGroupGetDTO> getAllGroups(){return groupService.findAll();}
+
 }

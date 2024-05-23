@@ -1,8 +1,5 @@
 package br.demo.backend.controller;
 
-
-import br.demo.backend.model.Project;
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
@@ -14,7 +11,6 @@ import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Collection;
 
 @RestController
@@ -80,4 +76,5 @@ public class ProjectController {
     public void inviteGroup(@PathVariable Long projectId, @RequestBody SimpleGroupGetDTO group){
          projectService.inviteAGroup(projectId, group);
     }
+
 }
