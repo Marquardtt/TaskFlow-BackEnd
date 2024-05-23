@@ -52,8 +52,6 @@ public class UserDatailEntity implements UserDetails {
     private OffsetDateTime lastPasswordEdition;
     private OffsetDateTime whenHeTryDelete;
 
-    private Boolean linkedWithGoogleCalendar= false;
-
     private LocalDateTime twoFactorResetTime;
 
 

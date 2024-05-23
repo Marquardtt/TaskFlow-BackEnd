@@ -107,7 +107,6 @@ public class GoogleCalendarConfig {
             GoogleTokenResponse tokenResponse = tokenRequest.execute();
 
            User user = userRepository.findByUserDetailsEntity_Username(userId.getUsername()).get();
-           user.getUserDetailsEntity().setLinkedWithGoogleCalendar(true);
            userRepository.save(user);
             return flow.createAndStoreCredential(tokenResponse, userId.getUsername());
         } catch (Exception e) {

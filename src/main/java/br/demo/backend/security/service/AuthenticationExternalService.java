@@ -200,7 +200,6 @@ public class AuthenticationExternalService {
         if (request.getRequestURI().contains("github")) {
             verifyGithub(request, response, oAuth2User, newCookie, returnUsername, name);
         } else if (request.getRequestURI().contains("google")) {
-            ;
             verifyGoogle(request, response, oAuth2User, newCookie, returnUsername, name);
         }
     }

@@ -63,8 +63,6 @@ public class AuthenticateController {
                 }
                     emailService.sendEmailAuth(user.getUserDetailsEntity().getUsername(), user.getMail());
                     return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-                
-
             }
         } catch (CredentialsExpiredException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Credentials Expired - 403");
@@ -81,6 +79,7 @@ public class AuthenticateController {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Cookie cookie = cookieUtil.gerarCookieJwt(userDetails);
+        response.addCookie(new Cookie("username", userDetails.getUsername()));
         response.addCookie(cookie);
         return ResponseEntity.ok("User authenticated");
     }

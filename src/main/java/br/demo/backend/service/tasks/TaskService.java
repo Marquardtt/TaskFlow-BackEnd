@@ -165,7 +165,6 @@ public class TaskService {
             notificationService.generateNotification(TypeOfNotification.CHANGETASK, task.getId(), null);
         }
         TaskGetDTO taskGetDTO = ModelToGetDTO.tranform(taskRepository.save(task));
-      
         generateGoogleCalendar(taskGetDTO);
         return taskGetDTO;
 
