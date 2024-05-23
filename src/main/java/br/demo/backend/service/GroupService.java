@@ -4,12 +4,14 @@ package br.demo.backend.service;
 import br.demo.backend.exception.AlreadyInGroupException;
 import br.demo.backend.exception.UserCantBeAddedInThisGroupException;
 import br.demo.backend.model.*;
+import br.demo.backend.model.chat.ChatGroup;
 import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 
 import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.dtos.user.UserGetDTO;
 
 import br.demo.backend.interfaces.IWithMembers;
+import br.demo.backend.repository.chat.ChatGroupRepository;
 import br.demo.backend.security.entity.UserDatailEntity;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
@@ -47,6 +49,7 @@ public class GroupService {
     private ProjectService projectService;
     private AutoMapper<Group> autoMapper;
     private UserService userService;
+    private ChatGroupRepository chatGroupRepository;
 
 
     public GroupGetDTO findOne(Long id) {
@@ -85,7 +88,7 @@ public class GroupService {
         User user = userRepository.findById(userDto.getId()).get();
         Collection<Permission> permissions = user.getPermissions().stream()
                 .filter(p -> group.getPermissions().stream().anyMatch(pg -> pg.getProject().equals(p.getProject()))).toList();
-        group.getOwner().getPermissions().addAll(permissions);
+        group.getOwner().getPermissions().removeAll(permissions);
         user.getPermissions().removeAll(permissions);
         userRepository.save(user);
         userRepository.save(group.getOwner());
@@ -189,6 +192,9 @@ public class GroupService {
 
             u.setPermissions(permissionsCopy);
         });
+        ChatGroup chatGroup  =  chatGroupRepository.findByGroup(group);
+        chatGroupRepository.deleteById(chatGroup.getId());
+
         groupRepository.deleteById(id);
     }
 
