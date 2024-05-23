@@ -21,12 +21,13 @@ public class Option {
     private String name;
     @NotNull
     @Column(nullable = false)
-    private String color = "#F04A94";
+    private String color;
     @NotNull
     @Column(nullable = false)
     private Integer indexAtSelect = 0;
 
-    public Option(Long id){
+    public Option(Long id, String name){
         this.id = id;
+        this.name = name;
     }
 }

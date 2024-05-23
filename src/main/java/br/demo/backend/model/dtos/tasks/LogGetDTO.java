@@ -1,15 +1,16 @@
 package br.demo.backend.model.dtos.tasks;
 
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.user.SimpleUserGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
+import br.demo.backend.model.dtos.relations.PropertyValueGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.relations.PropertyValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -20,6 +21,7 @@ public class LogGetDTO {
     private Long id;
     private String description;
     private Action action;
-    private SimpleUserGetDTO user;
-    private LocalDateTime datetime;
+    private OtherUsersDTO user;
+    private OffsetDateTime datetime;
+    private PropertyValueGetDTO value;
 }

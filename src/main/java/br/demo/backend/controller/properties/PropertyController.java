@@ -9,71 +9,88 @@ import br.demo.backend.model.properties.Limited;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.properties.Select;
 import br.demo.backend.service.properties.PropertyService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/property")
+@RequestMapping("/property/project/{projectId}")
 public class PropertyController {
 
     private PropertyService propertyService;
+    private IdProjectValidation validation;
 
+ //Precisa ter permissão de post no projeto
     @PostMapping("/limited")
-    public void save(@RequestBody Limited property){
-        System.out.println(property);
-        propertyService.saveLimited(property);
+    public ResponseEntity<Limited> save(@RequestBody Limited property, @PathVariable Long projectId){
+
+        try {
+            validation.ofObject(projectId, property.getProject());
+        }catch (NullPointerException ignore){}
+        return new ResponseEntity<>(propertyService.save(property, projectId), HttpStatus.CREATED);
+
     }
+    //Precisa ter permissão de post no projeto
     @PostMapping("/select")
-    public void save(@RequestBody Select property){
-        propertyService.saveSelect(property);
+    public ResponseEntity<Select> save(@RequestBody Select property, @PathVariable Long projectId){
+
+        try {
+            validation.ofObject(projectId, property.getProject());
+        }catch (NullPointerException ignore){}
+        return new ResponseEntity<>(propertyService.save(property, projectId), HttpStatus.CREATED);
+
     }
+    //Precisa ter permissão de post no projeto
     @PostMapping("/date")
-    public void save(@RequestBody Date property){
-        propertyService.saveDate(property);
+    public ResponseEntity<Date> save(@RequestBody Date property, @PathVariable Long projectId){
+
+        try {
+            validation.ofObject(projectId, property.getProject());
+        }catch (NullPointerException ignore){}
+        return new ResponseEntity<>(propertyService.save(property, projectId),HttpStatus.CREATED);
+
     }
 
+
+
+    //Precisa ter permissão de put no projeto
     @PutMapping("/limited")
-    public void update(@RequestBody LimitedGetDTO property){
-        propertyService.updateLimited(property, false);
+    public ResponseEntity<PropertyGetDTO> update(@RequestBody Limited property, @PathVariable Long projectId){
+        return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
+    //Precisa ter permissão de put no projeto
     @PutMapping("/select")
-    public void update(@RequestBody SelectGetDTO property){
-        propertyService.updateSelect(property, false);
+    public ResponseEntity<PropertyGetDTO> update(@RequestBody Select property, @PathVariable Long projectId){
+        return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
+    //Precisa ter permissão de put no projeto
     @PutMapping("/date")
-    public void update(@RequestBody DateGetDTO property){
-        propertyService.updateDate(property, false);
+    public ResponseEntity<PropertyGetDTO> update(@RequestBody Date property, @PathVariable Long projectId){
+        return  new ResponseEntity<>(propertyService.update(property, false, projectId), HttpStatus.OK);
     }
+    //Precisa ter permissão de put no projeto
     @PatchMapping("/limited")
-    public void patch(@RequestBody LimitedGetDTO property){
-        propertyService.updateLimited(property, true);
+    public void patch(@RequestBody Limited property, @PathVariable Long projectId){
+        propertyService.update(property, true, projectId);
     }
+    //Precisa ter permissão de put no projeto
     @PatchMapping("/select")
-
-    public void patch(@RequestBody SelectGetDTO property){
-        propertyService.updateSelect(property, true);
+    public void patch(@RequestBody Select property, @PathVariable Long projectId){
+        propertyService.update(property, true, projectId);
     }
+    //Precisa ter permissão de put no projeto
     @PatchMapping("/date")
-
-    public void patch(@RequestBody DateGetDTO property){
-        propertyService.updateDate(property, true);
+    public void patch(@RequestBody Date property, @PathVariable Long projectId){
+        propertyService.update(property, true, projectId);
     }
 
-    @GetMapping("/{id}")
-    public PropertyGetDTO findOne(@PathVariable Long id){
-        return propertyService.findOne(id);
-    }
-
-    @GetMapping
-    public Collection<PropertyGetDTO> findAll(){
-        return propertyService.findAll();
-    }
+    //Precisa ter permissão de delete no projeto
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        propertyService.delete(id);
+    public void delete(@PathVariable Long id, @PathVariable Long projectId){
+        propertyService.delete(id, projectId);
     }
 
 

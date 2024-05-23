@@ -1,48 +1,48 @@
 package br.demo.backend.controller;
 
-
-import br.demo.backend.model.Permission;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import br.demo.backend.model.dtos.permission.PermissionPostDTO;
 import br.demo.backend.model.dtos.permission.PermissionPutDTO;
 import br.demo.backend.service.PermissionService;
-import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import br.demo.backend.utils.IdProjectValidation;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/permission")
 public class PermissionController {
+    @NonNull
     private PermissionService permissionService;
-    @PostMapping
-    public void insert(@RequestBody PermissionPostDTO permission){
-        permissionService.save(permission);
+
+    private IdProjectValidation validation;
+    @PostMapping("/project/{projectId}")
+    public PermissionGetDTO insert(@RequestBody PermissionPostDTO permissionDTO, @PathVariable Long projectId){
+        return permissionService.save(permissionDTO, projectId);
     }
 
-    @PutMapping
-    public void upDate(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, false);
+
+
+    @PutMapping("/project/{projectId}")
+    public PermissionGetDTO upDate(@RequestBody PermissionPutDTO permission, @PathVariable Long projectId){
+        return permissionService.update(permission, false, projectId);
     }
-    @PatchMapping
-    public void patch(@RequestBody PermissionPutDTO permission){
-        permissionService.update(permission, true);
+    @PatchMapping("/project/{projectId}")
+    public PermissionGetDTO patch(@RequestBody PermissionPutDTO permission, @PathVariable Long projectId){
+        return permissionService.update(permission, true, projectId);
     }
 
-    @GetMapping("/{id}")
-    public PermissionGetDTO findOne(@PathVariable Long id){
-        return permissionService.findOne(id);
+    @GetMapping("/project/{projectId}")
+    public Collection<PermissionGetDTO> findAll(@PathVariable Long projectId){
+        return permissionService.findByProject(projectId);
     }
 
-    @GetMapping
-    public Collection<PermissionGetDTO> findAll(){
-        return permissionService.findAll();
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        permissionService.delete(id);
+    @DeleteMapping("/{id}/other/{substituteId}/project/{projectId}")
+    public void delete(@PathVariable Long id, @PathVariable Long substituteId, @PathVariable Long projectId){
+        permissionService.delete(id, substituteId, projectId);
     }
 
 }

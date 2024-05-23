@@ -1,17 +1,16 @@
 package br.demo.backend.controller;
 
-
-import br.demo.backend.model.Project;
-import br.demo.backend.model.User;
-import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
 import br.demo.backend.service.ProjectService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Collection;
 
 @RestController
@@ -19,56 +18,63 @@ import java.util.Collection;
 @RequestMapping("/project")
 public class ProjectController {
     private ProjectService projectService;
+    private IdProjectValidation validation;
+
     @PostMapping
-    public void insert(@RequestBody ProjectPostDTO project) {
-        projectService.save(project);
+    public SimpleProjectGetDTO insert(@RequestBody ProjectPostDTO project) {
+        return projectService.save(project);
     }
 
-    @PatchMapping("/picture/{id}")
-    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable Long id) {
-        projectService.updatePicture(picture, id);
+    @PatchMapping("/{projectId}/picture")
+    public ProjectGetDTO upDatePicture(@RequestParam MultipartFile picture, @PathVariable("projectId") Long id) {
+        return projectService.updatePicture(picture, id);
     }
-    @PatchMapping("/set-now")
-    public void setVisualizedNow(@RequestBody Project project) {
-        projectService.setVisualizedNow(project);
+    @PatchMapping("/{projectId}/set-now")
+    public ProjectGetDTO setVisualizedNow(@PathVariable Long projectId){
+        return projectService.setVisualizedNow(projectId);
     }
-    @PutMapping
-    public void upDate(@RequestBody ProjectPutDTO project) {
-        projectService.update(project, false);
+    @PutMapping("/{projectId}")
+    public ProjectGetDTO upDate(@RequestBody ProjectPutDTO project, @PathVariable Long projectId) {
+        validation.of(projectId, project.getId());
+        return projectService.update(project, false);
     }
-    @PatchMapping
-    public void patch(@RequestBody ProjectPutDTO project) {
-        projectService.update(project, true);
+    @PatchMapping("/{projectId}")
+    public ProjectGetDTO patch(@RequestBody ProjectPutDTO project, @PathVariable Long projectId) {
+        validation.of(projectId, project.getId());
+        return projectService.update(project, true);
     }
 
-    @GetMapping("/{id}")
-    public ProjectGetDTO findOne(@PathVariable Long id) {
+    @PatchMapping("/comment/{projectId}")
+    public ProjectGetDTO comment(@RequestBody ProjectPutDTO project, @PathVariable Long projectId) {
+        validation.of(projectId, project.getId());
+        return projectService.comment(project);
+    }
+
+    @GetMapping("/{projectId}")
+    public ProjectGetDTO findOne(@PathVariable("projectId") Long id) {
         return projectService.findOne(id);
     }
 
-    @GetMapping
-    public Collection<ProjectGetDTO> findAll() {
-        return projectService.findAll();
+    @GetMapping("/my")
+    public Collection<SimpleProjectGetDTO> findAllOfAUser() {
+        return projectService.finAllOfAUser();
     }
 
-    @GetMapping("/user/{userId}")
-    public Collection<ProjectGetDTO> findAllOfAUser(@PathVariable String userId) {
-        return projectService.finAllOfAUser(userId);
+    @DeleteMapping("/{projectId}")
+    public void delete(@PathVariable("projectId") Long id) {
+         projectService.delete(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        projectService.delete(id);
+    //    FEITO
+    @PatchMapping("/{projectId}/change-owner")
+    public ProjectGetDTO updateOwner(@RequestBody OtherUsersDTO newOwner, @PathVariable Long projectId) {
+        return projectService.updateOwner(newOwner, projectId);
     }
 
-    @PatchMapping("/change-owner/{projectId}")
-    public void updateOwner(@RequestBody User newOwner, @PathVariable Long projectId) {
-        projectService.updateOwner(newOwner, projectId);
-    }
-
-    @GetMapping("/{projectId}/groups")
-    public Collection<GroupGetDTO> findAllGroupsOfAProject(@PathVariable Long projectId) {
-        return projectService.findAllGroupsOfAProject(projectId);
+    //TODO: new
+    @PostMapping("/{projectId}/invite-group")
+    public void inviteGroup(@PathVariable Long projectId, @RequestBody SimpleGroupGetDTO group){
+         projectService.inviteAGroup(projectId, group);
     }
 
 }

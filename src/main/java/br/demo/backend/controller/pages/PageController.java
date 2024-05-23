@@ -1,19 +1,21 @@
 package br.demo.backend.controller.pages;
 
+import br.demo.backend.model.dtos.pages.get.CanvasPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.OrderedPageGetDTO;
 import br.demo.backend.model.dtos.pages.get.PageGetDTO;
 import br.demo.backend.model.dtos.pages.post.PagePostDTO;
-import br.demo.backend.model.pages.OrderedPage;
+import br.demo.backend.model.dtos.relations.TaskCanvasGetDTO;
+import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.properties.Property;
 import br.demo.backend.model.relations.TaskCanvas;
+import br.demo.backend.model.relations.TaskPage;
 import br.demo.backend.service.pages.PageService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Collection;
-
 
 @RestController
 @AllArgsConstructor
@@ -21,66 +23,40 @@ import java.util.Collection;
 public class PageController {
 
     private PageService pageService;
+    private IdProjectValidation validation;
 
-
-    //OrderedPage
-    @PostMapping
-    public PageGetDTO insert(@RequestBody PagePostDTO page) {
-        return pageService.save(page);
+    // OrderedPage
+    @PostMapping("/project/{projectId}")
+    public PageGetDTO insert(@PathVariable Long projectId, @RequestBody PagePostDTO page) {
+        validation.ofObject(projectId, page.getProject());
+        return pageService.save(page, projectId);
+    }
+    @PatchMapping("/{id}/project/{projectId}")
+    public PageGetDTO upDate(@PathVariable Long projectId, @RequestBody(required = false) String name, @PathVariable Long id) {
+        return pageService.updateName(name, id, projectId);
+    }
+    @PatchMapping("/task-page/project/{projectId}")
+    public TaskPageGetDTO upDateTaskPage(@RequestBody TaskPage taskPage, @PathVariable Long projectId) {
+        return pageService.updateTaskPage(taskPage, projectId);
     }
 
-    //TODO: 11/02/2024 Ver se o indice pode ser atualizado no frontend de forma facil
-    @PatchMapping("/{taskId}/{index}/{columnChanged}")
-    public OrderedPageGetDTO updateIndexes(@RequestBody OrderedPage page, @PathVariable Long taskId,
-                                           @PathVariable Integer index, @PathVariable Integer columnChanged) {
-        return pageService.updateIndex(page, taskId, index, columnChanged);
+    @PatchMapping("/draw/{id}/project/{projectId}")
+    public PageGetDTO upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id, @PathVariable Long projectId) {
+        return pageService.updateDraw(draw, id, projectId);
     }
 
-    @PatchMapping("/{id}")
-    public void upDate(@RequestBody(required = false) String name, @PathVariable Long id) {
-        pageService.update(name, id);
+    @PatchMapping("/prop-ordering/{id}/project/{projectId}")
+    public PageGetDTO updatePropertiesOrdering(@PathVariable Long projectId, @RequestBody Property property, @PathVariable Long id) {
+        return pageService.updatePropertiesOrdering(property, id, projectId);
     }
 
-
-    @PatchMapping("/{taskId}/{index}")
-    public PageGetDTO updateIndexes(@RequestBody Page page, @PathVariable Long taskId, @PathVariable Integer index) {
-        return pageService.updateIndex(page, taskId, index);
+    @DeleteMapping("/{id}/project/{projectId}")
+    public void delete( @PathVariable Long id, @PathVariable Long projectId) {
+         pageService.delete(id, projectId);
     }
 
-
-    @PatchMapping("/x-and-y")
-    public void upDate(@RequestBody TaskCanvas taskPage) {
-        pageService.updateXAndY(taskPage);
-    }
-
-    @PatchMapping("/draw/{id}")
-    public void upDateDraw(@RequestParam MultipartFile draw, @PathVariable Long id) {
-        pageService.updateDraw(draw, id);
-    }
-
-    @PatchMapping("/prop-ordering/{id}")
-    public void updatePropertiesOrdering(@RequestBody Property property, @PathVariable Long id) {
-        pageService.updatePropertiesOrdering(property, id);
-    }
-
-    //General
-    @GetMapping("/{id}")
-    public PageGetDTO findOne(@PathVariable Long id) {
-        return pageService.findOne(id);
-    }
-
-    @GetMapping
-    public Collection<PageGetDTO> findAll() {
-        return pageService.findAll();
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        pageService.delete(id);
-    }
-
-    @PatchMapping("/merge/{id}")
-    public void merge(@RequestBody Collection<Page> pages, @PathVariable Long id) {
-        pageService.merge(pages, id);
+    @PatchMapping("/merge/{id}/project/{projectId}")
+    public Collection<PageGetDTO> merge( @RequestBody Collection<Page> pages, @PathVariable Long id, @PathVariable Long projectId) {
+        return pageService.merge(pages, id, projectId);
     }
 }

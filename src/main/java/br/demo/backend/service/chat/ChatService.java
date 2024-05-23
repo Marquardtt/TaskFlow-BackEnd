@@ -1,20 +1,25 @@
 package br.demo.backend.service.chat;
 
 
+import br.demo.backend.exception.ChatAlreadyExistsException;
 import br.demo.backend.model.Archive;
 import br.demo.backend.model.User;
 import br.demo.backend.model.chat.*;
 import br.demo.backend.model.dtos.chat.get.ChatGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatGroupGetDTO;
 import br.demo.backend.model.dtos.chat.get.ChatPrivateGetDTO;
+import br.demo.backend.model.dtos.chat.get.MessageGetDTO;
 import br.demo.backend.model.dtos.chat.post.ChatGroupPostDTO;
 import br.demo.backend.model.dtos.chat.post.ChatPrivatePostDTO;
 import br.demo.backend.model.dtos.chat.post.MessagePostPutDTO;
 import br.demo.backend.model.enums.TypeOfChat;
+import br.demo.backend.model.enums.TypeOfNotification;
 import br.demo.backend.model.ids.DestinationId;
+import br.demo.backend.repository.UserRepository;
 import br.demo.backend.repository.chat.ChatGroupRepository;
 import br.demo.backend.repository.chat.ChatPrivateRepository;
 import br.demo.backend.repository.chat.ChatRepository;
+import br.demo.backend.service.NotificationService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.repository.chat.MessageRepository;
@@ -22,13 +27,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.time.OffsetDateTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -38,119 +45,99 @@ public class ChatService {
     private ChatPrivateRepository chatPrivateRepository;
     private ChatGroupRepository chatGroupRepository;
     private MessageRepository messageRepository;
-
+    private UserRepository userRepository;
+    private NotificationService notificationService;
     private ObjectMapper objectMapper;
-    private AutoMapper<ChatGroup> mapperGroup;
-    private AutoMapper<ChatPrivate> mapperPrivate;
     private AutoMapper<Message> mapperMessage;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-
-    public Collection<ChatPrivateGetDTO> findAllPrivate(String userId) {
+    public Collection<ChatPrivateGetDTO> findAllPrivate() {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<ChatPrivate> chats = chatPrivateRepository
-                .findChatsByUsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
-        return chats.stream().map(c -> privateToGetDTO(c, userId)).toList();
+                .findAllByUsersContainingOrderByLastMessage_DateCreateDesc(user);
+        return chats.stream().map(c -> privateToGetDTO(c, username)).toList();
     }
 
-    public Collection<ChatGroupGetDTO> findAllGroup(String userId) {
+    public Collection<ChatGroupGetDTO> findAllGroup() {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         Collection<ChatGroup> chatGroups = chatGroupRepository
-                .findChatsByGroup_UsersContainingOrderByLastMessage_DateCreateDesc(new User(userId));
-        return chatGroups.stream().map(c -> groupToGetDTO(c, userId)).toList();
+                .findAllByGroup_OwnerOrGroup_UsersContainingOrderByLastMessage_DateCreateDesc(user, user);
+        return chatGroups.stream().map(this::groupToGetDTO).toList();
     }
 
     private ChatPrivateGetDTO privateToGetDTO(ChatPrivate chat, String userId) {
         ChatPrivateGetDTO chatGetDTO = (ChatPrivateGetDTO) ModelToGetDTO.tranform(chat);
-        chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
-        User destination = chat.getUsers().stream().filter(u -> !u.getUsername().equals(userId)).findFirst().get();
+        //getting the user that is not the user that is logged
+        User destination = chat.getUsers().stream().filter(u ->
+                !u.getUserDetailsEntity().getUsername().equals(userId)).findFirst().get();
         chatGetDTO.setPicture(destination.getPicture());
         chatGetDTO.setName(destination.getName());
         return chatGetDTO;
     }
 
-    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat, String userId) {
+    private ChatGroupGetDTO groupToGetDTO(ChatGroup chat) {
         ChatGroupGetDTO chatGetDTO = (ChatGroupGetDTO) ModelToGetDTO.tranform(chat);
-        chatGetDTO.setQuantityUnvisualized(setQuantityUnvisualized(chat, userId));
         chatGetDTO.setPicture(chat.getGroup().getPicture());
         chatGetDTO.setName(chat.getGroup().getName());
         return chatGetDTO;
     }
 
-    private ChatGetDTO chatToGetDTO(Chat chat, String userId) {
-        if(chat.getType().equals(TypeOfChat.PRIVATE)){
-            return privateToGetDTO((ChatPrivate) chat, userId);
-        }else{
-            return groupToGetDTO((ChatGroup) chat, userId);
-        }
+    public ChatGetDTO updateMessagesToVisualized(Long chatId) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+
+        Chat chat = chatRepository.findById(chatId).get();
+        setAllMessagesToVisualized(chat, user);
+        //set all notifications to visualized
+        user.getNotifications().stream().filter(n -> n.getType().equals(TypeOfNotification.CHAT)
+                && n.getLink().contains("chat/" + chatId)).forEach(n -> {
+            n.setVisualized(true);
+            notificationService.updateNotification(n);
+        });
+        return ModelToGetDTO.tranform(chatRepository.findById(chat.getId()).get());
     }
 
-    private Integer setQuantityUnvisualized(Chat chat, String userId) {
-        return chat.getMessages().stream().filter(m ->
-                m.getDestinations().stream().anyMatch(d ->
-                        d.getUser().getUsername().equals(userId) && !d.getVisualized()
-                )).toList().size();
-    }
-
-    public void updateMessagesToVisualized(Message messagePut, String userId) {
-        Message message = messageRepository.findById(messagePut.getId()).get();
-        message.setDestinations(message.getDestinations().stream().map(d->{
-            if(d.getUser().getUsername().equals(userId)){
-                d.setVisualized(true);
+    private void setAllMessagesToVisualized(Chat chat, User user) {
+        //set all messages to visualized
+        chat.getMessages().forEach(m -> {
+            ArrayList<Destination> destinations = new ArrayList<>();
+            try {
+                Destination dest = m.getDestinations().stream().filter(d -> d.getUser().equals(user)).findFirst().get();
+                dest.setVisualized(true);
+                destinations.add(dest);
+            } catch (NoSuchElementException ignore) {
             }
-            return d;
-        }).toList());
-        messageRepository.save(message);
+            destinations.addAll(m.getDestinations().stream().filter(d -> !d.getUser().equals(user)).toList());
+            m.setDestinations(destinations);
+            messageRepository.save(m);
+        });
     }
 
-    public Collection<ChatGetDTO> findGroupByName(String name, String userId) {
-        Collection<ChatGroup> chatsGroups = chatGroupRepository.
-                findAllByGroup_UsersContaining(new User(userId));
-        Collection<ChatPrivate> chatsPrivate = chatPrivateRepository.
-                findAllByUsersContaining(new User(userId));
-        Collection<Chat> chats = new HashSet<>();
-        chats.addAll(chatsGroups);
-        chats.addAll(chatsPrivate);
-        return chats.stream().map(c -> chatToGetDTO(c, userId)).filter(c -> c.getName().contains(name)).toList();
-    }
-
-
-    public void save(ChatGroupPostDTO chatGroup) {
+    public ChatGroupGetDTO save(ChatGroupPostDTO chatGroup) {
+        if(chatGroupRepository.existsByGroup_Id(chatGroup.getGroup().getId())) throw   new ChatAlreadyExistsException();
         ChatGroup chat = new ChatGroup();
         BeanUtils.copyProperties(chatGroup, chat);
         chat.setType(TypeOfChat.GROUP);
-        chatGroupRepository.save(chat);
+        return (ChatGroupGetDTO) ModelToGetDTO.tranform(chatGroupRepository.save(chat));
     }
 
-    public void save(ChatPrivatePostDTO chatPrivate) {
+    public ChatPrivateGetDTO save(ChatPrivatePostDTO chatPrivate) {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
         ChatPrivate chat = new ChatPrivate();
         BeanUtils.copyProperties(chatPrivate, chat);
         chat.setType(TypeOfChat.PRIVATE);
-        chatPrivateRepository.save(chat);
+        chat.getUsers().add(user);
+        if(chatPrivateRepository.findAllByUsersContaining(user).stream().anyMatch(c -> c.getUsers().contains(chatPrivate.getUsers().stream().findFirst().get()))) throw  new ChatAlreadyExistsException();
+        return (ChatPrivateGetDTO) ModelToGetDTO.tranform(chatPrivateRepository.save(chat));
     }
 
-    public void update(ChatGroup chatGroupDto, Boolean patching) {
-        ChatGroup chat = patching ?
-                chatGroupRepository.findById(chatGroupDto.getId()).get() :
-                new ChatGroup();
-        mapperGroup.map(chatGroupDto, chat, patching);
-        ChatGroup oldChat = chatGroupRepository.findById(chatGroupDto.getId()).get();
-        chat.setMessages(oldChat.getMessages());
-        chat.setType(TypeOfChat.GROUP);
-        chatGroupRepository.save(chat);
-    }
-
-    public void update(ChatPrivate chatGroupDto, Boolean patching) {
-        ChatPrivate chat = patching ?
-                chatPrivateRepository.findById(chatGroupDto.getId()).get() :
-                new ChatPrivate();
-        mapperPrivate.map(chatGroupDto, chat, patching);
-        ChatPrivate oldChat = chatPrivateRepository.findById(chatGroupDto.getId()).get();
-        chat.setMessages(oldChat.getMessages());
-        chat.setType(TypeOfChat.PRIVATE);
-        chatPrivateRepository.save(chat);
-    }
-
+    //that method update the last message of a chat
     private void updateLastMessage(Chat chat) {
         HashSet<Message> messages = new HashSet<>(chat.getMessages());
-        if(messages.isEmpty()) return;
+        if (messages.isEmpty()) return;
         chat.setLastMessage(messages.stream().max(Comparator.comparing(Message::getDateCreate)).get());
     }
 
@@ -159,51 +146,85 @@ public class ChatService {
         chatRepository.deleteById(id);
     }
 
-    public void updateMessages(MessagePostPutDTO messageDto, Long chatId) {
-        Chat chat = chatRepository.findById(chatId).get();
-        Message message = getMessage(chat, messageDto);
-        chat.getMessages().remove(message);
-        chat.getMessages().add(message);
-        updateLastMessage(chat);
-        saveTheUpdatableMessage(chat, message);
-    }
+//    public void updateMessages(MessagePostPutDTO messageDto, Long chatId) {
+//        Chat chat = chatRepository.findById(chatId).get();
+//        Message message = getMessage(chat, messageDto);
+//        chat.getMessages().remove(message);
+//        chat.getMessages().add(message);
+//        updateLastMessage(chat);
+//        saveTheUpdatableMessage(chat, message);
+//    }
 
+    //that method update the messages list, so it update a message or insert a new one
     public void updateMessages(MultipartFile annex, String messageString, Long chatId) throws JsonProcessingException {
         Chat chat = chatRepository.findById(chatId).get();
+        //map the string to a message
         MessagePostPutDTO messageDto = objectMapper.readValue(messageString, MessagePostPutDTO.class);
         Message message = getMessage(chat, messageDto);
-        message.setAnnex(new Archive(annex));
-        chat.getMessages().remove(message);
-        chat.getMessages().add(message);
-        updateLastMessage(chat);
+        //set the annex to the message
+        if (annex != null) {
+            message.setAnnex(new Archive(annex));
+        }
         saveTheUpdatableMessage(chat, message);
     }
 
-    private void saveTheUpdatableMessage(Chat chat, Message message){
-        Collection<User> users = chat.getType().equals(TypeOfChat.PRIVATE) ?
-                ((ChatPrivate) chat).getUsers() : ((ChatGroup) chat).getGroup().getUsers();
-        message.setDestinations(users.stream().filter(u-> !u.equals(message.getSender())).map(u -> new Destination(
-                            new DestinationId(u.getUsername(), message.getId()), u, message, false)
-                    ).toList());
-        if(chat.getType().equals(TypeOfChat.PRIVATE)){
-            chatPrivateRepository.save((ChatPrivate) chat);
-        }else{
-            chatGroupRepository.save((ChatGroup)chat );
+    private void saveTheUpdatableMessage(Chat chat, Message message) {
+        String usernameLogged  = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        createDestinations(chat, message);
+        //saving the chat with the new message
+        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
+            chat = chatPrivateRepository.save((ChatPrivate) chat);
+        } else {
+            chat = chatGroupRepository.save((ChatGroup) chat);
+        }
+        Message messageWithId = getmessageWithId(chat, message);
+        //generating the notification for each user of the chat
+        notificationService.generateNotification(TypeOfNotification.CHAT, messageWithId.getId(), chat.getId());
+        simpMessagingTemplate.convertAndSend("/chat/" + chat.getId(), messageWithId);
+
+        Chat finalChat = chat;
+        if (chat.getType().equals(TypeOfChat.PRIVATE)) {
+            simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), privateToGetDTO((ChatPrivate) finalChat, usernameLogged));
+            message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), privateToGetDTO((ChatPrivate) finalChat, d.getUser().getUserDetailsEntity().getUsername())));
+        } else {
+            simpMessagingTemplate.convertAndSend("/chats/" + messageWithId.getSender().getId(), groupToGetDTO((ChatGroup) finalChat));
+            message.getDestinations().forEach(d -> simpMessagingTemplate.convertAndSend("/chats/" + d.getUser().getId(), groupToGetDTO((ChatGroup) finalChat)));
         }
     }
 
+    private Message getmessageWithId(Chat chat, Message message) {
+        if (message.getId() == null) {
+            return new ArrayList<>(chat.getMessages()).get(chat.getMessages().size() - 1);
+        }
+        return message;
+    }
 
+    private void createDestinations(Chat chat, Message message) {
+        //getting the users of a chat
+        Collection<User> users = chat.finUsers();
+        //creating a destination for each user of the chat
+        message.setDestinations(users.stream().filter(u -> !u.equals(message.getSender())).map(u -> {
+                    return new Destination(
+                            new DestinationId(u.getId(), message.getId()), u, message, false);
+                }
+        ).toList());
+    }
+
+    //this method recognize if is a new message or a update message
     private Message getMessage(Chat chat, MessagePostPutDTO messageDto) {
-        Message message;
-        if(chat.getMessages().stream().anyMatch(m -> m.getId().equals(messageDto.getId()))){
-            message = messageRepository.findById(messageDto.getId()).get();
+        Message message = null;
+        try {
+            message = chat.getMessages().stream().filter(m -> m.getId().equals(messageDto.getId())).findFirst().get();
             mapperMessage.map(messageDto, message, true);
             message.setDateCreate(message.getDateCreate());
-            message.setDateUpdate(LocalDateTime.now());
-        }else{
+            message.setDateUpdate(OffsetDateTime.now());
+        } catch (NoSuchElementException e) {
             message = new Message();
             mapperMessage.map(messageDto, message, true);
-            message.setDateCreate(LocalDateTime.now());
+            message.setDateCreate(OffsetDateTime.now());
+            chat.getMessages().add(message);
+            //that sets the last message of the chat to the new message
+            updateLastMessage(chat);
         }
         return message;
     }

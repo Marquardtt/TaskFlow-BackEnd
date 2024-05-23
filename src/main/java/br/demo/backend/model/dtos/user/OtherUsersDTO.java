@@ -1,7 +1,6 @@
 package br.demo.backend.model.dtos.user;
 
 import br.demo.backend.model.Archive;
-import br.demo.backend.model.Configuration;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,17 +13,18 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class SimpleUserGetDTO {
+public class OtherUsersDTO {
 
     @EqualsAndHashCode.Include
+    private Long id;
     private String username;
     private String name;
     private String surname;
-    private String address;
-    private Archive picture;
     private String mail;
     private String phone;
     private Integer points;
     private String description;
-    private Configuration configuration;
+    private Archive picture;
+    private boolean authenticate;
+    private Collection<PermissionGetDTO> permissions;
 }

@@ -28,14 +28,11 @@ public class Property {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
-    @NotNull
     @Column(nullable = false)
     private Boolean visible = true;
-    @NotNull
     @Column(nullable = false)
     private Boolean obligatory = false;
     @Enumerated(value = EnumType.STRING)
-    @NotNull
     @Column(nullable = false, updatable = false)
     private TypeOfProperty type;
  
@@ -48,5 +45,10 @@ public class Property {
 
     public Property(Long id){
         this.id = id;
+    }
+    public Property(Long id, TypeOfProperty type, String name){
+        this.id = id;
+        this.type = type;
+        this.name = name;
     }
 }

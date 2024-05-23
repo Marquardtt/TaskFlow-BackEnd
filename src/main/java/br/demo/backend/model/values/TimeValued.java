@@ -18,11 +18,11 @@ import java.util.Collection;
 @Table(name = "tb_valued_time")
 public class TimeValued extends Value {
     @OneToOne(cascade = CascadeType.ALL)
-    private Intervals value;
-    public TimeValued(Long id, Duration time, Collection<LocalDateTime> starts,
-                      Collection<LocalDateTime> ends, String color) {
+    @EqualsAndHashCode.Include
+    private Intervals value = new Intervals();
+    public TimeValued(Long id, Intervals interval) {
         super(id);
-        this.value = new Intervals(null, time, starts, ends, color);
+        this.value = interval;
     }
 
     @Override

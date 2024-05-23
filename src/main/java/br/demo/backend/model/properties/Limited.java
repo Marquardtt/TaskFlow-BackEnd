@@ -24,12 +24,12 @@ import java.util.Collection;
 public class Limited extends Property {
     private Long maximum;
 
-    @Override
-    public String toString() {
-        return "Limited{" +
-                "maximum=" + maximum +
-                "} " + super.toString();
-    }
+//    @Override
+//    public String toString() {
+//        return "Limited{" +
+//                "maximum=" + maximum +
+//                "} " + super.toString();
+//    }
 
     public Limited(Long id, String name, @NotNull Boolean visible,
                    @NotNull Boolean obligatory, @NotNull TypeOfProperty type,
@@ -37,4 +37,8 @@ public class Limited extends Property {
         super(id, name, visible, obligatory, type, pages, project);
         this.maximum = maximum;
     }
+    public Limited(Long idprop, TypeOfProperty type, String name) {
+        super(idprop, type, name);
+    }
+
 }

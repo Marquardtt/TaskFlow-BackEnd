@@ -1,13 +1,19 @@
 package br.demo.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.demo.backend.security.entity.UserDatailEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.GeneratedColumn;
-import org.hibernate.validator.constraints.Length;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.data.geo.Point;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Data
@@ -19,23 +25,22 @@ import java.util.Collection;
 public class User {
 
     @Id
-//    @GeneratedValue(generator = "uuid")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private String username;
-
+    private Long id;
+    
     private String name;
     private String surname;
-    @Length(min = 8)
-    @Column(nullable = false)
-    private String password;
-    private String address;
     //Patch
     @OneToOne(cascade = CascadeType.ALL)
     private Archive picture = new Archive(null,  "picture", "jpg", new byte[0]);
 
+    @Column(unique = true)
     private String mail;
     private String phone;
     private String description;
+    private boolean authenticate;
+
     //Patch
     @Column(nullable = false)
     private Long points = 0L;
@@ -44,10 +49,16 @@ public class User {
     @JoinColumn(nullable = false, updatable = false)
     @OneToOne(cascade = CascadeType.ALL)
     private Configuration configuration = new Configuration();
-    @ManyToMany
+    @ManyToMany (fetch = FetchType.EAGER)
     private Collection<Permission> permissions;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private UserDatailEntity userDetailsEntity;
+    @OneToMany(mappedBy = "user")
+    private Collection<Notification> notifications;
     public User (String username){
-        this.username = username;
+        this.userDetailsEntity.setUsername(username);
     }
+
+    public User(Long id) {this.id = id;}
 
 }

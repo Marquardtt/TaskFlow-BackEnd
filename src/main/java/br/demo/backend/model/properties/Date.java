@@ -17,7 +17,7 @@ import java.util.Collection;
 @Entity
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tb_date")
-public class   Date extends Property {
+public class Date extends Property {
 
     private Boolean canBePass = false;
     private Boolean includesHours =false;
@@ -34,6 +34,10 @@ public class   Date extends Property {
         this.deadline = deadline;
         this.scheduling = scheduling;
         this.color = color;
+    }
+
+    public Date(Long idprop, TypeOfProperty type, String name) {
+        super(idprop, type, name);
     }
 
 }

@@ -1,15 +1,15 @@
 package br.demo.backend.controller.tasks;
 
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.relations.TaskPageGetDTO;
 import br.demo.backend.model.dtos.tasks.TaskGetDTO;
-import br.demo.backend.model.pages.Page;
 import br.demo.backend.model.tasks.Task;
+import br.demo.backend.service.PropertyValueService;
 import br.demo.backend.service.tasks.TaskService;
+import br.demo.backend.utils.IdGroupValidation;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @RestController
@@ -17,69 +17,68 @@ import java.util.Collection;
 @RequestMapping("/task")
 public class TaskController {
     private TaskService taskService;
+    private PropertyValueService propertyValueService;
+    private IdGroupValidation validation;
 
-
-    @PostMapping("/{pageId}/{userId}")
-    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable String userId){
-        return taskService.save(pageId, userId);
+    @PostMapping("/{projectId}/{pageId}")
+    public TaskGetDTO insert(@PathVariable Long pageId, @PathVariable Long projectId){
+        return taskService.save(pageId, projectId);
     }
 
-    @PutMapping
-    public void upDate(@RequestBody Task task){
-        taskService.update(task, false);
-    }
-    @PatchMapping
-    public void patch(@RequestBody Task task){
-        taskService.update(task, true);
+    @PutMapping("/project/{projectId}")
+    public TaskGetDTO upDate(@RequestBody Task task, @PathVariable Long projectId){
+        System.out.println("adasdadad");
+        task.getPropertiesValues().forEach(p-> System.out.println(p.getValue().getValue()));
+        return taskService.update(task, false, projectId, true);
     }
 
-    @GetMapping("/{id}")
-    public TaskGetDTO findOne(@PathVariable Long id){
-        return taskService.findOne(id);
+    @PatchMapping("/project/{projectId}")
+    public TaskGetDTO patch(@RequestBody Task task, @PathVariable Long projectId){
+        return taskService.update(task, true, projectId, true);
     }
 
-    @GetMapping("/name/{name}")
-    public Collection<TaskGetDTO> findByName(@PathVariable String name){
-        return taskService.findByName(name);
+    @PatchMapping("/comment/project/{projectId}")
+    public TaskGetDTO comment(@RequestBody Task task, @PathVariable Long projectId){
+        return taskService.comment(task, projectId);
     }
 
-    @GetMapping
-    public Collection<TaskGetDTO> findAll(){
-        return taskService.findAll();
-    }
+
 
     @GetMapping("/today/{id}")
     public Collection<TaskGetDTO> findTodaysTasks(@PathVariable String id){
-        return taskService.getTasksToday(id);
-    }
-
-    @DeleteMapping("/{id}/{userId}")
-    public void delete(@PathVariable Long id , @PathVariable String userId){
-        taskService.delete(id, userId);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        taskService.deletePermanent(id);
-    }
-
-    @PutMapping("/redo/{userId}/{id}")
-    public void redo(@PathVariable Long id , @PathVariable String userId){
-        taskService.redo(id, userId);
-    }
-
-    @GetMapping("/month/{month}/{pageId}/{propertyId}")
-    public Collection<TaskPageGetDTO> getTasksOfMonth(@PathVariable Integer month,
-                                                      @PathVariable Long pageId,
-                                                      @PathVariable Long propertyId){
-        return taskService.getTasksOfMonth(month, pageId, propertyId);
+        return  propertyValueService.getTasksToday(OffsetDateTime.now());
     }
 
 
+    @DeleteMapping("/project/{projectId}/{id}")
+    public void delete(@PathVariable Long id, @PathVariable Long projectId){
+         taskService.delete(id, projectId);
+    }
 
+    @DeleteMapping("/project/{projectId}/{id}/permanent")
+    public void deletePermanent(@PathVariable Long id, @PathVariable Long projectId){
+         taskService.deletePermanent(id, projectId);
+    }
+
+    @PutMapping("/project/{projectId}/redo/{id}")
+    public TaskGetDTO redo(@PathVariable Long id, @PathVariable Long projectId){
+        return taskService.redo(id, projectId);
+    }
+
+    //FEITO
     @GetMapping("/project/{projectId}")
     public Collection<TaskGetDTO> getDeletedTasks(@PathVariable Long projectId){
-        return taskService.getDeletedTasks(projectId);
+        return  taskService.getDeletedTasks(projectId);
     }
+    //Só os donos do projeto podem completar
+    @PatchMapping("/{id}/project/{projectId}/complete")
+    public TaskGetDTO complete(@PathVariable Long id, @PathVariable Long projectId){
+        return  taskService.complete(id, projectId);
+    }
+    @PatchMapping("/{id}/project/{projectId}/complete-deny")
+    public TaskGetDTO completeDeny(@PathVariable Long id, @PathVariable Long projectId){
+        return  taskService.cancelComplete(id, projectId);
+    }
+
 
 }

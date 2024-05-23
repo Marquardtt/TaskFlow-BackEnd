@@ -2,6 +2,8 @@ package br.demo.backend.model.tasks;
 
 import br.demo.backend.model.User;
 import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.model.values.Value;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -22,7 +25,6 @@ public class Log {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    private String description;
     @NotNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -31,5 +33,7 @@ public class Log {
     @ManyToOne
     @JoinColumn(nullable = false)
     private User user;
-    private LocalDateTime datetime = LocalDateTime.now();
+    private OffsetDateTime datetime = OffsetDateTime.now();
+    @OneToOne(cascade = CascadeType.ALL)
+    private PropertyValue value;
 }

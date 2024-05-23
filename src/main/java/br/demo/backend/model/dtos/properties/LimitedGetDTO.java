@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class LimitedGetDTO extends PropertyGetDTO {
-    private Integer maximum;
+    private Long maximum;
 }

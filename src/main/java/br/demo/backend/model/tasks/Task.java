@@ -2,14 +2,16 @@ package br.demo.backend.model.tasks;
 
 
 import br.demo.backend.model.chat.Message;
-import br.demo.backend.model.relations.TaskValue;
+import br.demo.backend.interfaces.ILogged;
+import br.demo.backend.model.relations.PropertyValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 
 @Entity
@@ -19,7 +21,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
-public class Task {
+public class Task implements ILogged {
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,15 +30,18 @@ public class Task {
     private String name;
 
 
+    private OffsetDateTime dateDeleted;
     //Patch
     private Boolean deleted = false;
+    private OffsetDateTime dateCompleted;
     //Patch
     private Boolean completed = false;
+    private Boolean waitingRevision = false;
 
     //Patch
     @JoinColumn(name = "task_id")
     @OneToMany(cascade = CascadeType.ALL)
-    private Collection<TaskValue> properties;
+    private Collection<PropertyValue> properties;
 
 
     @JoinColumn(name = "task_id")
@@ -50,4 +55,8 @@ public class Task {
         this.id= id;
     }
 
+    @Override
+    public Collection<PropertyValue> getPropertiesValues() {
+        return this.properties;
+    }
 }

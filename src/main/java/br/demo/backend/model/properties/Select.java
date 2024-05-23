@@ -28,4 +28,7 @@ public class Select extends Property {
         this.options = options;
     }
 
+    public Select(Long idprop, TypeOfProperty type, String name) {
+        super(idprop, type, name);
+    }
 }

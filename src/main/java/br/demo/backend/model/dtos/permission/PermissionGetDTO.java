@@ -1,6 +1,7 @@
 package br.demo.backend.model.dtos.permission;
 
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.model.enums.TypePermission;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,6 @@ public class PermissionGetDTO {
     private Long id;
     private String name;
     private TypePermission permission;
-    private ProjectGetDTO project;
-
+    private SimpleProjectGetDTO project;
+    private Boolean isDefault;
 }

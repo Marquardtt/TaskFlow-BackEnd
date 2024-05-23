@@ -1,115 +1,217 @@
 package br.demo.backend.service;
 
-
-import br.demo.backend.model.dtos.group.GroupGetDTO;
+import br.demo.backend.exception.SomeUserAlreadyIsInProjectException;
+import br.demo.backend.model.dtos.group.SimpleGroupGetDTO;
+import br.demo.backend.model.dtos.user.OtherUsersDTO;
+import br.demo.backend.model.enums.Action;
+import br.demo.backend.model.enums.TypeOfNotification;
+import br.demo.backend.model.enums.TypeOfProperty;
+import br.demo.backend.model.pages.OrderedPage;
+import br.demo.backend.model.relations.PropertyValue;
+import br.demo.backend.repository.PermissionRepository;
+import br.demo.backend.repository.pages.PageRepository;
+import br.demo.backend.security.entity.UserDatailEntity;
+import br.demo.backend.service.properties.DefaultPropsService;
+import br.demo.backend.service.properties.PropertyService;
 import br.demo.backend.utils.AutoMapper;
 import br.demo.backend.utils.ModelToGetDTO;
 import br.demo.backend.model.*;
 import br.demo.backend.model.dtos.project.ProjectGetDTO;
 import br.demo.backend.model.dtos.project.ProjectPostDTO;
 import br.demo.backend.model.dtos.project.ProjectPutDTO;
-import br.demo.backend.model.enums.TypeOfProperty;
-import br.demo.backend.model.properties.Option;
-import br.demo.backend.model.properties.Select;
+import br.demo.backend.model.dtos.project.SimpleProjectGetDTO;
 import br.demo.backend.repository.GroupRepository;
 import br.demo.backend.repository.ProjectRepository;
 import br.demo.backend.repository.UserRepository;
-import br.demo.backend.repository.properties.SelectRepository;
+import br.demo.backend.utils.ResizeImage;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
+import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
+
 
 @Service
 @AllArgsConstructor
 public class ProjectService {
 
     private ProjectRepository projectRepository;
-    private SelectRepository selectRepository;
     private UserRepository userRepository;
+    private LogService logService;
     private GroupRepository groupRepository;
+    private DefaultPropsService defaultPropsService;
     private AutoMapper<Project> autoMapper;
+    private PermissionRepository permissionRepositoru;
+    private NotificationService notificationService;
+    private PropertyValueService propertyValueService;
+    private PropertyService propertyService;
+    private PageRepository pageRepository;
+    private UserService userService;
 
-
-
-    public Collection<ProjectGetDTO> findAll() {
-        return projectRepository.findAll().stream().map(ModelToGetDTO::tranform).toList();
-    }
-
-    public void updatePicture(MultipartFile picture, Long id) {
+    public ProjectGetDTO updatePicture(MultipartFile picture, Long id) {
         Project project = projectRepository.findById(id).get();
         project.setPicture(new Archive(picture));
-        projectRepository.save(project);
+        //generate logs
+        try {
+            project.getPicture().setData(ResizeImage.resizeImage(picture, 100, 100));
+        } catch (IOException ignore) {
+        }
+        logService.updatePicture(project);
+        return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
-    public void updateOwner(User user, Long projectId) {
+    public ProjectGetDTO updateOwner(OtherUsersDTO userDto, Long projectId) {
         Project project = projectRepository.findById(projectId).get();
+        User user = userRepository.findById(userDto.getId()).get();
+        Permission defaultPermission = permissionRepositoru.findByProjectAndIsDefault(project, true);
+        project.getOwner().getPermissions().add(defaultPermission);
+        userRepository.save(project.getOwner());
         project.setOwner(user);
-        projectRepository.save(project);
+        //generate logs
+        logService.updateOwner(project);
+        return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
-    public Collection<ProjectGetDTO> finAllOfAUser(String id) {
-        Collection<Project> projects = projectRepository.findProjectsByOwner_Username(id);
-        projects.addAll(userRepository.findById(id).get().getPermissions().stream().map(Permission::getProject).toList());
-        return projects.stream().map(ModelToGetDTO::tranform).toList();
+    @Transactional
+    public Collection<SimpleProjectGetDTO> finAllOfAUser() {
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findByUserDetailsEntity_Username(username).get();
+        return findProjectsByUser(user).stream().map(ModelToGetDTO::tranformSimple).toList();
     }
+
+    @Transactional
+    public Collection<Project> findProjectsByUser(User user) {
+        Collection<Project> projects = projectRepository.findProjectsByOwner_UserDetailsEntity_Username(user.getUserDetailsEntity().getUsername());
+        //get the projects that the user is member
+        projects.addAll(user.getPermissions().stream().map(Permission::getProject).toList());
+        //get the projects that the user is owner of some group
+        Collection<Group> groups = groupRepository.findGroupsByOwner_UserDetailsEntity_Username(user.getUserDetailsEntity().getUsername());
+        groups.forEach(group -> projects.addAll(group.getPermissions().stream().map(Permission::getProject).toList()));
+        return projects.stream().distinct().toList();
+    }
+
     public ProjectGetDTO findOne(Long id) {
         return ModelToGetDTO.tranform(projectRepository.findById(id).get());
     }
 
-    public void update(ProjectPutDTO projectDTO, Boolean patching) {
+    public ProjectGetDTO update(ProjectPutDTO projectDTO, Boolean patching) {
         Project oldProject = projectRepository.findById(projectDTO.getId()).get();
-        Project project = patching ? oldProject : new Project();
-        User owner = project.getOwner();
+        Project project = new Project();
+        if (patching) BeanUtils.copyProperties(oldProject, project);
         autoMapper.map(projectDTO, project, patching);
-        project.setOwner(owner);
+        //keep the owner, pages, properties and picture of the project
+        keepFileds(project, oldProject);
+        logService.generateLog(Action.UPDATE, project, oldProject);
+        if (changeDescription(oldProject, project)) {
+            logService.updateDescription(project);
+        }
+        //generate the logs
+        return ModelToGetDTO.tranform(projectRepository.save(project));
+    }
+
+    public ProjectGetDTO comment(ProjectPutDTO projectDTO) {
+        Project oldTask = projectRepository.findById(projectDTO.getId()).get();
+        oldTask.setComments(projectDTO.getComments());
+        return ModelToGetDTO.tranform(projectRepository.save(oldTask));
+    }
+
+    private void keepFileds(Project project, Project oldProject) {
+        project.setOwner(oldProject.getOwner());
         project.setPages(oldProject.getPages());
         project.setProperties(oldProject.getProperties());
         project.setPicture(oldProject.getPicture());
-        projectRepository.save(project);
+        project.setLogs(oldProject.getLogs());
+        project.setValues(propertyValueService.createNotSaved(project));
+        Stream<PropertyValue> archiveProps = project.getValues().stream().filter(p -> p.getProperty().getType().equals(TypeOfProperty.ARCHIVE));
+        Stream<PropertyValue> archivePropsOld = archiveProps.map(p -> oldProject.getValues().stream().filter(o -> o.equals(p)).findFirst().orElse(p));
+        List<PropertyValue> finalProps = archivePropsOld.toList();
+        ArrayList<PropertyValue> projectProps = new ArrayList<>(project.getValues());
+        projectProps.removeAll(finalProps.stream().filter(p -> project.getValues().contains(p)).toList());
+        projectProps.addAll(finalProps);
+        project.setValues(projectProps);
     }
 
-    public void save(ProjectPostDTO projectDto) {
+    private Boolean changeDescription(Project oldProject, Project project) {
+        return oldProject.getDescription() == null && project.getDescription() != null ||
+                project.getDescription() == null && oldProject.getDescription() != null ||
+                oldProject.getDescription() != null &&
+                        !oldProject.getDescription().equals(project.getDescription());
+    }
+
+    public SimpleProjectGetDTO save(ProjectPostDTO projectDto) {
+
+        String username = ((UserDatailEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
+        //create the project and set the owner
         Project project = new Project();
         BeanUtils.copyProperties(projectDto, project);
+        project.setOwner(userRepository.findByUserDetailsEntity_Username(username).get());
         Project emptyProject = projectRepository.save(project);
-        ArrayList<Option> options = new ArrayList<>();
-        options.add(new Option(null, "To-do", "#FF7A00", 0));
-        options.add(new Option(null, "Doing", "#F7624B", 1));
-        options.add(new Option(null, "Done", "#F04A94", 2));
-        emptyProject.setProperties(new ArrayList<>());
-        Select select = new Select(null, "Stats", true, false,
-                options, TypeOfProperty.SELECT, null, emptyProject);
-        Select selectCreated = selectRepository.save(select);
-        emptyProject.getProperties().add(selectCreated);
-        emptyProject.setVisualizedAt(LocalDateTime.now());
-        projectRepository.save(emptyProject);
+
+        //generate logs
+        logService.generateLog(Action.CREATE, project);
+
+        //set a default property
+        defaultPropsService.select(project, null);
+        emptyProject.setVisualizedAt(OffsetDateTime.now());
+
+        return ModelToGetDTO.tranformSimple(projectRepository.save(project));
     }
 
-    public void setVisualizedNow(Project projectPut) {
-        Project project = projectRepository.findById(projectPut.getId()).get();
-        project.setVisualizedAt(LocalDateTime.now());
-
-        projectRepository.save(project);
+    //set that the project was visualized by a user, to sort by this on the projects page
+    public ProjectGetDTO setVisualizedNow(Long projectId) {
+        Project project = projectRepository.findById(projectId).get();
+        project.setVisualizedAt(OffsetDateTime.now());
+        return ModelToGetDTO.tranform(projectRepository.save(project));
     }
 
     public void delete(Long id) {
+        Project project = projectRepository.findById(id).get();
+        project.getValues().forEach(p -> propertyService.delete(p.getProperty().getId(), project.getId()));
+        project.getProperties().forEach(p -> propertyService.delete(p.getId(), project.getId()));
+        project.getPages().forEach(p -> {
+            p.getProperties().forEach(prop -> propertyService.disassociate(prop));
+            if (p instanceof OrderedPage page) {
+                page.setPropertyOrdering(null);
+                pageRepository.save(p);
+            }
+        });
+        Collection<Permission> permissions = permissionRepositoru.findByProject(project);
+        permissions.forEach(p -> {
+            Collection<User> users = userRepository.findAllByPermissions_Project(project);
+            Collection<Group> groups = groupRepository.findGroupsByPermissions_Project(project);
+            users.forEach(u -> {
+                u.setPermissions(new ArrayList<>(u.getPermissions().stream().filter(per -> per.getProject().getId().equals(id)).toList()));
+                userRepository.save(u);
+            });
+            groups.forEach(u -> {
+                u.setPermissions(new ArrayList<>(u.getPermissions().stream().filter(per -> per.getProject().getId().equals(id)).toList()));
+                groupRepository.save(u);
+            });
+            permissionRepositoru.deleteById(p.getId());
+
+        });
+
         projectRepository.deleteById(id);
     }
 
-    public Collection<GroupGetDTO> findAllGroupsOfAProject(Long id) {
-        ProjectGetDTO projectGet = findOne(id);
-        Project project = new Project();
-        BeanUtils.copyProperties(projectGet, project);
-        List<GroupGetDTO> groups = new ArrayList<>();
-        for (Group group : groupRepository.findGroupsByPermissions_Project(project)) {
-            groups.add(ModelToGetDTO.tranform(group));
+    public void inviteAGroup(Long projectId, SimpleGroupGetDTO groupdto) {
+        Group group = groupRepository.findById(groupdto.getId()).get();
+        for (User user : group.getUsers()) {
+            if (user.getPermissions().stream().anyMatch(p -> p.getProject().getId().equals(projectId))) {
+                throw new SomeUserAlreadyIsInProjectException();
+            } else if (projectRepository.findById(projectId).get().getOwner().equals(user)) {
+                throw new SomeUserAlreadyIsInProjectException();
+            }
         }
-        return groups;
+        notificationService.generateNotification(TypeOfNotification.INVITETOPROJECT, projectId, group.getId());
+
     }
 }

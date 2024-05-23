@@ -1,82 +1,94 @@
 package br.demo.backend.controller;
 
 import br.demo.backend.model.Permission;
-import br.demo.backend.model.User;
 import br.demo.backend.model.dtos.permission.PermissionGetDTO;
-import br.demo.backend.model.dtos.user.UserGetDTO;
-import br.demo.backend.model.dtos.user.UserPostDTO;
-import br.demo.backend.model.dtos.user.UserPutDTO;
+import br.demo.backend.model.dtos.user.*;
 import br.demo.backend.service.UserService;
+import br.demo.backend.utils.IdProjectValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user")
 public class UserController {
     private UserService userService;
-
-    // TODO: 16/02/2024 O Usuario esta perdendo algumas de suas props
+    private IdProjectValidation validation;
 
     @PostMapping
-    public void insert(@RequestBody UserPostDTO user){
-        userService.save(user);
-    }
-
-    @GetMapping("/{username}/{projectId}")
-    public PermissionGetDTO getPermisisonInAProject(@PathVariable String username, @PathVariable Long projectId){
-        return userService.getPermissionOfAUserInAProject(username, projectId);
+    public UserGetDTO insert(@RequestBody UserPostDTO user){
+        return userService.save(user);
     }
 
     @PutMapping
-    public void upDate(@RequestBody UserPutDTO user){
-        userService.update(user, false);
+    public UserGetDTO upDate(@RequestBody UserPutDTO user) throws AccessDeniedException {
+        return userService.update(user, false);
     }
     @PatchMapping
-    public void patch(@RequestBody UserPutDTO user){
-        userService.update(user, true);
+    public UserGetDTO patch(@RequestBody UserPutDTO user) throws AccessDeniedException {
+        return userService.update(user, true);
+    }
+
+    @PatchMapping("/changeUsername")
+    public void changeUsername(@RequestBody UserChangeUsernameDTO userChangeUsernameDTO) throws AccessDeniedException {
+         userService.changeUsername(userChangeUsernameDTO);
+    }
+
+    @PatchMapping("/changePassword")
+    public void changePassword(@RequestBody UserChangePasswordDTO userChangePasswordDTO) throws AccessDeniedException {
+        userService.changePassword(userChangePasswordDTO);
     }
 
     @GetMapping("/{username}")
-    public UserGetDTO findOne(@PathVariable String username){
+    public OtherUsersDTO findOne(@PathVariable String username){
         return userService.findOne(username);
     }
 
-    @GetMapping("/username/{username}/{password}")
-    public UserGetDTO findByUsernameAndPassword(@PathVariable String username, @PathVariable String password){
-        return userService.findByUsernameAndPassword(username, password);
-    }
-    @GetMapping("/email/{email}/{password}")
-    public UserGetDTO findByEmailAndPassword(@PathVariable String email, @PathVariable String password){
-        return userService.findByEmailAndPassword(email, password);
-    }
-    @PatchMapping("/picture/{username}")
-    public void upDatePicture(@RequestParam MultipartFile picture, @PathVariable String username) {
-        userService.updatePicture(picture, username);
+    //precisa estar logado
+    @GetMapping("/logged")
+    public UserGetDTO findLogged(){
+        return userService.findLogged();
     }
 
+    @PatchMapping("/picture")
+    public UserGetDTO upDatePicture(@RequestParam MultipartFile picture) {
+        return userService.updatePicture(picture);
+    }
+
+    //FEITO
     @PatchMapping("/password/{username}")
-    public void upDatePassword(@PathVariable String username, @RequestBody String password) {
-        userService.updatePassword(username, password);
+    public UserGetDTO upDatePassword(@PathVariable String username, @RequestParam String password) {
+        return userService.updatePassword(username, password);
     }
-
-    @GetMapping
-    public Collection<UserGetDTO> findAll(){
-        return userService.findAll();
-    }
-
-    @DeleteMapping("/{username}")
-    public void delete(@PathVariable String username){
-        userService.delete(username);
+    @DeleteMapping
+    public void delete() throws AccessDeniedException {
+        userService.delete();
         //Ao deletar um usuario ele tem que setar o novo owner de seus projetos
     }
 
-    @GetMapping("/name/{name}")
-    public Collection<UserGetDTO> findByUsersNameOrName(@PathVariable String name) {
-        return userService.findByUserNameOrName(name);
+    @GetMapping
+    public Collection<OtherUsersDTO> findAll() {
+        return userService.findAll();
     }
 
+  //TODO: fazer isso no security
+    //precisa ser o dono do grupo em que o usuario esta nesse projeto
+    @PatchMapping("{username}/update-permission/project/{projectId}")
+    public PermissionGetDTO updatePermission(@PathVariable String username, @PathVariable Long projectId, @RequestBody Permission permission){
+        validation.ofObject(projectId, permission.getProject());
+        return userService.updatePermissionOfAUser(username, permission);
+    }
+
+    @PatchMapping("/exit/group/{groupId}")
+    public void updatePermission(@PathVariable Long groupId){
+        userService.getOutOfGroup(groupId);
+    }
+
+    @PatchMapping("/updateAllPermissions/{username}")
+    public void updateAllPermissions(@PathVariable String username, @RequestBody List<Permission> permissions){userService.updateAllPermissions(username, permissions);}
 }

@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "tb_valued_number")
 public class NumberValued extends Value{
-    private Integer number;
+    private Double number;
 
-    public NumberValued(Long id, Integer number){
+    public NumberValued(Long id, Double number){
         super(id);
         this.number = number;
     }
 
     @Override
-    public void setValue(Object value){this.number = (Integer)value;}
+    public void setValue(Object value){this.number = (Double)value;}
     @Override
     public Object getValue(){
         return this.number;
