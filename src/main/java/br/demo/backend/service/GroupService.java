@@ -93,6 +93,7 @@ public class GroupService {
         userRepository.save(user);
         userRepository.save(group.getOwner());
         group.setOwner(user);
+
         return ModelToGetDTO.tranform(groupRepository.save(group));
     }
 
@@ -193,8 +194,9 @@ public class GroupService {
             u.setPermissions(permissionsCopy);
         });
         ChatGroup chatGroup  =  chatGroupRepository.findByGroup(group);
-        chatGroupRepository.deleteById(chatGroup.getId());
-
+        if (chatGroup != null){
+            chatGroupRepository.deleteById(chatGroup.getId());
+        }
         groupRepository.deleteById(id);
     }
 
